@@ -1,4 +1,4 @@
-# GatherFlow — 모노레포 보일러플레이트
+# GatherFlow(임시 서비스명) — 모노레포 보일러플레이트
 
 > 모임 장소 선정 → 투표 → 예약 관리 → 정산을 한 흐름으로 묶는 그룹 모임 운영 플랫폼
 > Next.js 16 PWA + NestJS 11 · pnpm + Turborepo 모노레포 · 공용 Zod
