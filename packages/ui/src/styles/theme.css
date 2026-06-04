@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* GatherFlow 디자인 토큰 — Tailwind v4 @theme (config 파일 없음) */
+@theme {
+  --color-brand-50: oklch(0.97 0.02 250);
+  --color-brand-500: oklch(0.62 0.18 250);
+  --color-brand-600: oklch(0.55 0.18 250);
+  --color-brand-700: oklch(0.48 0.17 250);
+
+  --color-success: oklch(0.72 0.17 150);
+  --color-danger: oklch(0.63 0.22 25);
+
+  --radius-card: 1rem;
+  --font-sans: "Pretendard", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* PWA safe-area (노치) 대응 — ⑤ */
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}

@@ -1,0 +1,166 @@
+// GatherFlow Prisma 스키마 초안 — ① 모임·인증 리드 주도
+// 도메인: User / Meeting / Membership / Place / Vote / Receipt / Settlement / Share
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  HOST
+  GUEST
+}
+
+enum MeetingStatus {
+  DRAFT
+  VOTING
+  CONFIRMED
+  RESERVING
+  IN_PROGRESS
+  SETTLING
+  DONE
+}
+
+enum ReservationStatus {
+  NONE       // 예약 전
+  IN_PROGRESS
+  DONE
+}
+
+enum SettleMode {
+  ITEMIZED
+  EQUAL
+  MANUAL
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  password  String?  // 호스트 회원만
+  nickname  String
+  role      UserRole @default(GUEST)
+  createdAt DateTime @default(now())
+
+  hostedMeetings Meeting[]    @relation("HostMeetings")
+  memberships    Membership[]
+  votes          Vote[]
+  shares         Share[]
+}
+
+model Meeting {
+  id              String        @id @default(uuid())
+  title           String
+  date            DateTime
+  headcount       Int
+  region          String
+  budgetPerPerson Int?
+  foodType        String[]
+  needsParking    Boolean       @default(false)
+  needsRoom       Boolean       @default(false)
+  status          MeetingStatus @default(DRAFT)
+  optimizeBy      String        @default("FAIRNESS") // TOTAL | FAIRNESS
+  inviteCode      String        @unique
+  reservationStatus ReservationStatus @default(NONE) // F5 ⑤ 수동 관리
+  reservationOwnerId String?
+
+  hostId String
+  host   User   @relation("HostMeetings", fields: [hostId], references: [id])
+
+  members     Membership[]
+  places      Place[]
+  votes       Vote[]
+  receipt     Receipt?
+  settlement  Settlement?
+
+  createdAt DateTime @default(now())
+}
+
+model Membership {
+  id        String   @id @default(uuid())
+  meetingId String
+  userId    String
+  attending Boolean  @default(true) // F6 참석 체크
+  startLat  Float?   // 거리 최적화용 출발 좌표
+  startLng  Float?
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([meetingId, userId])
+}
+
+// ② 장소·지도: 카카오 Local 검색 후보 캐시 + 확정 플래그
+model Place {
+  id           String  @id @default(uuid())
+  meetingId    String
+  kakaoPlaceId String
+  name         String
+  category     String
+  address      String
+  lat          Float
+  lng          Float
+  reservable   Boolean @default(false)
+  reserveLink  String?
+  confirmed    Boolean @default(false) // F4 최종 확정
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+  votes   Vote[]
+
+  @@unique([meetingId, kakaoPlaceId])
+}
+
+// ③ 실시간·투표: 정합성(@@unique + 트랜잭션/Optimistic Lock)
+model Vote {
+  id        String   @id @default(uuid())
+  meetingId String
+  placeId   String
+  userId    String
+  value     String   // UP | DOWN | RANK
+  rank      Int?
+  createdAt DateTime @default(now())
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+  place   Place   @relation(fields: [placeId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([meetingId, placeId, userId])
+}
+
+// ④ 정산: 영수증(OCR) → 정산 → 분배 몫
+model Receipt {
+  id        String  @id @default(uuid())
+  meetingId String  @unique
+  imageUrl  String
+  subtotal  Int     @default(0)
+  total     Int     @default(0)
+  ocrFailed Boolean @default(false)
+  items     Json    @default("[]") // ReceiptItem[]
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+}
+
+model Settlement {
+  id        String     @id @default(uuid())
+  meetingId String     @unique
+  mode      SettleMode @default(ITEMIZED)
+  total     Int        @default(0)
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+  shares  Share[]
+}
+
+model Share {
+  id           String  @id @default(uuid())
+  settlementId String
+  userId       String
+  amount       Int
+  paid         Boolean @default(false) // F10 송금 현황
+
+  settlement Settlement @relation(fields: [settlementId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@unique([settlementId, userId])
+}
