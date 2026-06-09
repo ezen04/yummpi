@@ -7,5 +7,15 @@
     "build": "tsc",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bullmq": "5.65.0",
+    "ioredis": "5.11.1",
+    "socket.io": "4.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "4.22.4",
+    "typescript": "5.9.3"
   }
 }
