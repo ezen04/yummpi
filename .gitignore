@@ -1,30 +1,48 @@
-# deps
-node_modules/
-.pnpm-store/
+# dependencies
+node_modules
+.pnp
+.pnp.js
 
 # build
-dist/
-.next/
-out/
-build/
-*.tsbuildinfo
+dist
+.next
+out
+
+# pwa
+public/sw*
+public/swe-worker*
+**/public/sw*
+**/public/swe-worker*
+
+# typescript
+tsconfig.tsbuildinfo
+
+# playwright
+test-results/
+playwright-report/
 
 # turbo
-.turbo/
+.turbo
 
 # env
 .env
-.env.*.local
 .env.local
+.env.*.local
 
-# prisma
-apps/api/prisma/*.db
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
 
-# misc
+# os
 .DS_Store
-coverage/
-playwright-report/
-test-results/
-public/sw.js
-public/sw.js.map
-public/swe-worker-*.js
+
+# ide
+.vscode
+.idea
+
+# private work docs
+work.md
+history.md
+CLAUDE.local.md
+phase11.md

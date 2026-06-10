@@ -1,4 +1,2 @@
-export { Button, type ButtonProps } from './components/Button';
-export { Card } from './components/Card';
-export { TabBar, type TabItem } from './components/TabBar';
-export { cn } from './lib';
+export {}
+// 공통 컴포넌트는 기능 개발 시 추가
