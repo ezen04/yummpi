@@ -61,37 +61,125 @@ yummpi/
 - pnpm 10.11.0
 - Docker
 
-### 설치
+---
+
+### 1. 레포 클론 및 의존성 설치
 
 ```bash
+git clone https://github.com/ezen04/yummpi.git
+cd yummpi
 pnpm install
 ```
 
-### 인프라 실행 (PostgreSQL, Redis)
+---
+
+### 2. 환경 변수 설정
+
+`apps/web/.env.local` 파일을 직접 생성한다. 이 파일은 커밋하지 않는다.
+
+```bash
+# NEXTAUTH_SECRET 생성
+openssl rand -base64 32
+```
+
+`apps/web/.env.local`
+
+```env
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=<위에서 생성한 값>
+DATABASE_URL=postgresql://<user>:<password>@localhost:5433/<db>
+```
+
+> `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`는 루트 `.env.example`을 참고해 루트 `.env` 파일을 생성한다.
+>
+> ```env
+> POSTGRES_USER=yummpi
+> POSTGRES_PASSWORD=yummpi
+> POSTGRES_DB=yummpi
+> DATABASE_URL=postgresql://yummpi:yummpi@localhost:5433/yummpi
+> ```
+
+---
+
+### 3. 인프라 실행 (PostgreSQL, Redis)
 
 ```bash
 docker compose up -d
 ```
 
-### 개발 서버 실행
+컨테이너 상태 확인:
+
+```bash
+docker compose ps
+```
+
+---
+
+### 4. DB 마이그레이션
+
+```bash
+pnpm --filter @yummpi/server exec prisma migrate deploy
+```
+
+> 로컬 개발 중 스키마를 변경했다면 `migrate deploy` 대신 아래 명령어를 사용한다.
+>
+> ```bash
+> pnpm --filter @yummpi/server exec prisma migrate dev
+> ```
+
+---
+
+### 5. 개발 서버 실행
 
 ```bash
 pnpm dev
 ```
 
-### 빌드
+| 서비스 | 주소 |
+|--------|------|
+| Web (Next.js) | http://localhost:3000 |
+| Server | http://localhost:4000 |
+
+---
+
+## 개발 명령어
 
 ```bash
+# 전체 타입 검사
+pnpm typecheck
+
+# 전체 린트
+pnpm lint
+
+# 코드 포맷 적용
+pnpm format
+
+# 포맷 이상 여부 확인 (수정 없음)
+pnpm format:check
+
+# 전체 빌드
 pnpm build
 ```
 
-### 검사
+---
 
-```bash
-pnpm lint
-pnpm typecheck
+## 패키지 구조
+
+```
+yummpi/
+├── apps/
+│   ├── web/        # Next.js 프론트엔드 (포트 3000)
+│   └── server/     # API 서버 (포트 4000)
+└── packages/
+    ├── ui/         # 공통 UI 컴포넌트
+    ├── schemas/    # 공통 Zod 스키마
+    └── config/     # 공통 설정
 ```
 
-## 환경 변수
+---
 
-`.env.example`을 참고해 `.env` 파일을 작성한다. `.env` 파일은 절대 커밋하지 않는다.
+## 주의 사항
+
+- `.env`, `.env.local` 파일은 절대 커밋하지 않는다.
+- 패키지 설치 시 반드시 고정 버전을 사용한다. (`latest` 사용 금지)
+- `apps/web`과 `apps/server`는 독립 런타임이므로 Prisma Client는 각자 관리한다.
