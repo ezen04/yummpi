@@ -1,0 +1,11 @@
+# 환경변수 & 시크릿
+.env*
+!.env.example
+
+# 자동 생성 파일 (AI가 수정하면 안 됨)
+.next/
+node_modules/
+prisma/migrations/
+pnpm-lock.yaml
+
+# 다른 담당자 도메인 (역할별 claude.md에서 추가 제어)
