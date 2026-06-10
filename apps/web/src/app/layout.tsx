@@ -1,27 +1,38 @@
-import type { Metadata, Viewport } from 'next';
-import { AppTabBar } from '@/components/AppTabBar';
-import { Providers } from '@/components/Providers';
-import './globals.css';
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import { SessionProvider } from "@/components/providers/SessionProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 export const metadata: Metadata = {
-  title: 'GatherFlow',
-  description: '모임 장소 선정·투표·정산을 한 번에',
-  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'GatherFlow' },
+  title: "yummpi",
+  description: "식사 모임 운영 플랫폼",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "yummpi",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#3b5bdb',
-  viewportFit: 'cover', // safe-area 노치 대응
+  themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="ko">
-      <body className="pt-[var(--safe-top)]">
-        <Providers>
-          <main className="mx-auto min-h-dvh w-full max-w-md px-4 pb-24">{children}</main>
-          <AppTabBar />
-        </Providers>
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      </head>
+      <body>
+        <SessionProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </SessionProvider>
       </body>
     </html>
   );

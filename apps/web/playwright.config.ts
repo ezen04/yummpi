@@ -1,12 +1,24 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
-// ⑤ QA — E2E 베이스. webServer는 dev 서버 기준.
 export default defineConfig({
-  testDir: './e2e',
-  use: { baseURL: 'http://localhost:3000', ...devices['iPhone 14'] },
+  testDir: "tests",
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: process.env.CI ? "github" : "list",
+  use: {
+    baseURL: "http://localhost:3000",
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+  ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    command: "pnpm --filter @yummpi/web start",
+    url: "http://localhost:3000",
+    reuseExistingServer: false,
   },
 });

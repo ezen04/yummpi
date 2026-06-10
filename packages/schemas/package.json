@@ -1,5 +1,5 @@
 {
-  "name": "@yummpi/ui",
+  "name": "@yummpi/schemas",
   "version": "0.0.0",
   "private": true,
   "exports": {
@@ -8,13 +8,10 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+  "dependencies": {
+    "zod": "4.1.13"
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
     "typescript": "5.9.3"
   }
 }
