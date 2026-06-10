@@ -11,6 +11,15 @@ out
 # pwa
 public/sw*
 public/swe-worker*
+**/public/sw*
+**/public/swe-worker*
+
+# typescript
+tsconfig.tsbuildinfo
+
+# playwright
+test-results/
+playwright-report/
 
 # turbo
 .turbo
@@ -36,3 +45,4 @@ pnpm-debug.log*
 work.md
 history.md
 CLAUDE.md
+phase11.md
