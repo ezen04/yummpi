@@ -1,0 +1,36 @@
+# 의존성 및 빌드 결과물 (가장 중요)
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+# 패키지 매니저 및 락 파일 (포맷팅 불필요)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+
+# 로컬 환경 변수 및 보안 파일
+.env
+.env.*
+!.env.example
+.pno-config/
+
+# 로그 및 캐시 파일
+*.log
+.npm
+.eslintcache
+.turbo/
+.cache/
+
+# 테스트 및 커버리지 결과물
+coverage/
+.nyc_output/
+
+# OS 및 에디터 시스템 파일
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
