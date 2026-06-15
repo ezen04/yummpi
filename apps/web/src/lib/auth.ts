@@ -1,9 +1,11 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
 import KakaoProvider from "next-auth/providers/kakao";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 
+// 게스트는 NextAuth를 사용하지 않는다(ERD v2.2 b안).
+// 모임 범위 서명 토큰 → 쿠키, 해시는 meeting_members.guest_token_hash.
+// CredentialsProvider는 DB 세션 전략과 호환 불가하여 제거.
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
@@ -13,22 +15,6 @@ export const authOptions: NextAuthOptions = {
     KakaoProvider({
       clientId: process.env.KAKAO_CLIENT_ID!,
       clientSecret: process.env.KAKAO_CLIENT_SECRET!,
-    }),
-    CredentialsProvider({
-      id: "guest",
-      name: "게스트",
-      credentials: {
-        name: { label: "닉네임", type: "text" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.name) return null;
-        return {
-          id: `guest_${Date.now()}`,
-          name: credentials.name,
-          email: null,
-          image: null,
-        };
-      },
     }),
   ],
   callbacks: {
