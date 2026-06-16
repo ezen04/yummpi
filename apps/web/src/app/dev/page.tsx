@@ -2,7 +2,7 @@
  * /dev — 공통 컴포넌트 시각 검증 페이지
  */
 import { Button } from '@yummpi/ui';
-import { KakaoLoginButton } from '@yummpi/ui';
+// import { KakaoLoginButton } from '@yummpi/ui';
 import {
   YIcon,
   Home,
@@ -267,7 +267,7 @@ export default function DevPage() {
           {/* Pay 버튼 */}
           <div className="space-y-2">
             <p className="text-caption1 text-[var(--label-assistive)]">Pay</p>
-            <KakaoLoginButton />
+            {/* <KakaoLoginButton /> */}
             <button
               className="w-full h-[50px] [border-radius:var(--radius-12)] font-semibold text-base text-[var(--static-white)] flex items-center justify-center gap-2"
               style={{ background: 'var(--brand-toss)' }}
@@ -345,12 +345,12 @@ export default function DevPage() {
         </section>
 
         {/* ── 카카오 로그인 ── */}
-        <section>
+        {/* <section>
           <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide mb-3">
             Kakao Login Button
           </h2>
           <KakaoLoginButton />
-        </section>
+        </section> */}
       </div>
     </main>
   );
