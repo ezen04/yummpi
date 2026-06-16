@@ -294,7 +294,7 @@ model Vote {
 model Reservation {
   id                 String            @id @default(uuid()) @db.Uuid
   meetingId          String            @unique @map("meeting_id") @db.Uuid // 모임당 1예약
-  placeCandidateId   String            @map("place_candidate_id") @db.Uuid
+  placeCandidateId   String            @unique @map("place_candidate_id") @db.Uuid
   status             ReservationStatus @default(NONE)
   reservationName    String?           @map("reservation_name")
   reservationAt      DateTime?         @map("reservation_at")
