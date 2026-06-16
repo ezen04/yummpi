@@ -1,23 +1,34 @@
 import { z } from "zod";
 
-export const gatheringStatusSchema = z.enum([
+// 모임 상태 머신 (Prisma MeetingStatus 일치)
+export const meetingStatusSchema = z.enum([
   "DRAFT",
-  "OPEN",
-  "CLOSED",
-  "CANCELLED",
-]);
-
-export const reservationStatusSchema = z.enum([
-  "PENDING",
-  "CONFIRMED",
-  "CANCELLED",
-]);
-
-export const voteTypeSchema = z.enum(["SINGLE", "MULTIPLE"]);
-
-export const paymentStatusSchema = z.enum([
-  "PENDING",
+  "RECRUITING",
+  "VOTING",
+  "PLACE_CONFIRMED",
+  "IN_PROGRESS",
+  "SETTLING",
   "COMPLETED",
-  "FAILED",
   "CANCELLED",
 ]);
+
+export const memberRoleSchema = z.enum(["HOST", "MEMBER"]);
+
+export const attendanceStatusSchema = z.enum(["PENDING", "ATTENDING", "ABSENT"]);
+
+export const candidateStatusSchema = z.enum(["ACTIVE", "REJECTED"]);
+
+export const reservationStatusSchema = z.enum(["NONE", "PENDING", "DONE"]);
+
+export const ocrStatusSchema = z.enum([
+  "PENDING",
+  "PROCESSING",
+  "SUCCEEDED",
+  "FAILED",
+]);
+
+export const settlementStatusSchema = z.enum(["DRAFT", "CONFIRMED", "COMPLETED"]);
+
+export const splitMethodSchema = z.enum(["ITEM_BASED", "EQUAL"]);
+
+export const paymentStatusSchema = z.enum(["PENDING", "PAID", "EXEMPT"]);
