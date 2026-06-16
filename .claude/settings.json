@@ -1,0 +1,33 @@
+{
+  "$comment": "리포 루트 .claude/settings.json 으로 배치(이 파일을 복사). 경로는 실제 모노레포 구조(apps/server, packages/schemas) 기준으로 교정됨. .aiignore 대체 — Claude Code는 .aiignore를 읽지 않으므로 permission deny로 강제한다.",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/secrets/**)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Edit(./**/.env.*)",
+      "Edit(./pnpm-lock.yaml)",
+      "Edit(./**/migrations/**)",
+      "Edit(./**/node_modules/**)",
+      "Edit(./**/.next/**)",
+      "Edit(./**/generated/**)",
+      "Edit(./.git/**)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npx prisma db push:*)"
+    ],
+    "ask": [
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(git push:*)",
+      "Edit(./packages/schemas/**)",
+      "Edit(./apps/server/prisma/schema.prisma)",
+      "Edit(./apps/server/**)",
+      "Edit(./.github/**)"
+    ]
+  }
+}
