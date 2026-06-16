@@ -1,3 +1,13 @@
+// ─────────────────────────────────────────────────────────────
+// 얌피(yummpi) Prisma Schema — ERD v2.2 기준 (docs/erd-v2.2.md)
+// 규칙: 컬럼 snake_case(@map) · 금액 INTEGER · 좌표 Decimal(10,7)
+// PK: uuid 통일(@default(uuid()) @db.Uuid)
+// ⚠️ NextAuth(User/Account/Session/VerificationToken)은 어댑터 표준 필드명 유지,
+//    snake_case는 @map으로만 보정 (프로젝트 규칙의 유일한 예외)
+// ⚠️ 부분 유니크 meeting_members(meeting_id,user_id) WHERE user_id IS NOT NULL
+//    → Prisma 미지원. migration.sql에 raw로 수동 추가할 것.
+// ─────────────────────────────────────────────────────────────
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -7,45 +17,138 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
+// ── Enums ────────────────────────────────────────────────────
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum MeetingStatus {
+  DRAFT
+  RECRUITING
+  VOTING
+  PLACE_CONFIRMED
+  IN_PROGRESS
+  SETTLING
+  COMPLETED
+  CANCELLED
+
+  @@map("meeting_status")
+}
+
+enum MemberRole {
+  HOST
+  MEMBER
+
+  @@map("member_role")
+}
+
+enum AttendanceStatus {
+  PENDING
+  ATTENDING
+  ABSENT
+
+  @@map("attendance_status")
+}
+
+enum CandidateStatus {
+  ACTIVE
+  REJECTED
+
+  @@map("candidate_status")
+}
+
+enum ReservationStatus {
+  NONE
+  PENDING
+  DONE
+
+  @@map("reservation_status")
+}
+
+enum OcrStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+
+  @@map("ocr_status")
+}
+
+enum SettlementStatus {
+  DRAFT
+  CONFIRMED
+  COMPLETED
+
+  @@map("settlement_status")
+}
+
+enum SplitMethod {
+  ITEM_BASED
+  EQUAL
+
+  @@map("split_method")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  EXEMPT
+
+  @@map("payment_status")
+}
+
+// ── 인증 · 플랫폼 (NextAuth 예외 영역) ────────────────────────
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String? // NextAuth 표준 — 카카오 원본 이름
+  nickname      String? // 편집용 닉네임 (어댑터 name과 분리)
+  email         String?   @unique // 선택 동의, nullable
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+
+  pushEnabled            Boolean @default(true) @map("push_enabled")
+  paymentReminderEnabled Boolean @default(true) @map("payment_reminder_enabled")
+
+  deletedAt DateTime? @map("deleted_at") // 탈퇴 익명화
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  accounts          Account[]
+  sessions          Session[]
+  pushSubscriptions PushSubscription[]
+  hostedMeetings    Meeting[]          @relation("MeetingHost")
+  meetingMembers    MeetingMember[]
+
+  @@map("users")
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
   type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
+  provider          String // 'kakao'
+  providerAccountId String  @map("provider_account_id") // = kakaoId
+  refresh_token     String? @map("refresh_token") @db.Text
+  access_token      String? @map("access_token") @db.Text
+  expires_at        Int?    @map("expires_at")
+  token_type        String? @map("token_type")
   scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  id_token          String? @map("id_token") @db.Text
+  session_state     String? @map("session_state")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model VerificationToken {
@@ -54,4 +157,275 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  endpoint  String   @unique
+  p256dhKey String   @map("p256dh_key")
+  authKey   String   @map("auth_key")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
+}
+
+// ── 모임 라이프사이클 (①) ─────────────────────────────────────
+
+model Meeting {
+  id                   String  @id @default(uuid()) @db.Uuid
+  hostUserId           String  @map("host_user_id") @db.Uuid
+  confirmedCandidateId String? @unique @map("confirmed_candidate_id") @db.Uuid
+
+  title       String
+  description String?
+  status      MeetingStatus @default(DRAFT)
+
+  scheduledAt        DateTime? @map("scheduled_at")
+  votingClosesAt     DateTime? @map("voting_closes_at") // 투표 마감 시각(nullable)
+  maxMembers         Int?      @map("max_members")
+  budgetPerPerson    Int?      @map("budget_per_person")
+  foodTypes          String[]  @map("food_types")
+  needParking        Boolean   @default(false) @map("need_parking")
+  needRoom           Boolean   @default(false) @map("need_room")
+  anonymousVoting    Boolean   @default(false) @map("anonymous_voting")
+  placeSearchRadiusM Int?      @map("place_search_radius_m")
+
+  inviteCode  String    @unique @map("invite_code")
+  expiresAt   DateTime? @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  cancelledAt DateTime? @map("cancelled_at") // 소프트 삭제
+
+  host               User            @relation("MeetingHost", fields: [hostUserId], references: [id])
+  confirmedCandidate PlaceCandidate? @relation("ConfirmedCandidate", fields: [confirmedCandidateId], references: [id])
+  members            MeetingMember[]
+  placeCandidates    PlaceCandidate[] @relation("MeetingCandidates")
+  votes              Vote[]
+  reservation        Reservation?
+  receipts           Receipt[]
+  settlement         Settlement?
+
+  @@map("meetings")
+}
+
+model MeetingMember {
+  id               String           @id @default(uuid()) @db.Uuid
+  meetingId        String           @map("meeting_id") @db.Uuid
+  userId           String?          @map("user_id") @db.Uuid // 게스트는 NULL
+  guestTokenHash   String?          @map("guest_token_hash")
+  nickname         String
+  role             MemberRole       @default(MEMBER)
+  attendanceStatus AttendanceStatus @default(PENDING) @map("attendance_status")
+
+  startAddress   String?  @map("start_address")
+  startStation   String?  @map("start_station")
+  startLatitude  Decimal? @map("start_latitude") @db.Decimal(10, 7)
+  startLongitude Decimal? @map("start_longitude") @db.Decimal(10, 7)
+
+  checkedIn   Boolean   @default(false) @map("checked_in")
+  checkedInAt DateTime? @map("checked_in_at")
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+  leftAt      DateTime? @map("left_at")
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  createdCandidates PlaceCandidate[]   @relation("CandidateCreator")
+  votes             Vote[]
+  uploadedReceipts  Receipt[]
+  itemAssignments   ItemAssignment[]
+  settlementMembers SettlementMember[]
+
+  // ⚠️ 부분 유니크 (meeting_id, user_id) WHERE user_id IS NOT NULL → migration.sql raw 추가
+  @@index([meetingId])
+  @@map("meeting_members")
+}
+
+// ── 장소 · 투표 · 예약 (②③ 소유 — 스키마는 ① 작성) ───────────
+
+model PlaceCandidate {
+  id                String          @id @default(uuid()) @db.Uuid
+  meetingId         String          @map("meeting_id") @db.Uuid
+  createdByMemberId String?         @map("created_by_member_id") @db.Uuid
+  externalPlaceId   String?         @map("external_place_id")
+  name              String
+  categoryName      String?         @map("category_name")
+  address           String?
+  roadAddress       String?         @map("road_address")
+  phone             String?
+  latitude          Decimal?        @db.Decimal(10, 7)
+  longitude         Decimal?        @db.Decimal(10, 7)
+  placeUrl          String?         @map("place_url")
+  status            CandidateStatus @default(ACTIVE)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  meeting             Meeting        @relation("MeetingCandidates", fields: [meetingId], references: [id], onDelete: Cascade)
+  confirmedForMeeting Meeting?       @relation("ConfirmedCandidate")
+  createdBy           MeetingMember? @relation("CandidateCreator", fields: [createdByMemberId], references: [id])
+  votes               Vote[]
+  reservation         Reservation?
+
+  @@unique([meetingId, externalPlaceId])
+  @@map("place_candidates")
+}
+
+model Vote {
+  id          String   @id @default(uuid()) @db.Uuid
+  meetingId   String   @map("meeting_id") @db.Uuid
+  memberId    String   @map("member_id") @db.Uuid
+  candidateId String   @map("candidate_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  meeting   Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  member    MeetingMember  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  candidate PlaceCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, memberId]) // 1인 1표 — 변경은 UPDATE
+  @@map("votes")
+}
+
+model Reservation {
+  id                 String            @id @default(uuid()) @db.Uuid
+  meetingId          String            @unique @map("meeting_id") @db.Uuid // 모임당 1예약
+  placeCandidateId   String            @unique @map("place_candidate_id") @db.Uuid
+  status             ReservationStatus @default(NONE)
+  reservationName    String?           @map("reservation_name")
+  reservationAt      DateTime?         @map("reservation_at")
+  partySize          Int?              @map("party_size")
+  confirmationNumber String?           @map("confirmation_number")
+  memo               String?
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  meeting        Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  placeCandidate PlaceCandidate @relation(fields: [placeCandidateId], references: [id])
+
+  @@map("reservations")
+}
+
+// ── 정산 · 송금 (④⑤ 소유 — 스키마는 ① 작성) ─────────────────
+
+model Receipt {
+  id                  String    @id @default(uuid()) @db.Uuid
+  meetingId           String    @map("meeting_id") @db.Uuid
+  uploadedByMemberId  String?   @map("uploaded_by_member_id") @db.Uuid
+  objectKey           String    @unique @map("object_key")
+  imageUrl            String?   @map("image_url")
+  ocrStatus           OcrStatus @default(PENDING) @map("ocr_status")
+  rawOcrJson          Json?     @map("raw_ocr_json") // OCR 원본·미분류 라인
+  merchantName        String?   @map("merchant_name")
+  purchasedAt         DateTime? @map("purchased_at")
+  subtotalAmount      Int?      @map("subtotal_amount")
+  taxAmount           Int?      @map("tax_amount")
+  serviceChargeAmount Int?      @map("service_charge_amount")
+  discountAmount      Int?      @map("discount_amount")
+  totalAmount         Int?      @map("total_amount")
+  currency            String    @default("KRW")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  meeting    Meeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  uploadedBy MeetingMember? @relation(fields: [uploadedByMemberId], references: [id])
+  items      ReceiptItem[]
+
+  @@map("receipts")
+}
+
+model ReceiptItem {
+  id            String   @id @default(uuid()) @db.Uuid
+  receiptId     String   @map("receipt_id") @db.Uuid
+  name          String
+  quantity      Int      @default(1)
+  unitPrice     Int      @map("unit_price")
+  totalPrice    Int      @map("total_price")
+  ocrConfidence Decimal? @map("ocr_confidence") @db.Decimal(5, 4)
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  receipt         Receipt          @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  itemAssignments ItemAssignment[]
+
+  @@map("receipt_items")
+}
+
+model Settlement {
+  id              String           @id @default(uuid()) @db.Uuid
+  meetingId       String           @unique @map("meeting_id") @db.Uuid // 모임당 1정산
+  splitMethod     SplitMethod      @default(ITEM_BASED) @map("split_method")
+  status          SettlementStatus @default(DRAFT)
+  totalAmount     Int              @default(0) @map("total_amount")
+  allocatedAmount Int              @default(0) @map("allocated_amount")
+  confirmedAt     DateTime?        @map("confirmed_at")
+  completedAt     DateTime?        @map("completed_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  meeting           Meeting            @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  itemAssignments   ItemAssignment[]
+  settlementMembers SettlementMember[]
+
+  @@map("settlements")
+}
+
+model ItemAssignment {
+  id               String   @id @default(uuid()) @db.Uuid
+  settlementId     String   @map("settlement_id") @db.Uuid
+  receiptItemId    String   @map("receipt_item_id") @db.Uuid
+  memberId         String   @map("member_id") @db.Uuid
+  shareNumerator   Int      @map("share_numerator")
+  shareDenominator Int      @map("share_denominator")
+  assignedAmount   Int      @map("assigned_amount")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  settlement  Settlement    @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  receiptItem ReceiptItem   @relation(fields: [receiptItemId], references: [id], onDelete: Cascade)
+  member      MeetingMember @relation(fields: [memberId], references: [id])
+
+  @@unique([settlementId, receiptItemId, memberId])
+  @@map("item_assignments")
+}
+
+model SettlementMember {
+  id                  String   @id @default(uuid()) @db.Uuid
+  settlementId        String   @map("settlement_id") @db.Uuid
+  memberId            String   @map("member_id") @db.Uuid
+  itemAmount          Int      @default(0) @map("item_amount")
+  taxAmount           Int      @default(0) @map("tax_amount")
+  serviceChargeAmount Int      @default(0) @map("service_charge_amount")
+  discountAmount      Int      @default(0) @map("discount_amount")
+  adjustmentAmount    Int      @default(0) @map("adjustment_amount")
+  finalAmount         Int      @default(0) @map("final_amount")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  settlement Settlement    @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  member     MeetingMember @relation(fields: [memberId], references: [id])
+  payment    Payment?
+
+  @@unique([settlementId, memberId])
+  @@map("settlement_members")
+}
+
+model Payment {
+  id                 String        @id @default(uuid()) @db.Uuid
+  settlementMemberId String        @unique @map("settlement_member_id") @db.Uuid // 정산멤버당 1결제
+  status             PaymentStatus @default(PENDING)
+  amount             Int
+  paidAt             DateTime?     @map("paid_at")
+  memo               String?
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  settlementMember SettlementMember @relation(fields: [settlementMemberId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
