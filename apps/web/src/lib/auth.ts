@@ -21,8 +21,21 @@ export const authOptions: NextAuthOptions = {
     async session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id;
+        // 편집용 닉네임(adapter name과 분리). 미설정 시 카카오 name으로 노출.
+        const nickname = (user as { nickname?: string | null }).nickname;
+        session.user.nickname = nickname ?? user.name ?? null;
       }
       return session;
+    },
+  },
+  events: {
+    // 최초 가입 시 편집용 닉네임을 카카오 이름으로 초기화.
+    async createUser({ user }) {
+      if (!user.name) return;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { nickname: user.name },
+      });
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
