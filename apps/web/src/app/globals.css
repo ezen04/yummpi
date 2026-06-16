@@ -1,1 +1,89 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@source '../../../../packages/ui/src';
+
+:root {
+  /* ---- Brand / Primary (Vermilion) ---- */
+  --primary: #e94b35;
+  --primary-strong: #d63d28;
+  --primary-heavy: #b23420;
+  --primary-border: rgba(233, 75, 53, 0.4);
+
+  /* ---- Accent / Status ---- */
+  --secondary: #ffc857;
+  --secondary-tint: #fff4dd;
+  --secondary-strong: #8a5a00;
+  --status-positive: #00bf40;
+  --status-cautionary: #ff9200;
+  --status-negative: #ff4242;
+  --tinted: #f6b2ab;
+
+  /* ---- Pay brands ---- */
+  --brand-toss: #0064ff;
+  --brand-kakao: #ffeb00;
+
+  /* ---- Label ---- */
+  --label-strong: #1a120f;
+  --label-normal: #2b211e;
+  --label-neutral: #443c39;
+  --label-alternative: #7e7876;
+  --label-assistive: #c4c1c0;
+  --label-disable: #dddbdb;
+
+  /* ---- Surface ---- */
+  --bg-normal: #ffffff;
+  --bg-alternative: #f7f7f8;
+  --bg-elevated: #ffffff;
+  --bg-inverse: #1b1c1e;
+
+  /* ---- Line ---- */
+  --line-normal: rgba(112, 115, 124, 0.22);
+  --line-neutral: rgba(112, 115, 124, 0.16);
+  --line-alternative: rgba(112, 115, 124, 0.08);
+
+  /* ---- Fill ---- */
+  --fill-alternative: rgba(112, 115, 124, 0.05);
+  --fill-normal: rgba(112, 115, 124, 0.08);
+  --fill-strong: rgba(112, 115, 124, 0.16);
+  --fill-disable: #f4f4f5;
+
+  /* ---- Static ---- */
+  --static-white: #ffffff;
+  --static-black: #000000;
+
+  /* ---- Ring (focus) ---- */
+  --ring: var(--primary);
+
+  /* ---- Radius ---- */
+  --radius-6: 6px;
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-full: 999px;
+
+  /* ---- Shadow ---- */
+  --shadow-xsmall: 0 1px 0.5px rgba(23, 23, 23, 0.05);
+  --shadow-small:
+    0 2px 1px rgba(23, 23, 23, 0.03), 0 4px 2.5px rgba(23, 23, 23, 0.03);
+  --shadow-large:
+    0 6px 3px rgba(23, 23, 23, 0.04), 0 16px 9px rgba(23, 23, 23, 0.04);
+
+  /* ---- Font ---- */
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, Roboto, sans-serif;
+}
+
+[data-theme='dark'] {
+  --primary: #f26b57;
+  --bg-normal: #1b1c1e;
+  --bg-alternative: #232427;
+  --bg-elevated: #232427;
+  --label-normal: #f7f7f7;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-normal);
+  color: var(--label-normal);
+}
