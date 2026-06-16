@@ -28,6 +28,10 @@ export default function RootLayout({
     <html lang="ko">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
       </head>
       <body>
         <SessionProvider>
