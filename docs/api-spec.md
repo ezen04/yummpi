@@ -287,8 +287,12 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ### 연결 인증
 ```tsx
-io(SOCKET_URL, { auth: { meetingId, memberId, sessionToken } })
+// 회원
+io(SOCKET_URL, { auth: { meetingId, sessionToken } })
+// 게스트
+io(SOCKET_URL, { auth: { meetingId, guestToken } })
 ```
+> `memberId`는 서버가 토큰으로 DB 조회해 `socket.data`에 저장. 클라이언트가 전달하지 않는다.
 
 ### 클라이언트 → 서버
 
