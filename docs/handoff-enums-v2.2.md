@@ -60,4 +60,43 @@ export const paymentStatusSchema = z.enum(["PENDING", "PAID", "EXEMPT"]);
 2. 이 값들은 Prisma `apps/server/prisma/schema.prisma`의 enum과 **1:1 일치**해야 합니다(런타임 검증·DB 제약 정합). 변경 시 ①에 알려주세요.
 3. `voteTypeSchema`를 참조하는 코드가 있으면 제거 전 확인.
 
+---
+
+## 추가 핸드오프 — 인증 작업(feature/auth-guest)에서 발견 (2026-06-16)
+
+> ①이 인증/게스트 작업 중 발견한 공용 계약 이슈. ⑤ 소유 영역이라 제안만 전달.
+
+### 1. `idSchema` cuid → uuid 불일치 (`packages/schemas/src/common.ts`)
+
+```ts
+// 현재 — DB는 uuid인데 cuid 검증이라 모든 id가 검증 실패
+export const idSchema = z.string().cuid();
+
+// 제안 — Prisma PK가 @default(uuid())
+export const idSchema = z.string().uuid();
+```
+
+영향: meetingId·memberId 등 모든 path/body id 검증. ①은 임시로 라우트에서 `z.string().uuid()`(또는 정규식)로 우회 중. ⑤가 교정하면 우회 제거 예정.
+
+### 2. 공용 에러코드 2종 — api-spec §13 정식 등재 요청
+
+`apps/web/src/lib/api-response.ts`에 공용 fallback으로 추가해 사용 중. §13 표에도 등재 필요:
+
+| 코드 | HTTP | 상황 |
+| --- | --- | --- |
+| `INTERNAL_ERROR` | 500 | 처리되지 않은 서버 예외 |
+| `VALIDATION_ERROR` | 400 | 요청 바디/파라미터 검증 실패 |
+
+### 3. 게스트 생성 요청 스키마 신설 제안 (`packages/schemas`)
+
+`apps/web`에 zod·@yummpi/schemas 의존성이 아직 없어, `POST /auth/guest`는 수동 검증 중. ⑤가 web에 의존성 배선 + 아래 스키마 추가 시 수동 검증을 교체할 예정.
+
+```ts
+export const guestCreateSchema = z.object({
+  meetingId: idSchema, // (1번 교정 후 uuid)
+  inviteCode: z.string().min(1),
+  nickname: nicknameSchema, // 기존 1~20자
+});
+```
+
 — 문의: ① (스키마/상태 머신 담당)
