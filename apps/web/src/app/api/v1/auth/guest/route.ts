@@ -1,10 +1,10 @@
-import { prisma } from "@/lib/prisma";
-import { ApiError, apiSuccess, handleRoute } from "@/lib/api-response";
+import { prisma } from '@/lib/prisma';
+import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import {
   hashGuestToken,
   setGuestCookie,
   signGuestToken,
-} from "@/lib/guest-token";
+} from '@/lib/guest-token';
 
 /**
  * POST /api/v1/auth/guest — 게스트 세션 생성 (b안 자체 토큰).
@@ -45,26 +45,27 @@ async function suggestNickname(
 export const POST = handleRoute(async (req: Request) => {
   const body = (await req.json().catch(() => ({}))) as GuestBody;
 
-  const meetingId = typeof body.meetingId === "string" ? body.meetingId : "";
-  const inviteCode = typeof body.inviteCode === "string" ? body.inviteCode : "";
-  const nickname = typeof body.nickname === "string" ? body.nickname.trim() : "";
+  const meetingId = typeof body.meetingId === 'string' ? body.meetingId : '';
+  const inviteCode = typeof body.inviteCode === 'string' ? body.inviteCode : '';
+  const nickname =
+    typeof body.nickname === 'string' ? body.nickname.trim() : '';
 
   if (!UUID_RE.test(meetingId) || !inviteCode) {
-    throw new ApiError("INVALID_INVITE_CODE", "초대 정보가 올바르지 않습니다.");
+    throw new ApiError('INVALID_INVITE_CODE', '초대 정보가 올바르지 않습니다.');
   }
   if (nickname.length < 1 || nickname.length > 20) {
-    throw new ApiError("VALIDATION_ERROR", "닉네임은 1~20자여야 합니다.");
+    throw new ApiError('VALIDATION_ERROR', '닉네임은 1~20자여야 합니다.');
   }
 
   const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
   if (!meeting || meeting.inviteCode !== inviteCode) {
-    throw new ApiError("INVALID_INVITE_CODE", "초대 코드가 올바르지 않습니다.");
+    throw new ApiError('INVALID_INVITE_CODE', '초대 코드가 올바르지 않습니다.');
   }
   if (meeting.cancelledAt) {
-    throw new ApiError("MEETING_EXPIRED", "취소된 모임입니다.");
+    throw new ApiError('MEETING_EXPIRED', '취소된 모임입니다.');
   }
   if (meeting.expiresAt && meeting.expiresAt.getTime() < Date.now()) {
-    throw new ApiError("MEETING_EXPIRED", "만료된 모임입니다.");
+    throw new ApiError('MEETING_EXPIRED', '만료된 모임입니다.');
   }
 
   // 닉네임 중복 검사 (미퇴장 멤버 기준)
@@ -74,7 +75,7 @@ export const POST = handleRoute(async (req: Request) => {
   });
   if (dup) {
     const suggestion = await suggestNickname(meetingId, nickname);
-    throw new ApiError("NICKNAME_DUPLICATED", "이미 사용 중인 닉네임입니다.", {
+    throw new ApiError('NICKNAME_DUPLICATED', '이미 사용 중인 닉네임입니다.', {
       suggestion,
     });
   }
@@ -82,7 +83,7 @@ export const POST = handleRoute(async (req: Request) => {
   // 멤버 생성 → 토큰 서명(memberId 포함) → 해시 저장 (원자적)
   const { memberId, token } = await prisma.$transaction(async (tx) => {
     const created = await tx.meetingMember.create({
-      data: { meetingId, nickname, role: "MEMBER" },
+      data: { meetingId, nickname, role: 'MEMBER' },
       select: { id: true },
     });
     const signed = signGuestToken(created.id, meetingId);
@@ -97,7 +98,7 @@ export const POST = handleRoute(async (req: Request) => {
 
   return apiSuccess(
     { memberId, meetingId, nickname },
-    "게스트로 입장했습니다.",
+    '게스트로 입장했습니다.',
     201
   );
 });

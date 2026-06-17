@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { type LucideProps } from 'lucide-react'
+import * as React from 'react';
+import { type LucideProps } from 'lucide-react';
 
 export {
   Home,
@@ -39,7 +39,7 @@ export {
   Trash2 as Trash,
   RefreshCw as Refresh,
   FileText,
-} from 'lucide-react'
+} from 'lucide-react';
 
 export function YIcon({
   icon: Icon,
@@ -47,8 +47,8 @@ export function YIcon({
   className,
   ...props
 }: {
-  icon: React.ComponentType<LucideProps>
-  size?: 16 | 20 | 24
+  icon: React.ComponentType<LucideProps>;
+  size?: 16 | 20 | 24;
 } & Omit<LucideProps, 'size'>) {
   return (
     <Icon
@@ -58,5 +58,5 @@ export function YIcon({
       aria-hidden
       {...props}
     />
-  )
+  );
 }

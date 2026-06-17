@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 /**
  * API 응답 봉투 + 에러코드 레지스트리 (api-spec §13).
@@ -47,7 +47,7 @@ export class ApiError extends Error {
 
   constructor(code: ErrorCode, message?: string, details?: unknown) {
     super(message ?? code);
-    this.name = "ApiError";
+    this.name = 'ApiError';
     this.code = code;
     this.details = details ?? null;
   }
@@ -72,7 +72,7 @@ export function apiSuccess<T>(
 ): NextResponse<SuccessBody<T>> {
   const body: SuccessBody<T> = { success: true, data };
   if (message) body.message = message;
-  const responseInit = typeof init === "number" ? { status: init } : init;
+  const responseInit = typeof init === 'number' ? { status: init } : init;
   return NextResponse.json(body, responseInit);
 }
 
@@ -108,8 +108,8 @@ export function handleRoute<Args extends unknown[]>(
       return await handler(...args);
     } catch (err) {
       if (err instanceof ApiError) return apiError(err);
-      console.error("[api] unhandled error:", err);
-      return apiError("INTERNAL_ERROR", "서버 오류가 발생했습니다.");
+      console.error('[api] unhandled error:', err);
+      return apiError('INTERNAL_ERROR', '서버 오류가 발생했습니다.');
     }
   };
 }
