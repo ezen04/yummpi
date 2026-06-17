@@ -230,7 +230,7 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - 제한: 모임당 최대 10장(`422 RECEIPT_LIMIT_EXCEEDED`), 장당 10MB, `image/*`만
 
 ### `POST .../receipts/:receiptId/ocr` — OCR 분석 (영수증별 독립) ★ v2.1
-- 응답: `receiptId·ocrStatus·merchantName·subtotal/tax/service/total·items[]`(name·quantity·unitPrice·totalPrice·confidence)
+- 응답: `receiptId·ocrStatus·total·items[]`(name·quantity·unitPrice?·totalPrice·confidence)
 - **1장 실패해도 나머지 진행** — 실패 영수증만 `ocrStatus: FAILED` + 수동 입력 fallback
 - ★ v2.2(④ 추가 예정): 응답에 `unclassifiedLines[]`(파서 미분류 원문 라인) 노출 — 검수 화면에서 품목 승격용. 원본은 `receipts.raw_ocr_json`에 보관. 필드 형태는 ④가 확정
 
@@ -255,21 +255,45 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - EQUAL 시 `settlements.total_amount = totalAmount` 직접 저장
 - 이미 존재 시 `409 SETTLEMENT_ALREADY_EXISTS`
 - 모임의 **모든** RECEIPT_ITEM이 배정 대상 (EQUAL은 RECEIPT_ITEM 없이도 진행 가능)
+- ★ v2.2: 생성 시 모임 `status`가 `IN_PROGRESS`이면 `SETTLING`으로 자동 전환
 
-### `GET /api/v1/meetings/:meetingId/settlement` — 조회 (단수)
-- 응답에 `receipts: [{receiptId, merchantName, totalAmount}]` 합산 내역 포함
+### `GET /api/v1/meetings/:meetingId/settlement` — 조회 (단수) ★ v2.2
+- 응답:
+  ```json
+  {
+    "id", "splitMethod", "status", "totalAmount", "confirmedAt",
+    "receipts": [{ "receiptId", "totalAmount" }],
+    "settlementMembers": [{
+      "memberId", "nickname", "role",
+      "items": [{ "receiptItemId", "itemName", "unitPrice?", "quantity" }],
+      "finalAmount", "paymentStatus"
+    }]
+  }
+  ```
+- `receipts[]`: 모임 전체 영수증 합산 내역
+- `settlementMembers[].items`: ITEM_BASED 시 본인 선택 품목 목록, **EQUAL 시 `null`**
+- `settlementMembers[].role`: `"HOST" | "MEMBER"` — §5 members 응답과 동일 필드명
 - `GET .../settlements/:settlementId`도 호환 유지
 
-### `PUT .../settlements/:settlementId/assignments` — 소비 항목 배정
-`{ "assignments": [{ "receiptItemId", "memberIds": ["mem_1","mem_2"] }] }`
+### `PUT .../settlements/:settlementId/assignments/me` — 본인 소비 항목 선택 ★ v2.2
+요청: `{ "receiptItemIds": ["item_1", "item_2"] }`
+- 회원·게스트 모두 본인만 선택 가능. **최소 1개 필수** (`400 VALIDATION_ERROR`)
+- 재호출 시 이전 선택 초기화 후 저장
+- 응답 200: `{ "memberId", "receiptItemIds" }`
+- `status: CONFIRMED` 이후 시도 → `403 FORBIDDEN`
+- EQUAL 방식일 때는 호출 불필요 (계산 자동 진행)
 
-### `POST .../settlements/:settlementId/calculate` — 금액 계산
-- `total_amount = Σ 모임 전체 receipt.total_amount` ★ v2.1
-- 부가세·봉사료·할인·반올림 차액을 소비 비율로 배분 (영수증별 비율 배분 후 합산) → `SETTLEMENT_MEMBER` upsert
-- `Σ finalAmount ≠ totalAmount` 시 `422 SETTLEMENT_AMOUNT_MISMATCH`
+### 금액 계산 — BE 자동 트리거 ★ v2.2 수정 (클라이언트 직접 호출 없음)
+- **트리거**: EQUAL — 정산 생성 즉시 실행. ITEM_BASED — 출석(`ATTENDING`) 전원 `assignments/me` 제출 완료 시 자동 실행
+- **ITEM_BASED**: 품목별 `total_price` ÷ 해당 품목 선택 참여자 수 → 멤버별 배분금 합산 후 `SETTLEMENT_MEMBER` upsert. 반올림 차액 → 주최자 +1원 보정
+- **EQUAL**: `total_amount` ÷ 출석(`ATTENDING`) 인원수 균등 배분. 반올림 차액 → 주최자 +1원 보정
+- 부가세·봉사료·할인은 별도 배분하지 않음. 영수증 `total_amount`(최종 청구액)를 그대로 사용
+- `Σ finalAmount ≠ totalAmount` 시 서버 에러 로깅 (클라이언트 미노출)
 
-### `POST .../settlements/:settlementId/confirm` — 확정 (호스트, 금액 잠금 + PAYMENT 생성)
-### `POST .../settlements/:settlementId/reopen` — 재오픈 (전원 `PENDING`일 때만)
+### `POST .../settlements/:settlementId/confirm` — 확정 (호스트) ★ v2.2 수정
+- `Settlement.status = CONFIRMED`, `confirmedAt` 기록. 금액 잠금
+- Payment 생성은 ⑤ 담당 (lazy 생성). ④는 `SettlementMember` 보장까지만
+### `POST .../settlements/:settlementId/reopen` — 재오픈 (MVP 제외, V2 확장 예정)
 
 ---
 
