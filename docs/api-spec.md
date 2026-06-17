@@ -126,7 +126,8 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ```
 - 건너뛰기·역행 시 `409 INVALID_MEETING_STATUS_TRANSITION`
 
-### `DELETE /api/v1/meetings/:meetingId` — 소프트 삭제(`CANCELLED`, COMPLETED 후 불가)
+### `DELETE /api/v1/meetings/:meetingId` — 소프트 삭제(`CANCELLED`, **SETTLING 진입 이후 불가**)
+- 정산 시작(SETTLING)·완료(COMPLETED)·이미 취소된 모임은 삭제 불가 → `409 INVALID_MEETING_STATUS_TRANSITION`. (CLAUDE.md 엣지케이스와 통일, 2026-06-17 결정)
 ### `GET /api/v1/meetings/invite/:inviteCode` — 초대 링크 정보 (비로그인 허용)
 
 ---
@@ -331,6 +332,7 @@ io(SOCKET_URL, {
 | --- | --- | --- |
 | `UNAUTHORIZED` | 401 | 인증 없음 |
 | `FORBIDDEN` | 403 | 권한 없음 |
+| `VALIDATION_ERROR` ★ | 400 | 요청 바디/파라미터 검증 실패 |
 | `MEETING_NOT_FOUND` | 404 | 모임 없음 |
 | `MEMBER_NOT_FOUND` | 404 | 참석자 없음 |
 | `CANDIDATE_NOT_FOUND` | 404 | 후보 없음 |
@@ -352,6 +354,7 @@ io(SOCKET_URL, {
 | `PAYMENTS_NOT_COMPLETED` | 422 | 미송금 존재 |
 | `OCR_REQUEST_FAILED` | 502 | OCR 실패 |
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
+| `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
 ★ = v2.1 신규
 
