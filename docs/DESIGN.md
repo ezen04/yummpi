@@ -16,15 +16,15 @@ CSS 변수(시맨틱 토큰)를 사용한다. 하드코딩된 Hex/RGB 값 사용
 | `--primary` | `#E94B35` | 주요 버튼·선택 상태·링크·강조 (브랜드 핵심) |
 | `--primary-strong` | `#D63D28` | 호버 상태 |
 | `--primary-heavy` | `#B23420` | 프레스(클릭) 상태 |
-| `--primary-tint` | `rgba(233,75,53, 0.08)` | 배지·태그 배경 틴트 |
 
 ### 1-2. 세컨더리 컬러 (Secondary — Amber)
 
 | 토큰 | Hex | 역할 |
 |:---|:---|:---|
-| `--secondary` | `#FFC857` | 앰버 하이라이트 — 배지·뱃지 전용 |
-| `--secondary-strong` | `#8A5A00` | 라이트 배경 위 앰버 텍스트/아이콘 |
-| `--secondary-tint` | `#FFF4DD` | 앰버 배지 배경 |
+| `--secondary`        | `#FFC857` | 앰버 하이라이트 — 배지·뱃지 전용 |
+| `--secondary-strong` | `#8A5A00` | 앰버 배경 위 텍스트·아이콘 색 |
+| `--secondary-tint`   | `#FFF4DD` | 앰버 배지 배경 |
+| `--tinted`           | `#F6B2AB` | 선택 상태 배경, 강조 표면 |
 
 > **⚠️ 앰버(secondary)는 버튼·대형 표면에 절대 사용하지 않는다.** 배지·하이라이트 전용.
 
@@ -36,10 +36,10 @@ CSS 변수(시맨틱 토큰)를 사용한다. 하드코딩된 Hex/RGB 값 사용
 |:---|:---|:---|
 | `--label-strong` | `#1A120F` | 최대 강조 헤딩 |
 | `--label-normal` | `#2B211E` | 기본 본문 텍스트 |
-| `--label-neutral` | `rgba(43,33,30, 0.88)` | 본문 카피 |
-| `--label-alternative` | `rgba(43,33,30, 0.61)` | 보조·서브 카피 |
-| `--label-assistive` | `rgba(43,33,30, 0.28)` | 힌트, 플레이스홀더 |
-| `--label-disable` | `rgba(43,33,30, 0.16)` | 비활성 텍스트 |
+| `--label-neutral` | `#443C39` | 본문 카피 |
+| `--label-alternative` | `#7E7876` | 보조·서브 카피 |
+| `--label-assistive` | `#C4C1C0` | 힌트, 플레이스홀더 |
+| `--label-disable` | `#DDDBDB` | 비활성 텍스트 |
 
 ### 1-4. 서피스(배경)
 
@@ -83,18 +83,18 @@ CSS 변수(시맨틱 토큰)를 사용한다. 하드코딩된 Hex/RGB 값 사용
   --primary:           #E94B35;
   --primary-strong:    #D63D28;
   --primary-heavy:     #B23420;
-  --primary-tint:      rgba(233, 75, 53, 0.08);
   --secondary:         #FFC857;
   --secondary-strong:  #8A5A00;
   --secondary-tint:    #FFF4DD;
+  --tinted:            #F6B2AB;
 
   /* Label */
   --label-strong:      #1A120F;
   --label-normal:      #2B211E;
-  --label-neutral:     rgba(43, 33, 30, 0.88);
-  --label-alternative: rgba(43, 33, 30, 0.61);
-  --label-assistive:   rgba(43, 33, 30, 0.28);
-  --label-disable:     rgba(43, 33, 30, 0.16);
+  --label-neutral:     #443C39;
+  --label-alternative: #7E7876;
+  --label-assistive:   #C4C1C0;
+  --label-disable:     #DDDBDB;
 
   /* Background */
   --bg-normal:         #FFFFFF;
@@ -118,6 +118,10 @@ CSS 변수(시맨틱 토큰)를 사용한다. 하드코딩된 Hex/RGB 값 사용
   --status-cautionary: #FF9200;
   --status-negative:   #FF4242;
 
+  /* External Service */
+  --brand-kakao:       #FFEB00;
+  --brand-toss:        #0064FF;
+
   /* Static */
   --static-white:      #FFFFFF;
   --static-black:      #000000;
@@ -131,6 +135,17 @@ CSS 변수(시맨틱 토큰)를 사용한다. 하드코딩된 Hex/RGB 값 사용
 
 > **다크 모드**: `[data-theme="dark"]` 블록에서 위 변수를 재정의한다.
 > `--primary` → `#F26B57`, 배경·레이블은 쿨뉴트럴 계열로 반전.
+
+---
+
+### 1-9. 외부 서비스 컬러 (External Service)
+
+외부 앱 브랜드 버튼에만 허용되는 예외 색상.
+
+| 토큰 | Hex | 역할 |
+|:---|:---|:---|
+| `--brand-kakao` | `#FFEB00` | 카카오 로그인·공유 버튼 전용 |
+| `--brand-toss`  | `#0064FF` | 토스페이 딥링크 버튼 전용 |
 
 ---
 
@@ -515,7 +530,7 @@ font-family: var(--font-sans);
 <button style={{
   height: 50, padding: '0 24px',
   borderRadius: 'var(--radius-12)',
-  background: '#FEE500',  /* 카카오 공식 색상 — 이 버튼에만 예외적 하드코딩 허용 */
+  background: 'var(--brand-kakao)',
   color: 'rgba(0,0,0,0.85)',
   font: '600 16px var(--font-sans)', border: 'none', width: '100%',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -523,6 +538,235 @@ font-family: var(--font-sans);
   {/* 카카오 아이콘 */}
   카카오로 시작하기
 </button>
+```
+
+### 5-14. 헤더 (Header)
+
+상태바(44px) + 콘텐츠 영역으로 구성. 배경 `--bg-normal`, 전체 너비.
+
+| 종류 | 용도 |
+|:---|:---|
+| `title` | 뒤로가기 + 제목 |
+| `dashboard` | 인사말 + 유저명 + 알림 아이콘 |
+| `nontitle-exit` | 닫기 버튼 전용 |
+| `title-subtitle` | 제목 + 부제목 |
+| `title-status` | 제목 + 상태 배지 |
+| `mypage` | 마이페이지 타이틀 |
+
+```tsx
+{/* Header/title — 뒤로가기 + 제목 */}
+<header style={{
+  display: 'flex', alignItems: 'center', gap: 4,
+  paddingTop: 54, paddingBottom: 10,
+  paddingLeft: 8, paddingRight: 12,
+  background: 'var(--bg-normal)', width: '100%',
+}}>
+  <button style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'none' }}>
+    <ChevronLeftIcon size={24} color="var(--label-normal)" />
+  </button>
+  <span style={{ font: '400 18px/26px var(--font-sans)', color: 'var(--label-normal)', letterSpacing: '-0.2px' }}>
+    페이지 제목
+  </span>
+</header>
+
+{/* Header/dashboard — 인사말 + 알림 아이콘 */}
+<header style={{
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  paddingTop: 56, paddingBottom: 14,
+  paddingLeft: 20, paddingRight: 20,
+  background: 'var(--bg-normal)', width: '100%',
+}}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <span style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--label-alternative)' }}>
+      안녕하세요
+    </span>
+    <span style={{ font: '600 19px/30px var(--font-sans)', color: 'var(--label-normal)' }}>
+      김원티님 👋
+    </span>
+  </div>
+  {/* 알림 버튼 — hasNotification prop으로 도트 제어 */}
+  <div style={{ position: 'relative', width: 42, height: 42, borderRadius: '50%', background: 'var(--bg-alternative)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <BellIcon size={22} color="var(--label-neutral)" />
+    {hasNotification && (
+      <span style={{ position: 'absolute', top: 9, right: 10, width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)', border: '2px solid var(--bg-normal)' }} />
+    )}
+  </div>
+</header>
+```
+
+### 5-15. 풋터 (Footer)
+
+```tsx
+{/* Footer/button — 안내 문구 + CTA */}
+<footer style={{
+  width: '100%',
+  background: 'var(--bg-normal)',
+  borderTop: '1px solid var(--line-alternative)',
+  padding: '13px 20px 30px',
+  display: 'flex', flexDirection: 'column', gap: 8,
+}}>
+  <p style={{ font: '400 12px/16px var(--font-sans)', color: 'var(--label-alternative)', textAlign: 'center' }}>
+    안내 문구
+  </p>
+  <button style={{
+    height: 48, width: '100%',
+    borderRadius: 'var(--radius-12)',
+    background: 'var(--primary)',
+    color: 'var(--static-white)',
+    font: '600 16px var(--font-sans)', border: 'none',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+  }}>
+    <CheckIcon size={20} />
+    액션 레이블
+  </button>
+</footer>
+
+{/* Footer/menubar — 바텀 탭 (4탭 + 중앙 FAB) */}
+<nav style={{
+  width: '100%',
+  background: 'var(--bg-normal)',
+  borderTop: '1px solid var(--line-alternative)',
+  padding: '9px 12px 30px',
+  display: 'flex', alignItems: 'flex-start', justifyContent: 'space-around',
+}}>
+  {/* 일반 탭 (비활성) */}
+  <button style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: 56, background: 'none', border: 'none' }}>
+    <HomeIcon size={20} color="var(--label-assistive)" />
+    <span style={{ font: '400 11px/14px var(--font-sans)', color: 'var(--label-assistive)' }}>모임</span>
+  </button>
+
+  {/* 중앙 FAB */}
+  <button style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: 44, background: 'none', border: 'none' }}>
+    <div style={{ width: 44, height: 44, borderRadius: 14, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <PlusIcon size={24} color="var(--static-white)" />
+    </div>
+    <span style={{ font: '400 11px/14px var(--font-sans)', color: 'var(--label-assistive)' }}>만들기</span>
+  </button>
+
+  {/* 활성 탭 */}
+  <button style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: 56, background: 'none', border: 'none' }}>
+    <UserIcon size={20} color="var(--primary)" />
+    <span style={{ font: '400 11px/14px var(--font-sans)', color: 'var(--primary)' }}>마이</span>
+  </button>
+</nav>
+```
+
+### 5-16. 컨펌박스 (Confirmbox)
+
+```tsx
+{/* 전체 화면 오버레이 */}
+<div style={{
+  position: 'fixed', inset: 0,
+  background: 'rgba(43,33,30,0.61)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  zIndex: 100,
+}}>
+  {/* 다이얼로그 박스 */}
+  <div style={{
+    background: 'var(--bg-normal)',
+    borderRadius: 'var(--radius-12)',
+    padding: '32px 56px',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+    width: 334,
+  }}>
+    <p style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--label-alternative)', textAlign: 'center' }}>
+      정산을 마감하시겠습니까?
+    </p>
+    <div style={{ display: 'flex', gap: 12, width: '100%' }}>
+      {/* 취소 */}
+      <button style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-normal)', font: '600 16px var(--font-sans)', color: 'var(--label-normal)', background: 'var(--bg-normal)' }}>
+        아니요
+      </button>
+      {/* 확인 */}
+      <button style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-neutral)', font: '600 16px var(--font-sans)', color: 'var(--primary)', background: 'var(--bg-normal)' }}>
+        마감하기
+      </button>
+    </div>
+  </div>
+</div>
+```
+
+### 5-17. 팁박스 (Tipbox)
+
+`--secondary-tint` 배경 위에 `--secondary-strong` 색상 아이콘·텍스트를 사용한다.
+
+```tsx
+<div style={{
+  display: 'flex', alignItems: 'center', gap: 8,
+  padding: '10px 16px',
+  background: 'var(--secondary-tint)',
+  borderRadius: 'var(--radius-10)',
+}}>
+  <EyeIcon size={20} color="var(--secondary-strong)" />
+  <p style={{ font: '400 13px/18px var(--font-sans)', color: 'var(--secondary-strong)' }}>
+    OCR은 정확하지 않을 수 있어요. 금액을 꼭 확인하세요
+  </p>
+</div>
+```
+
+### 5-18. 바텀시트 (BottomSheet)
+
+```tsx
+{/* BottomSheet/background — 오버레이 포함 */}
+<div style={{ position: 'fixed', inset: 0, background: 'rgba(43,33,30,0.61)', zIndex: 90 }} />
+
+<div style={{
+  position: 'fixed', left: 0, right: 0, bottom: 0,
+  background: 'var(--bg-normal)',
+  borderRadius: '36px 36px 0 0',
+  padding: '12px 12px 32px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+  zIndex: 91,
+  boxShadow: 'var(--shadow-xlarge)',
+}}>
+  {/* 핸들 */}
+  <div style={{ width: 76, height: 4, borderRadius: 10, background: 'var(--fill-strong)' }} />
+  {/* 콘텐츠 */}
+  <div style={{ width: '100%', padding: 10 }}>
+    <p style={{ font: '400 14px var(--font-sans)', color: 'var(--label-alternative)', textAlign: 'center' }}>
+      내용
+    </p>
+  </div>
+  {/* 버튼 */}
+  <div style={{ display: 'flex', gap: 10, width: '100%' }}>
+    <button style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-normal)', font: '600 16px var(--font-sans)', color: 'var(--label-normal)', background: 'var(--bg-normal)' }}>
+      취소
+    </button>
+    <button style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-neutral)', font: '600 16px var(--font-sans)', color: 'var(--primary)', background: 'var(--bg-normal)' }}>
+      확인
+    </button>
+  </div>
+</div>
+```
+
+### 5-19. 알림 아이템 (Notification)
+
+| 상태 | 아이콘 색 |
+|:---|:---|
+| unread (미확인) | `--primary` |
+| read (확인) | `--label-assistive` |
+
+```tsx
+{/* unread */}
+<div style={{
+  display: 'flex', alignItems: 'center', gap: 16,
+  padding: '13px 21px',
+  background: 'var(--bg-normal)',
+  borderBottom: '1px solid var(--line-neutral)',
+  width: '100%',
+}}>
+  {/* unread: var(--primary) / read: var(--label-assistive) */}
+  <BellFilledIcon size={24} color="var(--primary)" />
+  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <span style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--label-normal)' }}>
+      금요일 회식 알림
+    </span>
+    <span style={{ font: '400 12px/16px var(--font-sans)', color: 'var(--label-alternative)' }}>
+      투표가 아직 진행되지 않았어요.
+    </span>
+  </div>
+  <ChevronRightIcon size={20} color="var(--label-assistive)" />
+</div>
 ```
 
 ---
@@ -603,6 +847,7 @@ font-family: var(--font-sans);
 | `box-shadow: 0 4px 10px rgba(0,0,0,0.3)` | `box-shadow: var(--shadow-medium)` |
 | `border: 1px solid #E0E0E0` | `border: 1px solid var(--line-normal)` |
 | 이모지를 UI 아이콘으로 사용 | 아이콘 SVG 사용 |
+| `--brand-kakao`, `--brand-toss` 를 일반 UI에 사용 | 해당 외부 서비스 버튼에만 허용 |
 
 ---
 
@@ -625,7 +870,7 @@ font-family: var(--font-sans);
 
 ## 10. AI 어시스턴트 지침
 
-1. **하드코딩 색상 금지**: 모든 Hex 값 직접 사용 금지. 반드시 CSS 변수만 사용한다. **예외: 카카오 로그인 버튼 배경 `#FEE500` 단 하나.**
+1. **하드코딩 색상 금지**: 모든 Hex 값 직접 사용 금지. 반드시 CSS 변수만 사용한다. 외부 서비스 버튼은 `var(--brand-kakao)`, `var(--brand-toss)` 변수를 사용한다.
 2. **라인(보더)**: 테두리 추가 시 반드시 `border: 1px solid var(--line-neutral)` 또는 `var(--line-normal)` 사용.
 3. **호버**: `background: var(--fill-alternative)` 패턴 일관 적용.
 4. **프레스**: `filter: brightness(0.93)` — scale/bounce 금지.
