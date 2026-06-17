@@ -5,6 +5,7 @@
  */
 import { Header } from '../../components/common/Header';
 import { Menubar } from '../../components/common/Menubar';
+import { Footer } from '../../components/common/Footer';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -377,6 +378,46 @@ export default function DevPage() {
             {/* ⑥ 제목 + 설정 */}
             <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
               <Header title="마이페이지" onSettings={() => {}} />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Footer ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Footer
+          </h2>
+          {/* button — 힌트 있음 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">button / 힌트 있음</p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer
+                variant="button"
+                hint="정산 후 송금 요청이 자동으로 전송됩니다"
+                label="정산 확정"
+                onClick={() => {}}
+              />
+            </div>
+          </div>
+          {/* button — 힌트 없음 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">button / 힌트 없음</p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer variant="button" label="다음" onClick={() => {}} />
+            </div>
+          </div>
+          {/* button — disabled */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">button / disabled</p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer variant="button" label="다음" onClick={() => {}} disabled />
+            </div>
+          </div>
+          {/* menubar */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">menubar</p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer variant="menubar" activeTab="home" onTabChange={() => {}} onCreateClick={() => {}} />
             </div>
           </div>
         </section>
