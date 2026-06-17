@@ -1,3 +1,4 @@
+
 # 얌피 공통 컴포넌트 명세
 
 > **출처**: Figma `yummpi_공통컴포넌트` / `공통 컴포넌트` 섹션 분석 결과  
@@ -163,12 +164,12 @@
 
 | 상태 | Variant | 설명 | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `title` | 제목만 | 모임 상세, 정산 |
-| ⬜ | `title-subtitle` | 제목 + 서브타이틀 | 투표 화면 |
+| ✅ | `title` | 제목만 | 모임 상세, 정산 |
+| ✅ | `title-subtitle` | 제목 + 서브타이틀 | 투표 화면 |
 | ⬜ | `title-status` | 제목 + 상태 배지 | 모임 상세 |
-| ⬜ | `dashboard` | 로고 + 알림 아이콘 | 대시보드 홈 |
+| ✅ | `dashboard` | 로고 + 알림 아이콘 | 대시보드 홈 |
 | ⬜ | `mypage` | 마이페이지 헤더 | 마이페이지 |
-| ⬜ | `nontitle-exit` | 제목 없음 + 닫기 버튼 | 바텀시트, 모달 |
+| ✅ | `nontitle-exit` | 제목 없음 + 닫기 버튼 | 바텀시트, 모달 |
 
 ---
 
@@ -176,11 +177,11 @@
 
 | 상태 | 컴포넌트 | Variant | 설명 |
 |:---:|:---|:---|:---|
-| ⬜ | `Footer` | `button` | 하단 단일 CTA 버튼 영역 |
-| ⬜ | `Footer` | `menubar` | 하단 탭 내비게이션 포함 |
-| ⬜ | `Menubar` | `normal` | 탭 비활성 |
-| ⬜ | `Menubar` | `clicked` | 탭 활성 |
-| ⬜ | `Menubar` | `primary` | 강조 탭 (홈 등) |
+| ✅ | `Footer` | `button` | 하단 단일 CTA 버튼 영역 |
+| ✅ | `Footer` | `menubar` | 하단 탭 내비게이션 포함 |
+| ✅ | `Menubar` | `normal` | 탭 비활성 |
+| ✅ | `Menubar` | `clicked` | 탭 활성 |
+| ✅ | `Menubar` | `primary` | 강조 탭 (홈 등) |
 
 ---
 
@@ -200,14 +201,14 @@
 
 | 상태 | Variant | 색상 | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `Badge/black` | 다크 인버스 | 장소 카드 카테고리 |
-| ⬜ | `Badge/green` | status-positive | 완료, 예약 확정 |
-| ⬜ | `Badge/red` | status-negative | 미송금, 오류 |
-| ⬜ | `Badge/yellow` | secondary-tint | 투표 중, 주의 |
-| ⬜ | `badge/guest` | fill-normal | 게스트 표시 |
-| ⬜ | `badge/unpaid` | status-negative tint | 미송금 |
-| ⬜ | `badge/reservable` | secondary-tint | 예약 가능 |
-| ⬜ | `badge/icon-red` | 아이콘 포함 red | 알림 뱃지 |
+| ✅ | `Badge/black` | 다크 인버스 | 장소 카드 카테고리 |
+| ✅ | `Badge/green` | status-positive | 완료, 예약 확정 |
+| ✅ | `Badge/red` | status-negative | 미송금, 오류 |
+| ✅ | `Badge/yellow` | secondary-tint | 투표 중, 주의 |
+| ✅ | `badge/guest` | fill-normal | 게스트 표시 |
+| ✅ | `badge/unpaid` | status-negative tint | 미송금 |
+| ✅ | `badge/reservable` | secondary-tint | 예약 가능 |
+| ✅ | `badge/icon-red` | 아이콘 포함 red | 알림 뱃지 |
 
 ---
 
