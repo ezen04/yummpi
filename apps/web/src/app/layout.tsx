@@ -1,21 +1,21 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import { QueryProvider } from "@/components/providers/QueryProvider";
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
+import { SessionProvider } from '@/components/providers/SessionProvider';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 export const metadata: Metadata = {
-  title: "yummpi",
-  description: "식사 모임 운영 플랫폼",
+  title: 'yummpi',
+  description: '식사 모임 운영 플랫폼',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "yummpi",
+    statusBarStyle: 'default',
+    title: 'yummpi',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
-  width: "device-width",
+  themeColor: '#ffffff',
+  width: 'device-width',
   initialScale: 1,
 };
 

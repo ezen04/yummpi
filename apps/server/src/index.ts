@@ -15,12 +15,10 @@ const io = new Server(httpServer, {
 })
 
 async function bootstrap() {
-  // Redis 연결 확인 후 Adapter 등록
   await Promise.all([pubClient.ping(), subClient.ping()])
   io.adapter(createAdapter(pubClient, subClient))
   console.log('[Socket] Redis Adapter 연결 완료')
 
-  // 연결 인증 미들웨어
   registerAuthMiddleware(io)
 
   io.on('connection', (socket) => {
