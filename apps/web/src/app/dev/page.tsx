@@ -7,6 +7,7 @@ import { Header } from '../../components/common/Header';
 import { Menubar } from '../../components/common/Menubar';
 import { Footer } from '../../components/common/Footer';
 import { Badge } from '../../components/common/Badge';
+import { KakaoLoginButton, KakaoPayButton, TossPayButton, RadiusButton } from '../../components/common/Button';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -379,6 +380,30 @@ export default function DevPage() {
             {/* ⑥ 제목 + 설정 */}
             <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
               <Header title="마이페이지" onSettings={() => {}} />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Button (얌피 전용) ── */}
+        <section className="space-y-4">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Button (얌피 전용)
+          </h2>
+          {/* 브랜드 버튼 */}
+          <div className="space-y-2">
+            <p className="text-caption1 text-[var(--label-assistive)]">브랜드</p>
+            <KakaoLoginButton />
+            <KakaoPayButton />
+            <TossPayButton />
+          </div>
+          {/* Radius 계열 */}
+          <div className="space-y-2">
+            <p className="text-caption1 text-[var(--label-assistive)]">Radius</p>
+            <div className="flex flex-wrap gap-2">
+              <RadiusButton variant="radius">태그</RadiusButton>
+              <RadiusButton variant="radius-border">독촉</RadiusButton>
+              <RadiusButton variant="radius-border-colored">완료 확인</RadiusButton>
+              <RadiusButton variant="radius-border-inactive">비활성</RadiusButton>
             </div>
           </div>
         </section>
