@@ -1,6 +1,9 @@
+'use client';
+
 /**
  * /dev — 공통 컴포넌트 시각 검증 페이지
  */
+import { TopBar } from '../../components/common/TopBar';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -340,6 +343,39 @@ export default function DevPage() {
                   className="text-[var(--label-normal)]"
                 />
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── TopBar ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            TopBar
+          </h2>
+          <div className="space-y-2">
+            {/* ① 뒤로가기 + 제목 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <TopBar title="송금하기" onBack={() => {}} />
+            </div>
+            {/* ② 대시보드 — 인사 + 벨 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <TopBar greeting="안녕하세요" title="김원티님 👋" showBell hasNotification />
+            </div>
+            {/* ③ 뒤로가기 + X */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <TopBar onBack={() => {}} onClose={() => {}} />
+            </div>
+            {/* ④ 뒤로가기 + 제목 + 부제목 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <TopBar title="장소 추천" subtitle="조건에 맞는 후보 5곳" onBack={() => {}} />
+            </div>
+            {/* ⑤ 뒤로가기 + 제목 + 상태 뱃지 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <TopBar title="장소 투표" onBack={() => {}} badge="장소 확정" />
+            </div>
+            {/* ⑥ 제목 + 설정 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <TopBar title="마이페이지" onSettings={() => {}} />
             </div>
           </div>
         </section>
