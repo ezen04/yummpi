@@ -6,6 +6,7 @@
 import { Header } from '../../components/common/Header';
 import { Menubar } from '../../components/common/Menubar';
 import { Footer } from '../../components/common/Footer';
+import { Badge } from '../../components/common/Badge';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -379,6 +380,25 @@ export default function DevPage() {
             <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
               <Header title="마이페이지" onSettings={() => {}} />
             </div>
+          </div>
+        </section>
+
+        {/* ── Badge ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Badge
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="black">한식</Badge>
+            <Badge variant="green">good</Badge>
+            <Badge variant="red">오류</Badge>
+            <Badge variant="yellow">투표 중</Badge>
+            <Badge variant="guest">게스트</Badge>
+            <Badge variant="unpaid">미송금</Badge>
+            <Badge variant="reservable">예약가능</Badge>
+            <Badge variant="icon-red" icon={<span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-negative)', display: 'inline-block' }} />}>
+              미송금
+            </Badge>
           </div>
         </section>
 
