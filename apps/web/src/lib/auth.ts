@@ -1,7 +1,7 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { NextAuthOptions } from "next-auth";
-import KakaoProvider from "next-auth/providers/kakao";
-import { prisma } from "@/lib/prisma";
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import type { NextAuthOptions } from 'next-auth';
+import KakaoProvider from 'next-auth/providers/kakao';
+import { prisma } from '@/lib/prisma';
 
 // 게스트는 NextAuth를 사용하지 않는다(ERD v2.2 b안).
 // 모임 범위 서명 토큰 → 쿠키, 해시는 meeting_members.guest_token_hash.
@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: 'database',
   },
   providers: [
     KakaoProvider({

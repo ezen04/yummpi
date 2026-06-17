@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
-import type { PrecacheEntry } from "serwist";
-import { defaultCache } from "@serwist/next/worker";
-import { Serwist } from "serwist";
+import type { PrecacheEntry } from 'serwist';
+import { defaultCache } from '@serwist/next/worker';
+import { Serwist } from 'serwist';
 
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;

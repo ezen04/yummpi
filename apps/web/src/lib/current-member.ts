@@ -1,13 +1,13 @@
-import { getServerSession } from "next-auth";
-import type { MeetingMember, User } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { ApiError } from "@/lib/api-response";
+import { getServerSession } from 'next-auth';
+import type { MeetingMember, User } from '@prisma/client';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { ApiError } from '@/lib/api-response';
 import {
   hashGuestToken,
   readGuestCookie,
   verifyGuestToken,
-} from "@/lib/guest-token";
+} from '@/lib/guest-token';
 
 /**
  * 공통 인증/권한 미들웨어.
@@ -31,7 +31,7 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function requireUser(): Promise<User> {
   const user = await getCurrentUser();
   if (!user) {
-    throw new ApiError("UNAUTHORIZED", "로그인이 필요합니다.");
+    throw new ApiError('UNAUTHORIZED', '로그인이 필요합니다.');
   }
   return user;
 }
@@ -72,7 +72,7 @@ export async function getCurrentMember(
 export async function requireMember(meetingId: string): Promise<MeetingMember> {
   const member = await getCurrentMember(meetingId);
   if (!member) {
-    throw new ApiError("FORBIDDEN", "모임 참여자만 접근할 수 있습니다.");
+    throw new ApiError('FORBIDDEN', '모임 참여자만 접근할 수 있습니다.');
   }
   return member;
 }
@@ -80,8 +80,8 @@ export async function requireMember(meetingId: string): Promise<MeetingMember> {
 /** 호스트 전용 가드 — 호스트가 아니면 FORBIDDEN(403). */
 export async function assertHost(meetingId: string): Promise<MeetingMember> {
   const member = await requireMember(meetingId);
-  if (member.role !== "HOST") {
-    throw new ApiError("FORBIDDEN", "주최자만 수행할 수 있습니다.");
+  if (member.role !== 'HOST') {
+    throw new ApiError('FORBIDDEN', '주최자만 수행할 수 있습니다.');
   }
   return member;
 }
