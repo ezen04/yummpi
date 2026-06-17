@@ -6,6 +6,9 @@ build/
 .nuxt/
 out/
 
+# Next.js 자동 생성 (빌드 시 재생성 → 포맷/체크 제외)
+next-env.d.ts
+
 # 패키지 매니저 및 락 파일 (포맷팅 불필요)
 package-lock.json
 yarn.lock
