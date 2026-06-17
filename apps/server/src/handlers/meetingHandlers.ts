@@ -10,7 +10,7 @@ export function registerMeetingHandlers(io: Server, socket: Socket & { data: Soc
     const room = `meeting:${meetingId}`
     await socket.join(room)
 
-    socket.to(room).emit('member:joined', { meetingId, memberId, role })
+    socket.to(room).emit('member:joined', { meetingId, member: { memberId, role } })
     console.log(`[meeting:join] member=${memberId} room=${room}`)
   })
 
@@ -24,10 +24,11 @@ export function registerMeetingHandlers(io: Server, socket: Socket & { data: Soc
     console.log(`[meeting:leave] member=${memberId} room=${room}`)
   })
 
-  socket.on('disconnect', async () => {
+  socket.on('disconnecting', () => {
     const room = `meeting:${meetingId}`
-    // socket.leave는 disconnect 시 자동 처리되므로 브로드캐스트만
-    socket.to(room).emit('member:left', { meetingId, memberId })
-    console.log(`[disconnect] member=${memberId} room=${room}`)
+    if (socket.rooms.has(room)) {
+      socket.to(room).emit('member:left', { meetingId, memberId })
+    }
+    console.log(`[disconnecting] member=${memberId} room=${room}`)
   })
 }
