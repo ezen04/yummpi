@@ -8,6 +8,7 @@ import { Menubar } from '../../components/common/Menubar';
 import { Footer } from '../../components/common/Footer';
 import { Badge } from '../../components/common/Badge';
 import { KakaoLoginButton, KakaoPayButton, TossPayButton, RadiusButton } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -25,6 +26,8 @@ import {
   Sparkles,
   Flame,
   Check,
+  Pencil,
+  Calendar,
 } from '@yummpi/ui';
 
 export default function DevPage() {
@@ -382,6 +385,46 @@ export default function DevPage() {
               <Header title="마이페이지" onSettings={() => {}} />
             </div>
           </div>
+        </section>
+
+        {/* ── Input ── */}
+        <section className="space-y-4">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Input
+          </h2>
+          {/* essential-basic (왼쪽 아이콘 — 펜) */}
+          <Input
+            label="모임 이름" required
+            leftIcon={<Pencil size={18} strokeWidth={1.5} />}
+            placeholder="모임 이름을 입력하세요"
+          />
+          {/* essential-icon-left — 캘린더 */}
+          <Input
+            label="날짜" required
+            leftIcon={<Calendar size={18} strokeWidth={1.5} />}
+            placeholder="날짜를 선택하세요"
+            readOnly
+          />
+          {/* essential-icon-left — 인원 */}
+          <Input
+            label="인원" required
+            leftIcon={<Users size={18} strokeWidth={1.5} />}
+            placeholder="인원 수"
+          />
+          {/* essential-icon-left — 지역 */}
+          <Input
+            label="지역" required
+            leftIcon={<MapPin size={18} strokeWidth={1.5} />}
+            placeholder="지역을 입력하세요"
+          />
+          {/* optional-basic */}
+          <Input label="모임 설명" placeholder="설명을 입력하세요 (선택)" />
+          {/* error */}
+          <Input
+            label="닉네임" required
+            placeholder="닉네임을 입력하세요"
+            error="이미 사용 중인 닉네임입니다"
+          />
         </section>
 
         {/* ── Button (얌피 전용) ── */}

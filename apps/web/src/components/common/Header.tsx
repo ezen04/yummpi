@@ -2,7 +2,7 @@
 
 import { ChevronLeft, Close, Settings, Bell } from '@yummpi/ui';
 
-interface TopBarProps {
+interface HeaderProps {
   title?: string;
   subtitle?: string;
   greeting?: string;
@@ -14,7 +14,7 @@ interface TopBarProps {
   badge?: string;
 }
 
-export function TopBar({
+export function Header({
   title,
   subtitle,
   greeting,
@@ -24,7 +24,9 @@ export function TopBar({
   showBell,
   hasNotification,
   badge,
-}: TopBarProps) {
+}: HeaderProps) {
+  const isDashboard = !!greeting;
+
   return (
     <header
       style={{
@@ -33,12 +35,13 @@ export function TopBar({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 16px',
+        paddingLeft: isDashboard ? 20 : 8,
+        paddingRight: isDashboard ? 20 : 12,
         flexShrink: 0,
       }}
     >
       {/* 왼쪽 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
         {onBack && (
           <button
             onClick={onBack}
@@ -46,9 +49,8 @@ export function TopBar({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 36,
-              height: 36,
-              marginLeft: -8,
+              width: 40,
+              height: 40,
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -62,22 +64,22 @@ export function TopBar({
 
         {greeting ? (
           <div>
-            <p style={{ fontSize: 13, color: 'var(--label-alternative)', lineHeight: '18px' }}>
+            <p style={{ fontSize: 14, fontWeight: 400, color: 'var(--label-alternative)', lineHeight: '20px' }}>
               {greeting}
             </p>
-            <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--label-strong)', lineHeight: '26px' }}>
+            <p style={{ fontSize: 18, fontWeight: 400, color: 'var(--label-normal)', lineHeight: '26px' }}>
               {title}
             </p>
           </div>
         ) : (
           <div>
             {title && (
-              <p style={{ fontSize: 17, fontWeight: 600, color: 'var(--label-strong)', lineHeight: '24px' }}>
+              <p style={{ fontSize: 18, fontWeight: 400, color: 'var(--label-normal)', lineHeight: '26px' }}>
                 {title}
               </p>
             )}
             {subtitle && (
-              <p style={{ fontSize: 12, color: 'var(--label-alternative)', lineHeight: '16px', marginTop: 1 }}>
+              <p style={{ fontSize: 12, fontWeight: 400, color: 'var(--label-alternative)', lineHeight: '16px', marginTop: 1 }}>
                 {subtitle}
               </p>
             )}
@@ -113,26 +115,26 @@ export function TopBar({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 36,
-              height: 36,
-              background: 'var(--fill-alternative)',
+              width: 42,
+              height: 42,
+              background: 'var(--bg-alternative)',
               borderRadius: 'var(--radius-full)',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--label-normal)',
             }}
           >
-            <Bell size={20} strokeWidth={1.5} />
+            <Bell size={22} strokeWidth={1.5} />
             {hasNotification && (
               <span
                 style={{
                   position: 'absolute',
-                  top: 6,
-                  right: 6,
+                  top: 9,
+                  right: 10,
                   width: 8,
                   height: 8,
                   borderRadius: '50%',
-                  background: 'var(--status-negative)',
+                  background: 'var(--primary)',
                   border: '1.5px solid var(--bg-normal)',
                 }}
               />
@@ -147,15 +149,15 @@ export function TopBar({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--label-normal)',
             }}
           >
-            <Settings size={20} strokeWidth={1.5} />
+            <Settings size={22} strokeWidth={1.5} />
           </button>
         )}
 
@@ -166,15 +168,15 @@ export function TopBar({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--label-normal)',
             }}
           >
-            <Close size={20} strokeWidth={1.5} />
+            <Close size={22} strokeWidth={1.5} />
           </button>
         )}
       </div>
