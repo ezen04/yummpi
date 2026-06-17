@@ -85,24 +85,24 @@
 
 | 상태 | Variant | 설명 | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `basic` | solid primary — 주요 CTA | 모임 생성, 정산 시작 |
-| ⬜ | `basic-hover` | solid primary hover | — |
-| ⬜ | `basic-icon` | 아이콘 포함 basic | 장소 추가 |
-| ⬜ | `nonColored` | solid assistive (회색 배경) | 취소, 닫기 |
-| ⬜ | `nonbordered` | 텍스트 전용 (테두리 없음) | 건너뛰기, 보조 링크 |
-| ⬜ | `nonbordered-gray` | 텍스트 gray | 비활성 보조 |
-| ⬜ | `outline-colored` | outlined primary | 재오픈, 장소 직접 추가 |
-| ⬜ | `outline-nonColored` | outlined gray | 보조 액션 |
-| ⬜ | `outline-icon-nonColored` | 아이콘 포함 outlined gray | — |
-| ⬜ | `radius` | 소형 둥근 버튼 | 태그형 버튼 |
-| ⬜ | `radius-border` | 소형 둥근 + 테두리 | 송금 독촉, 확인 |
-| ⬜ | `radius-border-colored` | 소형 둥근 + 테두리 primary | 완료 확인 |
-| ⬜ | `radius-border-inactive` | 소형 둥근 비활성 | — |
+| ✅ | `basic` | solid primary — 주요 CTA | 모임 생성, 정산 시작 |
+| ✅ | `basic-hover` | solid primary hover | — |
+| ✅ | `basic-icon` | 아이콘 포함 basic | 장소 추가 |
+| ✅ | `nonColored` | solid assistive (회색 배경) | 취소, 닫기 |
+| ✅ | `nonbordered` | 텍스트 전용 (테두리 없음) | 건너뛰기, 보조 링크 |
+| ✅ | `nonbordered-gray` | 텍스트 gray | 비활성 보조 |
+| ✅ | `outline-colored` | outlined primary | 재오픈, 장소 직접 추가 |
+| ✅ | `outline-nonColored` | outlined gray | 보조 액션 |
+| ✅ | `outline-icon-nonColored` | 아이콘 포함 outlined gray | — |
+| ✅ | `radius` | 소형 둥근 버튼 | 태그형 버튼 |
+| ✅ | `radius-border` | 소형 둥근 + 테두리 | 송금 독촉, 확인 |
+| ✅ | `radius-border-colored` | 소형 둥근 + 테두리 primary | 완료 확인 |
+| ✅ | `radius-border-inactive` | 소형 둥근 비활성 | — |
 | ⬜ | `radius-border-selected` | 소형 둥근 선택됨 | — |
-| ⬜ | `inactive` | 전체 비활성 | 조건 미충족 시 |
-| ⬜ | `kakao` | 카카오 로그인 | 로그인 화면 |
-| ⬜ | `kakaopay` | 카카오페이 딥링크 | 송금 화면 |
-| ⬜ | `tosspay` | 토스페이 딥링크 | 송금 화면 |
+| ✅ | `inactive` | 전체 비활성 | 조건 미충족 시 |
+| ✅ | `kakao` | 카카오 로그인 | 로그인 화면 |
+| ✅ | `kakaopay` | 카카오페이 딥링크 | 송금 화면 |
+| ✅ | `tosspay` | 토스페이 딥링크 | 송금 화면 |
 
 ---
 
@@ -127,11 +127,11 @@
 
 | 상태 | Variant | 설명 | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `essential-basic` | 필수 항목 기본 | 모임 생성, 닉네임 입력 |
-| ⬜ | `essential-basic-focus` | 필수 항목 포커스 | — |
-| ⬜ | `essential-icon-right` | 필수 + 우측 아이콘 | 검색, 날짜 선택 |
-| ⬜ | `optional-basic` | 선택 항목 기본 | 모임 설명 |
-| ⬜ | `optional-basic-focus` | 선택 항목 포커스 | — |
+| ✅ | `essential-basic` | 필수 항목 기본 | 모임 생성, 닉네임 입력 |
+| ✅ | `essential-basic-focus` | 필수 항목 포커스 | — |
+| ✅ | `essential-icon-right` | 필수 + 우측 아이콘 | 검색, 날짜 선택 |
+| ✅ | `optional-basic` | 선택 항목 기본 | 모임 설명 |
+| ✅ | `optional-basic-focus` | 선택 항목 포커스 | — |
 
 ---
 
