@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { parse } from 'cookie';
 import type { Server, Socket } from 'socket.io';
 import { prisma } from '../lib/prisma.js';
 
@@ -10,11 +11,15 @@ export interface SocketData {
 
 export function registerAuthMiddleware(io: Server) {
   io.use(async (socket: Socket, next) => {
-    const { meetingId, sessionToken, guestToken } = socket.handshake.auth as {
-      meetingId?: string;
-      sessionToken?: string;
-      guestToken?: string;
-    };
+    const { meetingId } = socket.handshake.auth as { meetingId?: string };
+
+    const cookies = parse(socket.handshake.headers.cookie ?? '');
+    const sessionToken =
+      cookies['next-auth.session-token'] ??
+      cookies['__Secure-next-auth.session-token'];
+    const guestToken = meetingId
+      ? cookies[`yummpi_guest_${meetingId}`]
+      : undefined;
 
     if (!meetingId) {
       return next(new Error('MISSING_MEETING_ID'));
