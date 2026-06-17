@@ -13,6 +13,7 @@ import { NextResponse } from "next/server";
 export const ERROR_STATUS = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
+  VALIDATION_ERROR: 400,
   MEETING_NOT_FOUND: 404,
   MEMBER_NOT_FOUND: 404,
   CANDIDATE_NOT_FOUND: 404,

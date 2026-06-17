@@ -3,6 +3,11 @@ import type { MeetingMember, User } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ApiError } from "@/lib/api-response";
+import {
+  hashGuestToken,
+  readGuestCookie,
+  verifyGuestToken,
+} from "@/lib/guest-token";
 
 /**
  * 공통 인증/권한 미들웨어.
@@ -34,7 +39,7 @@ export async function requireUser(): Promise<User> {
 /**
  * 모임 범위에서 현재 행위자를 MeetingMember로 해석한다.
  * - 로그인 회원: 세션 user → 해당 모임의 멤버(user_id 일치, 미퇴장)
- * - 게스트: 게스트 토큰 쿠키 해석 (TODO: feature/auth-guest)
+ * - 게스트: 게스트 토큰 쿠키 → 서명·해시 검증 후 멤버
  * 멤버가 아니면 null.
  */
 export async function getCurrentMember(
@@ -47,10 +52,20 @@ export async function getCurrentMember(
     });
   }
 
-  // TODO(feature/auth-guest): 게스트 토큰 쿠키 분기
-  //   - 쿠키 yummpi_guest_<meetingId> HMAC 검증 → memberId
-  //   - meeting_members.guest_token_hash 일치 + leftAt null 확인 후 반환
-  return null;
+  // 게스트: 모임 범위 쿠키 → 서명 검증 → 멤버 조회 + 해시 일치 확인
+  const token = await readGuestCookie(meetingId);
+  if (!token) return null;
+
+  const verified = verifyGuestToken(token, meetingId);
+  if (!verified) return null;
+
+  const member = await prisma.meetingMember.findFirst({
+    where: { id: verified.memberId, meetingId, leftAt: null },
+  });
+  if (!member?.guestTokenHash) return null;
+  if (member.guestTokenHash !== hashGuestToken(token)) return null;
+
+  return member;
 }
 
 /** 모임 멤버 필수 — 아니면 FORBIDDEN(403). */
