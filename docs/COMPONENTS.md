@@ -151,7 +151,7 @@
 
 | 상태 | 컴포넌트 | Variant | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `Check` | `active` / `inactive` | 소비 항목 선택 (정산) |
+| ✅ | `Check` | `active` / `inactive` | 소비 항목 선택 (정산) |
 | ⬜ | `Radio` | `active` / `inactive` | 정산 방식 선택 |
 | ⬜ | `Toggle` | `active` / `inactive` | 알림 설정 on/off |
 | ⬜ | `Menu-check` | `active` / `inactive` | 메뉴 체크 (OCR 검수) |

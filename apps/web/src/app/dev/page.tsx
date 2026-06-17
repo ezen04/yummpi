@@ -9,6 +9,7 @@ import { Footer } from '../../components/common/Footer';
 import { Badge } from '../../components/common/Badge';
 import { KakaoLoginButton, KakaoPayButton, TossPayButton, RadiusButton } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { Check } from '../../components/common/Check';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -425,6 +426,20 @@ export default function DevPage() {
             placeholder="닉네임을 입력하세요"
             error="이미 사용 중인 닉네임입니다"
           />
+        </section>
+
+        {/* ── Check ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Check
+          </h2>
+          <div className="space-y-3">
+            <Check checked={false} label="삼겹살 2인분 (inactive)" />
+            <Check checked={true} label="소주 3병 (active)" />
+            <Check checked={true} label="비활성 선택됨" disabled />
+            <Check checked={false} />
+            <Check checked={true} />
+          </div>
         </section>
 
         {/* ── Button (얌피 전용) ── */}
