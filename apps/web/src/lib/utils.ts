@@ -1,1 +1,1 @@
-export { cn } from '@yummpi/ui'
+export { cn } from '@yummpi/ui';
