@@ -121,6 +121,7 @@ type FoodType          = 'KOREAN' | 'JAPANESE' | 'CHINESE' | 'WESTERN' | 'ASIAN'
 - ★ v2.1: `anonymousVoting`은 **VOTING 진입 후 변경 불가** → `409 VOTING_SETTING_LOCKED`
 
 ### `PATCH /api/v1/meetings/:meetingId/status` — 상태 변경 (호스트)
+
 ```
 DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING → COMPLETED
 ```
@@ -241,10 +242,18 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ## 10. 정산 API — **모임당 1건** ★ v2.1
 
-### `POST /api/v1/meetings/:meetingId/settlements` — 정산 생성
-요청 `{ "splitMethod": "ITEM_BASED" | "EQUAL" }`  (~~receiptId~~ 제거)
+### `POST /api/v1/meetings/:meetingId/settlements` — 정산 생성 ★ v2.2 수정
+
+요청:
+
+```json
+{ "splitMethod": "ITEM_BASED" | "EQUAL", "totalAmount": 150000 }
+```
+
+- `totalAmount`: **EQUAL 필수**, ITEM_BASED 무시 (단위: 원 정수) (~~receiptId~~ 제거)
+- EQUAL 시 `settlements.total_amount = totalAmount` 직접 저장
 - 이미 존재 시 `409 SETTLEMENT_ALREADY_EXISTS`
-- 모임의 **모든** RECEIPT_ITEM이 배정 대상
+- 모임의 **모든** RECEIPT_ITEM이 배정 대상 (EQUAL은 RECEIPT_ITEM 없이도 진행 가능)
 
 ### `GET /api/v1/meetings/:meetingId/settlement` — 조회 (단수)
 - 응답에 `receipts: [{receiptId, merchantName, totalAmount}]` 합산 내역 포함
