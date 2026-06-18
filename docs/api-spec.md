@@ -282,6 +282,45 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ### `PATCH .../payments/:paymentId` — 완료 처리 (`status: PAID`, 본인/호스트)
 ### `POST .../complete` — 모임 종료 (전원 `PAID|EXEMPT` 시 `COMPLETED`, 아니면 `422 PAYMENTS_NOT_COMPLETED`)
 
+### 11-B. 송금 Mock UX 계약
+
+MVP의 송금하기는 실제 계좌 송금 연동이 아니라 **표시용 송금 Mock**으로 처리한다. 실제 송금은 발생하지 않지만, 사용자는 송금 정보 확인 → 송금 수단 선택 → 송금 확인 → 완료 화면까지 실제 송금과 유사한 단계형 흐름을 경험한다.
+
+- 계좌번호, 은행명, 예금주 실명, 결제 토큰, 실제 송금 식별자는 저장하거나 반환하지 않는다.
+- 송금 화면은 `Payment.amount`, 멤버 닉네임, 표시용 수신자 라벨, 송금 앱 선택값, fallback 액션으로 구성한다.
+- 표시용 수신자 라벨은 실계좌 정보가 아니라 `모임장 {nickname}` 같은 UI 라벨만 사용한다.
+- `transferMock`은 송금 화면 편의를 위한 nullable 표시 데이터이며, 실제 송금 완료 증빙으로 사용하지 않는다.
+- 딥링크 prefill은 실기기 검증 전 확정하지 않는다. 불가 시 `금액 복사 + 앱 열기 + 송금했어요` 흐름으로 후퇴한다.
+- 은행명·계좌번호처럼 보이는 상세 정보가 필요하면 API/DB 값이 아니라 FE의 더미 표시값만 사용한다. 예: `윰피뱅크`, `***-**-1234`.
+
+예시:
+
+```json
+{
+  "recipientLabel": "모임장 지훈",
+  "app": "kakaopay",
+  "amount": 18000,
+  "deeplink": "kakaopay://mock-transfer?amount=18000",
+  "fallbackActionLabel": "금액 복사"
+}
+```
+
+권장 화면 흐름:
+
+```txt
+1. 송금 정보 확인
+2. 송금 수단 선택
+3. 송금 확인
+4. Mock 송금 완료
+5. 호스트 입금 확인 대기
+```
+
+상태 처리는 기존 Payment API를 따른다.
+
+- 멤버가 Mock 송금 완료 단계까지 진행 → `PATCH .../payments/:paymentId` with `{ "action": "REPORT_TRANSFER" }`
+- 호스트가 입금 확인 → `{ "action": "MARK_PAID" }`
+- 운영상 면제 → `{ "action": "MARK_EXEMPT" }`
+
 ---
 
 ## 11-A. 웹푸시 구독 API ★ v2.2 신규 (⑤ · 추가 예정)
@@ -350,6 +389,7 @@ io(SOCKET_URL, {
 | `CANDIDATE_NOT_FOUND` | 404 | 후보 없음 |
 | `RECEIPT_NOT_FOUND` | 404 | 영수증 없음 |
 | `SETTLEMENT_NOT_FOUND` | 404 | 정산 없음 |
+| `PAYMENT_NOT_FOUND` ★★ | 404 | 송금 정보 없음 |
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
