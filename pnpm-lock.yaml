@@ -72,6 +72,9 @@ importers:
       '@tanstack/react-query':
         specifier: 5.101.0
         version: 5.101.0(react@19.2.7)
+      '@yummpi/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       '@yummpi/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -102,6 +105,9 @@ importers:
       socket.io-client:
         specifier: 4.8.1
         version: 4.8.1
+      zod:
+        specifier: 4.1.13
+        version: 4.1.13
       zustand:
         specifier: 5.0.8
         version: 5.0.8(@types/react@19.2.17)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))

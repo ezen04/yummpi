@@ -35,15 +35,98 @@ e2e/** (Playwright 공통 fixture)
 
 ## 의존 계약
 
-- Payment는 SETTLEMENT_MEMBER와 1:1 (`payments.settlement_member_id` UNIQUE). 생성 시점: ④의 정산 확정 직후 — 정산 계산 로직 침범 금지
+- Payment는 SETTLEMENT_MEMBER와 1:1 (`payments.settlement_member_id` UNIQUE).
+- 생성 시점: ④의 정산 확정 직후가 아니라 ⑤ 소유 `POST /payments/initialize`에서 명시적으로 초기화한다.
+  - ④ confirm은 `Settlement.status = CONFIRMED`, `confirmedAt != null`, 참여자별 `SettlementMember`, 확정된 `SettlementMember.finalAmount`까지만 보장한다.
+  - ⑤는 위 데이터를 읽어 누락된 Payment를 idempotent하게 생성한다.
+  - `GET /payments`는 Payment를 생성하지 않는 순수 조회 API로 유지한다.
 - 모임 종료(`/complete`): 전원 PAID|EXEMPT일 때만 → ①의 상태 머신 경유로 `COMPLETED` 전환
-- BullMQ 큐는 ①(만료 Job)과 공유 — 큐 설정·Redis 연결 변경은 ①과 페어로
+- BullMQ Worker는 `apps/server/src/workers/`에 둔다. Queue 이름은 ① 만료 Job과 겹치지 않게 네임스페이스를 분리한다.
+- BullMQ Redis 연결은 Socket.io Adapter용 `pubClient`/`subClient`를 재사용하지 않는다. `apps/server/src/lib/redis.ts`에 BullMQ 전용 연결을 별도로 둔다.
 - 독촉 Worker: 발송 전 반드시 Payment 상태 재확인 (이미 PAID면 스킵)
+- 독촉 Job payload는 `{ meetingId, paymentId, targetMemberId }`를 사용하고, `jobId` 기반 중복 방지를 적용한다.
+- 발송 로그 테이블은 MVP에서 만들지 않는다. Worker guard와 BullMQ job 상태 조회로 운영한다.
 
 ## 핵심 주의사항
 
 - **딥링크 prefill은 실기기 검증 전 구현 확정 금지** — 불가 시 "금액 복사 + 앱 열기" fallback
+- 송금 화면 진입 전 `POST /payments/initialize` 호출을 필수 플로우로 둔다.
 - 송금 상태 변경은 본인/호스트만 (`PATCH /payments/:id`)
 - 웹푸시 없으면 이메일 fallback (PWA 미설치 대응). VAPID 키는 서버 전용
 - CI(turbo typecheck·lint·build·e2e)는 전 팀의 게이트 — 워크플로 변경 시 공지
 - iOS PWA: 홈 화면 추가 메타태그 + 설치 안내 UI (①의 마이페이지와 연동)
+
+## 송금 Mock UX 구현 규칙
+
+MVP의 송금하기는 실제 계좌 송금이 아니라 `Payment` 기반의 표시용 송금 Mock으로 구현한다. 실제 송금은 발생하지 않지만, 사용자가 송금 정보 확인부터 완료 화면까지 실제 송금과 유사한 단계를 경험하도록 만든다.
+
+### 금지 데이터
+
+아래 값은 mock이어도 DB에 저장하거나 API로 반환하지 않는다.
+
+- 계좌번호
+- 은행명과 계좌번호 조합
+- 예금주 실명
+- 전화번호 기반 송금 식별자
+- 결제/송금 인증 토큰
+- 실제 provider 송금 식별자
+
+### 표시 데이터
+
+송금 화면은 아래 데이터만 사용한다.
+
+- `recipientLabel`: 표시용 수신자 라벨. 기본값은 `모임장 {host.nickname}`
+- `app`: `kakaopay`, `toss`, `other`
+- `amount`: `Payment.amount`
+- `deeplink`: 검증 전에는 mock 또는 optional 값으로만 취급
+- `fallbackActionLabel`: 예: `금액 복사`
+
+은행명·계좌번호처럼 보이는 정보가 필요하면 API나 DB에서 받지 않고 FE의 더미 표시값만 사용한다.
+
+- mock 은행명 예: `윰피뱅크`, `카카오페이 Mock`, `토스 Mock`
+- mock 계좌 예: `***-**-1234`
+- mock 예금주 예: `모임장 지훈`
+
+예시 UI:
+
+```txt
+받는 사람: 모임장 지훈
+은행: 윰피뱅크
+계좌: ***-**-1234
+금액: 18,000원
+
+[카카오페이]
+[토스]
+[직접 송금]
+```
+
+### 처리 흐름
+
+1. 송금 화면 진입 시 `POST /payments/initialize`를 먼저 호출한다.
+2. `GET /payments`로 송금 현황을 조회한다.
+   `transferMock`은 현재 `null`로 내려오므로 FE에서 `Payment.amount`와 호스트 닉네임으로 직접 구성한다.
+3. 사용자가 내 Payment의 `송금하기`를 누르면 송금 정보 확인 화면으로 이동한다.
+4. 송금 수단을 선택한다. 선택값은 FE UI 상태로 충분하며 저장은 필수 아님.
+5. 송금 확인 화면에서 금액과 수신자 라벨을 다시 보여준다.
+6. 사용자가 완료 버튼을 누르면 Mock 완료 화면을 보여주고 `REPORT_TRANSFER`로 상태를 변경한다.
+7. 호스트가 실제 입금 여부를 확인하고 `MARK_PAID`, `MARK_PENDING`, `MARK_EXEMPT` 중 하나로 정리한다.
+
+권장 단계:
+
+```txt
+송금 정보 확인
+→ 송금 수단 선택
+→ 송금 확인
+→ Mock 송금 완료
+→ 호스트 입금 확인 대기
+```
+
+### `transferMock` 생성 기준
+
+- `transferMock`은 UI 편의 필드이며 결제 증빙이 아니다.
+- 수신자는 계좌정보가 아닌 모임장 닉네임 라벨로 표시한다.
+- 금액은 항상 `Payment.amount`를 사용한다.
+- 딥링크 prefill 가능 여부가 확정되기 전에는 fallback 액션을 반드시 함께 둔다.
+- `REPORT_TRANSFER`는 실제 송금 성공이 아니라 사용자가 Mock 송금 완료 단계까지 진행했다는 의미다.
+- `MARK_PAID`는 호스트 입금 확인, `MARK_PENDING`은 호스트 되돌리기, `MARK_EXEMPT`는 운영상 면제 처리다.
+- 호스트 본인의 Payment나 금액 0원 Payment에 노출할지 여부는 UI 정책으로 결정하되, 상태 처리는 기존 Payment API를 그대로 사용한다.

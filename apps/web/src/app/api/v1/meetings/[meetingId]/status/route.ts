@@ -2,7 +2,10 @@ import type { MeetingStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
-import { assertTransition, MEETING_STATUSES } from '@/lib/meeting-status';
+import {
+  MEETING_STATUSES,
+  transitionMeetingStatus,
+} from '@/lib/meeting-status';
 import { bad } from '@/lib/meeting-input';
 
 /**
@@ -15,7 +18,11 @@ type Ctx = { params: Promise<{ meetingId: string }> };
 export const PATCH = handleRoute(async (req: Request, ctx: Ctx) => {
   const { meetingId } = await ctx.params;
 
-  const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+  // 존재 확인을 권한 검사보다 먼저: 없는 모임은 403이 아니라 404로 응답.
+  const meeting = await prisma.meeting.findUnique({
+    where: { id: meetingId },
+    select: { id: true },
+  });
   if (!meeting) {
     throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
   }
@@ -31,15 +38,8 @@ export const PATCH = handleRoute(async (req: Request, ctx: Ctx) => {
   }
   const target = to as MeetingStatus;
 
-  assertTransition(meeting.status, target); // 위반 시 409
-
-  const updated = await prisma.meeting.update({
-    where: { id: meetingId },
-    data: {
-      status: target,
-      ...(target === 'CANCELLED' ? { cancelledAt: new Date() } : {}),
-    },
-  });
+  // 전이 검증 + 갱신(+CANCELLED cancelledAt)은 shared helper에 위임.
+  const updated = await transitionMeetingStatus(meetingId, target);
 
   return apiSuccess(
     { id: updated.id, status: updated.status },

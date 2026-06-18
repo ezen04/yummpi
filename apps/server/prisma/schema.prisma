@@ -88,6 +88,7 @@ enum SplitMethod {
 
 enum PaymentStatus {
   PENDING
+  TRANSFER_REPORTED
   PAID
   EXEMPT
 
@@ -180,6 +181,7 @@ model Meeting {
   id                   String  @id @default(uuid()) @db.Uuid
   hostUserId           String  @map("host_user_id") @db.Uuid
   confirmedCandidateId String? @unique @map("confirmed_candidate_id") @db.Uuid
+  seriesId             String? @map("series_id") @db.Uuid // B-lite 클론 회차 스탬프 (nullable self-FK, V2 그룹 히스토리용)
 
   title       String
   description String?
@@ -203,6 +205,8 @@ model Meeting {
 
   host               User            @relation("MeetingHost", fields: [hostUserId], references: [id])
   confirmedCandidate PlaceCandidate? @relation("ConfirmedCandidate", fields: [confirmedCandidateId], references: [id])
+  series             Meeting?        @relation("MeetingSeries", fields: [seriesId], references: [id])
+  clones             Meeting[]       @relation("MeetingSeries")
   members            MeetingMember[]
   placeCandidates    PlaceCandidate[] @relation("MeetingCandidates")
   votes              Vote[]
@@ -316,7 +320,7 @@ model Receipt {
   id                  String    @id @default(uuid()) @db.Uuid
   meetingId           String    @map("meeting_id") @db.Uuid
   uploadedByMemberId  String?   @map("uploaded_by_member_id") @db.Uuid
-  objectKey           String    @unique @map("object_key")
+  objectKey           String?   @unique @map("object_key")
   imageUrl            String?   @map("image_url")
   ocrStatus           OcrStatus @default(PENDING) @map("ocr_status")
   rawOcrJson          Json?     @map("raw_ocr_json") // OCR 원본·미분류 라인
