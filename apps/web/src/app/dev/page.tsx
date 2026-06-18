@@ -26,7 +26,7 @@ import {
   ChevronLeft,
   Sparkles,
   Flame,
-  Check,
+  Check as CheckIcon,
   Pencil,
   Calendar,
 } from '@yummpi/ui';
@@ -140,10 +140,10 @@ export default function DevPage() {
               <Button size="md">지원하기</Button>
             </div>
             <div className="flex gap-2">
-              <Button size="lg" leftIcon={<Check strokeWidth={1.5} />}>
+              <Button size="lg" leftIcon={<CheckIcon strokeWidth={1.5} />}>
                 지원하기
               </Button>
-              <Button size="md" leftIcon={<Check strokeWidth={1.5} />}>
+              <Button size="md" leftIcon={<CheckIcon strokeWidth={1.5} />}>
                 지원하기
               </Button>
             </div>
@@ -163,7 +163,7 @@ export default function DevPage() {
               <Button
                 variant="outline"
                 size="lg"
-                leftIcon={<Check strokeWidth={1.5} />}
+                leftIcon={<CheckIcon strokeWidth={1.5} />}
               >
                 지원하기
               </Button>
