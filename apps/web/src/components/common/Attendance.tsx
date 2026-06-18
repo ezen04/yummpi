@@ -43,72 +43,39 @@ export function Attendance({
   const borderWidth = isHost || isSelected ? 2 : 1.5;
 
   return (
-    <div
-      className={cn(className)}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 6,
-      }}
-    >
-      <div style={{ position: 'relative' }}>
-        {/* 아바타 원형 */}
+    <div className={cn('flex flex-col items-center gap-[6px]', className)}>
+      <div className="relative">
         <div
+          className={cn(
+            'rounded-full flex items-center justify-center overflow-hidden transition-opacity duration-150',
+            isHost || isSelected
+              ? 'border-2 border-[var(--primary)]'
+              : 'border-[1.5px] border-[var(--line-normal)]',
+            isHover ? 'opacity-70' : 'opacity-100',
+          )}
           style={{
             width: size,
             height: size,
-            borderRadius: '50%',
-            border: `${borderWidth}px solid ${borderColor}`,
             background: isGuest ? 'var(--fill-normal)' : getAvatarBg(name),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            opacity: isHover ? 0.7 : 1,
-            transition: 'opacity 0.15s',
           }}
         >
           {src ? (
-            <Image
-              src={src}
-              alt={name}
-              width={size}
-              height={size}
-              style={{ objectFit: 'cover' }}
-            />
+            <Image src={src} alt={name} width={size} height={size} className="object-cover" />
           ) : (
             <span
-              style={{
-                font: `700 ${Math.round(size * 0.4)}px var(--font-sans)`,
-                color: isGuest
-                  ? 'var(--label-assistive)'
-                  : 'var(--label-normal)',
-                userSelect: 'none',
-              }}
+              className={cn(
+                'font-bold font-[var(--font-sans)] select-none',
+                isGuest ? 'text-[var(--label-assistive)]' : 'text-[var(--label-normal)]',
+              )}
+              style={{ fontSize: Math.round(size * 0.4) }}
             >
               {name.charAt(0)}
             </span>
           )}
         </div>
 
-        {/* 선택됨 체크 뱃지 */}
         {isSelected && (
-          <span
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              width: 18,
-              height: 18,
-              borderRadius: '50%',
-              background: 'var(--primary)',
-              border: '2px solid var(--bg-normal)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <span className="absolute bottom-0 right-0 w-[18px] h-[18px] rounded-full bg-[var(--primary)] border-2 border-[var(--bg-normal)] flex items-center justify-center">
             <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
               <path
                 d="M1 3.5L3.2 5.5L8 1"
@@ -122,20 +89,12 @@ export function Attendance({
         )}
       </div>
 
-      {/* 이름 */}
       <span
-        style={{
-          font: `${isHost || isSelected ? '600' : '400'} 11px/14px var(--font-sans)`,
-          color:
-            isHost || isSelected
-              ? 'var(--label-normal)'
-              : 'var(--label-alternative)',
-          maxWidth: size + 8,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          textAlign: 'center',
-        }}
+        className={cn(
+          'text-[11px] leading-[14px] font-[var(--font-sans)] truncate text-center',
+          isHost || isSelected ? 'font-semibold text-[var(--label-normal)]' : 'font-normal text-[var(--label-alternative)]',
+        )}
+        style={{ maxWidth: size + 8 }}
       >
         {name}
       </span>

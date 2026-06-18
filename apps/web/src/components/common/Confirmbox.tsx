@@ -27,94 +27,36 @@ export function Confirmbox({
   if (!open) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 300,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {/* 딤 배경 */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'rgba(43,33,30,0.61)',
-        }}
-      />
+    <div className="fixed inset-0 z-[300] flex items-center justify-center">
+      <div onClick={onClose} className="absolute inset-0 bg-[rgba(43,33,30,0.61)]" />
 
-      {/* 카드 */}
       <div
-        className={cn(className)}
-        style={{
-          position: 'relative',
-          width: 334,
-          background: 'var(--bg-normal)',
-          borderRadius: 'var(--radius-12)',
-          padding: '32px 24px',
-          boxShadow: 'var(--shadow-xlarge)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 16,
-        }}
+        className={cn(
+          'relative w-[334px] bg-[var(--bg-normal)] rounded-[var(--radius-12)]',
+          'px-6 py-8 shadow-[var(--shadow-large)] flex flex-col items-center gap-4',
+          className,
+        )}
       >
-        <p
-          style={{
-            font: '400 14px/20px var(--font-sans)',
-            color: 'var(--label-alternative)',
-            margin: 0,
-            textAlign: 'center',
-          }}
-        >
+        <p className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 text-center">
           {title}
         </p>
 
         {body && (
-          <p
-            style={{
-              font: '400 13px/18px var(--font-sans)',
-              color: 'var(--label-assistive)',
-              margin: 0,
-              textAlign: 'center',
-            }}
-          >
+          <p className="text-[13px] leading-[18px] font-normal font-[var(--font-sans)] text-[var(--label-assistive)] m-0 text-center">
             {body}
           </p>
         )}
 
-        <div style={{ display: 'flex', gap: 12, width: '100%' }}>
+        <div className="flex gap-3 w-full">
           <button
             onClick={onClose}
-            style={{
-              flex: 1,
-              height: 48,
-              borderRadius: 'var(--radius-12)',
-              border: '1px solid var(--line-normal)',
-              background: 'var(--bg-normal)',
-              font: '600 16px var(--font-sans)',
-              color: 'var(--label-normal)',
-              cursor: 'pointer',
-            }}
+            className="flex-1 h-12 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[16px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)] cursor-pointer"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            style={{
-              flex: 1,
-              height: 48,
-              borderRadius: 'var(--radius-12)',
-              border: '1px solid var(--line-neutral)',
-              background: 'var(--bg-normal)',
-              font: '600 16px var(--font-sans)',
-              color: 'var(--primary)',
-              cursor: 'pointer',
-            }}
+            className="flex-1 h-12 rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[16px] font-semibold font-[var(--font-sans)] text-[var(--primary)] cursor-pointer"
           >
             {confirmLabel}
           </button>

@@ -28,124 +28,43 @@ export function Menubar({
   onCreateClick,
   className,
 }: MenubarProps) {
+  const TAB_BTN = 'flex flex-col items-center gap-1 w-14 bg-transparent border-none cursor-pointer p-0';
+  const TAB_LABEL = 'text-[11px] leading-[14px] font-normal font-[var(--font-sans)]';
+
   return (
     <nav
-      className={cn(className)}
-      style={{
-        width: '100%',
-        background: 'var(--bg-normal)',
-        borderTop: '1px solid var(--line-alternative)',
-        paddingTop: 9,
-        paddingBottom: 'max(30px, env(safe-area-inset-bottom))',
-        paddingLeft: 12,
-        paddingRight: 12,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-around',
-      }}
+      className={cn(
+        'w-full bg-[var(--bg-normal)] border-t border-[var(--line-alternative)]',
+        'pt-[9px] px-3 flex items-start justify-around',
+        className,
+      )}
+      style={{ paddingBottom: 'max(30px, env(safe-area-inset-bottom))' }}
     >
       {LEFT_TABS.map(({ key, Icon, label }) => {
         const isActive = activeTab === key;
         return (
-          <button
-            key={key}
-            onClick={() => onTabChange(key)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-              width: 56,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-            }}
-          >
-            <Icon
-              size={20}
-              strokeWidth={1.5}
-              color={isActive ? 'var(--primary)' : 'var(--label-assistive)'}
-            />
-            <span
-              style={{
-                font: '400 11px/14px var(--font-sans)',
-                color: isActive ? 'var(--primary)' : 'var(--label-assistive)',
-              }}
-            >
+          <button key={key} onClick={() => onTabChange(key)} className={TAB_BTN}>
+            <Icon size={20} strokeWidth={1.5} color={isActive ? 'var(--primary)' : 'var(--label-assistive)'} />
+            <span className={cn(TAB_LABEL, isActive ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]')}>
               {label}
             </span>
           </button>
         );
       })}
 
-      {/* 중앙 FAB */}
-      <button
-        onClick={onCreateClick}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 4,
-          width: 44,
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: 0,
-        }}
-      >
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            background: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+      <button onClick={onCreateClick} className="flex flex-col items-center gap-1 w-11 bg-transparent border-none cursor-pointer p-0">
+        <div className="w-11 h-11 rounded-[14px] bg-[var(--primary)] flex items-center justify-center">
           <Plus size={24} strokeWidth={1.5} color="var(--static-white)" />
         </div>
-        <span
-          style={{
-            font: '400 11px/14px var(--font-sans)',
-            color: 'var(--label-assistive)',
-          }}
-        >
-          만들기
-        </span>
+        <span className={cn(TAB_LABEL, 'text-[var(--label-assistive)]')}>만들기</span>
       </button>
 
       {RIGHT_TABS.map(({ key, Icon, label }) => {
         const isActive = activeTab === key;
         return (
-          <button
-            key={key}
-            onClick={() => onTabChange(key)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-              width: 56,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-            }}
-          >
-            <Icon
-              size={20}
-              strokeWidth={1.5}
-              color={isActive ? 'var(--primary)' : 'var(--label-assistive)'}
-            />
-            <span
-              style={{
-                font: '400 11px/14px var(--font-sans)',
-                color: isActive ? 'var(--primary)' : 'var(--label-assistive)',
-              }}
-            >
+          <button key={key} onClick={() => onTabChange(key)} className={TAB_BTN}>
+            <Icon size={20} strokeWidth={1.5} color={isActive ? 'var(--primary)' : 'var(--label-assistive)'} />
+            <span className={cn(TAB_LABEL, isActive ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]')}>
               {label}
             </span>
           </button>

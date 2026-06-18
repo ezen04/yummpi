@@ -35,59 +35,28 @@ export function Input({
   const paddingRight = rightIcon ? 44 : 16;
 
   return (
-    <div
-      className={cn(wrapperClassName)}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-        width: '100%',
-      }}
-    >
+    <div className={cn('flex flex-col gap-[6px] w-full', wrapperClassName)}>
       {label && (
-        <label
-          style={{
-            font: '500 14px/20px var(--font-sans)',
-            color: 'var(--label-normal)',
-          }}
-        >
+        <label className="text-[14px] leading-5 font-medium font-[var(--font-sans)] text-[var(--label-normal)]">
           {label}
           {required && (
-            <span style={{ color: 'var(--primary)', marginLeft: 2 }}>•</span>
+            <span className="text-[var(--primary)] ml-[2px]">•</span>
           )}
         </label>
       )}
 
-      <div style={{ position: 'relative', width: '100%' }}>
+      <div className="relative w-full">
         {leftIcon && (
-          <span
-            style={{
-              position: 'absolute',
-              left: 14,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              color: 'var(--label-assistive)',
-              pointerEvents: 'none',
-            }}
-          >
+          <span className="absolute left-[14px] top-1/2 -translate-y-1/2 flex items-center text-[var(--label-assistive)] pointer-events-none">
             {leftIcon}
           </span>
         )}
         <input
-          className="placeholder:text-[var(--label-assistive)]"
+          className="placeholder:text-[var(--label-assistive)] h-12 w-full rounded-[var(--radius-12)] bg-[var(--bg-alternative)] text-[16px] font-normal font-[var(--font-sans)] text-[var(--label-normal)] outline-none box-border"
           style={{
-            height: 48,
-            width: '100%',
-            padding: `0 ${paddingRight}px 0 ${paddingLeft}px`,
-            borderRadius: 'var(--radius-12)',
             border,
-            background: 'var(--bg-alternative)',
-            font: '400 16px var(--font-sans)',
-            color: 'var(--label-normal)',
-            outline: 'none',
-            boxSizing: 'border-box',
+            paddingLeft: paddingLeft,
+            paddingRight: paddingRight,
           }}
           onFocus={(e) => {
             setFocused(true);
@@ -100,31 +69,14 @@ export function Input({
           {...props}
         />
         {rightIcon && (
-          <span
-            style={{
-              position: 'absolute',
-              right: 14,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              color: 'var(--label-assistive)',
-              pointerEvents: 'none',
-            }}
-          >
+          <span className="absolute right-[14px] top-1/2 -translate-y-1/2 flex items-center text-[var(--label-assistive)] pointer-events-none">
             {rightIcon}
           </span>
         )}
       </div>
 
       {error && (
-        <p
-          style={{
-            font: '400 12px/16px var(--font-sans)',
-            color: 'var(--status-negative)',
-            margin: 0,
-          }}
-        >
+        <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--status-negative)] m-0">
           {error}
         </p>
       )}
