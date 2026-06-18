@@ -20,7 +20,20 @@ function KakaoIcon() {
 
 function TossIcon() {
   return (
-    <img src="/icons/toss.png" alt="toss" width={22} height={22} style={{ objectFit: 'contain' }} />
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <defs>
+        <linearGradient id="toss-a" x1="4" y1="4" x2="18" y2="18" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#5AAAFF" />
+          <stop offset="100%" stopColor="#0051FF" />
+        </linearGradient>
+        <linearGradient id="toss-b" x1="8" y1="6" x2="16" y2="18" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#80BFFF" />
+          <stop offset="100%" stopColor="#0064FF" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="10" cy="11" rx="5.5" ry="7.5" fill="url(#toss-a)" transform="rotate(-12 10 11)" />
+      <ellipse cx="13" cy="10" rx="4.5" ry="6.5" fill="url(#toss-b)" opacity="0.85" transform="rotate(10 13 10)" />
+    </svg>
   );
 }
 
