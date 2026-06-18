@@ -21,6 +21,7 @@ import { YAvatar } from '../../components/common/YAvatar';
 import { Thumbnail } from '../../components/common/Thumbnail';
 import { Confirmbox } from '../../components/common/Confirmbox';
 import { PersonItem, MenuItem } from '../../components/common/List';
+import { TodoCard, WaitingCard } from '../../components/common/GroupDetailCard';
 import { Notification } from '../../components/common/Notification';
 import { VoteResultBar } from '../../components/common/VoteResultBar';
 import { VoteResultSelect } from '../../components/common/VoteResultSelect';
@@ -399,15 +400,31 @@ export default function DevPage() {
             <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
               <Header title="장소 추천" subtitle="조건에 맞는 후보 5곳" onBack={() => {}} />
             </div>
-            {/* ⑤ 뒤로가기 + 제목 + 상태 뱃지 */}
+            {/* ⑤ title-status — 뒤로가기 + 제목 + 상태 배지 (yellow: 투표 중) */}
             <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
-              <Header title="장소 투표" onBack={() => {}} badge="장소 확정" />
+              <Header title="홍대 회식" onBack={() => {}} statusVariant="yellow" statusLabel="투표 중" />
             </div>
-            {/* ⑥ 제목 + 설정 */}
+            {/* ⑥ title-status — green: 완료 */}
             <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
-              <Header title="마이페이지" onSettings={() => {}} />
+              <Header title="홍대 회식" onBack={() => {}} statusVariant="green" statusLabel="완료" />
+            </div>
+            {/* ⑦ mypage */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header isMypage onSettings={() => {}} />
             </div>
           </div>
+        </section>
+
+        {/* ── GroupDetailCard ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">GroupDetailCard</h2>
+          <p className="text-caption1 text-[var(--label-assistive)]">TodoCard (주최자)</p>
+          <TodoCard type="location-vote" onAction={() => {}} />
+          <TodoCard type="adjustment" onAction={() => {}} />
+          <TodoCard type="transfer" onAction={() => {}} />
+          <p className="text-caption1 text-[var(--label-assistive)] mt-2">WaitingCard (일반 참여자)</p>
+          <WaitingCard type="location-vote" />
+          <WaitingCard type="adjustment" />
         </section>
 
         {/* ── Input ── */}

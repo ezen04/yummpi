@@ -166,9 +166,9 @@
 |:---:|:---|:---|:---|
 | ✅ | `title` | 제목만 | 모임 상세, 정산 |
 | ✅ | `title-subtitle` | 제목 + 서브타이틀 | 투표 화면 |
-| ⬜ | `title-status` | 제목 + 상태 배지 | 모임 상세 |
+| ✅ | `title-status` | 제목 + 상태 배지 | 모임 상세 |
 | ✅ | `dashboard` | 로고 + 알림 아이콘 | 대시보드 홈 |
-| ⬜ | `mypage` | 마이페이지 헤더 | 마이페이지 |
+| ✅ | `mypage` | 마이페이지 헤더 | 마이페이지 |
 | ✅ | `nontitle-exit` | 제목 없음 + 닫기 버튼 | 바텀시트, 모달 |
 
 ---
@@ -297,11 +297,11 @@
 
 | 상태 | Variant | 설명 |
 |:---:|:---|:---|
-| ⬜ | `todoCard-location-vote` | 투표 진행 중 TODO 카드 |
-| ⬜ | `todoCard-adjustment` | 정산 진행 중 TODO 카드 |
-| ⬜ | `todoCard-transfer` | 송금 진행 중 TODO 카드 |
-| ⬜ | `waitingCard-location-vote` | 투표 대기 카드 |
-| ⬜ | `waitingCard-adjustment` | 정산 대기 카드 |
+| ✅ | `todoCard-location-vote` | 투표 진행 중 TODO 카드 |
+| ✅ | `todoCard-adjustment` | 정산 진행 중 TODO 카드 |
+| ✅ | `todoCard-transfer` | 송금 진행 중 TODO 카드 |
+| ✅ | `waitingCard-location-vote` | 투표 대기 카드 |
+| ✅ | `waitingCard-adjustment` | 정산 대기 카드 |
 
 ---
 

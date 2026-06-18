@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, Close, Settings, Bell } from '@yummpi/ui';
+import { Badge, type BadgeVariant } from './Badge';
 
 interface HeaderProps {
   title?: string;
@@ -11,7 +12,13 @@ interface HeaderProps {
   onSettings?: () => void;
   showBell?: boolean;
   hasNotification?: boolean;
+  /** @deprecated badge 대신 statusVariant + statusLabel 사용 */
   badge?: string;
+  /** title-status variant용 */
+  statusVariant?: BadgeVariant;
+  statusLabel?: string;
+  /** mypage variant */
+  isMypage?: boolean;
 }
 
 export function Header({
@@ -24,8 +31,54 @@ export function Header({
   showBell,
   hasNotification,
   badge,
+  statusVariant,
+  statusLabel,
+  isMypage,
 }: HeaderProps) {
   const isDashboard = !!greeting;
+
+  // mypage: 중앙 타이틀 + 오른쪽 설정 아이콘
+  if (isMypage) {
+    return (
+      <header
+        style={{
+          height: 56,
+          background: 'var(--bg-normal)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingLeft: 12,
+          paddingRight: 12,
+          position: 'relative',
+          flexShrink: 0,
+        }}
+      >
+        <span style={{ font: '600 18px/26px var(--font-sans)', color: 'var(--label-normal)' }}>
+          {title ?? '마이페이지'}
+        </span>
+        {onSettings && (
+          <button
+            onClick={onSettings}
+            style={{
+              position: 'absolute',
+              right: 12,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 40,
+              height: 40,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--label-normal)',
+            }}
+          >
+            <Settings size={22} strokeWidth={1.5} />
+          </button>
+        )}
+      </header>
+    );
+  }
 
   return (
     <header
@@ -89,23 +142,11 @@ export function Header({
 
       {/* 오른쪽 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        {badge && (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 13,
-              fontWeight: 500,
-              color: 'var(--status-positive)',
-              padding: '4px 8px',
-              borderRadius: 'var(--radius-full)',
-              background: 'rgba(0,191,64,0.08)',
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-positive)', flexShrink: 0 }} />
-            {badge}
-          </span>
+        {statusVariant && statusLabel && (
+          <Badge variant={statusVariant}>{statusLabel}</Badge>
+        )}
+        {badge && !statusVariant && (
+          <Badge variant="green">{badge}</Badge>
         )}
 
         {showBell && (
