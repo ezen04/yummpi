@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 
 interface YAvatarProps {
   variant?: 'host' | 'guest';
@@ -37,10 +38,12 @@ export function YAvatar({
       }}
     >
       {src ? (
-        <img
+        <Image
           src={src}
           alt={name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          width={size}
+          height={size}
+          style={{ objectFit: 'cover' }}
         />
       ) : (
         <span
