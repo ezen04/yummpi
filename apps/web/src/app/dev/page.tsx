@@ -784,27 +784,28 @@ export default function DevPage() {
           open={bsOpen === 'background'}
           onClose={() => setBsOpen(null)}
           variant="background"
-          title="정산 방식 선택"
         >
-          <RadioGroup
-            options={[
-              { value: 'ITEM_BASED', label: '항목별 정산' },
-              { value: 'EQUAL', label: '1/N 균등 정산' },
-            ]}
-            value="ITEM_BASED"
-            onChange={() => {}}
-          />
+          <p style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--label-alternative)', textAlign: 'center', marginBottom: 16 }}>
+            참여자의 상태를 변경할 수 있습니다.
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={() => setBsOpen(null)} style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-normal)', font: '600 16px var(--font-sans)', color: 'var(--label-normal)', background: 'var(--bg-normal)', cursor: 'pointer' }}>지원하기</button>
+            <button onClick={() => setBsOpen(null)} style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-neutral)', font: '600 16px var(--font-sans)', color: 'var(--primary)', background: 'var(--bg-normal)', cursor: 'pointer' }}>투표 마감</button>
+          </div>
         </BottomSheet>
 
         <BottomSheet
           open={bsOpen === 'non-background'}
           onClose={() => setBsOpen(null)}
           variant="non-background"
-          title="옵션 선택"
         >
-          <p style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--label-normal)' }}>
-            non-background 바텀시트 콘텐츠
+          <p style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--label-alternative)', textAlign: 'center', marginBottom: 16 }}>
+            참여자의 상태를 변경할 수 있습니다.
           </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={() => setBsOpen(null)} style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-normal)', font: '600 16px var(--font-sans)', color: 'var(--label-normal)', background: 'var(--bg-normal)', cursor: 'pointer' }}>지원하기</button>
+            <button onClick={() => setBsOpen(null)} style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-neutral)', font: '600 16px var(--font-sans)', color: 'var(--primary)', background: 'var(--bg-normal)', cursor: 'pointer' }}>투표 마감</button>
+          </div>
         </BottomSheet>
 
         <BottomSheet
@@ -812,9 +813,13 @@ export default function DevPage() {
           onClose={() => setBsOpen(null)}
           variant="solo"
         >
-          <p style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--label-normal)', marginBottom: 16 }}>
-            닉네임을 입력해주세요
+          <p style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--label-alternative)', textAlign: 'center', marginBottom: 16 }}>
+            참여자의 상태를 변경할 수 있습니다.
           </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={() => setBsOpen(null)} style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-normal)', font: '600 16px var(--font-sans)', color: 'var(--label-normal)', background: 'var(--bg-normal)', cursor: 'pointer' }}>지원하기</button>
+            <button onClick={() => setBsOpen(null)} style={{ flex: 1, height: 48, borderRadius: 'var(--radius-12)', border: '1px solid var(--line-neutral)', font: '600 16px var(--font-sans)', color: 'var(--primary)', background: 'var(--bg-normal)', cursor: 'pointer' }}>투표 마감</button>
+          </div>
         </BottomSheet>
 
         {/* ── Button (얌피 전용) ── */}
