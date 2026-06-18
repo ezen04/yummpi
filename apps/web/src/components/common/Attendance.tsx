@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 
 type AttendanceVariant = 'host' | 'user' | 'user-hover' | 'user-selected' | 'guest';
 
@@ -49,7 +50,7 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
           }}
         >
           {src ? (
-            <img src={src} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Image src={src} alt={name} width={size} height={size} style={{ objectFit: 'cover' }} />
           ) : (
             <span
               style={{
