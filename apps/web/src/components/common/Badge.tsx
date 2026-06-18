@@ -18,85 +18,66 @@ interface BadgeProps {
   className?: string;
 }
 
-const STYLES: Record<
-  BadgeVariant,
-  { background: string; color: string; dot: boolean }
-> = {
+const STYLES: Record<BadgeVariant, { classes: string; dotClass: string; dot: boolean }> = {
   black: {
-    background: 'var(--bg-inverse)',
-    color: 'var(--inverse-label)',
+    classes: 'bg-[var(--bg-inverse)] text-[var(--inverse-label)]',
+    dotClass: 'bg-[var(--inverse-label)]',
     dot: true,
   },
   green: {
-    background: 'rgba(0,191,64,0.10)',
-    color: 'var(--status-positive)',
+    classes: 'bg-[rgba(0,191,64,0.10)] text-[var(--status-positive)]',
+    dotClass: 'bg-[var(--status-positive)]',
     dot: true,
   },
   red: {
-    background: 'rgba(255,66,66,0.08)',
-    color: 'var(--status-negative)',
+    classes: 'bg-[rgba(255,66,66,0.08)] text-[var(--status-negative)]',
+    dotClass: 'bg-[var(--status-negative)]',
     dot: true,
   },
   yellow: {
-    background: 'var(--secondary-tint)',
-    color: 'var(--secondary-strong)',
+    classes: 'bg-[var(--secondary-tint)] text-[var(--secondary-strong)]',
+    dotClass: 'bg-[var(--secondary-strong)]',
     dot: true,
   },
   guest: {
-    background: 'var(--fill-normal)',
-    color: 'var(--label-alternative)',
+    classes: 'bg-[var(--fill-normal)] text-[var(--label-alternative)]',
+    dotClass: '',
     dot: false,
   },
   unpaid: {
-    background: 'rgba(255,66,66,0.08)',
-    color: 'var(--status-negative)',
+    classes: 'bg-[rgba(255,66,66,0.08)] text-[var(--status-negative)]',
+    dotClass: '',
     dot: false,
   },
   reservable: {
-    background: 'var(--secondary-tint)',
-    color: 'var(--secondary-strong)',
+    classes: 'bg-[var(--secondary-tint)] text-[var(--secondary-strong)]',
+    dotClass: '',
     dot: false,
   },
   'icon-red': {
-    background: 'rgba(255,66,66,0.08)',
-    color: 'var(--status-negative)',
+    classes: 'bg-[rgba(255,66,66,0.08)] text-[var(--status-negative)]',
+    dotClass: '',
     dot: false,
   },
 };
 
 export function Badge({ variant, children, icon, className }: BadgeProps) {
-  const { background, color, dot } = STYLES[variant];
+  const { classes, dotClass, dot } = STYLES[variant];
 
   return (
     <span
-      className={cn(className)}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        borderRadius: 'var(--radius-8)',
-        padding: '4px 6px',
-        background,
-        color,
-        font: '600 12px var(--font-sans)',
-        whiteSpace: 'nowrap',
-      }}
+      className={cn(
+        'inline-flex items-center gap-1 rounded-[var(--radius-8)] px-[6px] py-1',
+        'text-[12px] font-semibold font-[var(--font-sans)] whitespace-nowrap',
+        classes,
+        className,
+      )}
     >
       {dot && (
-        <span
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: '50%',
-            background: color,
-            flexShrink: 0,
-          }}
-        />
+        <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotClass)} />
       )}
       {icon && (
-        <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          {icon}
-        </span>
+        <span className="flex items-center shrink-0">{icon}</span>
       )}
       {children}
     </span>
