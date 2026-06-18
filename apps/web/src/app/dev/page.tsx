@@ -14,6 +14,9 @@ import { Input } from '../../components/common/Input';
 import { Check } from '../../components/common/Check';
 import { Radio, RadioGroup } from '../../components/common/Radio';
 import { BottomSheet } from '../../components/common/BottomSheet';
+import { Notification } from '../../components/common/Notification';
+import { Tipbox } from '../../components/common/Tipbox';
+import { Step } from '../../components/common/Step';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -469,6 +472,53 @@ export default function DevPage() {
               onChange={() => {}}
             />
           </div>
+        </section>
+
+        {/* ── Notification ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Notification
+          </h2>
+          <div style={{ borderRadius: 'var(--radius-12)', overflow: 'hidden', border: '1px solid var(--line-normal)' }}>
+            <Notification
+              variant="unread"
+              title="송금 요청이 도착했어요"
+              body="김지훈님이 15,000원 송금을 요청했어요"
+              time="방금 전"
+            />
+            <Notification
+              variant="read"
+              title="모임 장소가 확정됐어요"
+              body="홍대 삼겹살 마당으로 장소가 확정됐어요"
+              time="1시간 전"
+            />
+          </div>
+        </section>
+
+        {/* ── Tipbox ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Tipbox
+          </h2>
+          <Tipbox variant="normal">
+            초대 링크를 공유하면 게스트도 참여할 수 있어요
+          </Tipbox>
+          <Tipbox variant="completed-vote">
+            투표가 완료됐어요! 주최자가 장소를 확정할 예정이에요
+          </Tipbox>
+          <Tipbox variant="completed-title" title="정산 완료">
+            모든 참여자의 송금이 확인됐어요
+          </Tipbox>
+        </section>
+
+        {/* ── Step ── */}
+        <section className="space-y-4">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Step
+          </h2>
+          <Step steps={['장소 선택', '투표', '예약', '정산']} current={0} />
+          <Step steps={['장소 선택', '투표', '예약', '정산']} current={2} />
+          <Step steps={['장소 선택', '투표', '예약', '정산']} current={4} />
         </section>
 
         {/* ── BottomSheet ── */}

@@ -275,11 +275,11 @@
 
 | 상태 | Variant | 설명 |
 |:---:|:---|:---|
-| ⬜ | `complete` | 완료된 단계 |
-| ⬜ | `now` | 현재 단계 |
-| ⬜ | `yet` | 미완료 단계 |
-| ⬜ | `Line/complete` | 단계 연결선 — 완료 |
-| ⬜ | `Line/yet` | 단계 연결선 — 미완료 |
+| ✅ | `complete` | 완료된 단계 |
+| ✅ | `now` | 현재 단계 |
+| ✅ | `yet` | 미완료 단계 |
+| ✅ | `Line/complete` | 단계 연결선 — 완료 |
+| ✅ | `Line/yet` | 단계 연결선 — 미완료 |
 
 ---
 
@@ -309,10 +309,10 @@
 
 | 상태 | 컴포넌트 | Variant | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `notification` | `unread` / `read` | 알림 목록 |
-| ⬜ | `tipbox` | `normal` | 일반 안내 팁 |
-| ⬜ | `tipbox` | `completed-vote` | 투표 완료 안내 |
-| ⬜ | `tipbox` | `completed-title` | 제목 포함 완료 안내 |
+| ✅ | `notification` | `unread` / `read` | 알림 목록 |
+| ✅ | `tipbox` | `normal` | 일반 안내 팁 |
+| ✅ | `tipbox` | `completed-vote` | 투표 완료 안내 |
+| ✅ | `tipbox` | `completed-title` | 제목 포함 완료 안내 |
 | ⬜ | `Confirmbox` | `basic` | 확인 다이얼로그 |
 | ⬜ | `Confirmbox` | `hover` | 확인 다이얼로그 호버 |
 
