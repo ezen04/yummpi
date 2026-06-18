@@ -1,4 +1,0 @@
--- AlterEnum
--- payment_status: PENDING → TRANSFER_REPORTED → PAID | EXEMPT
--- 송금 신고(TRANSFER_REPORTED) 상태를 PENDING과 PAID 사이에 추가.
-ALTER TYPE "payment_status" ADD VALUE 'TRANSFER_REPORTED' BEFORE 'PAID';
