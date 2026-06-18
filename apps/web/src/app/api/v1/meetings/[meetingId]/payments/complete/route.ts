@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
+import { transitionMeetingStatus } from '@/lib/meeting-status';
 
 const paramsSchema = z.object({ meetingId: z.string().uuid() });
 
@@ -14,12 +15,6 @@ export const POST = handleRoute(
     const { meetingId } = paramsSchema.parse(await params);
 
     await assertHost(meetingId);
-
-    const meeting = await prisma.meeting.findUnique({
-      where: { id: meetingId },
-    });
-    if (!meeting)
-      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
 
     const payments = await prisma.payment.findMany({
       where: { settlementMember: { settlement: { meetingId } } },
@@ -38,12 +33,12 @@ export const POST = handleRoute(
       );
     }
 
-    // TODO: ① transitionMeetingStatus helper 머지 후 아래 주석 해제
-    // await transitionMeetingStatus(meetingId, 'COMPLETED');
-    // 현재는 검증만 수행하고 상태 전환은 보류한다.
+    const updatedMeeting = await transitionMeetingStatus(meetingId, 'COMPLETED', {
+      reason: 'PAYMENTS_COMPLETED',
+    });
 
     return apiSuccess(
-      { meetingId, meetingStatus: meeting.status },
+      { meetingId, meetingStatus: updatedMeeting.status },
       '전원 송금이 확인되었습니다.'
     );
   }
