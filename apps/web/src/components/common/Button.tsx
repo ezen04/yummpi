@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 // 표준 버튼은 @yummpi/ui에서 re-export
 export { Button, type ButtonProps } from '@yummpi/ui';
@@ -72,30 +73,17 @@ interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   children?: React.ReactNode;
 }
 
-const BRAND_BASE: React.CSSProperties = {
-  height: 48,
-  width: '100%',
-  borderRadius: 'var(--radius-12)',
-  border: 'none',
-  font: '600 16px var(--font-sans)',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 8,
-};
+const BRAND_BASE =
+  'w-full h-12 rounded-[var(--radius-12)] border-none text-[16px] font-semibold font-[var(--font-sans)] cursor-pointer flex items-center justify-center gap-2';
 
 export function KakaoLoginButton({
   children = '카카오로 시작하기',
+  className,
   ...props
 }: BrandButtonProps) {
   return (
     <button
-      style={{
-        ...BRAND_BASE,
-        background: 'var(--brand-kakao)',
-        color: 'rgba(0,0,0,0.85)',
-      }}
+      className={cn(BRAND_BASE, 'bg-[var(--brand-kakao)] text-[rgba(0,0,0,0.85)]', className)}
       {...props}
     >
       <KakaoIcon />
@@ -106,15 +94,12 @@ export function KakaoLoginButton({
 
 export function KakaoPayButton({
   children = '카카오페이로 송금',
+  className,
   ...props
 }: BrandButtonProps) {
   return (
     <button
-      style={{
-        ...BRAND_BASE,
-        background: 'var(--brand-kakao)',
-        color: 'rgba(0,0,0,0.85)',
-      }}
+      className={cn(BRAND_BASE, 'bg-[var(--brand-kakao)] text-[rgba(0,0,0,0.85)]', className)}
       {...props}
     >
       <KakaoIcon />
@@ -125,15 +110,12 @@ export function KakaoPayButton({
 
 export function TossPayButton({
   children = '토스로 송금',
+  className,
   ...props
 }: BrandButtonProps) {
   return (
     <button
-      style={{
-        ...BRAND_BASE,
-        background: 'var(--brand-toss)',
-        color: 'var(--static-white)',
-      }}
+      className={cn(BRAND_BASE, 'bg-[var(--brand-toss)] text-[var(--static-white)]', className)}
       {...props}
     >
       <TossIcon />
@@ -156,56 +138,30 @@ interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   children: React.ReactNode;
 }
 
-const RADIUS_STYLES: Record<RadiusVariant, React.CSSProperties> = {
-  radius: {
-    background: 'var(--fill-normal)',
-    color: 'var(--label-alternative)',
-    border: 'none',
-  },
-  'radius-border': {
-    background: 'transparent',
-    color: 'var(--label-normal)',
-    border: '1px solid var(--line-normal)',
-  },
-  'radius-border-colored': {
-    background: 'transparent',
-    color: 'var(--primary)',
-    border: '1px solid var(--primary)',
-  },
-  'radius-border-inactive': {
-    background: 'var(--fill-disable)',
-    color: 'var(--label-disable)',
-    border: '1px solid var(--line-alternative)',
-    cursor: 'default',
-  },
-  'radius-border-selected': {
-    background: 'rgba(233,75,53,0.08)',
-    color: 'var(--primary)',
-    border: '1.5px solid var(--primary)',
-  },
+const RADIUS_CLASSES: Record<RadiusVariant, string> = {
+  radius: 'bg-[var(--fill-normal)] text-[var(--label-alternative)]',
+  'radius-border': 'bg-transparent text-[var(--label-normal)] border border-[var(--line-normal)]',
+  'radius-border-colored': 'bg-transparent text-[var(--primary)] border border-[var(--primary)]',
+  'radius-border-inactive':
+    'bg-[var(--fill-disable)] text-[var(--label-disable)] border border-[var(--line-alternative)] cursor-default',
+  'radius-border-selected':
+    'bg-[rgba(233,75,53,0.08)] text-[var(--primary)] border-[1.5px] border-[var(--primary)]',
 };
 
 export function RadiusButton({
   variant = 'radius',
   children,
+  className,
   ...props
 }: RadiusButtonProps) {
-  const variantStyle = RADIUS_STYLES[variant];
-
   return (
     <button
-      style={{
-        height: 32,
-        padding: '0 14px',
-        borderRadius: 'var(--radius-full)',
-        font: '600 13px var(--font-sans)',
-        cursor: 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 4,
-        ...variantStyle,
-      }}
+      className={cn(
+        'inline-flex items-center justify-center gap-1 h-8 px-[14px]',
+        'rounded-[var(--radius-full)] text-[13px] font-semibold font-[var(--font-sans)] cursor-pointer',
+        RADIUS_CLASSES[variant],
+        className,
+      )}
       {...props}
     >
       {children}
