@@ -88,6 +88,7 @@ enum SplitMethod {
 
 enum PaymentStatus {
   PENDING
+  TRANSFER_REPORTED
   PAID
   EXEMPT
 
