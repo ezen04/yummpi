@@ -1,7 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button, YIcon, Camera, Pencil, Receipt, ChevronRight } from '@yummpi/ui';
+import {
+  Button,
+  YIcon,
+  Camera,
+  Pencil,
+  Receipt,
+  ChevronRight,
+} from '@yummpi/ui';
 
 interface Method {
   key: string;
@@ -39,13 +46,21 @@ export function SettlementMethodSelector({ meetingId }: Props) {
   const router = useRouter();
 
   return (
-    <ul className="flex flex-col" style={{ padding: 0, margin: 0, listStyle: 'none' }}>
+    <ul
+      className="flex flex-col"
+      style={{ padding: 0, margin: 0, listStyle: 'none' }}
+    >
       {METHODS.map((method) => (
-        <li key={method.key} style={{ borderBottom: '1px solid var(--line-alternative)' }}>
+        <li
+          key={method.key}
+          style={{ borderBottom: '1px solid var(--line-alternative)' }}
+        >
           <Button
             variant="outline"
             className="w-full h-auto py-4 justify-start gap-4 border-none rounded-none"
-            onClick={() => router.push(`/meetings/${meetingId}/settlement/new/${method.key}`)}
+            onClick={() =>
+              router.push(`/meetings/${meetingId}/settlement/new/${method.key}`)
+            }
             leftIcon={
               <span
                 className="flex items-center justify-center shrink-0"
@@ -62,7 +77,13 @@ export function SettlementMethodSelector({ meetingId }: Props) {
             }
           >
             <span className="flex flex-col items-start gap-0.5 flex-1">
-              <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--label-normal)' }}>
+              <span
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  color: 'var(--label-normal)',
+                }}
+              >
                 {method.label}
               </span>
               <span
