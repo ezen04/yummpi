@@ -26,37 +26,24 @@ export function VoteResultSelect({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={cn(className)}
-      style={{
-        width: '100%',
-        padding: '14px 16px',
-        borderRadius: 'var(--radius-12)',
-        border: selected
-          ? '1.5px solid var(--primary)'
-          : '1px solid var(--line-normal)',
-        background: selected ? 'rgba(233,75,53,0.04)' : 'var(--bg-normal)',
-        cursor: disabled ? 'default' : 'pointer',
-        textAlign: 'left',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        opacity: disabled ? 0.5 : 1,
-        transition: 'border 0.15s, background 0.15s',
-      }}
+      className={cn(
+        'w-full px-4 py-[14px] rounded-[var(--radius-12)] text-left flex items-center gap-3',
+        'transition-[border,background] duration-150',
+        selected
+          ? 'border-[1.5px] border-[var(--primary)] bg-[rgba(233,75,53,0.04)]'
+          : 'border border-[var(--line-normal)] bg-[var(--bg-normal)]',
+        disabled ? 'cursor-default opacity-50' : 'cursor-pointer',
+        className,
+      )}
     >
       {/* 선택 인디케이터 */}
       <span
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          border: selected ? 'none' : '1.5px solid var(--line-normal)',
-          background: selected ? 'var(--primary)' : 'transparent',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
+        className={cn(
+          'w-5 h-5 rounded-full flex items-center justify-center shrink-0',
+          selected
+            ? 'bg-[var(--primary)]'
+            : 'bg-transparent border-[1.5px] border-[var(--line-normal)]',
+        )}
       >
         {selected && (
           <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -72,30 +59,17 @@ export function VoteResultSelect({
       </span>
 
       {/* 텍스트 */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="flex-1 min-w-0">
         <p
-          style={{
-            font: `${selected ? '600' : '400'} 15px/22px var(--font-sans)`,
-            color: selected ? 'var(--primary)' : 'var(--label-normal)',
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
+          className={cn(
+            'text-[15px] leading-[22px] font-[var(--font-sans)] m-0 truncate',
+            selected ? 'font-semibold text-[var(--primary)]' : 'font-normal text-[var(--label-normal)]',
+          )}
         >
           {label}
         </p>
         {(address || category) && (
-          <p
-            style={{
-              font: '400 12px/16px var(--font-sans)',
-              color: 'var(--label-assistive)',
-              margin: '2px 0 0',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-assistive)] mt-[2px] mb-0 truncate">
             {[category, address].filter(Boolean).join(' · ')}
           </p>
         )}

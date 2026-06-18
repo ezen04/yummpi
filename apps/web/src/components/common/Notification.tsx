@@ -26,20 +26,17 @@ export function Notification({
   return (
     <div
       onClick={onClick}
-      className={cn(className)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        padding: '13px 21px',
-        background: 'var(--bg-normal)',
-        borderBottom: '1px solid var(--line-neutral)',
-        width: '100%',
-        cursor: onClick ? 'pointer' : 'default',
-      }}
+      className={cn(
+        'flex items-center gap-4 px-[21px] py-[13px]',
+        'w-full bg-[var(--bg-normal)] border-b border-[var(--line-neutral)]',
+        onClick ? 'cursor-pointer' : 'cursor-default',
+        className,
+      )}
     >
-      {/* 아이콘 */}
-      <span style={{ color: iconColor, flexShrink: 0, display: 'flex' }}>
+      <span
+        className="shrink-0 flex"
+        style={{ color: iconColor }}
+      >
         {icon ?? (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path
@@ -60,38 +57,18 @@ export function Notification({
         )}
       </span>
 
-      {/* 텍스트 */}
-      <div
-        style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}
-      >
-        <span
-          style={{
-            font: '400 15px/22px var(--font-sans)',
-            color: 'var(--label-normal)',
-          }}
-        >
+      <div className="flex-1 flex flex-col gap-[3px]">
+        <span className="text-[15px] leading-[22px] font-normal font-[var(--font-sans)] text-[var(--label-normal)]">
           {title}
         </span>
         {body && (
-          <span
-            style={{
-              font: '400 12px/16px var(--font-sans)',
-              color: 'var(--label-alternative)',
-            }}
-          >
+          <span className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)]">
             {body}
           </span>
         )}
       </div>
 
-      {/* 오른쪽 화살표 */}
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        style={{ flexShrink: 0 }}
-      >
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
         <path
           d="M7.5 5L12.5 10L7.5 15"
           stroke="var(--label-assistive)"

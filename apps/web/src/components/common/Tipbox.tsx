@@ -18,24 +18,13 @@ export function Tipbox({
 }: TipboxProps) {
   return (
     <div
-      className={cn(className)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '10px 16px',
-        borderRadius: 'var(--radius-10)',
-        background: 'var(--secondary-tint)',
-      }}
+      className={cn(
+        'flex items-center gap-2 px-4 py-[10px]',
+        'rounded-[var(--radius-10)] bg-[var(--secondary-tint)]',
+        className,
+      )}
     >
-      {/* Eye 아이콘 대체 — 간단한 SVG */}
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        style={{ flexShrink: 0 }}
-      >
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
         <path
           d="M1.5 10C1.5 10 4.5 4 10 4C15.5 4 18.5 10 18.5 10C18.5 10 15.5 16 10 16C4.5 16 1.5 10 1.5 10Z"
           stroke="var(--secondary-strong)"
@@ -43,34 +32,16 @@ export function Tipbox({
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle
-          cx="10"
-          cy="10"
-          r="2.5"
-          stroke="var(--secondary-strong)"
-          strokeWidth="1.5"
-        />
+        <circle cx="10" cy="10" r="2.5" stroke="var(--secondary-strong)" strokeWidth="1.5" />
       </svg>
 
-      <div style={{ flex: 1 }}>
+      <div className="flex-1">
         {title && variant === 'completed-title' && (
-          <p
-            style={{
-              font: '600 13px/18px var(--font-sans)',
-              color: 'var(--secondary-strong)',
-              margin: '0 0 2px',
-            }}
-          >
+          <p className="text-[13px] leading-[18px] font-semibold font-[var(--font-sans)] text-[var(--secondary-strong)] mb-[2px] mt-0">
             {title}
           </p>
         )}
-        <p
-          style={{
-            font: '400 13px/18px var(--font-sans)',
-            color: 'var(--secondary-strong)',
-            margin: 0,
-          }}
-        >
+        <p className="text-[13px] leading-[18px] font-normal font-[var(--font-sans)] text-[var(--secondary-strong)] m-0">
           {children}
         </p>
       </div>

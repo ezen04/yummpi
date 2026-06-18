@@ -11,46 +11,23 @@ interface StepProps {
 
 export function Step({ steps, current, className }: StepProps) {
   return (
-    <div
-      className={cn(className)}
-      style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-    >
+    <div className={cn('flex items-center w-full', className)}>
       {steps.map((label, i) => {
         const isDone = i < current;
         const isNow = i === current;
 
         return (
           <React.Fragment key={i}>
-            {/* 스텝 원 + 라벨 */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
+            <div className="flex flex-col items-center gap-[6px]">
               <div
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  ...(isDone
-                    ? { background: 'var(--primary)', border: 'none' }
+                className={cn(
+                  'w-6 h-6 rounded-full flex items-center justify-center shrink-0',
+                  isDone
+                    ? 'bg-[var(--primary)]'
                     : isNow
-                      ? {
-                          background: 'transparent',
-                          border: '2px solid var(--primary)',
-                        }
-                      : {
-                          background: 'transparent',
-                          border: '1.5px solid var(--line-normal)',
-                        }),
-                }}
+                      ? 'bg-transparent border-2 border-[var(--primary)]'
+                      : 'bg-transparent border-[1.5px] border-[var(--line-normal)]',
+                )}
               >
                 {isDone ? (
                   <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
@@ -64,13 +41,10 @@ export function Step({ steps, current, className }: StepProps) {
                   </svg>
                 ) : (
                   <span
-                    style={{
-                      font: '500 11px var(--font-sans)',
-                      color: isNow
-                        ? 'var(--primary)'
-                        : 'var(--label-assistive)',
-                      lineHeight: 1,
-                    }}
+                    className={cn(
+                      'text-[11px] font-medium font-[var(--font-sans)] leading-none',
+                      isNow ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]',
+                    )}
                   >
                     {i + 1}
                   </span>
@@ -78,31 +52,22 @@ export function Step({ steps, current, className }: StepProps) {
               </div>
 
               <span
-                style={{
-                  font: `${isNow ? '600' : '400'} 11px/14px var(--font-sans)`,
-                  color:
-                    isDone || isNow
-                      ? 'var(--label-normal)'
-                      : 'var(--label-assistive)',
-                  whiteSpace: 'nowrap',
-                }}
+                className={cn(
+                  'text-[11px] leading-[14px] font-[var(--font-sans)] whitespace-nowrap',
+                  isNow ? 'font-semibold' : 'font-normal',
+                  isDone || isNow ? 'text-[var(--label-normal)]' : 'text-[var(--label-assistive)]',
+                )}
               >
                 {label}
               </span>
             </div>
 
-            {/* 연결선 */}
             {i < steps.length - 1 && (
               <div
-                style={{
-                  flex: 1,
-                  height: 1.5,
-                  background:
-                    i < current ? 'var(--primary)' : 'var(--line-normal)',
-                  marginBottom: 20,
-                  marginLeft: 4,
-                  marginRight: 4,
-                }}
+                className={cn(
+                  'flex-1 h-[1.5px] mb-5 mx-1',
+                  i < current ? 'bg-[var(--primary)]' : 'bg-[var(--line-normal)]',
+                )}
               />
             )}
           </React.Fragment>
