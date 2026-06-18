@@ -21,56 +21,39 @@ export function Radio({
 }: RadioProps) {
   return (
     <label
-      className={cn(className)}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 10,
-        cursor: disabled ? 'default' : 'pointer',
-        opacity: disabled ? 0.4 : 1,
-      }}
+      className={cn(
+        'inline-flex items-center gap-[10px]',
+        disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
+        className,
+      )}
     >
       <input
         type="radio"
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange?.(e.target.checked)}
-        style={{ display: 'none' }}
+        className="sr-only"
       />
       <span
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          border: checked
-            ? '2px solid var(--primary)'
-            : '1.5px solid var(--line-normal)',
-          background: 'var(--bg-normal)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          transition: 'border 0.15s',
-        }}
+        className={cn(
+          'w-5 h-5 rounded-full flex items-center justify-center shrink-0',
+          'bg-[var(--bg-normal)] transition-[border] duration-150',
+          checked
+            ? 'border-2 border-[var(--primary)]'
+            : 'border-[1.5px] border-[var(--line-normal)]',
+        )}
       >
         {checked && (
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: 'var(--primary)',
-            }}
-          />
+          <span className="w-2 h-2 rounded-full bg-[var(--primary)]" />
         )}
       </span>
 
       {label && (
         <span
-          style={{
-            font: '400 15px/22px var(--font-sans)',
-            color: checked ? 'var(--label-normal)' : 'var(--label-alternative)',
-          }}
+          className={cn(
+            'text-[15px] leading-[22px] font-normal font-[var(--font-sans)]',
+            checked ? 'text-[var(--label-normal)]' : 'text-[var(--label-alternative)]',
+          )}
         >
           {label}
         </span>
@@ -95,10 +78,7 @@ export function RadioGroup({
   className,
 }: RadioGroupProps) {
   return (
-    <div
-      className={cn(className)}
-      style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
-    >
+    <div className={cn('flex flex-col gap-[14px]', className)}>
       {options.map((opt) => (
         <Radio
           key={opt.value}
