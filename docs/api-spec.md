@@ -353,7 +353,9 @@ io(SOCKET_URL, {
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
-| `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 상태 전이 |
+| `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 모임 상태 전이 |
+| `INVALID_SETTLEMENT_STATUS` ★★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
+| `INVALID_PAYMENT_STATUS` ★★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
 | `VOTING_CLOSED` | 409 | 투표 종료 |
 | `ALREADY_CONFIRMED_PLACE` | 409 | 장소 확정됨 |
 | `MEETING_EXPIRED` | 409 | 모임 만료 |
@@ -368,7 +370,7 @@ io(SOCKET_URL, {
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
 | `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
-★ = v2.1 신규
+★ = v2.1 신규 / ★★ = Payment Phase 03 신규
 
 ---
 
