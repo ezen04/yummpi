@@ -1,12 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ToggleProps {
   checked: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
   label?: string;
+  className?: string;
 }
 
 export function Toggle({
@@ -14,9 +16,11 @@ export function Toggle({
   onChange,
   disabled = false,
   label,
+  className,
 }: ToggleProps) {
   return (
     <label
+      className={cn(className)}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

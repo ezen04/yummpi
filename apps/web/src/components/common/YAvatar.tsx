@@ -2,12 +2,14 @@
 
 import * as React from 'react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface YAvatarProps {
   variant?: 'host' | 'guest';
   src?: string;
   name: string;
   size?: number;
+  className?: string;
 }
 
 export function YAvatar({
@@ -15,6 +17,7 @@ export function YAvatar({
   src,
   name,
   size = 40,
+  className,
 }: YAvatarProps) {
   const initial = name.charAt(0).toUpperCase();
   const isHost = variant === 'host';
@@ -23,6 +26,7 @@ export function YAvatar({
 
   return (
     <div
+      className={cn(className)}
       style={{
         width: size,
         height: size,

@@ -1,12 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface SelectboxItemProps {
   position?: 'top' | 'mid' | 'end' | 'solo';
   selected?: boolean;
   onClick?: () => void;
   children: React.ReactNode;
+  className?: string;
 }
 
 const RADIUS: Record<NonNullable<SelectboxItemProps['position']>, string> = {
@@ -21,6 +23,7 @@ export function SelectboxItem({
   selected = false,
   onClick,
   children,
+  className,
 }: SelectboxItemProps) {
   const [hovered, setHovered] = React.useState(false);
 
@@ -29,6 +32,7 @@ export function SelectboxItem({
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      className={cn(className)}
       style={{
         width: '100%',
         height: 48,
@@ -58,11 +62,18 @@ interface SelectboxProps {
   options: { value: string; label: string }[];
   value?: string;
   onChange?: (value: string) => void;
+  className?: string;
 }
 
-export function Selectbox({ options, value, onChange }: SelectboxProps) {
+export function Selectbox({
+  options,
+  value,
+  onChange,
+  className,
+}: SelectboxProps) {
   return (
     <div
+      className={cn(className)}
       style={{
         borderRadius: 'var(--radius-12)',
         border: '1px solid var(--line-normal)',

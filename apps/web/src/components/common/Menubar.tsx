@@ -1,6 +1,7 @@
 'use client';
 
 import { Home, Users, Plus, Bell, User } from '@yummpi/ui';
+import { cn } from '@/lib/utils';
 
 type TabKey = 'home' | 'meetings' | 'notifications' | 'mypage';
 
@@ -8,6 +9,7 @@ interface MenubarProps {
   activeTab: TabKey;
   onTabChange: (tab: TabKey) => void;
   onCreateClick: () => void;
+  className?: string;
 }
 
 const LEFT_TABS = [
@@ -24,9 +26,11 @@ export function Menubar({
   activeTab,
   onTabChange,
   onCreateClick,
+  className,
 }: MenubarProps) {
   return (
     <nav
+      className={cn(className)}
       style={{
         width: '100%',
         background: 'var(--bg-normal)',

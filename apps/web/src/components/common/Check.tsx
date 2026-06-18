@@ -1,12 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface CheckProps {
   checked: boolean;
   onChange?: (checked: boolean) => void;
   label?: string;
   disabled?: boolean;
+  className?: string;
 }
 
 export function Check({
@@ -14,9 +16,11 @@ export function Check({
   onChange,
   label,
   disabled = false,
+  className,
 }: CheckProps) {
   return (
     <label
+      className={cn(className)}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

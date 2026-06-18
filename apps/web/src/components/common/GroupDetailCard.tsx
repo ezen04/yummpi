@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 // ── TODO 카드 (주최자용 — 진행 중인 액션 안내) ──────────────────
 
@@ -9,6 +10,7 @@ type TodoCardType = 'location-vote' | 'adjustment' | 'transfer';
 interface TodoCardProps {
   type: TodoCardType;
   onAction?: () => void;
+  className?: string;
 }
 
 const TODO_CONFIG: Record<
@@ -98,11 +100,12 @@ const TODO_CONFIG: Record<
   },
 };
 
-export function TodoCard({ type, onAction }: TodoCardProps) {
+export function TodoCard({ type, onAction, className }: TodoCardProps) {
   const config = TODO_CONFIG[type];
 
   return (
     <div
+      className={cn(className)}
       style={{
         background: 'var(--bg-elevated)',
         border: '1px solid var(--line-normal)',
@@ -161,6 +164,7 @@ type WaitingCardType = 'location-vote' | 'adjustment';
 
 interface WaitingCardProps {
   type: WaitingCardType;
+  className?: string;
 }
 
 const WAITING_CONFIG: Record<
@@ -211,11 +215,12 @@ const WAITING_CONFIG: Record<
   },
 };
 
-export function WaitingCard({ type }: WaitingCardProps) {
+export function WaitingCard({ type, className }: WaitingCardProps) {
   const config = WAITING_CONFIG[type];
 
   return (
     <div
+      className={cn(className)}
       style={{
         background: 'var(--fill-normal)',
         borderRadius: 'var(--radius-12)',

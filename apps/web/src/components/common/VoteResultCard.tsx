@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { VoteResultBar } from './VoteResultBar';
 
 interface VoteItem {
@@ -11,9 +12,14 @@ interface VoteItem {
 interface VoteResultCardProps {
   title?: string;
   items: VoteItem[];
+  className?: string;
 }
 
-export function VoteResultCard({ title, items }: VoteResultCardProps) {
+export function VoteResultCard({
+  title,
+  items,
+  className,
+}: VoteResultCardProps) {
   const totalVotes = items.reduce((sum, item) => sum + item.votes, 0);
   const maxVotes = Math.max(...items.map((i) => i.votes));
 
@@ -28,6 +34,7 @@ export function VoteResultCard({ title, items }: VoteResultCardProps) {
 
   return (
     <div
+      className={cn(className)}
       style={{
         background: 'var(--bg-elevated)',
         border: '1px solid var(--line-normal)',

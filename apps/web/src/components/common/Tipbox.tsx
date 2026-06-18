@@ -1,16 +1,24 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface TipboxProps {
   variant?: 'normal' | 'completed-vote' | 'completed-title';
   title?: string;
   children: React.ReactNode;
+  className?: string;
 }
 
-export function Tipbox({ variant = 'normal', title, children }: TipboxProps) {
+export function Tipbox({
+  variant = 'normal',
+  title,
+  children,
+  className,
+}: TipboxProps) {
   return (
     <div
+      className={cn(className)}
       style={{
         display: 'flex',
         alignItems: 'center',

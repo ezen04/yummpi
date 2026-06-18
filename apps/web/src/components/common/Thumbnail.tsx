@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 type FoodCategory =
   | 'korean'
@@ -13,6 +14,7 @@ type FoodCategory =
 interface ThumbnailProps {
   category: FoodCategory;
   size?: number;
+  className?: string;
 }
 
 const CATEGORY_CONFIG: Record<
@@ -27,12 +29,13 @@ const CATEGORY_CONFIG: Record<
   western: { bg: '#E8F5E9', label: '양식', abbr: '양' },
 };
 
-export function Thumbnail({ category, size = 56 }: ThumbnailProps) {
+export function Thumbnail({ category, size = 56, className }: ThumbnailProps) {
   const { bg, label, abbr } = CATEGORY_CONFIG[category];
 
   return (
     <div
       aria-label={label}
+      className={cn(className)}
       style={{
         width: size,
         height: size,

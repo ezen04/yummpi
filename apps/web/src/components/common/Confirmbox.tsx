@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ConfirmboxProps {
   open: boolean;
@@ -10,6 +11,7 @@ interface ConfirmboxProps {
   body?: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  className?: string;
 }
 
 export function Confirmbox({
@@ -20,6 +22,7 @@ export function Confirmbox({
   body,
   confirmLabel = '확인',
   cancelLabel = '취소',
+  className,
 }: ConfirmboxProps) {
   if (!open) return null;
 
@@ -46,6 +49,7 @@ export function Confirmbox({
 
       {/* 카드 */}
       <div
+        className={cn(className)}
         style={{
           position: 'relative',
           width: 334,

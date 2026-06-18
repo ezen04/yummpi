@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, Close, Settings, Bell } from '@yummpi/ui';
+import { cn } from '@/lib/utils';
 import { Badge, type BadgeVariant } from './Badge';
 
 interface HeaderProps {
@@ -19,6 +20,7 @@ interface HeaderProps {
   statusLabel?: string;
   /** mypage variant */
   isMypage?: boolean;
+  className?: string;
 }
 
 export function Header({
@@ -34,6 +36,7 @@ export function Header({
   statusVariant,
   statusLabel,
   isMypage,
+  className,
 }: HeaderProps) {
   const isDashboard = !!greeting;
 
@@ -41,6 +44,7 @@ export function Header({
   if (isMypage) {
     return (
       <header
+        className={cn(className)}
         style={{
           height: 56,
           background: 'var(--bg-normal)',
@@ -87,6 +91,7 @@ export function Header({
 
   return (
     <header
+      className={cn(className)}
       style={{
         height: 56,
         background: 'var(--bg-normal)',

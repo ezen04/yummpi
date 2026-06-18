@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import { Menubar } from './Menubar';
 
 type TabKey = 'home' | 'meetings' | 'notifications' | 'mypage';
@@ -12,12 +13,14 @@ type FooterProps =
       hint?: string;
       icon?: React.ReactNode;
       disabled?: boolean;
+      className?: string;
     }
   | {
       variant: 'menubar';
       activeTab: TabKey;
       onTabChange: (tab: TabKey) => void;
       onCreateClick: () => void;
+      className?: string;
     };
 
 export function Footer(props: FooterProps) {
@@ -35,6 +38,7 @@ export function Footer(props: FooterProps) {
 
   return (
     <footer
+      className={cn(props.className)}
       style={{
         width: '100%',
         background: 'var(--bg-normal)',

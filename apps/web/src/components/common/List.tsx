@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { YAvatar } from './YAvatar';
 import { Badge } from './Badge';
 
@@ -13,6 +14,7 @@ interface PersonItemProps {
   isHost?: boolean;
   status?: 'paid' | 'unpaid' | 'exempt';
   isMe?: boolean;
+  className?: string;
 }
 
 export function PersonItem({
@@ -21,11 +23,13 @@ export function PersonItem({
   avatarSrc,
   isHost,
   status,
+  className,
 }: PersonItemProps) {
   const isInactive = variant === 'other-inactive';
 
   return (
     <div
+      className={cn(className)}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -101,6 +105,7 @@ interface PersonAttendanceItemProps {
   avatarSrc?: string;
   attended?: boolean;
   isMe?: boolean;
+  className?: string;
 }
 
 export function PersonAttendanceItem({
@@ -108,9 +113,11 @@ export function PersonAttendanceItem({
   avatarSrc,
   attended = false,
   isMe = false,
+  className,
 }: PersonAttendanceItemProps) {
   return (
     <div
+      className={cn(className)}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -181,6 +188,7 @@ interface PersonResultItemProps {
   isHost?: boolean;
   resultLabel: string;
   resultVariant?: 'primary' | 'secondary' | 'default';
+  className?: string;
 }
 
 export function PersonResultItem({
@@ -190,6 +198,7 @@ export function PersonResultItem({
   isHost,
   resultLabel,
   resultVariant = 'default',
+  className,
 }: PersonResultItemProps) {
   const labelColor =
     resultVariant === 'primary'
@@ -200,6 +209,7 @@ export function PersonResultItem({
 
   return (
     <div
+      className={cn(className)}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -259,6 +269,7 @@ interface ResultRowProps {
   votes: number;
   percent: number;
   variant: 'r' | 'b';
+  className?: string;
 }
 
 export function ResultRow({
@@ -268,6 +279,7 @@ export function ResultRow({
   votes,
   percent,
   variant,
+  className,
 }: ResultRowProps) {
   const isR = variant === 'r';
   const accentColor = isR ? 'var(--primary)' : 'var(--secondary)';
@@ -275,6 +287,7 @@ export function ResultRow({
 
   return (
     <div
+      className={cn(className)}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -361,6 +374,7 @@ interface MenuItemProps {
   value?: string;
   onClick?: () => void;
   destructive?: boolean;
+  className?: string;
 }
 
 export function MenuItem({
@@ -369,10 +383,12 @@ export function MenuItem({
   value,
   onClick,
   destructive = false,
+  className,
 }: MenuItemProps) {
   return (
     <button
       onClick={onClick}
+      className={cn(className)}
       style={{
         width: '100%',
         display: 'flex',
@@ -445,6 +461,7 @@ interface MenuCheckItemProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   variant?: 'active' | 'inactive';
+  className?: string;
 }
 
 export function MenuCheckItem({
@@ -453,12 +470,14 @@ export function MenuCheckItem({
   checked = false,
   onChange,
   variant,
+  className,
 }: MenuCheckItemProps) {
   const isActive = variant === 'active' || checked;
 
   return (
     <button
       onClick={() => onChange?.(!isActive)}
+      className={cn(className)}
       style={{
         width: '100%',
         display: 'flex',

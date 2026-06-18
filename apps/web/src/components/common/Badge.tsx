@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 type BadgeVariant =
   | 'black'
@@ -14,6 +15,7 @@ interface BadgeProps {
   variant: BadgeVariant;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  className?: string;
 }
 
 const STYLES: Record<
@@ -62,11 +64,12 @@ const STYLES: Record<
   },
 };
 
-export function Badge({ variant, children, icon }: BadgeProps) {
+export function Badge({ variant, children, icon, className }: BadgeProps) {
   const { background, color, dot } = STYLES[variant];
 
   return (
     <span
+      className={cn(className)}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

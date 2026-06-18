@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface RadioProps {
   checked: boolean;
@@ -8,6 +9,7 @@ interface RadioProps {
   label?: string;
   disabled?: boolean;
   value?: string;
+  className?: string;
 }
 
 export function Radio({
@@ -15,9 +17,11 @@ export function Radio({
   onChange,
   label,
   disabled = false,
+  className,
 }: RadioProps) {
   return (
     <label
+      className={cn(className)}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -80,6 +84,7 @@ interface RadioGroupProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export function RadioGroup({
@@ -87,9 +92,13 @@ export function RadioGroup({
   value,
   onChange,
   disabled,
+  className,
 }: RadioGroupProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div
+      className={cn(className)}
+      style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+    >
       {options.map((opt) => (
         <Radio
           key={opt.value}

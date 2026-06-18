@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 // ── Outline Chip (기존) ─────────────────────────────────────
 
@@ -9,6 +10,7 @@ interface ChipProps {
   onClick?: () => void;
   children: React.ReactNode;
   disabled?: boolean;
+  className?: string;
 }
 
 export function Chip({
@@ -16,11 +18,13 @@ export function Chip({
   onClick,
   children,
   disabled = false,
+  className,
 }: ChipProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      className={cn(className)}
       style={{
         height: 34,
         padding: '0 12px',
@@ -53,6 +57,7 @@ interface SolidChipProps {
   onClick?: () => void;
   children: React.ReactNode;
   disabled?: boolean;
+  className?: string;
 }
 
 const SOLID_STYLES: Record<SolidChipVariant, React.CSSProperties> = {
@@ -75,11 +80,13 @@ export function SolidChip({
   onClick,
   children,
   disabled = false,
+  className,
 }: SolidChipProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      className={cn(className)}
       style={{
         height: 32,
         padding: '0 14px',

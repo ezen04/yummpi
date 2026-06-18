@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -8,6 +9,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   error?: string;
+  wrapperClassName?: string;
 }
 
 export function Input({
@@ -18,6 +20,7 @@ export function Input({
   error,
   onFocus,
   onBlur,
+  wrapperClassName,
   ...props
 }: InputProps) {
   const [focused, setFocused] = React.useState(false);
@@ -33,6 +36,7 @@ export function Input({
 
   return (
     <div
+      className={cn(wrapperClassName)}
       style={{
         display: 'flex',
         flexDirection: 'column',

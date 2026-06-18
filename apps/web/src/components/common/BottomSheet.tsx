@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface BottomSheetProps {
   open: boolean;
@@ -8,6 +9,7 @@ interface BottomSheetProps {
   variant?: 'background' | 'non-background' | 'solo';
   title?: string;
   children: React.ReactNode;
+  className?: string;
 }
 
 export function BottomSheet({
@@ -16,6 +18,7 @@ export function BottomSheet({
   variant = 'background',
   title,
   children,
+  className,
 }: BottomSheetProps) {
   const hasDim = variant === 'background' || variant === 'solo';
 
@@ -49,6 +52,7 @@ export function BottomSheet({
 
       {/* 시트 패널 */}
       <div
+        className={cn(className)}
         style={{
           position: 'absolute',
           bottom: 0,

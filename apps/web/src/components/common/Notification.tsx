@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface NotificationProps {
   variant: 'unread' | 'read';
@@ -8,6 +9,7 @@ interface NotificationProps {
   body?: string;
   icon?: React.ReactNode;
   onClick?: () => void;
+  className?: string;
 }
 
 export function Notification({
@@ -16,6 +18,7 @@ export function Notification({
   body,
   icon,
   onClick,
+  className,
 }: NotificationProps) {
   const isUnread = variant === 'unread';
   const iconColor = isUnread ? 'var(--primary)' : 'var(--label-assistive)';
@@ -23,6 +26,7 @@ export function Notification({
   return (
     <div
       onClick={onClick}
+      className={cn(className)}
       style={{
         display: 'flex',
         alignItems: 'center',

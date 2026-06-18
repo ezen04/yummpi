@@ -1,12 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface VoteResultBarProps {
   label: string;
   percent: number;
   votes: number;
   variant?: 'active' | 'inactive';
+  className?: string;
 }
 
 export function VoteResultBar({
@@ -14,11 +16,15 @@ export function VoteResultBar({
   percent,
   votes,
   variant = 'inactive',
+  className,
 }: VoteResultBarProps) {
   const isActive = variant === 'active';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div
+      className={cn(className)}
+      style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+    >
       <div
         style={{
           display: 'flex',

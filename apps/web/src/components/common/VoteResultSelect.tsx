@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface VoteResultSelectProps {
   label: string;
@@ -9,6 +10,7 @@ interface VoteResultSelectProps {
   selected?: boolean;
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export function VoteResultSelect({
@@ -18,11 +20,13 @@ export function VoteResultSelect({
   selected = false,
   onClick,
   disabled = false,
+  className,
 }: VoteResultSelectProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      className={cn(className)}
       style={{
         width: '100%',
         padding: '14px 16px',

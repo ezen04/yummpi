@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 type AttendanceVariant =
   | 'host'
@@ -15,6 +16,7 @@ interface AttendanceProps {
   name: string;
   src?: string;
   size?: number;
+  className?: string;
 }
 
 const AVATAR_BACKGROUNDS = ['#FBE2DF', '#FFF6E4', '#D6F5E0', '#FEE9FB'];
@@ -24,7 +26,13 @@ function getAvatarBg(name: string) {
   return AVATAR_BACKGROUNDS[index];
 }
 
-export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
+export function Attendance({
+  variant,
+  name,
+  src,
+  size = 56,
+  className,
+}: AttendanceProps) {
   const isHost = variant === 'host';
   const isSelected = variant === 'user-selected';
   const isHover = variant === 'user-hover';
@@ -36,6 +44,7 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
 
   return (
     <div
+      className={cn(className)}
       style={{
         display: 'flex',
         flexDirection: 'column',

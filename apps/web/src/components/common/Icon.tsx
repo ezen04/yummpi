@@ -73,6 +73,7 @@ interface IconProps {
   size?: number;
   color?: string;
   strokeWidth?: number;
+  className?: string;
 }
 
 export function Icon({
@@ -80,7 +81,15 @@ export function Icon({
   size = 24,
   color = 'currentColor',
   strokeWidth = 1.5,
+  className,
 }: IconProps) {
   const LucideIcon = ICON_MAP[name];
-  return <LucideIcon size={size} color={color} strokeWidth={strokeWidth} />;
+  return (
+    <LucideIcon
+      size={size}
+      color={color}
+      strokeWidth={strokeWidth}
+      className={className}
+    />
+  );
 }

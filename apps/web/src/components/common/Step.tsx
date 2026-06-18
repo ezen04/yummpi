@@ -1,15 +1,20 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface StepProps {
   steps: string[];
   current: number; // 0-based
+  className?: string;
 }
 
-export function Step({ steps, current }: StepProps) {
+export function Step({ steps, current, className }: StepProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+    <div
+      className={cn(className)}
+      style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+    >
       {steps.map((label, i) => {
         const isDone = i < current;
         const isNow = i === current;
