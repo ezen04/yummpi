@@ -181,6 +181,7 @@ model Meeting {
   id                   String  @id @default(uuid()) @db.Uuid
   hostUserId           String  @map("host_user_id") @db.Uuid
   confirmedCandidateId String? @unique @map("confirmed_candidate_id") @db.Uuid
+  seriesId             String? @map("series_id") @db.Uuid // B-lite 클론 회차 스탬프 (nullable self-FK, V2 그룹 히스토리용)
 
   title       String
   description String?
@@ -204,6 +205,8 @@ model Meeting {
 
   host               User            @relation("MeetingHost", fields: [hostUserId], references: [id])
   confirmedCandidate PlaceCandidate? @relation("ConfirmedCandidate", fields: [confirmedCandidateId], references: [id])
+  series             Meeting?        @relation("MeetingSeries", fields: [seriesId], references: [id])
+  clones             Meeting[]       @relation("MeetingSeries")
   members            MeetingMember[]
   placeCandidates    PlaceCandidate[] @relation("MeetingCandidates")
   votes              Vote[]
@@ -419,14 +422,4 @@ model SettlementMember {
 model Payment {
   id                 String        @id @default(uuid()) @db.Uuid
   settlementMemberId String        @unique @map("settlement_member_id") @db.Uuid // 정산멤버당 1결제
-  status             PaymentStatus @default(PENDING)
-  amount             Int
-  paidAt             DateTime?     @map("paid_at")
-  memo               String?
-  createdAt          DateTime      @default(now()) @map("created_at")
-  updatedAt          DateTime      @updatedAt @map("updated_at")
-
-  settlementMember SettlementMember @relation(fields: [settlementMemberId], references: [id], onDelete: Cascade)
-
-  @@map("payments")
-}
+  status 
