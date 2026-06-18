@@ -26,36 +26,25 @@ export function YAvatar({
 
   return (
     <div
-      className={cn(className)}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        border: `${borderWidth}px solid ${borderColor}`,
-        overflow: 'hidden',
-        flexShrink: 0,
-        background: 'var(--fill-normal)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-      }}
+      className={cn(
+        'rounded-full overflow-hidden shrink-0 bg-[var(--fill-normal)]',
+        'flex items-center justify-center relative',
+        isHost
+          ? 'border-2 border-[var(--primary)]'
+          : 'border-[1.5px] border-[var(--line-normal)]',
+        className,
+      )}
+      style={{ width: size, height: size }}
     >
       {src ? (
-        <Image
-          src={src}
-          alt={name}
-          width={size}
-          height={size}
-          style={{ objectFit: 'cover' }}
-        />
+        <Image src={src} alt={name} width={size} height={size} className="object-cover" />
       ) : (
         <span
-          style={{
-            font: `600 ${Math.round(size * 0.38)}px var(--font-sans)`,
-            color: isHost ? 'var(--primary)' : 'var(--label-alternative)',
-            userSelect: 'none',
-          }}
+          className={cn(
+            'font-semibold font-[var(--font-sans)] select-none',
+            isHost ? 'text-[var(--primary)]' : 'text-[var(--label-alternative)]',
+          )}
+          style={{ fontSize: Math.round(size * 0.38) }}
         >
           {initial}
         </span>
