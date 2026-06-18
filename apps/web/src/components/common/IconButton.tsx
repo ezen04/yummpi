@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 export type IconButtonVariant =
   | 'normal'
@@ -17,39 +18,16 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   shape?: 'circle' | 'square';
 }
 
-const VARIANT_STYLES: Record<IconButtonVariant, React.CSSProperties> = {
-  normal: {
-    background: 'var(--bg-alternative)',
-    color: 'var(--label-normal)',
-    border: 'none',
-  },
-  hover: {
-    background: 'var(--fill-normal)',
-    color: 'var(--label-normal)',
-    border: 'none',
-  },
-  clicked: {
-    background: 'rgba(233,75,53,0.10)',
-    color: 'var(--primary)',
-    border: '1.5px solid var(--primary)',
-  },
-  done: {
-    background: 'var(--primary)',
-    color: 'var(--static-white)',
-    border: 'none',
-  },
-  draft: {
-    background: 'var(--fill-alternative)',
-    color: 'var(--label-assistive)',
-    border: '1px dashed var(--line-alternative)',
-  },
-  disabled: {
-    background: 'var(--fill-disable)',
-    color: 'var(--label-disable)',
-    border: 'none',
-    cursor: 'default',
-    pointerEvents: 'none',
-  },
+const VARIANT_CLASSES: Record<IconButtonVariant, string> = {
+  normal: 'bg-[var(--bg-alternative)] text-[var(--label-normal)]',
+  hover: 'bg-[var(--fill-normal)] text-[var(--label-normal)]',
+  clicked:
+    'bg-[rgba(233,75,53,0.10)] text-[var(--primary)] border-[1.5px] border-[var(--primary)]',
+  done: 'bg-[var(--primary)] text-[var(--static-white)]',
+  draft:
+    'bg-[var(--fill-alternative)] text-[var(--label-assistive)] border border-dashed border-[var(--line-alternative)]',
+  disabled:
+    'bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default pointer-events-none',
 };
 
 export function IconButton({
@@ -61,18 +39,12 @@ export function IconButton({
 }: IconButtonProps) {
   return (
     <button
-      style={{
-        width: size,
-        height: size,
-        borderRadius: shape === 'circle' ? '50%' : 'var(--radius-12)',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        transition: 'background 0.15s, color 0.15s',
-        flexShrink: 0,
-        ...VARIANT_STYLES[variant],
-      }}
+      className={cn(
+        'inline-flex items-center justify-center shrink-0 cursor-pointer transition-[background,color] duration-150',
+        shape === 'circle' ? 'rounded-full' : 'rounded-[var(--radius-12)]',
+        VARIANT_CLASSES[variant],
+      )}
+      style={{ width: size, height: size }}
       disabled={variant === 'disabled'}
       {...props}
     >
