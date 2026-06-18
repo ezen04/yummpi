@@ -63,24 +63,6 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
           )}
         </div>
 
-        {/* 호스트 왕관 */}
-        {isHost && (
-          <span
-            style={{
-              position: 'absolute',
-              top: -10,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-              <path d="M1 10h14M1 10L3 4l4 3 1-6 1 6 4-3 2 6" stroke="var(--primary)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            </svg>
-          </span>
-        )}
 
         {/* 선택됨 체크 뱃지 */}
         {isSelected && (
