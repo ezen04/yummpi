@@ -422,4 +422,14 @@ model SettlementMember {
 model Payment {
   id                 String        @id @default(uuid()) @db.Uuid
   settlementMemberId String        @unique @map("settlement_member_id") @db.Uuid // 정산멤버당 1결제
-  status 
+  status             PaymentStatus @default(PENDING)
+  amount             Int
+  paidAt             DateTime?     @map("paid_at")
+  memo               String?
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  settlementMember SettlementMember @relation(fields: [settlementMemberId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
