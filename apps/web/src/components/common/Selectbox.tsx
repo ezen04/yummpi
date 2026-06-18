@@ -11,11 +11,11 @@ interface SelectboxItemProps {
   className?: string;
 }
 
-const RADIUS: Record<NonNullable<SelectboxItemProps['position']>, string> = {
-  top: 'var(--radius-12) var(--radius-12) 0 0',
-  mid: '0',
-  end: '0 0 var(--radius-12) var(--radius-12)',
-  solo: 'var(--radius-12)',
+const RADIUS_CLASSES: Record<NonNullable<SelectboxItemProps['position']>, string> = {
+  top: 'rounded-tl-[var(--radius-12)] rounded-tr-[var(--radius-12)] rounded-bl-none rounded-br-none',
+  mid: 'rounded-none',
+  end: 'rounded-tl-none rounded-tr-none rounded-bl-[var(--radius-12)] rounded-br-[var(--radius-12)]',
+  solo: 'rounded-[var(--radius-12)]',
 };
 
 export function SelectboxItem({
@@ -25,33 +25,18 @@ export function SelectboxItem({
   children,
   className,
 }: SelectboxItemProps) {
-  const [hovered, setHovered] = React.useState(false);
-
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={cn(className)}
-      style={{
-        width: '100%',
-        height: 48,
-        padding: '0 16px',
-        borderRadius: RADIUS[position],
-        border: 'none',
-        background: selected
-          ? 'rgba(233,75,53,0.06)'
-          : hovered
-            ? 'var(--fill-normal)'
-            : 'var(--bg-normal)',
-        font: `${selected ? '600' : '400'} 15px var(--font-sans)`,
-        color: selected ? 'var(--primary)' : 'var(--label-normal)',
-        cursor: 'pointer',
-        textAlign: 'left',
-        display: 'flex',
-        alignItems: 'center',
-        transition: 'background 0.1s',
-      }}
+      className={cn(
+        'w-full h-12 px-4 border-none cursor-pointer text-left flex items-center',
+        'text-[15px] font-[var(--font-sans)] transition-[background] duration-100',
+        selected
+          ? 'bg-[rgba(233,75,53,0.06)] text-[var(--primary)] font-semibold'
+          : 'bg-[var(--bg-normal)] text-[var(--label-normal)] font-normal hover:bg-[var(--fill-normal)]',
+        RADIUS_CLASSES[position],
+        className,
+      )}
     >
       {children}
     </button>
@@ -73,12 +58,10 @@ export function Selectbox({
 }: SelectboxProps) {
   return (
     <div
-      className={cn(className)}
-      style={{
-        borderRadius: 'var(--radius-12)',
-        border: '1px solid var(--line-normal)',
-        overflow: 'hidden',
-      }}
+      className={cn(
+        'rounded-[var(--radius-12)] border border-[var(--line-normal)] overflow-hidden',
+        className,
+      )}
     >
       {options.map((opt, i) => {
         const position =
@@ -93,13 +76,7 @@ export function Selectbox({
         return (
           <React.Fragment key={opt.value}>
             {i > 0 && (
-              <div
-                style={{
-                  height: 1,
-                  background: 'var(--line-normal)',
-                  margin: '0 16px',
-                }}
-              />
+              <div className="h-px bg-[var(--line-normal)] mx-4" />
             )}
             <SelectboxItem
               position={position}
