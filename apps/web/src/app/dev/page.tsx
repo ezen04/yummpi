@@ -22,6 +22,11 @@ import { Thumbnail } from '../../components/common/Thumbnail';
 import { Confirmbox } from '../../components/common/Confirmbox';
 import { PersonItem, MenuItem } from '../../components/common/List';
 import { Notification } from '../../components/common/Notification';
+import { VoteResultBar } from '../../components/common/VoteResultBar';
+import { VoteResultSelect } from '../../components/common/VoteResultSelect';
+import { VoteResultCard } from '../../components/common/VoteResultCard';
+import { Attendance } from '../../components/common/Attendance';
+import { Icon } from '../../components/common/Icon';
 import { Tipbox } from '../../components/common/Tipbox';
 import { Step } from '../../components/common/Step';
 import { Button } from '@yummpi/ui';
@@ -586,6 +591,60 @@ export default function DevPage() {
               </div>
               <MenuItem label="탈퇴하기" destructive />
             </div>
+          </div>
+        </section>
+
+        {/* ── VoteResultBar ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">VoteResultBar</h2>
+          <VoteResultBar label="홍대 삼겹살 마당" percent={60} votes={3} variant="active" />
+          <VoteResultBar label="마포 고기집" percent={40} votes={2} variant="inactive" />
+          <VoteResultBar label="연남 이탈리안" percent={0} votes={0} variant="inactive" />
+        </section>
+
+        {/* ── VoteResultSelect ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">VoteResultSelect</h2>
+          <VoteResultSelect label="홍대 삼겹살 마당" address="서울 마포구 홍대입구" category="고기" selected />
+          <VoteResultSelect label="마포 고기집" address="서울 마포구 마포대로" category="고기" />
+          <VoteResultSelect label="연남 이탈리안" address="서울 마포구 연남동" category="양식" />
+        </section>
+
+        {/* ── VoteResultCard ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">VoteResultCard</h2>
+          <VoteResultCard
+            title="장소 투표 결과"
+            items={[
+              { label: '홍대 삼겹살 마당', votes: 3 },
+              { label: '마포 고기집', votes: 2 },
+              { label: '연남 이탈리안', votes: 0 },
+            ]}
+          />
+        </section>
+
+        {/* ── Attendance ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Attendance</h2>
+          <div className="flex gap-4 flex-wrap">
+            <Attendance variant="host" name="김주최" />
+            <Attendance variant="user" name="이참여" />
+            <Attendance variant="user-hover" name="박호버" />
+            <Attendance variant="user-selected" name="최선택" />
+            <Attendance variant="guest" name="게스트" />
+          </div>
+        </section>
+
+        {/* ── Icon ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Icon</h2>
+          <div className="flex flex-wrap gap-4">
+            {(['bell','home','users','map-pin','calendar','check','plus','x','chevron-left','chevron-right','chevron-down','settings','share','wallet','pen','camera','arrow-up-right','sparkles','flame','send'] as const).map((name) => (
+              <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <Icon name={name} size={24} color="var(--label-normal)" />
+                <span style={{ font: '400 10px var(--font-sans)', color: 'var(--label-assistive)' }}>{name}</span>
+              </div>
+            ))}
           </div>
         </section>
 

@@ -24,7 +24,7 @@
 
 | 상태 | 컴포넌트 | Variant | 비고 |
 |:---:|:---|:---|:---|
-| ⬜ | `Icon` | `default` / `colored` / `gray` / `white` | prop: `name`, `color` |
+| ✅ | `Icon` | `default` / `colored` / `gray` / `white` | prop: `name`, `color` |
 
 ### 지원 아이콘 목록 (103종)
 
@@ -246,11 +246,11 @@
 |:---:|:---|:---|:---|
 | ✅ | `YAvatar` | `host/single` | 주최자 아바타 |
 | ✅ | `YAvatar` | `guest/single` | 게스트 아바타 |
-| ⬜ | `attendance` | `host` | 출석 호스트 |
-| ⬜ | `attendance` | `user` | 출석 일반 참여자 |
-| ⬜ | `attendance` | `user-hover` | 호버 상태 |
-| ⬜ | `attendance` | `user-selected` | 선택된 참여자 |
-| ⬜ | `attendance` | `guest` | 출석 게스트 |
+| ✅ | `attendance` | `host` | 출석 호스트 |
+| ✅ | `attendance` | `user` | 출석 일반 참여자 |
+| ✅ | `attendance` | `user-hover` | 호버 상태 |
+| ✅ | `attendance` | `user-selected` | 선택된 참여자 |
+| ✅ | `attendance` | `guest` | 출석 게스트 |
 
 ---
 
@@ -287,9 +287,9 @@
 
 | 상태 | 컴포넌트 | Variant | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `VoteResultCard` | — | 투표 결과 카드 |
-| ⬜ | `VoteResultBar` | `active` / `hover` / `inactive` | 투표 결과 바 |
-| ⬜ | `VoteResultSelect` | `active` / `hover` / `inactive` | 투표 선택 항목 |
+| ✅ | `VoteResultCard` | — | 투표 결과 카드 |
+| ✅ | `VoteResultBar` | `active` / `hover` / `inactive` | 투표 결과 바 |
+| ✅ | `VoteResultSelect` | `active` / `hover` / `inactive` | 투표 선택 항목 |
 
 ---
 
