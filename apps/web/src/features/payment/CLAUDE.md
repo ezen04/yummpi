@@ -109,7 +109,7 @@ MVP의 송금하기는 실제 계좌 송금이 아니라 `Payment` 기반의 표
 4. 송금 수단을 선택한다. 선택값은 FE UI 상태로 충분하며 저장은 필수 아님.
 5. 송금 확인 화면에서 금액과 수신자 라벨을 다시 보여준다.
 6. 사용자가 완료 버튼을 누르면 Mock 완료 화면을 보여주고 `REPORT_TRANSFER`로 상태를 변경한다.
-7. 호스트가 실제 입금 여부를 확인하고 `MARK_PAID` 또는 `MARK_PENDING`으로 정리한다.
+7. 호스트가 실제 입금 여부를 확인하고 `MARK_PAID`, `MARK_PENDING`, `MARK_EXEMPT` 중 하나로 정리한다.
 
 권장 단계:
 
@@ -128,4 +128,5 @@ MVP의 송금하기는 실제 계좌 송금이 아니라 `Payment` 기반의 표
 - 금액은 항상 `Payment.amount`를 사용한다.
 - 딥링크 prefill 가능 여부가 확정되기 전에는 fallback 액션을 반드시 함께 둔다.
 - `REPORT_TRANSFER`는 실제 송금 성공이 아니라 사용자가 Mock 송금 완료 단계까지 진행했다는 의미다.
+- `MARK_PAID`는 호스트 입금 확인, `MARK_PENDING`은 호스트 되돌리기, `MARK_EXEMPT`는 운영상 면제 처리다.
 - 호스트 본인의 Payment나 금액 0원 Payment에 노출할지 여부는 UI 정책으로 결정하되, 상태 처리는 기존 Payment API를 그대로 사용한다.
