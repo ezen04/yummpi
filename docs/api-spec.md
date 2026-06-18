@@ -402,12 +402,55 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ### `GET /api/v1/meetings/:meetingId/payments` — 현황 (`total·collected·statuses[]`)
 - Payment를 생성하지 않는 순수 조회 API
-### `PATCH .../payments/:paymentId` — 완료 처리 (`status: PAID`, 본인/호스트)
+### `PATCH .../payments/:paymentId` — action 기반 상태 변경
+- 요청: `{ "action": "REPORT_TRANSFER" | "MARK_PAID" | "MARK_PENDING" | "MARK_EXEMPT" }`
+- 본인은 `REPORT_TRANSFER`, 호스트는 `MARK_PAID`·`MARK_PENDING`·`MARK_EXEMPT` 가능
 ### `POST .../complete` — 모임 종료 (전원 `PAID|EXEMPT` 시 `COMPLETED`, 아니면 `422 PAYMENTS_NOT_COMPLETED`)
+
+### 11-A. 송금 Mock UX 계약
+
+MVP의 송금하기는 실제 계좌 송금 연동이 아니라 **표시용 송금 Mock**으로 처리한다. 실제 송금은 발생하지 않지만, 사용자는 송금 정보 확인 → 송금 수단 선택 → 송금 확인 → 완료 화면까지 실제 송금과 유사한 단계형 흐름을 경험한다.
+
+- 계좌번호, 은행명, 예금주 실명, 결제 토큰, 실제 송금 식별자는 저장하거나 반환하지 않는다.
+- 단, FE 표시 전용 더미값(`윰피뱅크`, `***-**-1234` 등)은 API/DB를 거치지 않는 경우에 한해 허용한다.
+- 송금 화면은 `Payment.amount`, 멤버 닉네임, 표시용 수신자 라벨, 송금 앱 선택값, fallback 액션으로 구성한다.
+- 표시용 수신자 라벨은 실계좌 정보가 아니라 `모임장 {nickname}` 같은 UI 라벨만 사용한다.
+- `transferMock`은 송금 화면 편의를 위한 nullable 표시 데이터이며, 실제 송금 완료 증빙으로 사용하지 않는다.
+- 딥링크 prefill은 실기기 검증 전 확정하지 않는다. 불가 시 `금액 복사 + 앱 열기 + 송금했어요` 흐름으로 후퇴한다.
+- 은행명·계좌번호처럼 보이는 상세 정보가 필요하면 API/DB 값이 아니라 FE의 더미 표시값만 사용한다. 예: `윰피뱅크`, `***-**-1234`.
+
+예시:
+
+```json
+{
+  "recipientLabel": "모임장 지훈",
+  "app": "kakaopay",
+  "amount": 18000,
+  "deeplink": null,
+  "fallbackActionLabel": "금액 복사"
+}
+```
+
+권장 화면 흐름:
+
+```txt
+1. 송금 정보 확인
+2. 송금 수단 선택
+3. 송금 확인
+4. Mock 송금 완료
+5. 호스트 입금 확인 대기
+```
+
+상태 처리는 기존 Payment API를 따른다.
+
+- 멤버가 Mock 송금 완료 단계까지 진행 → `PATCH .../payments/:paymentId` with `{ "action": "REPORT_TRANSFER" }`
+- 호스트가 입금 확인 → `{ "action": "MARK_PAID" }`
+- 호스트가 입금 확인 대기 상태로 되돌림 → `{ "action": "MARK_PENDING" }`
+- 운영상 면제 → `{ "action": "MARK_EXEMPT" }`
 
 ---
 
-## 11-A. 웹푸시 구독 API ★ v2.2 신규 (⑤ · 추가 예정)
+## 11-B. 웹푸시 구독 API ★ v2.2 신규 (⑤ · 추가 예정)
 
 > F10 송금 독촉·웹푸시용. `PUSH_SUBSCRIPTION` 테이블(ERD v2.2) 기반. 회원 전용(게스트는 이메일 fallback). 상세 필드·인터페이스는 ⑤가 확정.
 
@@ -473,12 +516,13 @@ io(SOCKET_URL, {
 | `CANDIDATE_NOT_FOUND` | 404 | 후보 없음 |
 | `RECEIPT_NOT_FOUND` | 404 | 영수증 없음 |
 | `SETTLEMENT_NOT_FOUND` | 404 | 정산 없음 |
+| `PAYMENT_NOT_FOUND` ★ | 404 | 송금 정보 없음 |
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
 | `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 모임 상태 전이 |
-| `INVALID_SETTLEMENT_STATUS` ★★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
-| `INVALID_PAYMENT_STATUS` ★★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
+| `INVALID_SETTLEMENT_STATUS` ★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
+| `INVALID_PAYMENT_STATUS` ★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
 | `VOTING_CLOSED` | 409 | 투표 종료 |
 | `ALREADY_CONFIRMED_PLACE` | 409 | 장소 확정됨 |
 | `MEETING_EXPIRED` | 409 | 모임 만료 |
@@ -496,7 +540,7 @@ io(SOCKET_URL, {
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
 | `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
-★ = v2.1 신규 / ★★ = Payment Phase 03 신규
+★ = v2.x 신규
 
 ---
 
