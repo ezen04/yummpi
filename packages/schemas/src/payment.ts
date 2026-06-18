@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { idSchema } from './common';
 import {
   meetingStatusSchema,
   paymentStatusSchema,
@@ -14,12 +15,11 @@ export const paymentActionSchema = z.enum([
 
 // 목업 송금 표시 데이터. 계좌번호·은행명·예금주·결제 토큰·실제 송금 식별자 포함 금지.
 export const TransferMockDataSchema = z.object({
-  recipientLabel: z.string(),
+  recipientLabel: z.string().min(1).max(50),
   app: z.enum(['toss', 'kakaopay', 'other']),
   amount: z.number().int().nonnegative(),
-  displayMessage: z.string().optional(),
-  deeplink: z.string().url().optional(),
-  fallbackActionLabel: z.string().optional(),
+  deeplink: z.string().optional(),
+  fallbackActionLabel: z.string().min(1).max(30).optional(),
 });
 
 export const PaymentSummarySchema = z.object({
@@ -35,13 +35,12 @@ export const PaymentSummarySchema = z.object({
 
 // can* 필드는 UI 편의용. API는 서버에서 권한을 재검증한다.
 export const PaymentListItemSchema = z.object({
-  paymentId: z.string(),
-  meetingMemberId: z.string(),
-  displayName: z.string(),
+  paymentId: idSchema,
+  meetingMemberId: idSchema,
+  displayName: z.string().min(1),
   amount: z.number().int().nonnegative(),
   status: paymentStatusSchema,
   paidAt: z.string().datetime().nullable(),
-  memo: z.string().max(500).nullable(),
   canReportTransfer: z.boolean(),
   canMarkPaid: z.boolean(),
   canMarkPending: z.boolean(),
@@ -50,8 +49,8 @@ export const PaymentListItemSchema = z.object({
 });
 
 export const PaymentListResponseSchema = z.object({
-  meetingId: z.string(),
-  settlementId: z.string(),
+  meetingId: idSchema,
+  settlementId: idSchema,
   settlementStatus: settlementStatusSchema,
   summary: PaymentSummarySchema,
   payments: z.array(PaymentListItemSchema),
@@ -59,7 +58,6 @@ export const PaymentListResponseSchema = z.object({
 
 export const UpdatePaymentRequestSchema = z.object({
   action: paymentActionSchema,
-  memo: z.string().max(500).optional(),
 });
 
 export const UpdatePaymentResponseSchema = z.object({
@@ -68,7 +66,7 @@ export const UpdatePaymentResponseSchema = z.object({
 });
 
 export const CompleteMeetingResponseSchema = z.object({
-  meetingId: z.string(),
+  meetingId: idSchema,
   meetingStatus: meetingStatusSchema,
 });
 
