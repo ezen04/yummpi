@@ -15,15 +15,20 @@ export const POST = handleRoute(
 
     await assertHost(meetingId);
 
-    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
-    if (!meeting) throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId },
+    });
+    if (!meeting)
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
 
     const payments = await prisma.payment.findMany({
       where: { settlementMember: { settlement: { meetingId } } },
     });
 
     const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
-    const reportedCount = payments.filter((p) => p.status === 'TRANSFER_REPORTED').length;
+    const reportedCount = payments.filter(
+      (p) => p.status === 'TRANSFER_REPORTED'
+    ).length;
 
     if (pendingCount > 0 || reportedCount > 0) {
       throw new ApiError(

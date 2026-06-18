@@ -55,7 +55,10 @@ export const PATCH = handleRoute(
         throw new ApiError('FORBIDDEN', '본인 송금만 신고할 수 있습니다.');
       }
       if (payment.status !== 'PENDING') {
-        throw new ApiError('INVALID_PAYMENT_STATUS', 'PENDING 상태에서만 송금 신고가 가능합니다.');
+        throw new ApiError(
+          'INVALID_PAYMENT_STATUS',
+          'PENDING 상태에서만 송금 신고가 가능합니다.'
+        );
       }
     } else {
       // MARK_PAID / MARK_PENDING / MARK_EXEMPT

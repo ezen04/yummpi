@@ -16,8 +16,11 @@ export const POST = handleRoute(
 
     const currentMember = await assertHost(meetingId);
 
-    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
-    if (!meeting) throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId },
+    });
+    if (!meeting)
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
 
     const settlement = await prisma.settlement.findUnique({
       where: { meetingId },
@@ -26,7 +29,10 @@ export const POST = handleRoute(
       },
     });
     if (!settlement) {
-      throw new ApiError('SETTLEMENT_NOT_FOUND', '정산 정보를 찾을 수 없습니다.');
+      throw new ApiError(
+        'SETTLEMENT_NOT_FOUND',
+        '정산 정보를 찾을 수 없습니다.'
+      );
     }
     if (settlement.status !== 'CONFIRMED') {
       throw new ApiError(
@@ -36,7 +42,9 @@ export const POST = handleRoute(
     }
 
     // idempotent: Payment가 없는 SettlementMember에만 생성
-    const missing = settlement.settlementMembers.filter((sm) => sm.payment === null);
+    const missing = settlement.settlementMembers.filter(
+      (sm) => sm.payment === null
+    );
     if (missing.length > 0) {
       await prisma.payment.createMany({
         data: missing.map((sm) => ({

@@ -16,8 +16,11 @@ export const GET = handleRoute(
 
     const currentMember = await requireMember(meetingId);
 
-    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
-    if (!meeting) throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId },
+    });
+    if (!meeting)
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
 
     const settlement = await prisma.settlement.findUnique({
       where: { meetingId },
@@ -26,10 +29,15 @@ export const GET = handleRoute(
       },
     });
     if (!settlement) {
-      throw new ApiError('SETTLEMENT_NOT_FOUND', '정산 정보를 찾을 수 없습니다.');
+      throw new ApiError(
+        'SETTLEMENT_NOT_FOUND',
+        '정산 정보를 찾을 수 없습니다.'
+      );
     }
 
     // 순수 조회 — Payment가 없어도 생성하지 않는다.
-    return apiSuccess(buildPaymentListResponse(meetingId, settlement, currentMember));
+    return apiSuccess(
+      buildPaymentListResponse(meetingId, settlement, currentMember)
+    );
   }
 );

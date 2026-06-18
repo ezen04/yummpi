@@ -1,4 +1,9 @@
-import type { MeetingMember, Payment, Settlement, SettlementMember } from '@prisma/client';
+import type {
+  MeetingMember,
+  Payment,
+  Settlement,
+  SettlementMember,
+} from '@prisma/client';
 import type {
   PaymentListItem,
   PaymentListResponse,
@@ -30,8 +35,11 @@ export function buildSummary(payments: Payment[]): PaymentSummary {
     resolvedAmount,
     unresolvedAmount,
     totalCount: payments.length,
-    completedCount: payments.filter((p) => p.status === 'PAID' || p.status === 'EXEMPT').length,
-    reportedCount: payments.filter((p) => p.status === 'TRANSFER_REPORTED').length,
+    completedCount: payments.filter(
+      (p) => p.status === 'PAID' || p.status === 'EXEMPT'
+    ).length,
+    reportedCount: payments.filter((p) => p.status === 'TRANSFER_REPORTED')
+      .length,
     pendingCount: payments.filter((p) => p.status === 'PENDING').length,
   };
 }
