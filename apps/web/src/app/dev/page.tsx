@@ -10,6 +10,7 @@ import { Badge } from '../../components/common/Badge';
 import { KakaoLoginButton, KakaoPayButton, TossPayButton, RadiusButton } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Check } from '../../components/common/Check';
+import { Radio, RadioGroup } from '../../components/common/Radio';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -439,6 +440,29 @@ export default function DevPage() {
             <Check checked={true} label="비활성 선택됨" disabled />
             <Check checked={false} />
             <Check checked={true} />
+          </div>
+        </section>
+
+        {/* ── Radio ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Radio
+          </h2>
+          <div className="space-y-3">
+            <Radio checked={false} label="항목별 정산 (inactive)" />
+            <Radio checked={true} label="1/N 균등 정산 (active)" />
+            <Radio checked={true} label="비활성 선택됨" disabled />
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-2">RadioGroup</p>
+            <RadioGroup
+              options={[
+                { value: 'ITEM_BASED', label: '항목별 정산' },
+                { value: 'EQUAL', label: '1/N 균등 정산' },
+              ]}
+              value="ITEM_BASED"
+              onChange={() => {}}
+            />
           </div>
         </section>
 
