@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 /**
  * /dev — 공통 컴포넌트 시각 검증 페이지
  */
@@ -11,6 +13,7 @@ import { KakaoLoginButton, KakaoPayButton, TossPayButton, RadiusButton } from '.
 import { Input } from '../../components/common/Input';
 import { Check } from '../../components/common/Check';
 import { Radio, RadioGroup } from '../../components/common/Radio';
+import { BottomSheet } from '../../components/common/BottomSheet';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -33,6 +36,8 @@ import {
 } from '@yummpi/ui';
 
 export default function DevPage() {
+  const [bsOpen, setBsOpen] = useState<'background' | 'non-background' | 'solo' | null>(null);
+
   return (
     <main className="min-h-screen bg-[var(--bg-normal)]">
       <div className="max-w-[390px] mx-auto px-4 py-8 space-y-10">
@@ -465,6 +470,70 @@ export default function DevPage() {
             />
           </div>
         </section>
+
+        {/* ── BottomSheet ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            BottomSheet
+          </h2>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setBsOpen('background')}
+              style={{ padding: '8px 14px', borderRadius: 'var(--radius-8)', border: '1px solid var(--line-normal)', font: '400 14px var(--font-sans)', cursor: 'pointer' }}
+            >
+              background
+            </button>
+            <button
+              onClick={() => setBsOpen('non-background')}
+              style={{ padding: '8px 14px', borderRadius: 'var(--radius-8)', border: '1px solid var(--line-normal)', font: '400 14px var(--font-sans)', cursor: 'pointer' }}
+            >
+              non-background
+            </button>
+            <button
+              onClick={() => setBsOpen('solo')}
+              style={{ padding: '8px 14px', borderRadius: 'var(--radius-8)', border: '1px solid var(--line-normal)', font: '400 14px var(--font-sans)', cursor: 'pointer' }}
+            >
+              solo
+            </button>
+          </div>
+        </section>
+
+        <BottomSheet
+          open={bsOpen === 'background'}
+          onClose={() => setBsOpen(null)}
+          variant="background"
+          title="정산 방식 선택"
+        >
+          <RadioGroup
+            options={[
+              { value: 'ITEM_BASED', label: '항목별 정산' },
+              { value: 'EQUAL', label: '1/N 균등 정산' },
+            ]}
+            value="ITEM_BASED"
+            onChange={() => {}}
+          />
+        </BottomSheet>
+
+        <BottomSheet
+          open={bsOpen === 'non-background'}
+          onClose={() => setBsOpen(null)}
+          variant="non-background"
+          title="옵션 선택"
+        >
+          <p style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--label-normal)' }}>
+            non-background 바텀시트 콘텐츠
+          </p>
+        </BottomSheet>
+
+        <BottomSheet
+          open={bsOpen === 'solo'}
+          onClose={() => setBsOpen(null)}
+          variant="solo"
+        >
+          <p style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--label-normal)', marginBottom: 16 }}>
+            닉네임을 입력해주세요
+          </p>
+        </BottomSheet>
 
         {/* ── Button (얌피 전용) ── */}
         <section className="space-y-4">
