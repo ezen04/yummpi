@@ -38,45 +38,27 @@ export function Footer(props: FooterProps) {
 
   return (
     <footer
-      className={cn(props.className)}
-      style={{
-        width: '100%',
-        background: 'var(--bg-normal)',
-        borderTop: '1px solid var(--line-alternative)',
-        padding: '13px 20px max(30px, env(safe-area-inset-bottom))',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
+      className={cn(
+        'w-full flex flex-col gap-2 bg-[var(--bg-normal)] border-t border-[var(--line-alternative)]',
+        'px-5 pt-[13px] pb-[max(30px,env(safe-area-inset-bottom))]',
+        props.className,
+      )}
     >
       {hint && (
-        <p
-          style={{
-            font: '400 12px/16px var(--font-sans)',
-            color: 'var(--label-alternative)',
-            textAlign: 'center',
-          }}
-        >
+        <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] text-center">
           {hint}
         </p>
       )}
       <button
         onClick={onClick}
         disabled={disabled}
-        style={{
-          height: 48,
-          width: '100%',
-          borderRadius: 'var(--radius-12)',
-          background: disabled ? 'var(--fill-disable)' : 'var(--primary)',
-          color: disabled ? 'var(--label-disable)' : 'var(--static-white)',
-          font: '600 16px var(--font-sans)',
-          border: 'none',
-          cursor: disabled ? 'default' : 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 4,
-        }}
+        className={cn(
+          'w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center gap-1',
+          'text-[16px] font-semibold font-[var(--font-sans)] border-none',
+          disabled
+            ? 'bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default'
+            : 'bg-[var(--primary)] text-[var(--static-white)] cursor-pointer',
+        )}
       >
         {icon}
         {label}
