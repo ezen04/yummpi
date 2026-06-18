@@ -71,12 +71,14 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
               top: -10,
               left: '50%',
               transform: 'translateX(-50%)',
-              fontSize: 14,
-              lineHeight: 1,
-              userSelect: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            👑
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M1 10h14M1 10L3 4l4 3 1-6 1 6 4-3 2 6" stroke="var(--primary)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            </svg>
           </span>
         )}
 

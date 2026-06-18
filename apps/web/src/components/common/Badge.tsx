@@ -28,11 +28,11 @@ export function Badge({ variant, children, icon }: BadgeProps) {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 4,
-        borderRadius: 'var(--radius-full)',
-        padding: '4px 10px',
+        borderRadius: 'var(--radius-8)',
+        padding: '4px 6px',
         background,
         color,
-        font: '400 12px var(--font-sans)',
+        font: '600 12px var(--font-sans)',
         whiteSpace: 'nowrap',
       }}
     >

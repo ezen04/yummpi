@@ -120,7 +120,7 @@ export function Header({
             <p style={{ fontSize: 14, fontWeight: 400, color: 'var(--label-alternative)', lineHeight: '20px' }}>
               {greeting}
             </p>
-            <p style={{ fontSize: 18, fontWeight: 400, color: 'var(--label-normal)', lineHeight: '26px' }}>
+            <p style={{ fontSize: 19, fontWeight: 600, color: 'var(--label-normal)', lineHeight: '30px' }}>
               {title}
             </p>
           </div>

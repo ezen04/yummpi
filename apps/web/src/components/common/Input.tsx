@@ -67,7 +67,7 @@ export function Input({
             padding: `0 ${paddingRight}px 0 ${paddingLeft}px`,
             borderRadius: 'var(--radius-12)',
             border,
-            background: 'var(--bg-normal)',
+            background: 'var(--bg-alternative)',
             font: '400 16px var(--font-sans)',
             color: 'var(--label-normal)',
             outline: 'none',

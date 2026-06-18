@@ -17,12 +17,12 @@ export function Chip({ active = false, onClick, children, disabled = false }: Ch
       onClick={onClick}
       disabled={disabled}
       style={{
-        height: 32,
-        padding: '0 14px',
-        borderRadius: 'var(--radius-full)',
-        border: active ? '1.5px solid var(--primary)' : '1.5px solid var(--line-normal)',
-        background: active ? 'rgba(233,75,53,0.06)' : 'transparent',
-        font: `${active ? '600' : '400'} 13px var(--font-sans)`,
+        height: 34,
+        padding: '0 12px',
+        borderRadius: 'var(--radius-10)',
+        border: active ? '1px solid rgba(233,75,53,0.43)' : '1.5px solid var(--line-normal)',
+        background: active ? 'rgba(233,75,53,0.05)' : 'transparent',
+        font: '500 14px var(--font-sans)',
         color: active ? 'var(--primary)' : 'var(--label-alternative)',
         cursor: disabled ? 'default' : 'pointer',
         opacity: disabled ? 0.4 : 1,
@@ -50,10 +50,10 @@ interface SolidChipProps {
 
 const SOLID_STYLES: Record<SolidChipVariant, React.CSSProperties> = {
   'solid-dark': {
-    background: 'var(--label-normal)',
-    color: 'var(--static-white)',
+    background: 'var(--bg-inverse)',
+    color: 'var(--inverse-label)',
     border: 'none',
-    fontWeight: 600,
+    fontWeight: 500,
   },
   'solid-fill': {
     background: 'var(--fill-normal)',
