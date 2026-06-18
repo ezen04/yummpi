@@ -83,5 +83,9 @@ export type PaymentListItem = z.infer<typeof PaymentListItemSchema>;
 export type PaymentListResponse = z.infer<typeof PaymentListResponseSchema>;
 export type UpdatePaymentRequest = z.infer<typeof UpdatePaymentRequestSchema>;
 export type UpdatePaymentResponse = z.infer<typeof UpdatePaymentResponseSchema>;
-export type CompleteMeetingResponse = z.infer<typeof CompleteMeetingResponseSchema>;
-export type PaymentsNotCompletedDetails = z.infer<typeof PaymentsNotCompletedDetailsSchema>;
+export type CompleteMeetingResponse = z.infer<
+  typeof CompleteMeetingResponseSchema
+>;
+export type PaymentsNotCompletedDetails = z.infer<
+  typeof PaymentsNotCompletedDetailsSchema
+>;
