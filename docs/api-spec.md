@@ -170,9 +170,6 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ### `GET .../place-candidates` — 후보 목록
 - ★ v2.1 응답 필드: `"createdBy": { "memberId", "nickname", "isHost" }` + 득표수·본인 투표 포함
 
-### `DELETE .../place-candidates/:candidateId`
-- ★ v2.1 권한: **등록 멤버 본인 또는 호스트** (게스트 등록 후보도 본인 삭제 가능). 확정 후 불가
-
 ### `POST .../place-candidates/:candidateId/confirm` — 최종 확정 (호스트)
 - `confirmedCandidateId` 갱신 + `PLACE_CONFIRMED` 전환 + `place:confirmed` 브로드캐스트
 - 동률 시 호스트 수동 선택 (런오프 없음)
