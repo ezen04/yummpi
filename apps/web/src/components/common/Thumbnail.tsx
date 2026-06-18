@@ -35,24 +35,15 @@ export function Thumbnail({ category, size = 56, className }: ThumbnailProps) {
   return (
     <div
       aria-label={label}
-      className={cn(className)}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 'var(--radius-12)',
-        background: bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}
+      className={cn(
+        'flex items-center justify-center shrink-0 rounded-[var(--radius-12)]',
+        className,
+      )}
+      style={{ width: size, height: size, background: bg }}
     >
       <span
-        style={{
-          font: `600 ${Math.round(size * 0.28)}px var(--font-sans)`,
-          color: 'var(--label-alternative)',
-          userSelect: 'none',
-        }}
+        className="text-[var(--label-alternative)] select-none font-semibold font-[var(--font-sans)]"
+        style={{ fontSize: Math.round(size * 0.28) }}
       >
         {abbr}
       </span>
