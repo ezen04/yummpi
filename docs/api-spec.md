@@ -48,6 +48,7 @@ type AttendanceStatus  = 'PENDING' | 'ATTENDING' | 'ABSENT'
 type CandidateStatus   = 'ACTIVE' | 'REJECTED'   // 확정 여부의 단일 진실은 meeting.confirmedCandidateId
 type ReservationStatus = 'NONE' | 'PENDING' | 'DONE'   // ★ v2.1 추가
 type OcrStatus         = 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED'
+// SUCCEEDED: OCR 또는 수동 입력(manual)으로 정산 가능한 영수증 데이터가 준비된 상태
 type SettlementStatus  = 'DRAFT' | 'CONFIRMED' | 'COMPLETED'
 type SplitMethod       = 'ITEM_BASED' | 'EQUAL'
 type PaymentStatus     = 'PENDING' | 'PAID' | 'EXEMPT'
@@ -121,6 +122,7 @@ type FoodType          = 'KOREAN' | 'JAPANESE' | 'CHINESE' | 'WESTERN' | 'ASIAN'
 - ★ v2.1: `anonymousVoting`은 **VOTING 진입 후 변경 불가** → `409 VOTING_SETTING_LOCKED`
 
 ### `PATCH /api/v1/meetings/:meetingId/status` — 상태 변경 (호스트)
+
 ```
 DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING → COMPLETED
 ```
@@ -129,6 +131,14 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ### `DELETE /api/v1/meetings/:meetingId` — 소프트 삭제(`CANCELLED`, **SETTLING 진입 이후 불가**)
 - 정산 시작(SETTLING)·완료(COMPLETED)·이미 취소된 모임은 삭제 불가 → `409 INVALID_MEETING_STATUS_TRANSITION`. (CLAUDE.md 엣지케이스와 통일, 2026-06-17 결정)
 ### `GET /api/v1/meetings/invite/:inviteCode` — 초대 링크 정보 (비로그인 허용)
+### `POST /api/v1/meetings/:meetingId/clone` — 이 멤버로 새 모임 만들기 (호스트) ★ B-lite
+- ADR-0001 B-lite 클론. 원본의 **회원(`user_id` NOT NULL & 미퇴장)만 승계**해 새 `DRAFT` 모임 생성. 게스트·퇴장자 제외, 역할(HOST/MEMBER) 유지(호스트 불변식 자동 충족)
+- 승계: `title`·`description`·`maxMembers`·`budgetPerPerson`·`foodTypes`·`needParking`·`needRoom`·`anonymousVoting`·`placeSearchRadiusM`
+- 리셋: `status=DRAFT`, 새 `inviteCode`, `scheduledAt`·`votingClosesAt`·`expiresAt`·`confirmedCandidateId`·`cancelledAt` = null. 참석/체크인/출발지/게스트토큰도 리셋
+- `seriesId = source.seriesId ?? source.id` 스탬프 (클론의 클론도 동일 series 유지)
+- **복사 안 함**: 장소후보·투표·예약·영수증·정산·송금 (새 이벤트는 백지 시작 — 이벤트/멤버십 분리 위생)
+- 원본 **상태 무관**(COMPLETED·CANCELLED 포함) 클론 가능. 원본 상태머신은 변경하지 않음. 없으면 `404 MEETING_NOT_FOUND`, 비호스트 `403 FORBIDDEN`
+- 응답 201: `{ "id", "title", "status": "DRAFT", "inviteCode", "inviteUrl", "seriesId", "hostMemberId", "createdAt" }`
 
 ---
 
@@ -217,7 +227,9 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 > **권한: 업로드·OCR·검수·직접 입력·삭제는 전부 호스트 전용** (`assertHost`, 2026-06-12 결정). 게스트·일반 멤버는 403. 조회(`GET`)는 멤버 전원 가능.
 > **OCR 엔진: CLOVA General OCR** (영수증 특화 모델 아님 — 2026-06-12 전환 결정). 토큰 응답을 자체 파서로 구조화 — 상세는 `ocr-parser-work-doc.md` 참조.
-> **잠금 규칙**: 소비 선택 시작 후 영수증 추가/삭제 → `409 RECEIPT_LOCKED`. 선별 단계로 되돌아가면 ITEM_ASSIGNMENT 전체 초기화 (사전 경고).
+> **잠금 규칙**: 해당 모임에 `settlements` 레코드가 존재하면 영수증 추가/수정/삭제/수동 생성 → `409 RECEIPT_LOCKED`.
+> 정산 생성 이후에는 `EQUAL`은 금액이 확정되고, `ITEM_BASED`는 소비 선택 대상 품목이 확정되므로 영수증을 변경할 수 없다.
+> 잠금 해제/정산 재오픈은 MVP 제외.
 
 ### `POST /api/v1/meetings/:meetingId/receipts/upload-urls` — presigned URL **다건** 발급 ★ v2.1 (호스트)
 요청:
@@ -226,42 +238,153 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ```
 응답: `{ "uploads": [ { "objectKey", "uploadUrl", "expiresIn": 300 } ] }`
 - 촬영/갤러리 혼합 일괄 접수. 장당 RECEIPT 생성 (`ocr_status: PENDING`)
-- 제한: 모임당 최대 10장(`422 RECEIPT_LIMIT_EXCEEDED`), 장당 10MB, `image/*`만
+- 제한: 모임당 최대 4장(`422 RECEIPT_LIMIT_EXCEEDED`), 장당 10MB, `image/*`만
 
 ### `POST .../receipts/:receiptId/ocr` — OCR 분석 (영수증별 독립) ★ v2.1
-- 응답: `receiptId·ocrStatus·merchantName·subtotal/tax/service/total·items[]`(name·quantity·unitPrice·totalPrice·confidence)
+- 응답: `receiptId·ocrStatus·total·items[]`(name·quantity·unitPrice?·totalPrice·confidence)
 - **1장 실패해도 나머지 진행** — 실패 영수증만 `ocrStatus: FAILED` + 수동 입력 fallback
 - ★ v2.2(④ 추가 예정): 응답에 `unclassifiedLines[]`(파서 미분류 원문 라인) 노출 — 검수 화면에서 품목 승격용. 원본은 `receipts.raw_ocr_json`에 보관. 필드 형태는 ④가 확정
 
 ### `GET .../receipts` — 목록
+응답:
+```json
+{
+  "receipts": [
+    {
+      "receiptId": "r_xxx",
+      "objectKey": "meetings/m_xxx/receipts/r_xxx.jpg",
+      "ocrStatus": "SUCCEEDED",
+      "totalAmount": 50000,
+      "itemCount": 3,
+      "createdAt": "2026-06-18T12:00:00Z"
+    }
+  ]
+}
+```
+- `objectKey`: manual receipt는 `null`
 ### `PATCH .../receipts/:receiptId` — OCR 결과 검수·수정
-### `POST .../receipts/manual` — 직접 입력
-### `DELETE .../receipts/:receiptId` — 삭제 (DB + Object Storage)
+### `POST .../receipts/manual` — 직접 입력 (이미지 없이 receipt 생성, 호스트) ★ v2.2
+
+요청:
+```json
+{
+  "totalAmount": 50000,
+  "items": [
+    { "name": "치킨", "quantity": 1, "unitPrice": 18000, "totalPrice": 18000 }
+  ]
+}
+```
+
+응답 201:
+```json
+{
+  "receiptId": "r_xxx",
+  "objectKey": null,
+  "ocrStatus": "SUCCEEDED",
+  "totalAmount": 50000,
+  "items": [
+    { "receiptItemId": "item_1", "name": "치킨", "quantity": 1, "unitPrice": 18000, "totalPrice": 18000 }
+  ],
+  "unclassifiedLines": []
+}
+```
+
+- 이미지/OCR 없이 receipt와 items를 직접 생성한다
+- `objectKey = null`
+- `ocrStatus = SUCCEEDED`로 저장 — 의미는 §1.4 참조
+- OCR 실패 영수증 항목 수정은 `PATCH .../receipts/:receiptId` 사용
+- `items` 최소 1개, `totalAmount` 1원 이상, `quantity` 1 이상, `unitPrice`/`totalPrice` 0원 이상. 위반 시 `400 VALIDATION_ERROR`
+- 모임당 4장 제한에 포함 (`400 RECEIPT_LIMIT_EXCEEDED`)
+- 소비 선택 시작 후 → `409 RECEIPT_LOCKED`
+### `DELETE .../receipts/:receiptId` — 삭제 (호스트) ★ v2.2
+
+응답: `204 No Content`
+
+- `objectKey` 있으면 S3 오브젝트 + DB 레코드 삭제
+- `objectKey = null`이면 DB 레코드만 삭제 (manual receipt)
+- settlement가 `CONFIRMED | COMPLETED`이면 → `403 FORBIDDEN`
+- 소비 선택 시작 후 → `409 RECEIPT_LOCKED`
 
 ---
 
 ## 10. 정산 API — **모임당 1건** ★ v2.1
 
-### `POST /api/v1/meetings/:meetingId/settlements` — 정산 생성
-요청 `{ "splitMethod": "ITEM_BASED" | "EQUAL" }`  (~~receiptId~~ 제거)
+### `POST /api/v1/meetings/:meetingId/settlements` — 정산 생성 ★ v2.2 수정
+
+요청:
+
+```json
+{ "splitMethod": "ITEM_BASED" | "EQUAL", "totalAmount": 150000 }
+```
+
+- `splitMethod`: 배분 방식. 진입 경로 구분자가 아님
+- **receipt가 1개 이상 있는 경우** (EQUAL/ITEM_BASED 모두):
+  - `settlement.total_amount = SUM(receipts.total_amount)` 서버 계산. `totalAmount` 전달 불필요
+  - 각 `receipt.total_amount`가 0이면 `400 VALIDATION_ERROR`
+- **receipt가 없는 경우**:
+  - `EQUAL`만 허용. `ITEM_BASED` 시도 → `422 RECEIPT_REQUIRED`
+  - `totalAmount` 필수, 1원 이상 정수
 - 이미 존재 시 `409 SETTLEMENT_ALREADY_EXISTS`
-- 모임의 **모든** RECEIPT_ITEM이 배정 대상
+- 모임의 **모든** RECEIPT_ITEM이 배정 대상 (receipt 없는 EQUAL은 RECEIPT_ITEM 없이 진행)
+- ★ v2.2: 생성 시 모임 `status`가 `IN_PROGRESS`이면 `SETTLING`으로 자동 전환
 
-### `GET /api/v1/meetings/:meetingId/settlement` — 조회 (단수)
-- 응답에 `receipts: [{receiptId, merchantName, totalAmount}]` 합산 내역 포함
-- `GET .../settlements/:settlementId`도 호환 유지
+### `PUT .../settlements/:settlementId/assignments/me` — 본인 소비 항목 선택 ★ v2.2
+요청: `{ "receiptItemIds": ["item_1", "item_2"] }`
+- 회원·게스트 모두 본인만 선택 가능. **최소 1개 필수** (`400 VALIDATION_ERROR`)
+- 재호출 시 이전 선택 초기화 후 저장
+- 응답 200: `{ "memberId", "receiptItemIds" }`
+- `status: CONFIRMED` 이후 시도 → `403 FORBIDDEN`
+- EQUAL 방식일 때는 호출 불필요 (계산 자동 진행)
 
-### `PUT .../settlements/:settlementId/assignments` — 소비 항목 배정
-`{ "assignments": [{ "receiptItemId", "memberIds": ["mem_1","mem_2"] }] }`
+### 금액 계산 — BE 자동 트리거 ★ v2.2 수정 (클라이언트 직접 호출 없음)
+- **트리거**: EQUAL — 정산 생성 즉시 실행. ITEM_BASED — 출석(`ATTENDING`) 전원 `assignments/me` 제출 완료 시 자동 실행
+- **ITEM_BASED**: 품목별 `total_price` ÷ 해당 품목 선택 참여자 수 → 멤버별 배분금 합산 후 `SETTLEMENT_MEMBER` upsert. 반올림 차액 → 주최자 +1원 보정
+- **EQUAL**: `total_amount` ÷ 출석(`ATTENDING`) 인원수 균등 배분. 반올림 차액 → 주최자 +1원 보정
+- 부가세·봉사료·할인은 별도 배분하지 않음. 영수증 `total_amount`(최종 청구액)를 그대로 사용
+- `Σ finalAmount ≠ totalAmount` 시 서버 에러 로깅 (클라이언트 미노출)
 
-### `POST .../settlements/:settlementId/calculate` — 금액 계산
-- `total_amount = Σ 모임 전체 receipt.total_amount` ★ v2.1
-- 부가세·봉사료·할인·반올림 차액을 소비 비율로 배분 (영수증별 비율 배분 후 합산) → `SETTLEMENT_MEMBER` upsert
-- `Σ finalAmount ≠ totalAmount` 시 `422 SETTLEMENT_AMOUNT_MISMATCH`
+### `GET /api/v1/meetings/:meetingId/settlement` — 조회 (단수) ★ v2.2
+- 응답:
+  ```json
+  {
+    "id", "splitMethod", "status", "totalAmount", "confirmedAt",
+    "receipts": [{ "receiptId", "totalAmount" }],
+    "settlementMembers": [{
+      "memberId", "nickname", "role",
+      "isMe", "avatarUrl",
+      "finalAmount", "paymentStatus",
+      "items": [{
+        "receiptId", "receiptItemId", "itemName",
+        "quantity", "unitPrice?", "totalPrice", "assignedAmount"
+      }]
+    }]
+  }
+  ```
+- `receipts[]`: 모임 전체 영수증 합산 내역
+- `settlementMembers[].items`: 해당 멤버가 선택한 **모든 receipt의 품목 통합** 목록. EQUAL 시 `null`
+- `settlementMembers[].isMe`: 요청자 본인 여부 (서버가 세션 기준으로 판단)
+- `settlementMembers[].role`: `"HOST" | "MEMBER"`
+- 불변식: `settlementMember.finalAmount == SUM(items[].assignedAmount)`
+- 불변식: `SUM(settlementMembers[].finalAmount) == settlement.totalAmount`
+- `GET .../settlements/:settlementId` — V2 보류 (MVP 미구현. Gathering 분리 모델 전환 시 활성화)
 
-### `POST .../settlements/:settlementId/confirm` — 확정 (호스트, 금액 잠금)
-- Payment는 생성하지 않음
-- 보장 데이터: `Settlement.status = CONFIRMED`, `confirmedAt != null`, 참여자별 `SettlementMember`, 확정된 `SettlementMember.finalAmount`
+### `POST .../settlements/:settlementId/confirm` — 확정 (호스트) ★ v2.2 수정
+
+응답:
+```json
+{ "settlementId", "status": "CONFIRMED", "confirmedAt" }
+```
+
+사전 조건:
+- 모임 상태 `SETTLING`
+- `ATTENDING` 멤버 수 == `SettlementMember` 레코드 수 (미달 시 `409 SETTLEMENT_CALCULATION_PENDING`)
+- `ATTENDING` 멤버 1명 이상 (`400 VALIDATION_ERROR`)
+
+- `Settlement.status = CONFIRMED`, `confirmedAt` 기록. 금액 잠금
+- 이미 `CONFIRMED`인 경우 `200` 재응답 (idempotent — 버튼 중복 클릭 대응)
+- ④ 보장 범위: SettlementMember 전원 + finalAmount 확정까지
+- Payment 생성은 ⑤의 `POST /payments/initialize` 담당
+- confirm 직후 결과 화면 데이터는 `GET /settlement`로 조회
 
 ### `POST .../settlements/:settlementId/reopen` — 재오픈
 - MVP 확정 계약에서 제외. P1 확장 시 Payment 상태 정책과 함께 재논의
@@ -279,12 +402,55 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ### `GET /api/v1/meetings/:meetingId/payments` — 현황 (`total·collected·statuses[]`)
 - Payment를 생성하지 않는 순수 조회 API
-### `PATCH .../payments/:paymentId` — 완료 처리 (`status: PAID`, 본인/호스트)
+### `PATCH .../payments/:paymentId` — action 기반 상태 변경
+- 요청: `{ "action": "REPORT_TRANSFER" | "MARK_PAID" | "MARK_PENDING" | "MARK_EXEMPT" }`
+- 본인은 `REPORT_TRANSFER`, 호스트는 `MARK_PAID`·`MARK_PENDING`·`MARK_EXEMPT` 가능
 ### `POST .../complete` — 모임 종료 (전원 `PAID|EXEMPT` 시 `COMPLETED`, 아니면 `422 PAYMENTS_NOT_COMPLETED`)
+
+### 11-A. 송금 Mock UX 계약
+
+MVP의 송금하기는 실제 계좌 송금 연동이 아니라 **표시용 송금 Mock**으로 처리한다. 실제 송금은 발생하지 않지만, 사용자는 송금 정보 확인 → 송금 수단 선택 → 송금 확인 → 완료 화면까지 실제 송금과 유사한 단계형 흐름을 경험한다.
+
+- 계좌번호, 은행명, 예금주 실명, 결제 토큰, 실제 송금 식별자는 저장하거나 반환하지 않는다.
+- 단, FE 표시 전용 더미값(`윰피뱅크`, `***-**-1234` 등)은 API/DB를 거치지 않는 경우에 한해 허용한다.
+- 송금 화면은 `Payment.amount`, 멤버 닉네임, 표시용 수신자 라벨, 송금 앱 선택값, fallback 액션으로 구성한다.
+- 표시용 수신자 라벨은 실계좌 정보가 아니라 `모임장 {nickname}` 같은 UI 라벨만 사용한다.
+- `transferMock`은 송금 화면 편의를 위한 nullable 표시 데이터이며, 실제 송금 완료 증빙으로 사용하지 않는다.
+- 딥링크 prefill은 실기기 검증 전 확정하지 않는다. 불가 시 `금액 복사 + 앱 열기 + 송금했어요` 흐름으로 후퇴한다.
+- 은행명·계좌번호처럼 보이는 상세 정보가 필요하면 API/DB 값이 아니라 FE의 더미 표시값만 사용한다. 예: `윰피뱅크`, `***-**-1234`.
+
+예시:
+
+```json
+{
+  "recipientLabel": "모임장 지훈",
+  "app": "kakaopay",
+  "amount": 18000,
+  "deeplink": null,
+  "fallbackActionLabel": "금액 복사"
+}
+```
+
+권장 화면 흐름:
+
+```txt
+1. 송금 정보 확인
+2. 송금 수단 선택
+3. 송금 확인
+4. Mock 송금 완료
+5. 호스트 입금 확인 대기
+```
+
+상태 처리는 기존 Payment API를 따른다.
+
+- 멤버가 Mock 송금 완료 단계까지 진행 → `PATCH .../payments/:paymentId` with `{ "action": "REPORT_TRANSFER" }`
+- 호스트가 입금 확인 → `{ "action": "MARK_PAID" }`
+- 호스트가 입금 확인 대기 상태로 되돌림 → `{ "action": "MARK_PENDING" }`
+- 운영상 면제 → `{ "action": "MARK_EXEMPT" }`
 
 ---
 
-## 11-A. 웹푸시 구독 API ★ v2.2 신규 (⑤ · 추가 예정)
+## 11-B. 웹푸시 구독 API ★ v2.2 신규 (⑤ · 추가 예정)
 
 > F10 송금 독촉·웹푸시용. `PUSH_SUBSCRIPTION` 테이블(ERD v2.2) 기반. 회원 전용(게스트는 이메일 fallback). 상세 필드·인터페이스는 ⑤가 확정.
 
@@ -350,12 +516,13 @@ io(SOCKET_URL, {
 | `CANDIDATE_NOT_FOUND` | 404 | 후보 없음 |
 | `RECEIPT_NOT_FOUND` | 404 | 영수증 없음 |
 | `SETTLEMENT_NOT_FOUND` | 404 | 정산 없음 |
+| `PAYMENT_NOT_FOUND` ★ | 404 | 송금 정보 없음 |
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
 | `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 모임 상태 전이 |
-| `INVALID_SETTLEMENT_STATUS` ★★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
-| `INVALID_PAYMENT_STATUS` ★★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
+| `INVALID_SETTLEMENT_STATUS` ★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
+| `INVALID_PAYMENT_STATUS` ★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
 | `VOTING_CLOSED` | 409 | 투표 종료 |
 | `ALREADY_CONFIRMED_PLACE` | 409 | 장소 확정됨 |
 | `MEETING_EXPIRED` | 409 | 모임 만료 |
@@ -363,6 +530,9 @@ io(SOCKET_URL, {
 | `SETTLEMENT_ALREADY_EXISTS` ★ | 409 | 모임에 정산이 이미 존재 |
 | `VOTING_SETTING_LOCKED` ★ | 409 | 투표 시작 후 익명 설정 변경 |
 | `RECEIPT_LOCKED` ★ | 409 | 소비 선택 시작 후 영수증 추가/삭제 시도 |
+| `SETTLEMENT_CALCULATION_PENDING` ★ | 409 | 계산 미완료 상태에서 확정 시도 |
+| `RECEIPT_ALREADY_OCR_SUCCEEDED` ★ | 409 | OCR 성공한 영수증에 수동 입력 시도 |
+| `RECEIPT_REQUIRED` ★ | 422 | ITEM_BASED 정산인데 영수증 없음 |
 | `RECEIPT_LIMIT_EXCEEDED` ★ | 422 | 영수증 장수 제한 초과 |
 | `SETTLEMENT_AMOUNT_MISMATCH` | 422 | 배분/총액 불일치 |
 | `PAYMENTS_NOT_COMPLETED` | 422 | 미송금 존재 |
@@ -370,7 +540,7 @@ io(SOCKET_URL, {
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
 | `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
-★ = v2.1 신규 / ★★ = Payment Phase 03 신규
+★ = v2.x 신규
 
 ---
 

@@ -11,7 +11,7 @@
 
 ```
 features/settlement/**
-app/api/v1/meetings/[id]/receipts/** , .../settlements/**
+app/api/v1/meetings/[meetingId]/receipts/** , .../settlements/**
 lib/ocr/** , lib/s3/** , lib/settlement-engine/**
 ```
 
@@ -25,6 +25,14 @@ lib/ocr/** , lib/s3/** , lib/settlement-engine/**
 | `features/payment/**`, `api/.../payments/**`, `packages/schemas/**`, `.github/**` | ⑤ |
 
 **정산↔송금 경계**: 정산 확정(`/confirm`)까지가 ④, PAYMENT 생성·송금 현황부터는 ⑤. 확정 시 SETTLEMENT_MEMBER까지만 만들고 Payment 로직은 건드리지 않는다.
+
+- ④ `/confirm` 완료 시 보장 데이터:
+  - `Settlement.status = CONFIRMED`
+  - `Settlement.confirmedAt != null`
+  - `SettlementMember`가 참여자별로 생성되어 있음
+  - `SettlementMember.finalAmount`가 확정되어 있음
+- Payment 생성은 ⑤의 `POST /api/v1/meetings/:meetingId/payments/initialize`에서 수행
+- `GET /payments`는 Payment를 생성하지 않는 순수 조회 API
 
 ## 경계 이탈 프로토콜
 
