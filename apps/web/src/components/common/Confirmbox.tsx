@@ -32,7 +32,6 @@ export function Confirmbox({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '0 24px',
       }}
     >
       {/* 딤 배경 */}
@@ -41,7 +40,7 @@ export function Confirmbox({
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(0,0,0,0.4)',
+          background: 'rgba(43,33,30,0.61)',
         }}
       />
 
@@ -49,18 +48,21 @@ export function Confirmbox({
       <div
         style={{
           position: 'relative',
-          width: '100%',
-          maxWidth: 320,
+          width: 334,
           background: 'var(--bg-normal)',
-          borderRadius: 'var(--radius-16)',
-          padding: '24px 20px 20px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          borderRadius: 'var(--radius-12)',
+          padding: '32px 24px',
+          boxShadow: 'var(--shadow-xlarge)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 16,
         }}
       >
         <p
           style={{
-            font: '600 17px/24px var(--font-sans)',
-            color: 'var(--label-normal)',
+            font: '400 14px/20px var(--font-sans)',
+            color: 'var(--label-alternative)',
             margin: 0,
             textAlign: 'center',
           }}
@@ -71,9 +73,9 @@ export function Confirmbox({
         {body && (
           <p
             style={{
-              font: '400 14px/20px var(--font-sans)',
-              color: 'var(--label-alternative)',
-              margin: '8px 0 0',
+              font: '400 13px/18px var(--font-sans)',
+              color: 'var(--label-assistive)',
+              margin: 0,
               textAlign: 'center',
             }}
           >
@@ -81,16 +83,16 @@ export function Confirmbox({
           </p>
         )}
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
+        <div style={{ display: 'flex', gap: 12, width: '100%' }}>
           <button
             onClick={onClose}
             style={{
               flex: 1,
-              height: 44,
-              borderRadius: 'var(--radius-10)',
-              border: 'none',
-              background: 'var(--fill-normal)',
-              font: '500 15px var(--font-sans)',
+              height: 48,
+              borderRadius: 'var(--radius-12)',
+              border: '1px solid var(--line-normal)',
+              background: 'var(--bg-normal)',
+              font: '600 16px var(--font-sans)',
               color: 'var(--label-normal)',
               cursor: 'pointer',
             }}
@@ -101,12 +103,12 @@ export function Confirmbox({
             onClick={onConfirm}
             style={{
               flex: 1,
-              height: 44,
-              borderRadius: 'var(--radius-10)',
-              border: 'none',
-              background: 'var(--primary)',
-              font: '600 15px var(--font-sans)',
-              color: 'var(--static-white)',
+              height: 48,
+              borderRadius: 'var(--radius-12)',
+              border: '1px solid var(--line-neutral)',
+              background: 'var(--bg-normal)',
+              font: '600 16px var(--font-sans)',
+              color: 'var(--primary)',
               cursor: 'pointer',
             }}
           >

@@ -39,7 +39,7 @@ export function BottomSheet({
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'rgba(0,0,0,0.4)',
+            background: 'rgba(43,33,30,0.61)',
             animation: 'bs-fade-in 0.2s ease',
           }}
         />
@@ -53,19 +53,20 @@ export function BottomSheet({
           left: 0,
           right: 0,
           background: 'var(--bg-normal)',
-          borderRadius: 'var(--radius-20) var(--radius-20) 0 0',
-          padding: `20px 20px max(24px, env(safe-area-inset-bottom))`,
+          borderRadius: '36px 36px 0 0',
+          padding: `12px 12px max(32px, env(safe-area-inset-bottom))`,
+          boxShadow: 'var(--shadow-xlarge)',
           animation: 'bs-slide-up 0.25s ease',
         }}
       >
         {/* 핸들바 */}
         <div
           style={{
-            width: 36,
+            width: 76,
             height: 4,
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--fill-normal)',
-            margin: '0 auto 20px',
+            borderRadius: 10,
+            background: 'var(--fill-strong)',
+            margin: '0 auto 16px',
           }}
         />
 

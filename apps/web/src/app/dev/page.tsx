@@ -599,13 +599,11 @@ export default function DevPage() {
               variant="unread"
               title="송금 요청이 도착했어요"
               body="김지훈님이 15,000원 송금을 요청했어요"
-              time="방금 전"
             />
             <Notification
               variant="read"
               title="모임 장소가 확정됐어요"
               body="홍대 삼겹살 마당으로 장소가 확정됐어요"
-              time="1시간 전"
             />
           </div>
         </section>

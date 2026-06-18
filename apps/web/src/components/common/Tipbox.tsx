@@ -8,61 +8,45 @@ interface TipboxProps {
   children: React.ReactNode;
 }
 
-const VARIANT_STYLES: Record<
-  NonNullable<TipboxProps['variant']>,
-  { background: string; iconColor: string }
-> = {
-  'normal':           { background: 'var(--fill-normal)',         iconColor: 'var(--label-assistive)' },
-  'completed-vote':   { background: 'rgba(233,75,53,0.06)',       iconColor: 'var(--primary)' },
-  'completed-title':  { background: 'rgba(233,75,53,0.06)',       iconColor: 'var(--primary)' },
-};
-
 export function Tipbox({ variant = 'normal', title, children }: TipboxProps) {
-  const { background, iconColor } = VARIANT_STYLES[variant];
-
   return (
     <div
       style={{
         display: 'flex',
-        gap: 10,
-        padding: '12px 14px',
-        borderRadius: 'var(--radius-12)',
-        background,
-        borderLeft: `3px solid var(--primary)`,
+        alignItems: 'center',
+        gap: 8,
+        padding: '10px 16px',
+        borderRadius: 'var(--radius-10)',
+        background: 'var(--secondary-tint)',
       }}
     >
-      {/* 왼쪽 아이콘 — i */}
-      <span
-        style={{
-          font: '600 13px var(--font-sans)',
-          color: iconColor,
-          flexShrink: 0,
-          lineHeight: '20px',
-        }}
-      >
-        i
-      </span>
+      {/* Eye 아이콘 대체 — 간단한 SVG */}
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+        <path d="M1.5 10C1.5 10 4.5 4 10 4C15.5 4 18.5 10 18.5 10C18.5 10 15.5 16 10 16C4.5 16 1.5 10 1.5 10Z" stroke="var(--secondary-strong)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <circle cx="10" cy="10" r="2.5" stroke="var(--secondary-strong)" strokeWidth="1.5"/>
+      </svg>
 
       <div style={{ flex: 1 }}>
-        {title && (
+        {title && variant === 'completed-title' && (
           <p
             style={{
               font: '600 13px/18px var(--font-sans)',
-              color: 'var(--label-normal)',
+              color: 'var(--secondary-strong)',
               margin: '0 0 2px',
             }}
           >
             {title}
           </p>
         )}
-        <div
+        <p
           style={{
             font: '400 13px/18px var(--font-sans)',
-            color: 'var(--label-alternative)',
+            color: 'var(--secondary-strong)',
+            margin: 0,
           }}
         >
           {children}
-        </div>
+        </p>
       </div>
     </div>
   );
