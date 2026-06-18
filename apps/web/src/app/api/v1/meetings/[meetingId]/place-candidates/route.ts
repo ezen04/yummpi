@@ -22,7 +22,7 @@ export const GET = handleRoute(
         },
       }),
       prisma.placeCandidate.findMany({
-        where: { meetingId },
+        where: { meetingId, status: 'ACTIVE' },
         include: {
           createdBy: {
             select: { id: true, nickname: true, role: true },
@@ -107,7 +107,7 @@ export const POST = handleRoute(
         where: { id: meetingId },
         select: { status: true },
       }),
-      prisma.placeCandidate.count({ where: { meetingId } }),
+      prisma.placeCandidate.count({ where: { meetingId, status: 'ACTIVE' } }),
     ]);
     if (!meeting) {
       throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
@@ -131,40 +131,72 @@ export const POST = handleRoute(
       throw new ApiError('VALIDATION_ERROR', '좌표(lat, lng)는 필수입니다.');
     }
 
-    let candidate;
-    try {
-      candidate = await prisma.placeCandidate.create({
-        data: {
-          meetingId,
-          createdByMemberId: member.id,
-          externalPlaceId: body.externalPlaceId.trim(),
-          name: body.name.trim(),
-          categoryName: body.categoryName ?? null,
-          address: body.address ?? null,
-          roadAddress: body.roadAddress ?? null,
-          phone: body.phone ?? null,
-          latitude: body.lat,
-          longitude: body.lng,
-          placeUrl: body.placeUrl ?? null,
-        },
-        include: {
-          createdBy: {
-            select: { id: true, nickname: true, role: true },
-          },
-        },
-      });
-    } catch (err: unknown) {
-      // meetingId + externalPlaceId UNIQUE 제약 위반
-      if (
-        typeof err === 'object' &&
-        err !== null &&
-        'code' in err &&
-        (err as { code: string }).code === 'P2002'
-      ) {
-        throw new ApiError('CANDIDATE_ALREADY_EXISTS', '이미 추가된 장소입니다.');
+    const externalPlaceId = body.externalPlaceId.trim();
+
+    // REJECTED 풀 항목 확인 → ACTIVE로 승격(upsert) 또는 신규 생성
+    const existing = await prisma.placeCandidate.findFirst({
+      where: { meetingId, externalPlaceId },
+      include: { createdBy: { select: { id: true, nickname: true, role: true } } },
+    });
+
+    if (existing) {
+      if (existing.status === 'ACTIVE') {
+        throw new ApiError('CANDIDATE_ALREADY_EXISTS', '이미 투표 후보로 등록된 장소입니다.');
       }
-      throw err;
+      // REJECTED → ACTIVE 승격
+      const promoted = await prisma.placeCandidate.update({
+        where: { id: existing.id },
+        data: { status: 'ACTIVE' },
+        include: { createdBy: { select: { id: true, nickname: true, role: true } } },
+      });
+      return apiSuccess(
+        {
+          id: promoted.id,
+          externalPlaceId: promoted.externalPlaceId,
+          name: promoted.name,
+          categoryName: promoted.categoryName,
+          address: promoted.address,
+          roadAddress: promoted.roadAddress,
+          phone: promoted.phone,
+          lat: promoted.latitude,
+          lng: promoted.longitude,
+          placeUrl: promoted.placeUrl,
+          status: promoted.status,
+          createdBy: promoted.createdBy
+            ? {
+                memberId: promoted.createdBy.id,
+                nickname: promoted.createdBy.nickname,
+                isHost: promoted.createdBy.role === 'HOST',
+              }
+            : null,
+          voteCount: 0,
+          createdAt: promoted.createdAt,
+        },
+        '장소 후보가 추가되었습니다.',
+        201
+      );
     }
+
+    const candidate = await prisma.placeCandidate.create({
+      data: {
+        meetingId,
+        createdByMemberId: member.id,
+        externalPlaceId,
+        name: body.name.trim(),
+        categoryName: body.categoryName ?? null,
+        address: body.address ?? null,
+        roadAddress: body.roadAddress ?? null,
+        phone: body.phone ?? null,
+        latitude: body.lat,
+        longitude: body.lng,
+        placeUrl: body.placeUrl ?? null,
+      },
+      include: {
+        createdBy: {
+          select: { id: true, nickname: true, role: true },
+        },
+      },
+    });
 
     return apiSuccess(
       {

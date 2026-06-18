@@ -1,4 +1,5 @@
-import { apiSuccess, handleRoute } from '@/lib/api-response';
+import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
+import { requireUser } from '@/lib/current-member';
 
 const KAKAO_KEYWORD_URL =
   'https://dapi.kakao.com/v2/local/search/keyword.json';
@@ -21,6 +22,7 @@ interface KakaoResponse {
 }
 
 export const GET = handleRoute(async (req: Request) => {
+  await requireUser();
   const { searchParams } = new URL(req.url);
 
   const query = searchParams.get('query') ?? '';
@@ -45,7 +47,13 @@ export const GET = handleRoute(async (req: Request) => {
   });
   if (x) params.set('x', x);
   if (y) params.set('y', y);
-  if (radius) params.set('radius', radius);
+  if (radius) {
+    const radiusNum = Number(radius);
+    if (isNaN(radiusNum) || radiusNum < 1 || radiusNum > 20000) {
+      throw new ApiError('VALIDATION_ERROR', 'radius는 1~20000 사이 정수여야 합니다.');
+    }
+    params.set('radius', radius);
+  }
 
   const res = await fetch(`${KAKAO_KEYWORD_URL}?${params}`, {
     headers: { Authorization: `KakaoAK ${apiKey}` },
@@ -53,7 +61,7 @@ export const GET = handleRoute(async (req: Request) => {
   });
 
   if (!res.ok) {
-    throw new Error(`카카오 API 오류: ${res.status}`);
+    throw new ApiError('KAKAO_API_FAILED', '카카오 장소 검색에 실패했습니다.');
   }
 
   const kakao = (await res.json()) as KakaoResponse;

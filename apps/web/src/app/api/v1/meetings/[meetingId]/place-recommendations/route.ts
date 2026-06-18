@@ -82,11 +82,16 @@ export const GET = handleRoute(
     const categories = meeting.foodTypes.length > 0 ? meeting.foodTypes : ['음식점'];
 
     // 카카오 API: x = 경도(lng), y = 위도(lat)
-    const allResults = await Promise.all(
-      categories.map((category) =>
-        searchKakaoByCategory(category, lng, lat, radius, apiKey)
-      )
-    );
+    let allResults: Awaited<ReturnType<typeof searchKakaoByCategory>>[];
+    try {
+      allResults = await Promise.all(
+        categories.map((category) =>
+          searchKakaoByCategory(category, lng, lat, radius, apiKey)
+        )
+      );
+    } catch {
+      throw new ApiError('KAKAO_API_FAILED', '카카오 장소 검색에 실패했습니다.');
+    }
 
     // 중복 제거(externalPlaceId 기준) → 거리순 정렬 → 상위 10개
     const seen = new Set<string>();
