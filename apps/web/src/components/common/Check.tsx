@@ -20,35 +20,27 @@ export function Check({
 }: CheckProps) {
   return (
     <label
-      className={cn(className)}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 10,
-        cursor: disabled ? 'default' : 'pointer',
-        opacity: disabled ? 0.4 : 1,
-      }}
+      className={cn(
+        'inline-flex items-center gap-[10px]',
+        disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
+        className,
+      )}
     >
       <input
         type="checkbox"
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange?.(e.target.checked)}
-        style={{ display: 'none' }}
+        className="sr-only"
       />
       <span
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: 'var(--radius-4)',
-          border: checked ? 'none' : '1.5px solid var(--line-normal)',
-          background: checked ? 'var(--primary)' : 'var(--bg-normal)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          transition: 'background 0.15s, border 0.15s',
-        }}
+        className={cn(
+          'w-5 h-5 rounded flex items-center justify-center shrink-0',
+          'transition-[background,border] duration-150',
+          checked
+            ? 'bg-[var(--primary)] border-none'
+            : 'bg-[var(--bg-normal)] border-[1.5px] border-[var(--line-normal)]',
+        )}
       >
         {checked && (
           <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
@@ -65,10 +57,10 @@ export function Check({
 
       {label && (
         <span
-          style={{
-            font: '400 15px/22px var(--font-sans)',
-            color: checked ? 'var(--label-normal)' : 'var(--label-alternative)',
-          }}
+          className={cn(
+            'text-[15px] leading-[22px] font-normal font-[var(--font-sans)]',
+            checked ? 'text-[var(--label-normal)]' : 'text-[var(--label-alternative)]',
+          )}
         >
           {label}
         </span>
