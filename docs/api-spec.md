@@ -131,6 +131,14 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ### `DELETE /api/v1/meetings/:meetingId` — 소프트 삭제(`CANCELLED`, **SETTLING 진입 이후 불가**)
 - 정산 시작(SETTLING)·완료(COMPLETED)·이미 취소된 모임은 삭제 불가 → `409 INVALID_MEETING_STATUS_TRANSITION`. (CLAUDE.md 엣지케이스와 통일, 2026-06-17 결정)
 ### `GET /api/v1/meetings/invite/:inviteCode` — 초대 링크 정보 (비로그인 허용)
+### `POST /api/v1/meetings/:meetingId/clone` — 이 멤버로 새 모임 만들기 (호스트) ★ B-lite
+- ADR-0001 B-lite 클론. 원본의 **회원(`user_id` NOT NULL & 미퇴장)만 승계**해 새 `DRAFT` 모임 생성. 게스트·퇴장자 제외, 역할(HOST/MEMBER) 유지(호스트 불변식 자동 충족)
+- 승계: `title`·`description`·`maxMembers`·`budgetPerPerson`·`foodTypes`·`needParking`·`needRoom`·`anonymousVoting`·`placeSearchRadiusM`
+- 리셋: `status=DRAFT`, 새 `inviteCode`, `scheduledAt`·`votingClosesAt`·`expiresAt`·`confirmedCandidateId`·`cancelledAt` = null. 참석/체크인/출발지/게스트토큰도 리셋
+- `seriesId = source.seriesId ?? source.id` 스탬프 (클론의 클론도 동일 series 유지)
+- **복사 안 함**: 장소후보·투표·예약·영수증·정산·송금 (새 이벤트는 백지 시작 — 이벤트/멤버십 분리 위생)
+- 원본 **상태 무관**(COMPLETED·CANCELLED 포함) 클론 가능. 원본 상태머신은 변경하지 않음. 없으면 `404 MEETING_NOT_FOUND`, 비호스트 `403 FORBIDDEN`
+- 응답 201: `{ "id", "title", "status": "DRAFT", "inviteCode", "inviteUrl", "seriesId", "hostMemberId", "createdAt" }`
 
 ---
 
