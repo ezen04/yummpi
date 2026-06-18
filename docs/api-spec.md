@@ -166,7 +166,7 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - DB에서 `meeting.foodTypes`(카테고리 배열) + `meeting.placeSearchRadiusM` 조회
 - 카테고리별 카카오 키워드 검색 후 결과 병합·거리순 정렬 → 상위 10개 반환
 - 응답: `items[]`(externalPlaceId·name·categoryName·address·roadAddress·phone·lat·lng·placeUrl·distanceM)
-- 출발지 미입력으로 최적지점 계산 불가 시 FE가 lat/lng 미전달 → 422 `VALIDATION_ERROR`
+- 출발지 미입력으로 최적지점 계산 불가 시 FE가 lat/lng 미전달 → 400 `VALIDATION_ERROR`
 
 ### `POST /api/v1/meetings/:meetingId/places/optimal-point` — 중간지점
 ```json
@@ -563,6 +563,7 @@ io(SOCKET_URL, {
 | `PAYMENTS_NOT_COMPLETED` | 422 | 미송금 존재 |
 | `OCR_REQUEST_FAILED` | 502 | OCR 실패 |
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
+| `KAKAO_API_FAILED` | 502 | 카카오 외부 API 호출 실패 |
 | `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
 ★ = v2.x 신규
