@@ -105,36 +105,19 @@ export function TodoCard({ type, onAction, className }: TodoCardProps) {
 
   return (
     <div
-      className={cn(className)}
-      style={{
-        background: 'var(--bg-elevated)',
-        border: '1px solid var(--line-normal)',
-        borderRadius: 'var(--radius-12)',
-        padding: '16px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-      }}
+      className={cn(
+        'flex flex-col gap-3 bg-[var(--bg-elevated)] border border-[var(--line-normal)]',
+        'rounded-[var(--radius-12)] px-5 py-4',
+        className,
+      )}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <span style={{ flexShrink: 0, marginTop: 1 }}>{config.icon}</span>
+      <div className="flex items-start gap-3">
+        <span className="shrink-0 mt-[1px]">{config.icon}</span>
         <div>
-          <p
-            style={{
-              font: '600 15px/22px var(--font-sans)',
-              color: 'var(--label-normal)',
-              margin: 0,
-            }}
-          >
+          <p className="text-[15px] leading-[22px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)] m-0">
             {config.title}
           </p>
-          <p
-            style={{
-              font: '400 13px/18px var(--font-sans)',
-              color: 'var(--label-alternative)',
-              margin: '4px 0 0',
-            }}
-          >
+          <p className="text-[13px] leading-[18px] font-normal font-[var(--font-sans)] text-[var(--label-alternative)] mt-1 mb-0">
             {config.desc}
           </p>
         </div>
@@ -142,15 +125,7 @@ export function TodoCard({ type, onAction, className }: TodoCardProps) {
 
       <button
         onClick={onAction}
-        style={{
-          height: 36,
-          borderRadius: 'var(--radius-8)',
-          border: '1px solid var(--primary)',
-          background: 'transparent',
-          font: '500 13px var(--font-sans)',
-          color: 'var(--primary)',
-          cursor: 'pointer',
-        }}
+        className="h-9 rounded-[var(--radius-8)] border border-[var(--primary)] bg-transparent text-[13px] font-medium font-[var(--font-sans)] text-[var(--primary)] cursor-pointer"
       >
         {config.action}
       </button>
@@ -220,34 +195,17 @@ export function WaitingCard({ type, className }: WaitingCardProps) {
 
   return (
     <div
-      className={cn(className)}
-      style={{
-        background: 'var(--fill-normal)',
-        borderRadius: 'var(--radius-12)',
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 12,
-      }}
+      className={cn(
+        'flex items-start gap-3 bg-[var(--fill-normal)] rounded-[var(--radius-12)] px-5 py-4',
+        className,
+      )}
     >
-      <span style={{ flexShrink: 0, marginTop: 1 }}>{config.icon}</span>
+      <span className="shrink-0 mt-[1px]">{config.icon}</span>
       <div>
-        <p
-          style={{
-            font: '600 15px/22px var(--font-sans)',
-            color: 'var(--label-alternative)',
-            margin: 0,
-          }}
-        >
+        <p className="text-[15px] leading-[22px] font-semibold font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
           {config.title}
         </p>
-        <p
-          style={{
-            font: '400 13px/18px var(--font-sans)',
-            color: 'var(--label-assistive)',
-            margin: '4px 0 0',
-          }}
-        >
+        <p className="text-[13px] leading-[18px] font-normal font-[var(--font-sans)] text-[var(--label-assistive)] mt-1 mb-0">
           {config.desc}
         </p>
       </div>
