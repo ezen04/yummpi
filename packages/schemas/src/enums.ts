@@ -39,4 +39,10 @@ export const settlementStatusSchema = z.enum([
 
 export const splitMethodSchema = z.enum(['ITEM_BASED', 'EQUAL']);
 
-export const paymentStatusSchema = z.enum(['PENDING', 'PAID', 'EXEMPT']);
+// TRANSFER_REPORTED: Prisma enum 선반영 (① migration PR 머지 전)
+export const paymentStatusSchema = z.enum([
+  'PENDING',
+  'TRANSFER_REPORTED',
+  'PAID',
+  'EXEMPT',
+]);
