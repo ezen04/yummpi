@@ -4,7 +4,7 @@ import * as React from 'react';
 import {
   Bell, Home, Users, MapPin, Calendar, Check, Plus, Close,
   ChevronLeft, ChevronRight, ChevronDown, Settings, Share,
-  Wallet as WalletIcon, Pencil, Camera, ArrowUpRight, Sparkles,
+  Coins, Pencil, Camera, ArrowUpRight, Sparkles,
   Flame, Send, Search, User, Receipt, Star, Bookmark,
   MoreVertical, LogOut, Eye, Clock,
 } from '@yummpi/ui';
@@ -24,7 +24,7 @@ const ICON_MAP = {
   'chevron-down':  ChevronDown,
   settings:        Settings,
   share:           Share,
-  wallet:          WalletIcon,
+  wallet:          Coins,
   pen:             Pencil,
   camera:          Camera,
   'arrow-up-right':ArrowUpRight,
