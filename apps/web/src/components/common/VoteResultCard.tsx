@@ -34,25 +34,14 @@ export function VoteResultCard({
 
   return (
     <div
-      className={cn(className)}
-      style={{
-        background: 'var(--bg-elevated)',
-        border: '1px solid var(--line-normal)',
-        borderRadius: 'var(--radius-12)',
-        padding: '16px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 14,
-      }}
+      className={cn(
+        'flex flex-col gap-[14px] bg-[var(--bg-elevated)] border border-[var(--line-normal)]',
+        'rounded-[var(--radius-12)] px-5 py-4',
+        className,
+      )}
     >
       {title && (
-        <p
-          style={{
-            font: '600 15px/22px var(--font-sans)',
-            color: 'var(--label-normal)',
-            margin: 0,
-          }}
-        >
+        <p className="text-[15px] leading-[22px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)] m-0">
           {title}
         </p>
       )}
@@ -67,14 +56,7 @@ export function VoteResultCard({
         />
       ))}
 
-      <p
-        style={{
-          font: '400 12px var(--font-sans)',
-          color: 'var(--label-assistive)',
-          margin: 0,
-          textAlign: 'right',
-        }}
-      >
+      <p className="text-[12px] font-normal font-[var(--font-sans)] text-[var(--label-assistive)] m-0 text-right">
         총 {totalVotes}표
       </p>
     </div>
