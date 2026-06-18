@@ -21,54 +21,35 @@ export function VoteResultBar({
   const isActive = variant === 'active';
 
   return (
-    <div
-      className={cn(className)}
-      style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+    <div className={cn('flex flex-col gap-[6px]', className)}>
+      <div className="flex justify-between items-center">
         <span
-          style={{
-            font: `${isActive ? '600' : '400'} 14px/20px var(--font-sans)`,
-            color: isActive
-              ? 'var(--label-normal)'
-              : 'var(--label-alternative)',
-          }}
+          className={cn(
+            'text-[14px] leading-5 font-[var(--font-sans)]',
+            isActive
+              ? 'font-semibold text-[var(--label-normal)]'
+              : 'font-normal text-[var(--label-alternative)]',
+          )}
         >
           {label}
         </span>
         <span
-          style={{
-            font: '400 13px var(--font-sans)',
-            color: isActive ? 'var(--primary)' : 'var(--label-assistive)',
-          }}
+          className={cn(
+            'text-[13px] font-normal font-[var(--font-sans)]',
+            isActive ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]',
+          )}
         >
           {votes}표 ({percent}%)
         </span>
       </div>
 
-      {/* 퍼센트 바 */}
-      <div
-        style={{
-          height: 8,
-          borderRadius: 4,
-          background: 'var(--fill-normal)',
-          overflow: 'hidden',
-        }}
-      >
+      <div className="h-2 rounded bg-[var(--fill-normal)] overflow-hidden">
         <div
-          style={{
-            height: '100%',
-            width: `${percent}%`,
-            borderRadius: 4,
-            background: isActive ? 'var(--primary)' : 'var(--fill-strong)',
-            transition: 'width 0.3s ease',
-          }}
+          className={cn(
+            'h-full rounded transition-[width] duration-300 ease-in-out',
+            isActive ? 'bg-[var(--primary)]' : 'bg-[var(--fill-strong)]',
+          )}
+          style={{ width: `${percent}%` }}
         />
       </div>
     </div>
