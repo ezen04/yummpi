@@ -141,9 +141,9 @@
 
 | 상태 | Variant | 설명 |
 |:---:|:---|:---|
-| ⬜ | `top` / `top-hover` | 목록 첫 번째 아이템 |
-| ⬜ | `mid` / `mid-hover` | 목록 중간 아이템 |
-| ⬜ | `end` / `end-hover` | 목록 마지막 아이템 |
+| ✅ | `top` / `top-hover` | 목록 첫 번째 아이템 |
+| ✅ | `mid` / `mid-hover` | 목록 중간 아이템 |
+| ✅ | `end` / `end-hover` | 목록 마지막 아이템 |
 
 ---
 
@@ -153,7 +153,7 @@
 |:---:|:---|:---|:---|
 | ✅ | `Check` | `active` / `inactive` | 소비 항목 선택 (정산) |
 | ✅ | `Radio` | `active` / `inactive` | 정산 방식 선택 |
-| ⬜ | `Toggle` | `active` / `inactive` | 알림 설정 on/off |
+| ✅ | `Toggle` | `active` / `inactive` | 알림 설정 on/off |
 | ⬜ | `Menu-check` | `active` / `inactive` | 메뉴 체크 (OCR 검수) |
 
 ---
@@ -218,8 +218,8 @@
 
 | 상태 | Variant | 사용 화면 |
 |:---:|:---|:---|
-| ⬜ | `Outline/active` | 음식 종류 필터, 정렬 옵션 |
-| ⬜ | `Outline/inactive` | — |
+| ✅ | `Outline/active` | 음식 종류 필터, 정렬 옵션 |
+| ✅ | `Outline/inactive` | — |
 
 ---
 
@@ -227,14 +227,14 @@
 
 | 상태 | Variant | 설명 | 사용 화면 |
 |:---:|:---|:---|:---|
-| ⬜ | `Person/me` | 내 프로필 행 | 참석자 목록 |
+| ✅ | `Person/me` | 내 프로필 행 | 참석자 목록 |
 | ⬜ | `Person/me/attendance` | 내 출석 상태 | 출석 체크 |
 | ⬜ | `Person/me/result` | 내 투표 결과 | 투표 결과 |
-| ⬜ | `Person/other` | 다른 참여자 행 | 참석자 목록 |
-| ⬜ | `Person/other/admin` | 주최자 표시 포함 | — |
-| ⬜ | `Person/other-inactive` | 비활성 참여자 | — |
+| ✅ | `Person/other` | 다른 참여자 행 | 참석자 목록 |
+| ✅ | `Person/other/admin` | 주최자 표시 포함 | — |
+| ✅ | `Person/other-inactive` | 비활성 참여자 | — |
 | ⬜ | `Person/other/result` | 다른 참여자 결과 | 투표 결과 |
-| ⬜ | `menu` | 설정 메뉴 행 | 마이페이지, 설정 |
+| ✅ | `menu` | 설정 메뉴 행 | 마이페이지, 설정 |
 | ⬜ | `result-b` | 투표 결과 (b타입) | 장소 투표 |
 | ⬜ | `result-r` | 투표 결과 (r타입) | 장소 투표 |
 
@@ -244,8 +244,8 @@
 
 | 상태 | 컴포넌트 | Variant | 설명 |
 |:---:|:---|:---|:---|
-| ⬜ | `YAvatar` | `host/single` | 주최자 아바타 |
-| ⬜ | `YAvatar` | `guest/single` | 게스트 아바타 |
+| ✅ | `YAvatar` | `host/single` | 주최자 아바타 |
+| ✅ | `YAvatar` | `guest/single` | 게스트 아바타 |
 | ⬜ | `attendance` | `host` | 출석 호스트 |
 | ⬜ | `attendance` | `user` | 출석 일반 참여자 |
 | ⬜ | `attendance` | `user-hover` | 호버 상태 |
@@ -260,12 +260,12 @@
 
 | 상태 | Variant | 카테고리 |
 |:---:|:---|:---|
-| ⬜ | `korean` | 한식 |
-| ⬜ | `japanese` | 일식 |
-| ⬜ | `chinese` | 중식 |
-| ⬜ | `meat` | 고기 |
-| ⬜ | `cafe` | 카페 |
-| ⬜ | `western` | 양식 |
+| ✅ | `korean` | 한식 |
+| ✅ | `japanese` | 일식 |
+| ✅ | `chinese` | 중식 |
+| ✅ | `meat` | 고기 |
+| ✅ | `cafe` | 카페 |
+| ✅ | `western` | 양식 |
 
 ---
 
@@ -313,8 +313,8 @@
 | ✅ | `tipbox` | `normal` | 일반 안내 팁 |
 | ✅ | `tipbox` | `completed-vote` | 투표 완료 안내 |
 | ✅ | `tipbox` | `completed-title` | 제목 포함 완료 안내 |
-| ⬜ | `Confirmbox` | `basic` | 확인 다이얼로그 |
-| ⬜ | `Confirmbox` | `hover` | 확인 다이얼로그 호버 |
+| ✅ | `Confirmbox` | `basic` | 확인 다이얼로그 |
+| ✅ | `Confirmbox` | `hover` | 확인 다이얼로그 호버 |
 
 ---
 

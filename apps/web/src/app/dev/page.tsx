@@ -14,6 +14,13 @@ import { Input } from '../../components/common/Input';
 import { Check } from '../../components/common/Check';
 import { Radio, RadioGroup } from '../../components/common/Radio';
 import { BottomSheet } from '../../components/common/BottomSheet';
+import { Chip } from '../../components/common/Chip';
+import { Toggle } from '../../components/common/Toggle';
+import { Selectbox } from '../../components/common/Selectbox';
+import { YAvatar } from '../../components/common/YAvatar';
+import { Thumbnail } from '../../components/common/Thumbnail';
+import { Confirmbox } from '../../components/common/Confirmbox';
+import { PersonItem, MenuItem } from '../../components/common/List';
 import { Notification } from '../../components/common/Notification';
 import { Tipbox } from '../../components/common/Tipbox';
 import { Step } from '../../components/common/Step';
@@ -40,6 +47,7 @@ import {
 
 export default function DevPage() {
   const [bsOpen, setBsOpen] = useState<'background' | 'non-background' | 'solo' | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-[var(--bg-normal)]">
@@ -471,6 +479,113 @@ export default function DevPage() {
               value="ITEM_BASED"
               onChange={() => {}}
             />
+          </div>
+        </section>
+
+        {/* ── Chip ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Chip</h2>
+          <div className="flex flex-wrap gap-2">
+            <Chip active>한식</Chip>
+            <Chip active={false}>일식</Chip>
+            <Chip active={false}>중식</Chip>
+            <Chip active={false}>고기</Chip>
+            <Chip active={false}>카페</Chip>
+          </div>
+        </section>
+
+        {/* ── Toggle ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Toggle</h2>
+          <div className="space-y-3">
+            <Toggle checked={false} label="송금 독촉 알림 (inactive)" />
+            <Toggle checked={true} label="모임 알림 (active)" />
+            <Toggle checked={true} label="비활성" disabled />
+          </div>
+        </section>
+
+        {/* ── Selectbox ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Selectbox</h2>
+          <Selectbox
+            options={[
+              { value: 'ITEM_BASED', label: '항목별 정산' },
+              { value: 'EQUAL', label: '1/N 균등 정산' },
+            ]}
+            value="ITEM_BASED"
+            onChange={() => {}}
+          />
+        </section>
+
+        {/* ── YAvatar ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">YAvatar</h2>
+          <div className="flex gap-3 items-center">
+            <YAvatar variant="host" name="김주최" size={48} />
+            <YAvatar variant="guest" name="이참여" size={48} />
+            <YAvatar variant="host" name="박호스트" size={40} />
+            <YAvatar variant="guest" name="최게스트" size={32} />
+          </div>
+        </section>
+
+        {/* ── Thumbnail ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Thumbnail</h2>
+          <div className="flex gap-2 flex-wrap">
+            <Thumbnail category="korean" />
+            <Thumbnail category="japanese" />
+            <Thumbnail category="chinese" />
+            <Thumbnail category="meat" />
+            <Thumbnail category="cafe" />
+            <Thumbnail category="western" />
+          </div>
+        </section>
+
+        {/* ── Confirmbox ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">Confirmbox</h2>
+          <button
+            onClick={() => setConfirmOpen(true)}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-8)', border: '1px solid var(--line-normal)', font: '400 14px var(--font-sans)', cursor: 'pointer' }}
+          >
+            다이얼로그 열기
+          </button>
+          <Confirmbox
+            open={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={() => setConfirmOpen(false)}
+            title="정산을 확정할까요?"
+            body="확정 후에는 금액을 수정할 수 없어요"
+            confirmLabel="확정"
+          />
+        </section>
+
+        {/* ── List ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">List</h2>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">Person</p>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonItem variant="me" name="김윤아" isHost={true} status="paid" />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonItem variant="other" name="이지훈" status="unpaid" />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonItem variant="other-inactive" name="박민수" />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">Menu</p>
+            <div style={{ borderTop: '1px solid var(--line-normal)' }}>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuItem label="계좌 관리" />
+              </div>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuItem label="알림 설정" value="켜짐" />
+              </div>
+              <MenuItem label="탈퇴하기" destructive />
+            </div>
           </div>
         </section>
 
