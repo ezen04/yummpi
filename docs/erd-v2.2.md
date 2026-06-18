@@ -23,7 +23,13 @@
 - `meeting.host_user_id` ↔ `meeting_members(role=HOST).user_id` 항상 일치 (모임 생성 시 HOST 멤버 자동 생성)
 - 확정 장소의 단일 진실은 `meeting.confirmed_candidate_id`
 - `receipt: subtotal + tax + service_charge − discount == total`
-- `settlement.total_amount == SUM(meeting의 모든 receipt.total_amount)`
+- `settlement.total_amount == SUM(meeting의 모든 receipt.total_amount)` — **정산에 포함되는 receipt가 1개 이상 있고, 각 `receipt.total_amount`가 확정된 경우에만** 적용
+  - receipt 없는 EQUAL 정산: 요청의 `totalAmount`를 `settlements.total_amount`로 저장 → 위 합산 불변식 **적용 제외**
+  - receipt 있는 EQUAL/ITEM_BASED 정산: 서버가 `receipts.total_amount` 합산으로 `settlements.total_amount` 결정
+- ITEM_BASED: 각 멤버 `settlement_members.final_amount == SUM(item_assignments.assigned_amount)`
+- `SUM(settlement_members.final_amount) == settlements.total_amount`
+- `item_assignments`는 모임 내 모든 receipt의 `receipt_items`를 통틀어 저장
+- EQUAL 정산: `item_assignments`를 생성하지 않을 수 있으며, `settlement_members.final_amount = settlements.total_amount / ATTENDING 멤버 수`
 - 카카오 회원의 kakaoId = `account.provider_account_id` WHERE `provider='kakao'` (USER에 중복 저장 안 함)
 
 **정산 단계별 잠금 규칙** — v2.1과 동일.
