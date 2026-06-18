@@ -126,7 +126,8 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ```
 - 건너뛰기·역행 시 `409 INVALID_MEETING_STATUS_TRANSITION`
 
-### `DELETE /api/v1/meetings/:meetingId` — 소프트 삭제(`CANCELLED`, COMPLETED 후 불가)
+### `DELETE /api/v1/meetings/:meetingId` — 소프트 삭제(`CANCELLED`, **SETTLING 진입 이후 불가**)
+- 정산 시작(SETTLING)·완료(COMPLETED)·이미 취소된 모임은 삭제 불가 → `409 INVALID_MEETING_STATUS_TRANSITION`. (CLAUDE.md 엣지케이스와 통일, 2026-06-17 결정)
 ### `GET /api/v1/meetings/invite/:inviteCode` — 초대 링크 정보 (비로그인 허용)
 
 ---
@@ -258,14 +259,26 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - 부가세·봉사료·할인·반올림 차액을 소비 비율로 배분 (영수증별 비율 배분 후 합산) → `SETTLEMENT_MEMBER` upsert
 - `Σ finalAmount ≠ totalAmount` 시 `422 SETTLEMENT_AMOUNT_MISMATCH`
 
-### `POST .../settlements/:settlementId/confirm` — 확정 (호스트, 금액 잠금 + PAYMENT 생성)
-### `POST .../settlements/:settlementId/reopen` — 재오픈 (전원 `PENDING`일 때만)
+### `POST .../settlements/:settlementId/confirm` — 확정 (호스트, 금액 잠금)
+- Payment는 생성하지 않음
+- 보장 데이터: `Settlement.status = CONFIRMED`, `confirmedAt != null`, 참여자별 `SettlementMember`, 확정된 `SettlementMember.finalAmount`
+
+### `POST .../settlements/:settlementId/reopen` — 재오픈
+- MVP 확정 계약에서 제외. P1 확장 시 Payment 상태 정책과 함께 재논의
 
 ---
 
 ## 11. 송금 현황 API
 
+### `POST /api/v1/meetings/:meetingId/payments/initialize` — Payment 초기화
+- ⑤ 송금 도메인 소유 API
+- 전제: 해당 모임의 Settlement가 `CONFIRMED`이고 `SettlementMember.finalAmount`가 확정되어 있어야 함
+- 동작: 누락된 Payment를 `SettlementMember` 기준으로 idempotent 생성
+- 이미 생성된 Payment는 중복 생성하지 않고 성공 처리
+- 송금 화면 진입 전 필수 호출
+
 ### `GET /api/v1/meetings/:meetingId/payments` — 현황 (`total·collected·statuses[]`)
+- Payment를 생성하지 않는 순수 조회 API
 ### `PATCH .../payments/:paymentId` — 완료 처리 (`status: PAID`, 본인/호스트)
 ### `POST .../complete` — 모임 종료 (전원 `PAID|EXEMPT` 시 `COMPLETED`, 아니면 `422 PAYMENTS_NOT_COMPLETED`)
 
@@ -287,8 +300,17 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ### 연결 인증
 ```tsx
-io(SOCKET_URL, { auth: { meetingId, memberId, sessionToken } })
+// 회원 / 게스트 공통
+io(SOCKET_URL, {
+  auth: { meetingId },
+  withCredentials: true,
+})
 ```
+> 토큰은 httpOnly 쿠키로 발급되어 클라이언트 JS에서 읽을 수 없다.
+> 서버는 `socket.handshake.headers.cookie`에서 파싱한다.
+> - 회원: `next-auth.session-token` (dev) / `__Secure-next-auth.session-token` (prod)
+> - 게스트: `yummpi_guest_{meetingId}`
+> - `memberId`는 서버가 토큰으로 DB 조회해 `socket.data`에 저장. 클라이언트가 전달하지 않는다.
 
 ### 클라이언트 → 서버
 
@@ -322,6 +344,7 @@ io(SOCKET_URL, { auth: { meetingId, memberId, sessionToken } })
 | --- | --- | --- |
 | `UNAUTHORIZED` | 401 | 인증 없음 |
 | `FORBIDDEN` | 403 | 권한 없음 |
+| `VALIDATION_ERROR` ★ | 400 | 요청 바디/파라미터 검증 실패 |
 | `MEETING_NOT_FOUND` | 404 | 모임 없음 |
 | `MEMBER_NOT_FOUND` | 404 | 참석자 없음 |
 | `CANDIDATE_NOT_FOUND` | 404 | 후보 없음 |
@@ -330,7 +353,9 @@ io(SOCKET_URL, { auth: { meetingId, memberId, sessionToken } })
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
-| `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 상태 전이 |
+| `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 모임 상태 전이 |
+| `INVALID_SETTLEMENT_STATUS` ★★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
+| `INVALID_PAYMENT_STATUS` ★★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
 | `VOTING_CLOSED` | 409 | 투표 종료 |
 | `ALREADY_CONFIRMED_PLACE` | 409 | 장소 확정됨 |
 | `MEETING_EXPIRED` | 409 | 모임 만료 |
@@ -343,8 +368,9 @@ io(SOCKET_URL, { auth: { meetingId, memberId, sessionToken } })
 | `PAYMENTS_NOT_COMPLETED` | 422 | 미송금 존재 |
 | `OCR_REQUEST_FAILED` | 502 | OCR 실패 |
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
+| `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
-★ = v2.1 신규
+★ = v2.1 신규 / ★★ = Payment Phase 03 신규
 
 ---
 

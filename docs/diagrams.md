@@ -60,11 +60,12 @@ flowchart TD
     G --> H[분배 엔진 calculate\n모임당 SETTLEMENT 1건에 전체 영수증 합산\n봉사료·세금 비율 배분 + 1원 보정]
     H --> I{Σ final == total?}
     I -- 아니오 --> H
-    I -- 예 --> J[정산 확정 — 호스트\n금액 잠금 + PAYMENT 생성]
-    J --> K[송금 딥링크\n토스/카카오페이]
+    I -- 예 --> J[정산 확정 — 호스트\n금액 잠금 + SETTLEMENT_MEMBER 확정]
+    J --> P[Payment 초기화 API\nPOST /payments/initialize]
+    P --> K[송금 딥링크\n토스/카카오페이]
     K --> L[송금 현황\nD+1/D+3 독촉 알림 BullMQ]
     L --> M[전원 PAID → 모임 COMPLETED]
-    J -.->|수정 필요 시| N[재오픈\n전원 PENDING일 때만]
+    J -.->|추후 확장| N[재오픈\nPayment 정책 재논의]
     N -.-> E
 ```
 

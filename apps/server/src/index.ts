@@ -1,20 +1,41 @@
-import { createServer } from 'http'
-import { Server } from 'socket.io'
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { pubClient, subClient } from './lib/redis.js';
+import { registerAuthMiddleware } from './middleware/auth.js';
+import { registerMeetingHandlers } from './handlers/meetingHandlers.js';
+import type { SocketData } from './middleware/auth.js';
 
-const httpServer = createServer()
+const PORT = process.env.PORT ?? 4000;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? 'http://localhost:3000';
+
+const httpServer = createServer();
 const io = new Server(httpServer, {
-  cors: { origin: '*' },
-})
+  cors: { origin: CLIENT_ORIGIN, credentials: true },
+});
 
-const PORT = process.env.PORT ?? 4000
+async function bootstrap() {
+  await Promise.all([pubClient.ping(), subClient.ping()]);
+  io.adapter(createAdapter(pubClient, subClient));
+  console.log('[Socket] Redis Adapter 연결 완료');
 
-io.on('connection', (socket) => {
-  console.log(`connected: ${socket.id}`)
-  socket.on('disconnect', () => {
-    console.log(`disconnected: ${socket.id}`)
-  })
-})
+  registerAuthMiddleware(io);
 
-httpServer.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`)
-})
+  io.on('connection', (socket) => {
+    const { memberId, meetingId } = socket.data as SocketData;
+    console.log(
+      `[connected] member=${memberId} meeting=${meetingId} id=${socket.id}`
+    );
+
+    registerMeetingHandlers(io, socket as typeof socket & { data: SocketData });
+  });
+
+  httpServer.listen(PORT, () => {
+    console.log(`[Socket] 서버 실행 중 — port ${PORT}`);
+  });
+}
+
+bootstrap().catch((err) => {
+  console.error('[Socket] 부트스트랩 실패:', err);
+  process.exit(1);
+});

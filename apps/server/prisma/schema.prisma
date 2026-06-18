@@ -88,6 +88,7 @@ enum SplitMethod {
 
 enum PaymentStatus {
   PENDING
+  TRANSFER_REPORTED
   PAID
   EXEMPT
 
@@ -316,7 +317,7 @@ model Receipt {
   id                  String    @id @default(uuid()) @db.Uuid
   meetingId           String    @map("meeting_id") @db.Uuid
   uploadedByMemberId  String?   @map("uploaded_by_member_id") @db.Uuid
-  objectKey           String    @unique @map("object_key")
+  objectKey           String?   @unique @map("object_key")
   imageUrl            String?   @map("image_url")
   ocrStatus           OcrStatus @default(PENDING) @map("ocr_status")
   rawOcrJson          Json?     @map("raw_ocr_json") // OCR 원본·미분류 라인
