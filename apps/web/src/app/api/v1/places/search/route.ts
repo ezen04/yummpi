@@ -1,8 +1,7 @@
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireUser } from '@/lib/current-member';
 
-const KAKAO_KEYWORD_URL =
-  'https://dapi.kakao.com/v2/local/search/keyword.json';
+const KAKAO_KEYWORD_URL = 'https://dapi.kakao.com/v2/local/search/keyword.json';
 
 interface KakaoDocument {
   id: string;
@@ -50,7 +49,10 @@ export const GET = handleRoute(async (req: Request) => {
   if (radius) {
     const radiusNum = Number(radius);
     if (isNaN(radiusNum) || radiusNum < 1 || radiusNum > 20000) {
-      throw new ApiError('VALIDATION_ERROR', 'radius는 1~20000 사이 정수여야 합니다.');
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        'radius는 1~20000 사이 정수여야 합니다.'
+      );
     }
     params.set('radius', radius);
   }

@@ -8,8 +8,7 @@ const globalForEmitter = globalThis as unknown as {
   emitter: Emitter | undefined;
 };
 
-const emitterClient =
-  globalForEmitter.emitterClient ?? new Redis(redisUrl);
+const emitterClient = globalForEmitter.emitterClient ?? new Redis(redisUrl);
 
 emitterClient.on('error', (err) =>
   console.error('[socket-emitter] Redis 오류:', err)

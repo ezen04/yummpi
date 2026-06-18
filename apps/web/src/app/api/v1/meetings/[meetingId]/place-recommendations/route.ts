@@ -51,7 +51,10 @@ async function searchKakaoByCategory(
 }
 
 export const GET = handleRoute(
-  async (req: Request, { params }: { params: Promise<{ meetingId: string }> }) => {
+  async (
+    req: Request,
+    { params }: { params: Promise<{ meetingId: string }> }
+  ) => {
     const { meetingId } = await params;
     await requireMember(meetingId);
 
@@ -79,7 +82,8 @@ export const GET = handleRoute(
 
     const radius = meeting.placeSearchRadiusM ?? DEFAULT_RADIUS_M;
     // foodTypes가 비어있으면 '음식점' 전체로 fallback
-    const categories = meeting.foodTypes.length > 0 ? meeting.foodTypes : ['음식점'];
+    const categories =
+      meeting.foodTypes.length > 0 ? meeting.foodTypes : ['음식점'];
 
     // 카카오 API: x = 경도(lng), y = 위도(lat)
     let allResults: Awaited<ReturnType<typeof searchKakaoByCategory>>[];
@@ -90,7 +94,10 @@ export const GET = handleRoute(
         )
       );
     } catch {
-      throw new ApiError('KAKAO_API_FAILED', '카카오 장소 검색에 실패했습니다.');
+      throw new ApiError(
+        'KAKAO_API_FAILED',
+        '카카오 장소 검색에 실패했습니다.'
+      );
     }
 
     // 중복 제거(externalPlaceId 기준) → 거리순 정렬 → 상위 10개

@@ -6,7 +6,10 @@ import type { MeetingStatus } from '@prisma/client';
 const MAX_CANDIDATES = 5;
 
 export const GET = handleRoute(
-  async (_req: Request, { params }: { params: Promise<{ meetingId: string }> }) => {
+  async (
+    _req: Request,
+    { params }: { params: Promise<{ meetingId: string }> }
+  ) => {
     const { meetingId } = await params;
     const member = await requireMember(meetingId);
 
@@ -31,10 +34,7 @@ export const GET = handleRoute(
             select: { votes: true },
           },
         },
-        orderBy: [
-          { votes: { _count: 'desc' } },
-          { createdAt: 'asc' },
-        ],
+        orderBy: [{ votes: { _count: 'desc' } }, { createdAt: 'asc' }],
       }),
       prisma.vote.findFirst({
         where: { meetingId, memberId: member.id },
@@ -77,7 +77,9 @@ export const GET = handleRoute(
           : null,
         voteCount: c._count.votes,
         voteRate:
-          totalVoters > 0 ? Math.round((c._count.votes / totalVoters) * 100) : 0,
+          totalVoters > 0
+            ? Math.round((c._count.votes / totalVoters) * 100)
+            : 0,
       })),
     });
   }
@@ -98,7 +100,10 @@ interface PostBody {
 }
 
 export const POST = handleRoute(
-  async (req: Request, { params }: { params: Promise<{ meetingId: string }> }) => {
+  async (
+    req: Request,
+    { params }: { params: Promise<{ meetingId: string }> }
+  ) => {
     const { meetingId } = await params;
     const member = await assertHost(meetingId);
 
@@ -119,13 +124,19 @@ export const POST = handleRoute(
       );
     }
     if (candidateCount >= MAX_CANDIDATES) {
-      throw new ApiError('VALIDATION_ERROR', `후보는 최대 ${MAX_CANDIDATES}개까지 추가할 수 있습니다.`);
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        `후보는 최대 ${MAX_CANDIDATES}개까지 추가할 수 있습니다.`
+      );
     }
 
     const body = (await req.json()) as PostBody;
 
     if (!body.externalPlaceId?.trim() || !body.name?.trim()) {
-      throw new ApiError('VALIDATION_ERROR', 'externalPlaceId와 name은 필수입니다.');
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        'externalPlaceId와 name은 필수입니다.'
+      );
     }
     if (!body.lat || !body.lng) {
       throw new ApiError('VALIDATION_ERROR', '좌표(lat, lng)는 필수입니다.');
@@ -136,18 +147,25 @@ export const POST = handleRoute(
     // REJECTED 풀 항목 확인 → ACTIVE로 승격(upsert) 또는 신규 생성
     const existing = await prisma.placeCandidate.findFirst({
       where: { meetingId, externalPlaceId },
-      include: { createdBy: { select: { id: true, nickname: true, role: true } } },
+      include: {
+        createdBy: { select: { id: true, nickname: true, role: true } },
+      },
     });
 
     if (existing) {
       if (existing.status === 'ACTIVE') {
-        throw new ApiError('CANDIDATE_ALREADY_EXISTS', '이미 투표 후보로 등록된 장소입니다.');
+        throw new ApiError(
+          'CANDIDATE_ALREADY_EXISTS',
+          '이미 투표 후보로 등록된 장소입니다.'
+        );
       }
       // REJECTED → ACTIVE 승격
       const promoted = await prisma.placeCandidate.update({
         where: { id: existing.id },
         data: { status: 'ACTIVE' },
-        include: { createdBy: { select: { id: true, nickname: true, role: true } } },
+        include: {
+          createdBy: { select: { id: true, nickname: true, role: true } },
+        },
       });
       return apiSuccess(
         {
