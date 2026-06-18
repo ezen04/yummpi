@@ -40,48 +40,22 @@ export function Header({
 }: HeaderProps) {
   const isDashboard = !!greeting;
 
+  const ICON_BTN = 'flex items-center justify-center w-10 h-10 bg-transparent border-none cursor-pointer text-[var(--label-normal)]';
+
   // mypage: 중앙 타이틀 + 오른쪽 설정 아이콘
   if (isMypage) {
     return (
       <header
-        className={cn(className)}
-        style={{
-          height: 56,
-          background: 'var(--bg-normal)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingLeft: 12,
-          paddingRight: 12,
-          position: 'relative',
-          flexShrink: 0,
-        }}
+        className={cn(
+          'h-14 bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0',
+          className,
+        )}
       >
-        <span
-          style={{
-            font: '600 18px/26px var(--font-sans)',
-            color: 'var(--label-normal)',
-          }}
-        >
+        <span className="text-[18px] leading-[26px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)]">
           {title ?? '마이페이지'}
         </span>
         {onSettings && (
-          <button
-            onClick={onSettings}
-            style={{
-              position: 'absolute',
-              right: 12,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 40,
-              height: 40,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--label-normal)',
-            }}
-          >
+          <button onClick={onSettings} className={cn(ICON_BTN, 'absolute right-3')}>
             <Settings size={22} strokeWidth={1.5} />
           </button>
         )}
@@ -91,87 +65,38 @@ export function Header({
 
   return (
     <header
-      className={cn(className)}
-      style={{
-        height: 56,
-        background: 'var(--bg-normal)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: isDashboard ? 20 : 8,
-        paddingRight: isDashboard ? 20 : 12,
-        flexShrink: 0,
-      }}
+      className={cn(
+        'h-14 bg-[var(--bg-normal)] flex items-center justify-between shrink-0',
+        isDashboard ? 'px-5' : 'pl-2 pr-3',
+        className,
+      )}
     >
       {/* 왼쪽 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
+      <div className="flex items-center gap-1 flex-1">
         {onBack && (
-          <button
-            onClick={onBack}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 40,
-              height: 40,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--label-normal)',
-              flexShrink: 0,
-            }}
-          >
+          <button onClick={onBack} className={cn(ICON_BTN, 'shrink-0')}>
             <ChevronLeft size={24} strokeWidth={1.5} />
           </button>
         )}
 
         {greeting ? (
           <div>
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 400,
-                color: 'var(--label-alternative)',
-                lineHeight: '20px',
-              }}
-            >
+            <p className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-alternative)]">
               {greeting}
             </p>
-            <p
-              style={{
-                fontSize: 19,
-                fontWeight: 600,
-                color: 'var(--label-normal)',
-                lineHeight: '30px',
-              }}
-            >
+            <p className="text-[19px] leading-[30px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)]">
               {title}
             </p>
           </div>
         ) : (
           <div>
             {title && (
-              <p
-                style={{
-                  fontSize: 18,
-                  fontWeight: 400,
-                  color: 'var(--label-normal)',
-                  lineHeight: '26px',
-                }}
-              >
+              <p className="text-[18px] leading-[26px] font-normal font-[var(--font-sans)] text-[var(--label-normal)]">
                 {title}
               </p>
             )}
             {subtitle && (
-              <p
-                style={{
-                  fontSize: 12,
-                  fontWeight: 400,
-                  color: 'var(--label-alternative)',
-                  lineHeight: '16px',
-                  marginTop: 1,
-                }}
-              >
+              <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] mt-[1px]">
                 {subtitle}
               </p>
             )}
@@ -180,80 +105,29 @@ export function Header({
       </div>
 
       {/* 오른쪽 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div className="flex items-center gap-1">
         {statusVariant && statusLabel && (
           <Badge variant={statusVariant}>{statusLabel}</Badge>
         )}
         {badge && !statusVariant && <Badge variant="green">{badge}</Badge>}
 
         {showBell && (
-          <button
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 42,
-              height: 42,
-              background: 'var(--bg-alternative)',
-              borderRadius: 'var(--radius-full)',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--label-normal)',
-            }}
-          >
+          <button className="relative flex items-center justify-center w-[42px] h-[42px] bg-[var(--bg-alternative)] rounded-[var(--radius-full)] border-none cursor-pointer text-[var(--label-normal)]">
             <Bell size={22} strokeWidth={1.5} />
             {hasNotification && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 9,
-                  right: 10,
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  background: 'var(--primary)',
-                  border: '1.5px solid var(--bg-normal)',
-                }}
-              />
+              <span className="absolute top-[9px] right-[10px] w-2 h-2 rounded-full bg-[var(--primary)] border-[1.5px] border-[var(--bg-normal)]" />
             )}
           </button>
         )}
 
         {onSettings && (
-          <button
-            onClick={onSettings}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 40,
-              height: 40,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--label-normal)',
-            }}
-          >
+          <button onClick={onSettings} className={ICON_BTN}>
             <Settings size={22} strokeWidth={1.5} />
           </button>
         )}
 
         {onClose && (
-          <button
-            onClick={onClose}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 40,
-              height: 40,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--label-normal)',
-            }}
-          >
+          <button onClick={onClose} className={ICON_BTN}>
             <Close size={22} strokeWidth={1.5} />
           </button>
         )}
