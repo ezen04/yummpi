@@ -103,7 +103,8 @@ MVP의 송금하기는 실제 계좌 송금이 아니라 `Payment` 기반의 표
 ### 처리 흐름
 
 1. 송금 화면 진입 시 `POST /payments/initialize`를 먼저 호출한다.
-2. `GET /payments`로 송금 현황과 `transferMock` 표시 데이터를 조회한다.
+2. `GET /payments`로 송금 현황을 조회한다.
+   `transferMock`은 현재 `null`로 내려오므로 FE에서 `Payment.amount`와 호스트 닉네임으로 직접 구성한다.
 3. 사용자가 내 Payment의 `송금하기`를 누르면 송금 정보 확인 화면으로 이동한다.
 4. 송금 수단을 선택한다. 선택값은 FE UI 상태로 충분하며 저장은 필수 아님.
 5. 송금 확인 화면에서 금액과 수신자 라벨을 다시 보여준다.
