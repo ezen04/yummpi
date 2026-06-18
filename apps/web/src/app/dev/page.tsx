@@ -20,7 +20,9 @@ import { Selectbox } from '../../components/common/Selectbox';
 import { YAvatar } from '../../components/common/YAvatar';
 import { Thumbnail } from '../../components/common/Thumbnail';
 import { Confirmbox } from '../../components/common/Confirmbox';
-import { PersonItem, MenuItem } from '../../components/common/List';
+import { PersonItem, MenuItem, PersonAttendanceItem, PersonResultItem, ResultRow, MenuCheckItem } from '../../components/common/List';
+import { IconButton } from '../../components/common/IconButton';
+import { SolidChip } from '../../components/common/Chip';
 import { TodoCard, WaitingCard } from '../../components/common/GroupDetailCard';
 import { Notification } from '../../components/common/Notification';
 import { VoteResultBar } from '../../components/common/VoteResultBar';
@@ -514,6 +516,10 @@ export default function DevPage() {
             <Chip active={false}>고기</Chip>
             <Chip active={false}>카페</Chip>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <SolidChip variant="solid-dark">solid-dark</SolidChip>
+            <SolidChip variant="solid-fill">solid-fill</SolidChip>
+          </div>
         </section>
 
         {/* ── Toggle ── */}
@@ -598,6 +604,31 @@ export default function DevPage() {
             </div>
           </div>
           <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">Person / attendance</p>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonAttendanceItem name="김윤아" attended isMe />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonAttendanceItem name="이지훈" attended={false} />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">Person / result</p>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonResultItem name="김윤아" isMe resultLabel="홍대 삼겹살" resultVariant="primary" />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonResultItem name="이지훈" resultLabel="마포 고기집" resultVariant="default" />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">result-r / result-b</p>
+            <div className="space-y-2">
+              <ResultRow variant="r" rank={1} label="홍대 삼겹살 마당" address="서울 마포구 홍대입구" votes={3} percent={60} />
+              <ResultRow variant="b" rank={2} label="마포 고기집" address="서울 마포구 마포대로" votes={2} percent={40} />
+            </div>
+          </div>
+          <div>
             <p className="text-caption1 text-[var(--label-assistive)] mb-1">Menu</p>
             <div style={{ borderTop: '1px solid var(--line-normal)' }}>
               <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
@@ -607,6 +638,18 @@ export default function DevPage() {
                 <MenuItem label="알림 설정" value="켜짐" />
               </div>
               <MenuItem label="탈퇴하기" destructive />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">Menu-check (OCR 검수)</p>
+            <div style={{ borderTop: '1px solid var(--line-normal)' }}>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuCheckItem label="삼겹살 2인분" price={28000} checked />
+              </div>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuCheckItem label="된장찌개" price={9000} />
+              </div>
+              <MenuCheckItem label="소주 2병" price={7000} checked />
             </div>
           </div>
         </section>
@@ -794,7 +837,21 @@ export default function DevPage() {
               <RadiusButton variant="radius-border">독촉</RadiusButton>
               <RadiusButton variant="radius-border-colored">완료 확인</RadiusButton>
               <RadiusButton variant="radius-border-inactive">비활성</RadiusButton>
+              <RadiusButton variant="radius-border-selected">선택됨</RadiusButton>
             </div>
+          </div>
+        </section>
+
+        {/* ── IconButton ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">IconButton</h2>
+          <div className="flex gap-3 flex-wrap">
+            {(['normal','hover','clicked','done','draft','disabled'] as const).map((v) => (
+              <div key={v} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <IconButton variant={v} icon={<Icon name="bell" size={20} color="currentColor" />} />
+                <span style={{ font: '400 10px var(--font-sans)', color: 'var(--label-assistive)' }}>{v}</span>
+              </div>
+            ))}
           </div>
         </section>
 

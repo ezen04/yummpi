@@ -69,6 +69,144 @@ export function PersonItem({ variant, name, avatarSrc, isHost, status }: PersonI
   );
 }
 
+// ── Person/me/attendance ────────────────────────────────────
+
+interface PersonAttendanceItemProps {
+  name: string;
+  avatarSrc?: string;
+  attended?: boolean;
+  isMe?: boolean;
+}
+
+export function PersonAttendanceItem({ name, avatarSrc, attended = false, isMe = false }: PersonAttendanceItemProps) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+      <YAvatar variant="guest" src={avatarSrc} name={name} size={40} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ font: `${isMe ? '600' : '400'} 15px/22px var(--font-sans)`, color: 'var(--label-normal)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {name}
+          {isMe && <span style={{ font: '400 12px var(--font-sans)', color: 'var(--label-assistive)' }}>나</span>}
+        </p>
+      </div>
+      <span
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: '50%',
+          border: attended ? 'none' : '1.5px solid var(--line-normal)',
+          background: attended ? 'var(--primary)' : 'transparent',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {attended && (
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+            <path d="M1 5L4.5 8.5L12 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+    </div>
+  );
+}
+
+// ── Person/me/result & Person/other/result ──────────────────
+
+interface PersonResultItemProps {
+  name: string;
+  avatarSrc?: string;
+  isMe?: boolean;
+  isHost?: boolean;
+  resultLabel: string;
+  resultVariant?: 'primary' | 'secondary' | 'default';
+}
+
+export function PersonResultItem({ name, avatarSrc, isMe, isHost, resultLabel, resultVariant = 'default' }: PersonResultItemProps) {
+  const labelColor = resultVariant === 'primary'
+    ? 'var(--primary)'
+    : resultVariant === 'secondary'
+    ? 'var(--secondary)'
+    : 'var(--label-assistive)';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+      <YAvatar variant={isHost ? 'host' : 'guest'} src={avatarSrc} name={name} size={40} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ font: `${isMe ? '600' : '400'} 15px/22px var(--font-sans)`, color: 'var(--label-normal)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {name}
+          {isMe && <span style={{ font: '400 12px var(--font-sans)', color: 'var(--label-assistive)' }}>나</span>}
+        </p>
+      </div>
+      <span style={{ font: '500 13px var(--font-sans)', color: labelColor, flexShrink: 0 }}>
+        {resultLabel}
+      </span>
+    </div>
+  );
+}
+
+// ── result-r / result-b (투표 결과 장소 행) ─────────────────
+
+interface ResultRowProps {
+  rank: number;
+  label: string;
+  address?: string;
+  votes: number;
+  percent: number;
+  variant: 'r' | 'b';
+}
+
+export function ResultRow({ rank, label, address, votes, percent, variant }: ResultRowProps) {
+  const isR = variant === 'r';
+  const accentColor = isR ? 'var(--primary)' : 'var(--secondary)';
+  const bgColor = isR ? 'rgba(233,75,53,0.06)' : 'rgba(0,118,230,0.06)';
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '12px 16px',
+        borderRadius: 'var(--radius-10)',
+        background: bgColor,
+        border: `1px solid ${accentColor}`,
+      }}
+    >
+      <span
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          background: accentColor,
+          color: 'var(--static-white)',
+          font: '700 13px var(--font-sans)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {rank}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ font: '600 15px/22px var(--font-sans)', color: 'var(--label-normal)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {label}
+        </p>
+        {address && (
+          <p style={{ font: '400 12px/16px var(--font-sans)', color: 'var(--label-assistive)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {address}
+          </p>
+        )}
+      </div>
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+        <p style={{ font: '600 14px var(--font-sans)', color: accentColor, margin: 0 }}>{votes}표</p>
+        <p style={{ font: '400 11px var(--font-sans)', color: 'var(--label-assistive)', margin: '2px 0 0' }}>{percent}%</p>
+      </div>
+    </div>
+  );
+}
+
 // ── Menu 아이템 ─────────────────────────────────────────────
 
 interface MenuItemProps {
@@ -118,6 +256,72 @@ export function MenuItem({ icon, label, value, onClick, destructive = false }: M
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
           <path d="M6 4L10 8L6 12" stroke="var(--label-assistive)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
+      )}
+    </button>
+  );
+}
+
+// ── Menu-check 아이템 (OCR 검수용) ─────────────────────────
+
+interface MenuCheckItemProps {
+  label: string;
+  price?: number;
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  variant?: 'active' | 'inactive';
+}
+
+export function MenuCheckItem({ label, price, checked = false, onChange, variant }: MenuCheckItemProps) {
+  const isActive = variant === 'active' || checked;
+
+  return (
+    <button
+      onClick={() => onChange?.(!isActive)}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '12px 0',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        textAlign: 'left',
+      }}
+    >
+      {/* 체크박스 */}
+      <span
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 'var(--radius-6)',
+          border: isActive ? 'none' : '1.5px solid var(--line-normal)',
+          background: isActive ? 'var(--primary)' : 'transparent',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {isActive && (
+          <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+            <path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+      <span
+        style={{
+          flex: 1,
+          font: `${isActive ? '500' : '400'} 15px/22px var(--font-sans)`,
+          color: isActive ? 'var(--label-normal)' : 'var(--label-alternative)',
+        }}
+      >
+        {label}
+      </span>
+      {price !== undefined && (
+        <span style={{ font: `${isActive ? '600' : '400'} 14px var(--font-sans)`, color: isActive ? 'var(--label-normal)' : 'var(--label-assistive)', flexShrink: 0 }}>
+          {price.toLocaleString()}원
+        </span>
       )}
     </button>
   );

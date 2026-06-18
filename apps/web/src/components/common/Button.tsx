@@ -94,7 +94,7 @@ export function TossPayButton({ children = '토스로 송금', ...props }: Brand
 
 // ── Radius 소형 버튼 ───────────────────────────────────────
 
-type RadiusVariant = 'radius' | 'radius-border' | 'radius-border-colored' | 'radius-border-inactive';
+type RadiusVariant = 'radius' | 'radius-border' | 'radius-border-colored' | 'radius-border-inactive' | 'radius-border-selected';
 
 interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: RadiusVariant;
@@ -122,6 +122,11 @@ const RADIUS_STYLES: Record<RadiusVariant, React.CSSProperties> = {
     color: 'var(--label-disable)',
     border: '1px solid var(--line-alternative)',
     cursor: 'default',
+  },
+  'radius-border-selected': {
+    background: 'rgba(233,75,53,0.08)',
+    color: 'var(--primary)',
+    border: '1.5px solid var(--primary)',
   },
 };
 

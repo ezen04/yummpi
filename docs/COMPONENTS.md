@@ -98,7 +98,7 @@
 | ✅ | `radius-border` | 소형 둥근 + 테두리 | 송금 독촉, 확인 |
 | ✅ | `radius-border-colored` | 소형 둥근 + 테두리 primary | 완료 확인 |
 | ✅ | `radius-border-inactive` | 소형 둥근 비활성 | — |
-| ⬜ | `radius-border-selected` | 소형 둥근 선택됨 | — |
+| ✅ | `radius-border-selected` | 소형 둥근 선택됨 | — |
 | ✅ | `inactive` | 전체 비활성 | 조건 미충족 시 |
 | ✅ | `kakao` | 카카오 로그인 | 로그인 화면 |
 | ✅ | `kakaopay` | 카카오페이 딥링크 | 송금 화면 |
@@ -112,12 +112,12 @@
 
 | 상태 | Variant | 설명 |
 |:---:|:---|:---|
-| ⬜ | `normal` | 기본 |
-| ⬜ | `hover` | 호버 |
-| ⬜ | `clicked` | 클릭됨 |
-| ⬜ | `done` | 완료 표시 |
-| ⬜ | `draft` | 임시 저장 |
-| ⬜ | `disabled` | 비활성 |
+| ✅ | `normal` | 기본 |
+| ✅ | `hover` | 호버 |
+| ✅ | `clicked` | 클릭됨 |
+| ✅ | `done` | 완료 표시 |
+| ✅ | `draft` | 임시 저장 |
+| ✅ | `disabled` | 비활성 |
 
 ---
 
@@ -154,7 +154,7 @@
 | ✅ | `Check` | `active` / `inactive` | 소비 항목 선택 (정산) |
 | ✅ | `Radio` | `active` / `inactive` | 정산 방식 선택 |
 | ✅ | `Toggle` | `active` / `inactive` | 알림 설정 on/off |
-| ⬜ | `Menu-check` | `active` / `inactive` | 메뉴 체크 (OCR 검수) |
+| ✅ | `Menu-check` | `active` / `inactive` | 메뉴 체크 (OCR 검수) |
 
 ---
 
@@ -228,15 +228,15 @@
 | 상태 | Variant | 설명 | 사용 화면 |
 |:---:|:---|:---|:---|
 | ✅ | `Person/me` | 내 프로필 행 | 참석자 목록 |
-| ⬜ | `Person/me/attendance` | 내 출석 상태 | 출석 체크 |
-| ⬜ | `Person/me/result` | 내 투표 결과 | 투표 결과 |
+| ✅ | `Person/me/attendance` | 내 출석 상태 | 출석 체크 |
+| ✅ | `Person/me/result` | 내 투표 결과 | 투표 결과 |
 | ✅ | `Person/other` | 다른 참여자 행 | 참석자 목록 |
 | ✅ | `Person/other/admin` | 주최자 표시 포함 | — |
 | ✅ | `Person/other-inactive` | 비활성 참여자 | — |
-| ⬜ | `Person/other/result` | 다른 참여자 결과 | 투표 결과 |
+| ✅ | `Person/other/result` | 다른 참여자 결과 | 투표 결과 |
 | ✅ | `menu` | 설정 메뉴 행 | 마이페이지, 설정 |
-| ⬜ | `result-b` | 투표 결과 (b타입) | 장소 투표 |
-| ⬜ | `result-r` | 투표 결과 (r타입) | 장소 투표 |
+| ✅ | `result-b` | 투표 결과 (b타입) | 장소 투표 |
+| ✅ | `result-r` | 투표 결과 (r타입) | 장소 투표 |
 
 ---
 
