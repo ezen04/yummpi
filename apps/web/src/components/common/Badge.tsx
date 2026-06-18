@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-type BadgeVariant = 'black' | 'green' | 'red' | 'yellow' | 'guest' | 'unpaid' | 'reservable' | 'icon-red';
+type BadgeVariant =
+  | 'black'
+  | 'green'
+  | 'red'
+  | 'yellow'
+  | 'guest'
+  | 'unpaid'
+  | 'reservable'
+  | 'icon-red';
 
 interface BadgeProps {
   variant: BadgeVariant;
@@ -8,15 +16,50 @@ interface BadgeProps {
   icon?: React.ReactNode;
 }
 
-const STYLES: Record<BadgeVariant, { background: string; color: string; dot: boolean }> = {
-  black:      { background: 'var(--bg-inverse)',        color: 'var(--inverse-label)',      dot: true },
-  green:      { background: 'rgba(0,191,64,0.10)',      color: 'var(--status-positive)',    dot: true },
-  red:        { background: 'rgba(255,66,66,0.08)',     color: 'var(--status-negative)',    dot: true },
-  yellow:     { background: 'var(--secondary-tint)',    color: 'var(--secondary-strong)',   dot: true },
-  guest:      { background: 'var(--fill-normal)',       color: 'var(--label-alternative)',  dot: false },
-  unpaid:     { background: 'rgba(255,66,66,0.08)',     color: 'var(--status-negative)',    dot: false },
-  reservable: { background: 'var(--secondary-tint)',    color: 'var(--secondary-strong)',   dot: false },
-  'icon-red': { background: 'rgba(255,66,66,0.08)',     color: 'var(--status-negative)',    dot: false },
+const STYLES: Record<
+  BadgeVariant,
+  { background: string; color: string; dot: boolean }
+> = {
+  black: {
+    background: 'var(--bg-inverse)',
+    color: 'var(--inverse-label)',
+    dot: true,
+  },
+  green: {
+    background: 'rgba(0,191,64,0.10)',
+    color: 'var(--status-positive)',
+    dot: true,
+  },
+  red: {
+    background: 'rgba(255,66,66,0.08)',
+    color: 'var(--status-negative)',
+    dot: true,
+  },
+  yellow: {
+    background: 'var(--secondary-tint)',
+    color: 'var(--secondary-strong)',
+    dot: true,
+  },
+  guest: {
+    background: 'var(--fill-normal)',
+    color: 'var(--label-alternative)',
+    dot: false,
+  },
+  unpaid: {
+    background: 'rgba(255,66,66,0.08)',
+    color: 'var(--status-negative)',
+    dot: false,
+  },
+  reservable: {
+    background: 'var(--secondary-tint)',
+    color: 'var(--secondary-strong)',
+    dot: false,
+  },
+  'icon-red': {
+    background: 'rgba(255,66,66,0.08)',
+    color: 'var(--status-negative)',
+    dot: false,
+  },
 };
 
 export function Badge({ variant, children, icon }: BadgeProps) {

@@ -3,7 +3,12 @@
 import * as React from 'react';
 import Image from 'next/image';
 
-type AttendanceVariant = 'host' | 'user' | 'user-hover' | 'user-selected' | 'guest';
+type AttendanceVariant =
+  | 'host'
+  | 'user'
+  | 'user-hover'
+  | 'user-selected'
+  | 'guest';
 
 interface AttendanceProps {
   variant: AttendanceVariant;
@@ -25,13 +30,19 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
   const isHover = variant === 'user-hover';
   const isGuest = variant === 'guest';
 
-  const borderColor = isHost || isSelected
-    ? 'var(--primary)'
-    : 'var(--line-normal)';
+  const borderColor =
+    isHost || isSelected ? 'var(--primary)' : 'var(--line-normal)';
   const borderWidth = isHost || isSelected ? 2 : 1.5;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 6,
+      }}
+    >
       <div style={{ position: 'relative' }}>
         {/* 아바타 원형 */}
         <div
@@ -50,12 +61,20 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
           }}
         >
           {src ? (
-            <Image src={src} alt={name} width={size} height={size} style={{ objectFit: 'cover' }} />
+            <Image
+              src={src}
+              alt={name}
+              width={size}
+              height={size}
+              style={{ objectFit: 'cover' }}
+            />
           ) : (
             <span
               style={{
                 font: `700 ${Math.round(size * 0.4)}px var(--font-sans)`,
-                color: isGuest ? 'var(--label-assistive)' : 'var(--label-normal)',
+                color: isGuest
+                  ? 'var(--label-assistive)'
+                  : 'var(--label-normal)',
                 userSelect: 'none',
               }}
             >
@@ -63,7 +82,6 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
             </span>
           )}
         </div>
-
 
         {/* 선택됨 체크 뱃지 */}
         {isSelected && (
@@ -83,7 +101,13 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
             }}
           >
             <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-              <path d="M1 3.5L3.2 5.5L8 1" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M1 3.5L3.2 5.5L8 1"
+                stroke="white"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </span>
         )}
@@ -93,7 +117,10 @@ export function Attendance({ variant, name, src, size = 56 }: AttendanceProps) {
       <span
         style={{
           font: `${isHost || isSelected ? '600' : '400'} 11px/14px var(--font-sans)`,
-          color: isHost || isSelected ? 'var(--label-normal)' : 'var(--label-alternative)',
+          color:
+            isHost || isSelected
+              ? 'var(--label-normal)'
+              : 'var(--label-alternative)',
           maxWidth: size + 8,
           overflow: 'hidden',
           textOverflow: 'ellipsis',

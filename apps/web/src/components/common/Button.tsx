@@ -22,17 +22,46 @@ function TossIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <defs>
-        <linearGradient id="toss-a" x1="4" y1="4" x2="18" y2="18" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="toss-a"
+          x1="4"
+          y1="4"
+          x2="18"
+          y2="18"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#5AAAFF" />
           <stop offset="100%" stopColor="#0051FF" />
         </linearGradient>
-        <linearGradient id="toss-b" x1="8" y1="6" x2="16" y2="18" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="toss-b"
+          x1="8"
+          y1="6"
+          x2="16"
+          y2="18"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#80BFFF" />
           <stop offset="100%" stopColor="#0064FF" />
         </linearGradient>
       </defs>
-      <ellipse cx="10" cy="11" rx="5.5" ry="7.5" fill="url(#toss-a)" transform="rotate(-12 10 11)" />
-      <ellipse cx="13" cy="10" rx="4.5" ry="6.5" fill="url(#toss-b)" opacity="0.85" transform="rotate(10 13 10)" />
+      <ellipse
+        cx="10"
+        cy="11"
+        rx="5.5"
+        ry="7.5"
+        fill="url(#toss-a)"
+        transform="rotate(-12 10 11)"
+      />
+      <ellipse
+        cx="13"
+        cy="10"
+        rx="4.5"
+        ry="6.5"
+        fill="url(#toss-b)"
+        opacity="0.85"
+        transform="rotate(10 13 10)"
+      />
     </svg>
   );
 }
@@ -56,10 +85,17 @@ const BRAND_BASE: React.CSSProperties = {
   gap: 8,
 };
 
-export function KakaoLoginButton({ children = '카카오로 시작하기', ...props }: BrandButtonProps) {
+export function KakaoLoginButton({
+  children = '카카오로 시작하기',
+  ...props
+}: BrandButtonProps) {
   return (
     <button
-      style={{ ...BRAND_BASE, background: 'var(--brand-kakao)', color: 'rgba(0,0,0,0.85)' }}
+      style={{
+        ...BRAND_BASE,
+        background: 'var(--brand-kakao)',
+        color: 'rgba(0,0,0,0.85)',
+      }}
       {...props}
     >
       <KakaoIcon />
@@ -68,10 +104,17 @@ export function KakaoLoginButton({ children = '카카오로 시작하기', ...pr
   );
 }
 
-export function KakaoPayButton({ children = '카카오페이로 송금', ...props }: BrandButtonProps) {
+export function KakaoPayButton({
+  children = '카카오페이로 송금',
+  ...props
+}: BrandButtonProps) {
   return (
     <button
-      style={{ ...BRAND_BASE, background: 'var(--brand-kakao)', color: 'rgba(0,0,0,0.85)' }}
+      style={{
+        ...BRAND_BASE,
+        background: 'var(--brand-kakao)',
+        color: 'rgba(0,0,0,0.85)',
+      }}
       {...props}
     >
       <KakaoIcon />
@@ -80,10 +123,17 @@ export function KakaoPayButton({ children = '카카오페이로 송금', ...prop
   );
 }
 
-export function TossPayButton({ children = '토스로 송금', ...props }: BrandButtonProps) {
+export function TossPayButton({
+  children = '토스로 송금',
+  ...props
+}: BrandButtonProps) {
   return (
     <button
-      style={{ ...BRAND_BASE, background: 'var(--brand-toss)', color: 'var(--static-white)' }}
+      style={{
+        ...BRAND_BASE,
+        background: 'var(--brand-toss)',
+        color: 'var(--static-white)',
+      }}
       {...props}
     >
       <TossIcon />
@@ -94,7 +144,12 @@ export function TossPayButton({ children = '토스로 송금', ...props }: Brand
 
 // ── Radius 소형 버튼 ───────────────────────────────────────
 
-type RadiusVariant = 'radius' | 'radius-border' | 'radius-border-colored' | 'radius-border-inactive' | 'radius-border-selected';
+type RadiusVariant =
+  | 'radius'
+  | 'radius-border'
+  | 'radius-border-colored'
+  | 'radius-border-inactive'
+  | 'radius-border-selected';
 
 interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: RadiusVariant;
@@ -102,7 +157,7 @@ interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const RADIUS_STYLES: Record<RadiusVariant, React.CSSProperties> = {
-  'radius': {
+  radius: {
     background: 'var(--fill-normal)',
     color: 'var(--label-alternative)',
     border: 'none',
@@ -130,7 +185,11 @@ const RADIUS_STYLES: Record<RadiusVariant, React.CSSProperties> = {
   },
 };
 
-export function RadiusButton({ variant = 'radius', children, ...props }: RadiusButtonProps) {
+export function RadiusButton({
+  variant = 'radius',
+  children,
+  ...props
+}: RadiusButtonProps) {
   const variantStyle = RADIUS_STYLES[variant];
 
   return (

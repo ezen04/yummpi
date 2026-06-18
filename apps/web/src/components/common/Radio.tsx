@@ -10,7 +10,12 @@ interface RadioProps {
   value?: string;
 }
 
-export function Radio({ checked, onChange, label, disabled = false }: RadioProps) {
+export function Radio({
+  checked,
+  onChange,
+  label,
+  disabled = false,
+}: RadioProps) {
   return (
     <label
       style={{
@@ -33,7 +38,9 @@ export function Radio({ checked, onChange, label, disabled = false }: RadioProps
           width: 20,
           height: 20,
           borderRadius: '50%',
-          border: checked ? '2px solid var(--primary)' : '1.5px solid var(--line-normal)',
+          border: checked
+            ? '2px solid var(--primary)'
+            : '1.5px solid var(--line-normal)',
           background: 'var(--bg-normal)',
           display: 'flex',
           alignItems: 'center',
@@ -75,7 +82,12 @@ interface RadioGroupProps {
   disabled?: boolean;
 }
 
-export function RadioGroup({ options, value, onChange, disabled }: RadioGroupProps) {
+export function RadioGroup({
+  options,
+  value,
+  onChange,
+  disabled,
+}: RadioGroupProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {options.map((opt) => (

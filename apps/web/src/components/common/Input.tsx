@@ -25,16 +25,28 @@ export function Input({
   const border = error
     ? '1px solid rgba(255,66,66,0.28)'
     : focused
-    ? '2px solid rgba(233,75,53,0.43)'
-    : '1px solid var(--line-normal)';
+      ? '2px solid rgba(233,75,53,0.43)'
+      : '1px solid var(--line-normal)';
 
   const paddingLeft = leftIcon ? 44 : 16;
   const paddingRight = rightIcon ? 44 : 16;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+        width: '100%',
+      }}
+    >
       {label && (
-        <label style={{ font: '500 14px/20px var(--font-sans)', color: 'var(--label-normal)' }}>
+        <label
+          style={{
+            font: '500 14px/20px var(--font-sans)',
+            color: 'var(--label-normal)',
+          }}
+        >
           {label}
           {required && (
             <span style={{ color: 'var(--primary)', marginLeft: 2 }}>•</span>
@@ -73,8 +85,14 @@ export function Input({
             outline: 'none',
             boxSizing: 'border-box',
           }}
-          onFocus={(e) => { setFocused(true); onFocus?.(e); }}
-          onBlur={(e) => { setFocused(false); onBlur?.(e); }}
+          onFocus={(e) => {
+            setFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
           {...props}
         />
         {rightIcon && (
@@ -96,7 +114,13 @@ export function Input({
       </div>
 
       {error && (
-        <p style={{ font: '400 12px/16px var(--font-sans)', color: 'var(--status-negative)', margin: 0 }}>
+        <p
+          style={{
+            font: '400 12px/16px var(--font-sans)',
+            color: 'var(--status-negative)',
+            margin: 0,
+          }}
+        >
           {error}
         </p>
       )}

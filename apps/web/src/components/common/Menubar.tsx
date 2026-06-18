@@ -20,7 +20,11 @@ const RIGHT_TABS = [
   { key: 'mypage' as TabKey, Icon: User, label: '마이' },
 ];
 
-export function Menubar({ activeTab, onTabChange, onCreateClick }: MenubarProps) {
+export function Menubar({
+  activeTab,
+  onTabChange,
+  onCreateClick,
+}: MenubarProps) {
   return (
     <nav
       style={{

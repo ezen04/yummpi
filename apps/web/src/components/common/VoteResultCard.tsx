@@ -20,7 +20,8 @@ export function VoteResultCard({ title, items }: VoteResultCardProps) {
   const withPercent = items
     .map((item) => ({
       ...item,
-      percent: totalVotes === 0 ? 0 : Math.round((item.votes / totalVotes) * 100),
+      percent:
+        totalVotes === 0 ? 0 : Math.round((item.votes / totalVotes) * 100),
       isTop: item.votes === maxVotes && maxVotes > 0,
     }))
     .sort((a, b) => b.votes - a.votes);

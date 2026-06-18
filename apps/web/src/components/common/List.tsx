@@ -15,7 +15,13 @@ interface PersonItemProps {
   isMe?: boolean;
 }
 
-export function PersonItem({ variant, name, avatarSrc, isHost, status }: PersonItemProps) {
+export function PersonItem({
+  variant,
+  name,
+  avatarSrc,
+  isHost,
+  status,
+}: PersonItemProps) {
   const isInactive = variant === 'other-inactive';
 
   return (
@@ -48,20 +54,39 @@ export function PersonItem({ variant, name, avatarSrc, isHost, status }: PersonI
         >
           {name}
           {variant === 'me' && (
-            <span style={{ font: '400 12px var(--font-sans)', color: 'var(--label-assistive)' }}>
+            <span
+              style={{
+                font: '400 12px var(--font-sans)',
+                color: 'var(--label-assistive)',
+              }}
+            >
               나
             </span>
           )}
         </p>
         {isHost && (
-          <p style={{ font: '400 12px var(--font-sans)', color: 'var(--primary)', margin: '1px 0 0' }}>
+          <p
+            style={{
+              font: '400 12px var(--font-sans)',
+              color: 'var(--primary)',
+              margin: '1px 0 0',
+            }}
+          >
             주최자
           </p>
         )}
       </div>
 
       {status && (
-        <Badge variant={status === 'unpaid' ? 'unpaid' : status === 'paid' ? 'green' : 'guest'}>
+        <Badge
+          variant={
+            status === 'unpaid'
+              ? 'unpaid'
+              : status === 'paid'
+                ? 'green'
+                : 'guest'
+          }
+        >
           {status === 'unpaid' ? '미송금' : status === 'paid' ? '완료' : '면제'}
         </Badge>
       )}
@@ -78,14 +103,44 @@ interface PersonAttendanceItemProps {
   isMe?: boolean;
 }
 
-export function PersonAttendanceItem({ name, avatarSrc, attended = false, isMe = false }: PersonAttendanceItemProps) {
+export function PersonAttendanceItem({
+  name,
+  avatarSrc,
+  attended = false,
+  isMe = false,
+}: PersonAttendanceItemProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 0',
+      }}
+    >
       <YAvatar variant="guest" src={avatarSrc} name={name} size={40} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ font: `${isMe ? '600' : '400'} 15px/22px var(--font-sans)`, color: 'var(--label-normal)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <p
+          style={{
+            font: `${isMe ? '600' : '400'} 15px/22px var(--font-sans)`,
+            color: 'var(--label-normal)',
+            margin: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
           {name}
-          {isMe && <span style={{ font: '400 12px var(--font-sans)', color: 'var(--label-assistive)' }}>나</span>}
+          {isMe && (
+            <span
+              style={{
+                font: '400 12px var(--font-sans)',
+                color: 'var(--label-assistive)',
+              }}
+            >
+              나
+            </span>
+          )}
         </p>
       </div>
       <span
@@ -103,7 +158,13 @@ export function PersonAttendanceItem({ name, avatarSrc, attended = false, isMe =
       >
         {attended && (
           <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-            <path d="M1 5L4.5 8.5L12 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M1 5L4.5 8.5L12 1"
+              stroke="white"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         )}
       </span>
@@ -122,23 +183,67 @@ interface PersonResultItemProps {
   resultVariant?: 'primary' | 'secondary' | 'default';
 }
 
-export function PersonResultItem({ name, avatarSrc, isMe, isHost, resultLabel, resultVariant = 'default' }: PersonResultItemProps) {
-  const labelColor = resultVariant === 'primary'
-    ? 'var(--primary)'
-    : resultVariant === 'secondary'
-    ? 'var(--secondary)'
-    : 'var(--label-assistive)';
+export function PersonResultItem({
+  name,
+  avatarSrc,
+  isMe,
+  isHost,
+  resultLabel,
+  resultVariant = 'default',
+}: PersonResultItemProps) {
+  const labelColor =
+    resultVariant === 'primary'
+      ? 'var(--primary)'
+      : resultVariant === 'secondary'
+        ? 'var(--secondary)'
+        : 'var(--label-assistive)';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
-      <YAvatar variant={isHost ? 'host' : 'guest'} src={avatarSrc} name={name} size={40} />
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 0',
+      }}
+    >
+      <YAvatar
+        variant={isHost ? 'host' : 'guest'}
+        src={avatarSrc}
+        name={name}
+        size={40}
+      />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ font: `${isMe ? '600' : '400'} 15px/22px var(--font-sans)`, color: 'var(--label-normal)', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <p
+          style={{
+            font: `${isMe ? '600' : '400'} 15px/22px var(--font-sans)`,
+            color: 'var(--label-normal)',
+            margin: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
           {name}
-          {isMe && <span style={{ font: '400 12px var(--font-sans)', color: 'var(--label-assistive)' }}>나</span>}
+          {isMe && (
+            <span
+              style={{
+                font: '400 12px var(--font-sans)',
+                color: 'var(--label-assistive)',
+              }}
+            >
+              나
+            </span>
+          )}
         </p>
       </div>
-      <span style={{ font: '500 13px var(--font-sans)', color: labelColor, flexShrink: 0 }}>
+      <span
+        style={{
+          font: '500 13px var(--font-sans)',
+          color: labelColor,
+          flexShrink: 0,
+        }}
+      >
         {resultLabel}
       </span>
     </div>
@@ -156,7 +261,14 @@ interface ResultRowProps {
   variant: 'r' | 'b';
 }
 
-export function ResultRow({ rank, label, address, votes, percent, variant }: ResultRowProps) {
+export function ResultRow({
+  rank,
+  label,
+  address,
+  votes,
+  percent,
+  variant,
+}: ResultRowProps) {
   const isR = variant === 'r';
   const accentColor = isR ? 'var(--primary)' : 'var(--secondary)';
   const bgColor = isR ? 'rgba(233,75,53,0.06)' : 'rgba(0,118,230,0.06)';
@@ -190,18 +302,52 @@ export function ResultRow({ rank, label, address, votes, percent, variant }: Res
         {rank}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ font: '600 15px/22px var(--font-sans)', color: 'var(--label-normal)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p
+          style={{
+            font: '600 15px/22px var(--font-sans)',
+            color: 'var(--label-normal)',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {label}
         </p>
         {address && (
-          <p style={{ font: '400 12px/16px var(--font-sans)', color: 'var(--label-assistive)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p
+            style={{
+              font: '400 12px/16px var(--font-sans)',
+              color: 'var(--label-assistive)',
+              margin: '2px 0 0',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {address}
           </p>
         )}
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <p style={{ font: '600 14px var(--font-sans)', color: accentColor, margin: 0 }}>{votes}표</p>
-        <p style={{ font: '400 11px var(--font-sans)', color: 'var(--label-assistive)', margin: '2px 0 0' }}>{percent}%</p>
+        <p
+          style={{
+            font: '600 14px var(--font-sans)',
+            color: accentColor,
+            margin: 0,
+          }}
+        >
+          {votes}표
+        </p>
+        <p
+          style={{
+            font: '400 11px var(--font-sans)',
+            color: 'var(--label-assistive)',
+            margin: '2px 0 0',
+          }}
+        >
+          {percent}%
+        </p>
       </div>
     </div>
   );
@@ -217,7 +363,13 @@ interface MenuItemProps {
   destructive?: boolean;
 }
 
-export function MenuItem({ icon, label, value, onClick, destructive = false }: MenuItemProps) {
+export function MenuItem({
+  icon,
+  label,
+  value,
+  onClick,
+  destructive = false,
+}: MenuItemProps) {
   return (
     <button
       onClick={onClick}
@@ -234,7 +386,14 @@ export function MenuItem({ icon, label, value, onClick, destructive = false }: M
       }}
     >
       {icon && (
-        <span style={{ color: destructive ? 'var(--status-negative)' : 'var(--label-alternative)', flexShrink: 0 }}>
+        <span
+          style={{
+            color: destructive
+              ? 'var(--status-negative)'
+              : 'var(--label-alternative)',
+            flexShrink: 0,
+          }}
+        >
           {icon}
         </span>
       )}
@@ -248,13 +407,30 @@ export function MenuItem({ icon, label, value, onClick, destructive = false }: M
         {label}
       </span>
       {value && (
-        <span style={{ font: '400 14px var(--font-sans)', color: 'var(--label-assistive)' }}>
+        <span
+          style={{
+            font: '400 14px var(--font-sans)',
+            color: 'var(--label-assistive)',
+          }}
+        >
           {value}
         </span>
       )}
       {!value && (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-          <path d="M6 4L10 8L6 12" stroke="var(--label-assistive)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          style={{ flexShrink: 0 }}
+        >
+          <path
+            d="M6 4L10 8L6 12"
+            stroke="var(--label-assistive)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       )}
     </button>
@@ -271,7 +447,13 @@ interface MenuCheckItemProps {
   variant?: 'active' | 'inactive';
 }
 
-export function MenuCheckItem({ label, price, checked = false, onChange, variant }: MenuCheckItemProps) {
+export function MenuCheckItem({
+  label,
+  price,
+  checked = false,
+  onChange,
+  variant,
+}: MenuCheckItemProps) {
   const isActive = variant === 'active' || checked;
 
   return (
@@ -305,7 +487,13 @@ export function MenuCheckItem({ label, price, checked = false, onChange, variant
       >
         {isActive && (
           <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-            <path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M1 4L4.5 7.5L11 1"
+              stroke="white"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         )}
       </span>
@@ -319,7 +507,13 @@ export function MenuCheckItem({ label, price, checked = false, onChange, variant
         {label}
       </span>
       {price !== undefined && (
-        <span style={{ font: `${isActive ? '600' : '400'} 14px var(--font-sans)`, color: isActive ? 'var(--label-normal)' : 'var(--label-assistive)', flexShrink: 0 }}>
+        <span
+          style={{
+            font: `${isActive ? '600' : '400'} 14px var(--font-sans)`,
+            color: isActive ? 'var(--label-normal)' : 'var(--label-assistive)',
+            flexShrink: 0,
+          }}
+        >
           {price.toLocaleString()}원
         </span>
       )}

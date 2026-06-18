@@ -9,7 +9,12 @@ interface YAvatarProps {
   size?: number;
 }
 
-export function YAvatar({ variant = 'guest', src, name, size = 40 }: YAvatarProps) {
+export function YAvatar({
+  variant = 'guest',
+  src,
+  name,
+  size = 40,
+}: YAvatarProps) {
   const initial = name.charAt(0).toUpperCase();
   const isHost = variant === 'host';
   const borderWidth = isHost ? 2 : 1.5;

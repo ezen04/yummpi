@@ -17,7 +17,14 @@ export function Step({ steps, current }: StepProps) {
         return (
           <React.Fragment key={i}>
             {/* 스텝 원 + 라벨 */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
               <div
                 style={{
                   width: 24,
@@ -30,8 +37,14 @@ export function Step({ steps, current }: StepProps) {
                   ...(isDone
                     ? { background: 'var(--primary)', border: 'none' }
                     : isNow
-                    ? { background: 'transparent', border: '2px solid var(--primary)' }
-                    : { background: 'transparent', border: '1.5px solid var(--line-normal)' }),
+                      ? {
+                          background: 'transparent',
+                          border: '2px solid var(--primary)',
+                        }
+                      : {
+                          background: 'transparent',
+                          border: '1.5px solid var(--line-normal)',
+                        }),
                 }}
               >
                 {isDone ? (
@@ -48,7 +61,9 @@ export function Step({ steps, current }: StepProps) {
                   <span
                     style={{
                       font: '500 11px var(--font-sans)',
-                      color: isNow ? 'var(--primary)' : 'var(--label-assistive)',
+                      color: isNow
+                        ? 'var(--primary)'
+                        : 'var(--label-assistive)',
                       lineHeight: 1,
                     }}
                   >
@@ -60,7 +75,10 @@ export function Step({ steps, current }: StepProps) {
               <span
                 style={{
                   font: `${isNow ? '600' : '400'} 11px/14px var(--font-sans)`,
-                  color: isDone || isNow ? 'var(--label-normal)' : 'var(--label-assistive)',
+                  color:
+                    isDone || isNow
+                      ? 'var(--label-normal)'
+                      : 'var(--label-assistive)',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -74,7 +92,8 @@ export function Step({ steps, current }: StepProps) {
                 style={{
                   flex: 1,
                   height: 1.5,
-                  background: i < current ? 'var(--primary)' : 'var(--line-normal)',
+                  background:
+                    i < current ? 'var(--primary)' : 'var(--line-normal)',
                   marginBottom: 20,
                   marginLeft: 4,
                   marginRight: 4,

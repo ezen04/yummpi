@@ -9,7 +9,12 @@ interface CheckProps {
   disabled?: boolean;
 }
 
-export function Check({ checked, onChange, label, disabled = false }: CheckProps) {
+export function Check({
+  checked,
+  onChange,
+  label,
+  disabled = false,
+}: CheckProps) {
   return (
     <label
       style={{

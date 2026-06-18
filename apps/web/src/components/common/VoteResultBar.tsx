@@ -9,16 +9,29 @@ interface VoteResultBarProps {
   variant?: 'active' | 'inactive';
 }
 
-export function VoteResultBar({ label, percent, votes, variant = 'inactive' }: VoteResultBarProps) {
+export function VoteResultBar({
+  label,
+  percent,
+  votes,
+  variant = 'inactive',
+}: VoteResultBarProps) {
   const isActive = variant === 'active';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span
           style={{
             font: `${isActive ? '600' : '400'} 14px/20px var(--font-sans)`,
-            color: isActive ? 'var(--label-normal)' : 'var(--label-alternative)',
+            color: isActive
+              ? 'var(--label-normal)'
+              : 'var(--label-alternative)',
           }}
         >
           {label}

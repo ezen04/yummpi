@@ -53,7 +53,12 @@ export function Header({
           flexShrink: 0,
         }}
       >
-        <span style={{ font: '600 18px/26px var(--font-sans)', color: 'var(--label-normal)' }}>
+        <span
+          style={{
+            font: '600 18px/26px var(--font-sans)',
+            color: 'var(--label-normal)',
+          }}
+        >
           {title ?? '마이페이지'}
         </span>
         {onSettings && (
@@ -117,22 +122,51 @@ export function Header({
 
         {greeting ? (
           <div>
-            <p style={{ fontSize: 14, fontWeight: 400, color: 'var(--label-alternative)', lineHeight: '20px' }}>
+            <p
+              style={{
+                fontSize: 14,
+                fontWeight: 400,
+                color: 'var(--label-alternative)',
+                lineHeight: '20px',
+              }}
+            >
               {greeting}
             </p>
-            <p style={{ fontSize: 19, fontWeight: 600, color: 'var(--label-normal)', lineHeight: '30px' }}>
+            <p
+              style={{
+                fontSize: 19,
+                fontWeight: 600,
+                color: 'var(--label-normal)',
+                lineHeight: '30px',
+              }}
+            >
               {title}
             </p>
           </div>
         ) : (
           <div>
             {title && (
-              <p style={{ fontSize: 18, fontWeight: 400, color: 'var(--label-normal)', lineHeight: '26px' }}>
+              <p
+                style={{
+                  fontSize: 18,
+                  fontWeight: 400,
+                  color: 'var(--label-normal)',
+                  lineHeight: '26px',
+                }}
+              >
                 {title}
               </p>
             )}
             {subtitle && (
-              <p style={{ fontSize: 12, fontWeight: 400, color: 'var(--label-alternative)', lineHeight: '16px', marginTop: 1 }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 400,
+                  color: 'var(--label-alternative)',
+                  lineHeight: '16px',
+                  marginTop: 1,
+                }}
+              >
                 {subtitle}
               </p>
             )}
@@ -145,9 +179,7 @@ export function Header({
         {statusVariant && statusLabel && (
           <Badge variant={statusVariant}>{statusLabel}</Badge>
         )}
-        {badge && !statusVariant && (
-          <Badge variant="green">{badge}</Badge>
-        )}
+        {badge && !statusVariant && <Badge variant="green">{badge}</Badge>}
 
         {showBell && (
           <button

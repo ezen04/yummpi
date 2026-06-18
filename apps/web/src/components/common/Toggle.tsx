@@ -9,7 +9,12 @@ interface ToggleProps {
   label?: string;
 }
 
-export function Toggle({ checked, onChange, disabled = false, label }: ToggleProps) {
+export function Toggle({
+  checked,
+  onChange,
+  disabled = false,
+  label,
+}: ToggleProps) {
   return (
     <label
       style={{
@@ -56,7 +61,12 @@ export function Toggle({ checked, onChange, disabled = false, label }: TogglePro
       </span>
 
       {label && (
-        <span style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--label-normal)' }}>
+        <span
+          style={{
+            font: '400 15px/22px var(--font-sans)',
+            color: 'var(--label-normal)',
+          }}
+        >
           {label}
         </span>
       )}

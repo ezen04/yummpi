@@ -11,7 +11,12 @@ interface ChipProps {
   disabled?: boolean;
 }
 
-export function Chip({ active = false, onClick, children, disabled = false }: ChipProps) {
+export function Chip({
+  active = false,
+  onClick,
+  children,
+  disabled = false,
+}: ChipProps) {
   return (
     <button
       onClick={onClick}
@@ -20,7 +25,9 @@ export function Chip({ active = false, onClick, children, disabled = false }: Ch
         height: 34,
         padding: '0 12px',
         borderRadius: 'var(--radius-10)',
-        border: active ? '1px solid rgba(233,75,53,0.43)' : '1.5px solid var(--line-normal)',
+        border: active
+          ? '1px solid rgba(233,75,53,0.43)'
+          : '1.5px solid var(--line-normal)',
         background: active ? 'rgba(233,75,53,0.05)' : 'transparent',
         font: '500 14px var(--font-sans)',
         color: active ? 'var(--primary)' : 'var(--label-alternative)',
@@ -63,7 +70,12 @@ const SOLID_STYLES: Record<SolidChipVariant, React.CSSProperties> = {
   },
 };
 
-export function SolidChip({ variant, onClick, children, disabled = false }: SolidChipProps) {
+export function SolidChip({
+  variant,
+  onClick,
+  children,
+  disabled = false,
+}: SolidChipProps) {
   return (
     <button
       onClick={onClick}

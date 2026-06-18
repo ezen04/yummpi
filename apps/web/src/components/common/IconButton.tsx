@@ -2,7 +2,13 @@
 
 import * as React from 'react';
 
-export type IconButtonVariant = 'normal' | 'hover' | 'clicked' | 'done' | 'draft' | 'disabled';
+export type IconButtonVariant =
+  | 'normal'
+  | 'hover'
+  | 'clicked'
+  | 'done'
+  | 'draft'
+  | 'disabled';
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: IconButtonVariant;
