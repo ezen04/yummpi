@@ -16,11 +16,13 @@
 | 7 | MEETING에 `voting_closes_at`(nullable) 추가 | PRD F4 시간 기반 투표 마감. 자동 마감 Job은 P1 |
 | 8 | RECEIPT에 `raw_ocr_json`(JSON) 추가 | F7 검수 화면 "미분류 텍스트 영역" + OCR 원본 보관(④) |
 | 9 | RESERVATION 예약 담당자 FK **추가 안 함** | 예약 상태 변경 권한을 **호스트로 통일**(`assertHost`) |
+| 10 | MEETING에 `series_id`(nullable self-FK) 추가 ★ ADR-0001(post-v2.2) | B-lite "이 멤버로 새 모임" 클론 회차 스탬프. V2 그룹 히스토리 묶기용. 클론 시 `source.series_id ?? source.id` |
 
 **불변식 (앱 레벨 강제)** — v2.1 유지 + 추가
 - `vote.candidate.meeting_id == vote.meeting_id`
 - `reservation.place_candidate.meeting_id == reservation.meeting_id`
 - `meeting.host_user_id` ↔ `meeting_members(role=HOST).user_id` 항상 일치 (모임 생성 시 HOST 멤버 자동 생성)
+- `meeting.series_id`는 nullable self-FK(같은 모임 시리즈 묶기). 클론 시 `source.series_id ?? source.id`로 스탬프 (히스토리 UI는 V2)
 - 확정 장소의 단일 진실은 `meeting.confirmed_candidate_id`
 - `receipt: subtotal + tax + service_charge − discount == total`
 - `settlement.total_amount == SUM(meeting의 모든 receipt.total_amount)` — **정산에 포함되는 receipt가 1개 이상 있고, 각 `receipt.total_amount`가 확정된 경우에만** 적용
@@ -51,6 +53,7 @@ erDiagram
     MEETING ||--o| RESERVATION : has
     MEETING ||--o{ RECEIPT : has
     MEETING ||--o| SETTLEMENT : has
+    MEETING ||--o{ MEETING : "series (clones)"
     MEETING_MEMBER ||--o{ PLACE_CANDIDATE : creates
     MEETING_MEMBER ||--o{ RECEIPT : uploads
     MEETING_MEMBER ||--o{ VOTE : casts
@@ -127,6 +130,7 @@ erDiagram
       boolean anonymous_voting
       int place_search_radius_m
       string invite_code UK
+      uuid series_id FK "nullable — B-lite 클론 스탬프(self-FK)"
       datetime expires_at
       datetime created_at
       datetime updated_at
