@@ -290,16 +290,26 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - 부가세·봉사료·할인은 별도 배분하지 않음. 영수증 `total_amount`(최종 청구액)를 그대로 사용
 - `Σ finalAmount ≠ totalAmount` 시 서버 에러 로깅 (클라이언트 미노출)
 
-### `POST .../settlements/:settlementId/confirm` — 확정 (호스트) ★ v2.2 수정
-- `Settlement.status = CONFIRMED`, `confirmedAt` 기록. 금액 잠금
-- Payment 생성은 ⑤ 담당 (lazy 생성). ④는 `SettlementMember` 보장까지만
-### `POST .../settlements/:settlementId/reopen` — 재오픈 (MVP 제외, V2 확장 예정)
+### `POST .../settlements/:settlementId/confirm` — 확정 (호스트, 금액 잠금)
+- Payment는 생성하지 않음
+- 보장 데이터: `Settlement.status = CONFIRMED`, `confirmedAt != null`, 참여자별 `SettlementMember`, 확정된 `SettlementMember.finalAmount`
+
+### `POST .../settlements/:settlementId/reopen` — 재오픈
+- MVP 확정 계약에서 제외. P1 확장 시 Payment 상태 정책과 함께 재논의
 
 ---
 
 ## 11. 송금 현황 API
 
+### `POST /api/v1/meetings/:meetingId/payments/initialize` — Payment 초기화
+- ⑤ 송금 도메인 소유 API
+- 전제: 해당 모임의 Settlement가 `CONFIRMED`이고 `SettlementMember.finalAmount`가 확정되어 있어야 함
+- 동작: 누락된 Payment를 `SettlementMember` 기준으로 idempotent 생성
+- 이미 생성된 Payment는 중복 생성하지 않고 성공 처리
+- 송금 화면 진입 전 필수 호출
+
 ### `GET /api/v1/meetings/:meetingId/payments` — 현황 (`total·collected·statuses[]`)
+- Payment를 생성하지 않는 순수 조회 API
 ### `PATCH .../payments/:paymentId` — 완료 처리 (`status: PAID`, 본인/호스트)
 ### `POST .../complete` — 모임 종료 (전원 `PAID|EXEMPT` 시 `COMPLETED`, 아니면 `422 PAYMENTS_NOT_COMPLETED`)
 
