@@ -8,16 +8,23 @@ import {
   type CompleteMeetingResponse,
 } from '@yummpi/schemas';
 
-export class PaymentApiError extends Error {
-  constructor(
-    public readonly code: string,
-    message: string,
-    public readonly details?: unknown
-  ) {
-    super(message);
-    this.name = 'PaymentApiError';
-  }
-}
+export type PaymentApiError = {
+  name: 'PaymentApiError';
+  code: string;
+  message: string;
+  details?: unknown;
+};
+
+const createPaymentApiError = (
+  code: string,
+  message: string,
+  details?: unknown
+): PaymentApiError => ({ name: 'PaymentApiError', code, message, details });
+
+export const isPaymentApiError = (error: unknown): error is PaymentApiError =>
+  typeof error === 'object' &&
+  error !== null &&
+  (error as PaymentApiError).name === 'PaymentApiError';
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -31,7 +38,7 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   };
 
   if (!json.success) {
-    throw new PaymentApiError(
+    throw createPaymentApiError(
       json.error?.code ?? 'UNKNOWN_ERROR',
       json.error?.message ?? '알 수 없는 오류가 발생했습니다.',
       json.error?.details

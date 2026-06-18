@@ -7,7 +7,7 @@ import { PaymentErrorState } from '../components/PaymentErrorState';
 import {
   initializePayments,
   getPayments,
-  PaymentApiError,
+  isPaymentApiError,
 } from '../lib/paymentApi';
 
 const SETTLEMENT_NOT_READY_CODES = new Set([
@@ -34,7 +34,7 @@ export function PaymentStatusPage({ meetingId }: Props) {
   if (isLoading) return <PaymentLoadingSkeleton />;
 
   if (isError) {
-    const apiError = error instanceof PaymentApiError ? error : null;
+    const apiError = isPaymentApiError(error) ? error : null;
     if (apiError && SETTLEMENT_NOT_READY_CODES.has(apiError.code)) {
       return <PaymentEmptyState />;
     }
