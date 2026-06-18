@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
-import { requireMember } from '@/lib/current-member';
+import { assertHost } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
 import { buildPaymentListResponse } from '../_utils';
 
@@ -14,7 +14,7 @@ export const POST = handleRoute(
   ) => {
     const { meetingId } = paramsSchema.parse(await params);
 
-    const currentMember = await requireMember(meetingId);
+    const currentMember = await assertHost(meetingId);
 
     const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
     if (!meeting) throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
@@ -30,7 +30,7 @@ export const POST = handleRoute(
     }
     if (settlement.status !== 'CONFIRMED') {
       throw new ApiError(
-        'INVALID_MEETING_STATUS_TRANSITION',
+        'INVALID_SETTLEMENT_STATUS',
         '정산이 확정된 후에만 송금을 초기화할 수 있습니다.'
       );
     }

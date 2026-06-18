@@ -13,10 +13,10 @@ export const POST = handleRoute(
   ) => {
     const { meetingId } = paramsSchema.parse(await params);
 
+    await assertHost(meetingId);
+
     const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
     if (!meeting) throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
-
-    await assertHost(meetingId);
 
     const payments = await prisma.payment.findMany({
       where: { settlementMember: { settlement: { meetingId } } },
@@ -39,7 +39,7 @@ export const POST = handleRoute(
 
     return apiSuccess(
       { meetingId, meetingStatus: meeting.status },
-      '전원 송금 완료 확인됨. 모임 완료 전환은 ① helper 연결 후 활성화됩니다.'
+      '전원 송금이 확인되었습니다.'
     );
   }
 );

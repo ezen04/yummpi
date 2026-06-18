@@ -55,7 +55,7 @@ export const PATCH = handleRoute(
         throw new ApiError('FORBIDDEN', '본인 송금만 신고할 수 있습니다.');
       }
       if (payment.status !== 'PENDING') {
-        throw new ApiError('INVALID_MEETING_STATUS_TRANSITION', 'PENDING 상태에서만 송금 신고가 가능합니다.');
+        throw new ApiError('INVALID_PAYMENT_STATUS', 'PENDING 상태에서만 송금 신고가 가능합니다.');
       }
     } else {
       // MARK_PAID / MARK_PENDING / MARK_EXEMPT
@@ -73,6 +73,19 @@ export const PATCH = handleRoute(
     };
     const nextStatus: PaymentStatus = statusMap[action];
 
+    // 이미 같은 상태이면 DB 업데이트 없이 현재 값을 그대로 반환
+    if (payment.status === nextStatus) {
+      const allPayments = await prisma.payment.findMany({
+        where: { settlementMember: { settlement: { meetingId } } },
+      });
+      const item = buildPaymentListItem(
+        { ...payment.settlementMember, payment },
+        currentMember
+      );
+      return apiSuccess({ payment: item, summary: buildSummary(allPayments) });
+    }
+
+    // PAID 전환 시에만 paidAt 기록, 그 외 상태 전환 시 초기화
     const paidAt = nextStatus === 'PAID' ? new Date() : null;
 
     const updated = await prisma.payment.update({
