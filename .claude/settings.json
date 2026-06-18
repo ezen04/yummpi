@@ -1,13 +1,6 @@
 {
+  "$comment": "리포 루트 .claude/settings.json 으로 배치(이 파일을 복사). 경로는 실제 모노레포 구조(apps/server, packages/schemas) 기준으로 교정됨. .aiignore 대체 — Claude Code는 .aiignore를 읽지 않으므로 permission deny로 강제한다.",
   "permissions": {
-    "allow": [
-      "Bash(git checkout *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(gh pr edit 23 --body ' *)",
-      "Bash(pnpm prettier *)",
-      "Bash(grep -v \"^$\")"
-    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
@@ -36,6 +29,5 @@
       "Edit(./apps/server/**)",
       "Edit(./.github/**)"
     ]
-  },
-  "$comment": "리포 루트 .claude/settings.json 으로 배치(이 파일을 복사). 경로는 실제 모노레포 구조(apps/server, packages/schemas) 기준으로 교정됨. .aiignore 대체 — Claude Code는 .aiignore를 읽지 않으므로 permission deny로 강제한다."
+  }
 }
