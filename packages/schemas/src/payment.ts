@@ -1,12 +1,12 @@
-import { z } from 'zod';
 import { idSchema } from './common';
 import {
   meetingStatusSchema,
   paymentStatusSchema,
   settlementStatusSchema,
 } from './enums';
+import { z } from 'zod';
 
-export const paymentActionSchema = z.enum([
+export const PaymentActionSchema = z.enum([
   'REPORT_TRANSFER',
   'MARK_PAID',
   'MARK_PENDING',
@@ -57,7 +57,7 @@ export const PaymentListResponseSchema = z.object({
 });
 
 export const UpdatePaymentRequestSchema = z.object({
-  action: paymentActionSchema,
+  action: PaymentActionSchema,
 });
 
 export const UpdatePaymentResponseSchema = z.object({
@@ -76,7 +76,7 @@ export const PaymentsNotCompletedDetailsSchema = z.object({
   reportedCount: z.number().int().nonnegative(),
 });
 
-export type PaymentAction = z.infer<typeof paymentActionSchema>;
+export type PaymentAction = z.infer<typeof PaymentActionSchema>;
 export type TransferMockData = z.infer<typeof TransferMockDataSchema>;
 export type PaymentSummary = z.infer<typeof PaymentSummarySchema>;
 export type PaymentListItem = z.infer<typeof PaymentListItemSchema>;
