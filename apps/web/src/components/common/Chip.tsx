@@ -24,24 +24,16 @@ export function Chip({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={cn(className)}
-      style={{
-        height: 34,
-        padding: '0 12px',
-        borderRadius: 'var(--radius-10)',
-        border: active
-          ? '1px solid rgba(233,75,53,0.43)'
-          : '1.5px solid var(--line-normal)',
-        background: active ? 'rgba(233,75,53,0.05)' : 'transparent',
-        font: '500 14px var(--font-sans)',
-        color: active ? 'var(--primary)' : 'var(--label-alternative)',
-        cursor: disabled ? 'default' : 'pointer',
-        opacity: disabled ? 0.4 : 1,
-        display: 'inline-flex',
-        alignItems: 'center',
-        whiteSpace: 'nowrap',
-        transition: 'background 0.15s, border 0.15s, color 0.15s',
-      }}
+      className={cn(
+        'inline-flex items-center h-[34px] px-3 rounded-[var(--radius-10)]',
+        'text-[14px] font-medium font-[var(--font-sans)] whitespace-nowrap',
+        'transition-[background,border,color] duration-150',
+        active
+          ? 'border border-[rgba(233,75,53,0.43)] bg-[rgba(233,75,53,0.05)] text-[var(--primary)]'
+          : 'border-[1.5px] border-[var(--line-normal)] bg-transparent text-[var(--label-alternative)]',
+        disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
+        className,
+      )}
     >
       {children}
     </button>
@@ -60,19 +52,9 @@ interface SolidChipProps {
   className?: string;
 }
 
-const SOLID_STYLES: Record<SolidChipVariant, React.CSSProperties> = {
-  'solid-dark': {
-    background: 'var(--bg-inverse)',
-    color: 'var(--inverse-label)',
-    border: 'none',
-    fontWeight: 500,
-  },
-  'solid-fill': {
-    background: 'var(--fill-normal)',
-    color: 'var(--label-alternative)',
-    border: 'none',
-    fontWeight: 400,
-  },
+const SOLID_CLASSES: Record<SolidChipVariant, string> = {
+  'solid-dark': 'bg-[var(--bg-inverse)] text-[var(--inverse-label)] font-medium',
+  'solid-fill': 'bg-[var(--fill-normal)] text-[var(--label-alternative)] font-normal',
 };
 
 export function SolidChip({
@@ -86,20 +68,14 @@ export function SolidChip({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={cn(className)}
-      style={{
-        height: 32,
-        padding: '0 14px',
-        borderRadius: 'var(--radius-full)',
-        font: `13px var(--font-sans)`,
-        cursor: disabled ? 'default' : 'pointer',
-        opacity: disabled ? 0.4 : 1,
-        display: 'inline-flex',
-        alignItems: 'center',
-        whiteSpace: 'nowrap',
-        transition: 'opacity 0.15s',
-        ...SOLID_STYLES[variant],
-      }}
+      className={cn(
+        'inline-flex items-center h-8 px-[14px] rounded-[var(--radius-full)]',
+        'text-[13px] font-[var(--font-sans)] whitespace-nowrap',
+        'transition-opacity duration-150',
+        disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
+        SOLID_CLASSES[variant],
+        className,
+      )}
     >
       {children}
     </button>
