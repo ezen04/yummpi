@@ -31,7 +31,7 @@ export function Step({ steps, current, className }: StepProps) {
                 )}
               >
                 {isDone ? (
-                  <Check size={12} strokeWidth={1.8} color="white" />
+                  <Check size={12} strokeWidth={1.8} color="var(--static-white)" />
                 ) : (
                   <span
                     className={cn(

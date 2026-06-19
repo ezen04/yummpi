@@ -124,7 +124,7 @@ export function PersonAttendanceItem({
             : 'border-[1.5px] border-[var(--line-normal)] bg-transparent',
         )}
       >
-        {attended && <Check size={13} strokeWidth={1.6} color="white" />}
+        {attended && <Check size={13} strokeWidth={1.6} color="var(--static-white)" />}
       </span>
     </div>
   );
@@ -353,7 +353,7 @@ export function MenuCheckItem({
             : 'border-[1.5px] border-[var(--line-normal)] bg-transparent',
         )}
       >
-        {isActive && <Check size={12} strokeWidth={1.6} color="white" />}
+        {isActive && <Check size={12} strokeWidth={1.6} color="var(--static-white)" />}
       </span>
       <span
         className={cn(

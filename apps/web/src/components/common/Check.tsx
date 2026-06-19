@@ -43,7 +43,7 @@ export function Check({
             : 'bg-[var(--bg-normal)] border-[1.5px] border-[var(--line-normal)]',
         )}
       >
-        {checked && <CheckIcon size={12} strokeWidth={1.8} color="white" />}
+        {checked && <CheckIcon size={12} strokeWidth={1.8} color="var(--static-white)" />}
       </span>
 
       {label && (

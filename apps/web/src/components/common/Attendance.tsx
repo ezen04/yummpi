@@ -77,7 +77,7 @@ export function Attendance({
 
         {isSelected && (
           <span className="absolute bottom-0 right-0 w-[18px] h-[18px] rounded-full bg-[var(--primary)] border-2 border-[var(--bg-normal)] flex items-center justify-center">
-            <Check size={9} strokeWidth={1.4} color="white" />
+            <Check size={9} strokeWidth={1.4} color="var(--static-white)" />
           </span>
         )}
       </div>

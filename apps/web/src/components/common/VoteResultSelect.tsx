@@ -46,7 +46,7 @@ export function VoteResultSelect({
             : 'bg-transparent border-[1.5px] border-[var(--line-normal)]',
         )}
       >
-        {selected && <Check size={10} strokeWidth={1.6} color="white" />}
+        {selected && <Check size={10} strokeWidth={1.6} color="var(--static-white)" />}
       </span>
 
       {/* 텍스트 */}
