@@ -99,14 +99,10 @@ export function PaymentStatusPage({ meetingId }: Props) {
           <PaymentMemberView item={myPayment} meetingId={meetingId} />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center flex-1 px-5 py-16 gap-3 text-center">
-          <p className="text-sm font-semibold text-[var(--label-strong)]">
-            내 송금 정보를 찾을 수 없어요
-          </p>
-          <p className="text-xs text-[var(--label-alternative)]">
-            주최자가 송금 정보를 준비 중이에요. 잠시 후 다시 확인해 주세요.
-          </p>
-        </div>
+        <PaymentErrorState
+          message="내 송금 정보를 찾을 수 없어요"
+          onRetry={() => void refetch()}
+        />
       )}
     </div>
   );

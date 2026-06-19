@@ -16,17 +16,15 @@ const STATUS_BADGE: Record<
 > = {
   PAID: {
     label: '완료',
-    className: 'text-[var(--status-positive)] bg-[var(--status-positive)]/10',
+    className:
+      'text-[var(--status-positive)] border border-[var(--status-positive)]',
   },
   EXEMPT: {
     label: '면제',
-    className: 'text-[var(--label-alternative)] bg-[var(--bg-alternative)]',
-  },
-  TRANSFER_REPORTED: {
-    label: '송금 신고',
     className:
-      'text-[var(--status-cautionary)] bg-[var(--status-cautionary)]/10',
+      'text-[var(--label-alternative)] border border-[var(--line-normal)]',
   },
+  TRANSFER_REPORTED: null,
   PENDING: null,
 };
 
@@ -48,11 +46,9 @@ export function PaymentMemberItem({ item, onAction }: Props) {
             <span className="text-sm font-medium text-[var(--label-strong)] truncate">
               {item.displayName}
             </span>
-            {badge && (
-              <span
-                className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${badge.className}`}
-              >
-                {badge.label}
+            {item.isGuest && (
+              <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--bg-alternative)] text-[var(--label-assistive)]">
+                게스트
               </span>
             )}
           </div>
@@ -61,52 +57,79 @@ export function PaymentMemberItem({ item, onAction }: Props) {
           </span>
         </div>
 
-        {/* 호스트 액션 버튼 */}
-        {onAction && (
-          <div className="shrink-0">
-            {/* TRANSFER_REPORTED → 완료 확인 (primary) */}
-            {item.canMarkPaid && (
-              <button
-                className="rounded-full text-xs h-8 px-3 bg-[var(--primary)] text-[var(--static-white)] border-none cursor-pointer font-semibold"
-                onClick={() => setConfirmOpen(true)}
-              >
-                완료 확인
-              </button>
-            )}
+        {/* 오른쪽: 배지 또는 액션 버튼 */}
+        <div className="shrink-0">
+          {/* PAID / EXEMPT → 완료/면제 배지 */}
+          {badge && (
+            <span
+              className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${badge.className}`}
+            >
+              {badge.label}
+            </span>
+          )}
 
-            {/* PENDING → 독촉 (Phase 5 — UI only) */}
-            {item.status === 'PENDING' && !item.isMine && (
-              <button
-                className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
-                onClick={() => {
-                  /* Phase 5: POST /payments/{id}/remind */
-                }}
-              >
-                독촉
-              </button>
-            )}
+          {/* 액션 버튼 (배지 없는 경우만) */}
+          {!badge && onAction && (
+            <>
+              {/* TRANSFER_REPORTED → 완료 확인 */}
+              {item.canMarkPaid && (
+                <button
+                  className="rounded-full text-xs h-8 px-3 bg-[var(--primary)] text-[var(--static-white)] border-none cursor-pointer font-semibold"
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  완료 확인
+                </button>
+              )}
 
-            {/* canMarkPending → 되돌리기 */}
-            {item.canMarkPending && (
-              <button
-                className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
-                onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
-              >
-                되돌리기
-              </button>
-            )}
+              {/* PENDING → 독촉 / 쿨다운 */}
+              {item.status === 'PENDING' && !item.isMine && (() => {
+                const cooldownUntil = item.remindCooldownUntil ? new Date(item.remindCooldownUntil) : null;
+                const inCooldown = cooldownUntil !== null && cooldownUntil > new Date();
+                if (inCooldown) {
+                  const remainingHours = Math.ceil((cooldownUntil.getTime() - Date.now()) / (1000 * 60 * 60));
+                  return (
+                    <button
+                      disabled
+                      className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-assistive)] cursor-default font-medium whitespace-nowrap"
+                    >
+                      {remainingHours}시간 후 재독촉 가능
+                    </button>
+                  );
+                }
+                return (
+                  <button
+                    className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] hover:bg-[var(--primary)] hover:text-[var(--static-white)] hover:border-[var(--primary)] transition-colors cursor-pointer font-medium"
+                    onClick={() => {
+                      /* Phase 5: POST /payments/{id}/remind */
+                    }}
+                  >
+                    독촉
+                  </button>
+                );
+              })()}
 
-            {/* canMarkExempt → 면제 */}
-            {item.canMarkExempt && (
-              <button
-                className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
-                onClick={() => onAction(item.paymentId, 'MARK_EXEMPT')}
-              >
-                면제
-              </button>
-            )}
-          </div>
-        )}
+              {/* PAID → 되돌리기 */}
+              {item.canMarkPending && (
+                <button
+                  className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
+                  onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
+                >
+                  되돌리기
+                </button>
+              )}
+
+              {/* PENDING → 면제 */}
+              {item.canMarkExempt && (
+                <button
+                  className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
+                  onClick={() => onAction(item.paymentId, 'MARK_EXEMPT')}
+                >
+                  면제
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* 송금 확인 다이얼로그 */}

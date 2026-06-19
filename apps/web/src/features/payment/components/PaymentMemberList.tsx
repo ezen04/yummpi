@@ -43,7 +43,7 @@ export function PaymentMemberList({ payments, onAction }: Props) {
           <div key={title}>
             {/* 섹션 헤더 */}
             <div className="px-5 h-[52px] flex items-center">
-              <span className="text-xs font-semibold text-[var(--label-alternative)]">
+              <span className={`text-xs font-semibold ${title === '미송금' ? 'text-[var(--status-negative)]' : 'text-[var(--label-alternative)]'}`}>
                 {title}
               </span>
               {items.length > 0 && (
@@ -55,22 +55,23 @@ export function PaymentMemberList({ payments, onAction }: Props) {
 
             {/* empty state */}
             {items.length === 0 && emptyLabel && (
-              <div className="px-5 pb-4">
+              <div className="px-5 pb-4 text-center">
                 <p className="text-xs text-[var(--label-assistive)]">
                   {emptyLabel}
                 </p>
               </div>
             )}
 
-            {/* 멤버 아이템 목록 */}
+            {/* 멤버 아이템 목록 — 카드 */}
             {items.length > 0 && (
-              <div className="divide-y divide-[var(--line-alternative)]">
+              <div className="px-4 pb-2 flex flex-col gap-2">
                 {items.map((item) => (
-                  <PaymentMemberItem
+                  <div
                     key={item.paymentId}
-                    item={item}
-                    onAction={onAction}
-                  />
+                    className="rounded-[var(--radius-12)] bg-[var(--bg-normal)] shadow-[var(--shadow-medium)]"
+                  >
+                    <PaymentMemberItem item={item} onAction={onAction} />
+                  </div>
                 ))}
               </div>
             )}
