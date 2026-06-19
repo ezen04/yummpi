@@ -161,6 +161,13 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - 응답: `items[]`(externalPlaceId·name·categoryName·address·roadAddress·phone·lat·lng·placeUrl) + `page` + `hasNext`
 - 카카오 REST 키는 서버 전용
 
+### `GET /api/v1/meetings/:meetingId/place-recommendations?lat=&lng=` — 장소 추천
+- `lat`, `lng` 필수 — ②의 최적지점 API(`POST /places/optimal-point`) 결과를 FE가 전달
+- DB에서 `meeting.foodTypes`(카테고리 배열) + `meeting.placeSearchRadiusM` 조회
+- 카테고리별 카카오 키워드 검색 후 결과 병합·거리순 정렬 → 상위 10개 반환
+- 응답: `items[]`(externalPlaceId·name·categoryName·address·roadAddress·phone·lat·lng·placeUrl·distanceM)
+- 출발지 미입력으로 최적지점 계산 불가 시 FE가 lat/lng 미전달 → 400 `VALIDATION_ERROR`
+
 ### `POST /api/v1/meetings/:meetingId/places/optimal-point` — 중간지점
 ```json
 {
@@ -173,19 +180,37 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - 응답: `{ "optimizationType", "latitude", "longitude", "nearestStation", "totalDistanceM", "maxDistanceM", "memberDistances": [...] }`
 - 출발지 미입력 멤버 제외, 0명이면 계산 차단
 
-### `POST /api/v1/meetings/:meetingId/place-candidates` — 후보 추가
-- 회원/게스트 모두 가능 — ★ v2.1: 세션의 **memberId**로 기록 (`createdByMemberId`)
-- 검색 결과 스냅샷 저장
+### `POST /api/v1/meetings/:meetingId/place-suggestions` — 장소 풀 추가 (전체 멤버)
+- 호스트·게스트 포함 **전체 멤버** 사용 가능
+- 검색 결과를 장소 풀(pool)에 추가. DB 상 `CandidateStatus: REJECTED`로 저장
+- 허용 모임 상태: `RECRUITING` · `VOTING`
+- 동일 `externalPlaceId`가 이미 존재하면 `409 CANDIDATE_ALREADY_EXISTS`
+- 응답 201: `{ id, externalPlaceId, name, categoryName, address, roadAddress, phone, lat, lng, placeUrl, createdBy }`
 
-### `GET .../place-candidates` — 후보 목록
-- ★ v2.1 응답 필드: `"createdBy": { "memberId", "nickname", "isHost" }` + 득표수·본인 투표 포함
+### `GET /api/v1/meetings/:meetingId/place-suggestions` — 장소 풀 목록 (전체 멤버)
+- `CandidateStatus: REJECTED` 항목 전체 반환 (투표 후보로 선택되지 않은 장소 목록)
+- 응답: `{ items: [{ id, externalPlaceId, name, categoryName, address, roadAddress, phone, lat, lng, placeUrl, createdBy }] }`
+- 정렬: `createdAt ASC`
 
-### `DELETE .../place-candidates/:candidateId`
-- ★ v2.1 권한: **등록 멤버 본인 또는 호스트** (게스트 등록 후보도 본인 삭제 가능). 확정 후 불가
+### `POST /api/v1/meetings/:meetingId/place-candidates` — 투표 후보 선택 (호스트)
+- **호스트 전용** (`assertHost`) — 피그마 확인 결과 호스트만 투표 후보로 선택 가능
+- 검색 결과 스냅샷 저장. `createdByMemberId`로 기록
+- 허용 모임 상태: `RECRUITING` · `VOTING`
+- 최대 5개 제한 (`ACTIVE` 상태만 카운트) — 초과 시 `400 VALIDATION_ERROR`
+- 장소 풀(`REJECTED`)에 이미 존재하는 장소를 선택하면 `status: ACTIVE`로 upsert (새 레코드 미생성)
+- 동일 `externalPlaceId`가 `ACTIVE`로 이미 존재하면 `409 CANDIDATE_ALREADY_EXISTS`
 
-### `POST .../place-candidates/:candidateId/confirm` — 최종 확정 (호스트)
-- `confirmedCandidateId` 갱신 + `PLACE_CONFIRMED` 전환 + `place:confirmed` 브로드캐스트
+### `POST .../place-candidates/:candidateId/confirm` — 최종 확정·재확정 (호스트)
+- `VOTING` 상태: `confirmedCandidateId` 갱신 + `PLACE_CONFIRMED` 전환 + `place:confirmed` · `meeting:status-changed` 브로드캐스트
+- `PLACE_CONFIRMED` 상태: 상태 전환 없이 `confirmedCandidateId`만 교체 + `place:confirmed` 브로드캐스트 (Flow 2 — 기존 후보 중 선택)
 - 동률 시 호스트 수동 선택 (런오프 없음)
+
+### `POST .../place-candidates/confirm-search` — 검색 결과 직접 확정 (호스트, Flow 2)
+- 허용 모임 상태: `VOTING` · `PLACE_CONFIRMED`
+- 요청 바디: `{ externalPlaceId, name, categoryName, address, roadAddress, phone, lat, lng, placeUrl }`
+- `PlaceCandidate` 생성 + `confirmedCandidateId` 갱신을 단일 트랜잭션으로 처리 (고아 레코드 방지)
+- `place:confirmed` · `meeting:status-changed` 브로드캐스트
+- Next.js 라우팅: `confirm-search`는 정적 세그먼트이므로 `[candidateId]` 동적 세그먼트보다 우선 매칭됨 (충돌 없음)
 
 ---
 
@@ -198,12 +223,11 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - 단일 선택(1인 1표), 기존 표는 교체(UPDATE). DB 트랜잭션 필수
 - 투표 종료 후 `409 VOTING_CLOSED` · 성공 시 `vote:updated` 브로드캐스트
 
-### `DELETE /api/v1/meetings/:meetingId/votes/me` — 내 투표 취소
-
 ### `GET /api/v1/meetings/:meetingId/votes` — 현황
-응답 `{ "isAnonymous", "votingClosesAt", "totalVoters", "votedMemberCount", "candidates": [{ "candidateId", "name", "voteCount", "voteRate", "voterMemberIds" }], "myCandidateId" }`
+응답 `{ "isAnonymous", "votingClosesAt", "totalVoters", "votedMemberCount", "confirmedCandidateId", "myCandidateId", "candidates": [{ "candidateId", "name", "categoryName", "address", "distanceM", "voteCount", "voteRate", "voterMemberIds" }] }`
 - ★ v2.1: `isAnonymous`는 `meeting.anonymousVoting`에서 파생. 익명이면 `voterMemberIds` 항상 빈 배열 (내부 매핑은 저장하되 응답 제외)
 - ★ v2.2: `votingClosesAt` 노출 — 마감 카운트다운 표시용 (nullable)
+- ★ v2.3: `GET /place-candidates` 통합 — `candidates[]`에 `categoryName`·`address`·`distanceM` 추가, `confirmedCandidateId` 포함. `GET /place-candidates` 엔드포인트 폐지
 
 ---
 
@@ -524,6 +548,7 @@ io(SOCKET_URL, {
 | `INVALID_SETTLEMENT_STATUS` ★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
 | `INVALID_PAYMENT_STATUS` ★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
 | `VOTING_CLOSED` | 409 | 투표 종료 |
+| `CANDIDATE_ALREADY_EXISTS` | 409 | 동일 장소(externalPlaceId) 중복 추가 |
 | `ALREADY_CONFIRMED_PLACE` | 409 | 장소 확정됨 |
 | `MEETING_EXPIRED` | 409 | 모임 만료 |
 | `NICKNAME_DUPLICATED` | 409 | 닉네임 중복 |
@@ -538,6 +563,7 @@ io(SOCKET_URL, {
 | `PAYMENTS_NOT_COMPLETED` | 422 | 미송금 존재 |
 | `OCR_REQUEST_FAILED` | 502 | OCR 실패 |
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
+| `KAKAO_API_FAILED` | 502 | 카카오 외부 API 호출 실패 |
 | `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
 ★ = v2.x 신규
