@@ -61,8 +61,10 @@ export function buildPaymentListItem(
     amount: p.amount,
     status: p.status,
     paidAt: p.paidAt?.toISOString() ?? null,
+    isMine: isMe,
     canReportTransfer: isMe && p.status === 'PENDING',
-    canMarkPaid: isHost && p.status !== 'PAID',
+    canCancelTransfer: isMe && p.status === 'TRANSFER_REPORTED',
+    canMarkPaid: isHost && p.status === 'TRANSFER_REPORTED',
     canMarkPending: isHost && p.status !== 'PENDING',
     canMarkExempt: isHost && p.status !== 'EXEMPT',
     transferMock: null,
@@ -82,10 +84,13 @@ export function buildPaymentListResponse(
     .map((sm) => sm.payment)
     .filter((p): p is Payment => p !== null);
 
+  const isHost = currentMember?.role === 'HOST';
+
   return {
     meetingId,
     settlementId: settlement.id,
     settlementStatus: settlement.status,
+    viewerRole: isHost ? 'HOST' : 'MEMBER',
     summary: buildSummary(payments),
     payments: items,
   };

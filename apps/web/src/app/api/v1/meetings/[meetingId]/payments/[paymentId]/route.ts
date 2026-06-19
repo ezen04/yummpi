@@ -60,8 +60,14 @@ export const PATCH = handleRoute(
           'PENDING 상태에서만 송금 신고가 가능합니다.'
         );
       }
+    } else if (action === 'MARK_PENDING') {
+      const canOwnerCancelTransfer =
+        isOwner && payment.status === 'TRANSFER_REPORTED';
+      if (!isHost && !canOwnerCancelTransfer) {
+        throw new ApiError('FORBIDDEN', '송금 취소 권한이 없습니다.');
+      }
     } else {
-      // MARK_PAID / MARK_PENDING / MARK_EXEMPT
+      // MARK_PAID / MARK_EXEMPT
       if (!isHost) {
         throw new ApiError('FORBIDDEN', '주최자만 수행할 수 있습니다.');
       }

@@ -41,7 +41,9 @@ export const PaymentListItemSchema = z.object({
   amount: z.number().int().nonnegative(),
   status: paymentStatusSchema,
   paidAt: z.string().datetime().nullable(),
+  isMine: z.boolean(),
   canReportTransfer: z.boolean(),
+  canCancelTransfer: z.boolean(),
   canMarkPaid: z.boolean(),
   canMarkPending: z.boolean(),
   canMarkExempt: z.boolean(),
@@ -52,6 +54,7 @@ export const PaymentListResponseSchema = z.object({
   meetingId: idSchema,
   settlementId: idSchema,
   settlementStatus: settlementStatusSchema,
+  viewerRole: z.enum(['HOST', 'MEMBER']),
   summary: PaymentSummarySchema,
   payments: z.array(PaymentListItemSchema),
 });
