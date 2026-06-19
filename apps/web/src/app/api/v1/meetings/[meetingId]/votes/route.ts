@@ -41,32 +41,64 @@ export const PUT = handleRoute(
       throw new ApiError('VALIDATION_ERROR', 'candidateId는 필수입니다.');
     }
 
-    const candidate = await prisma.placeCandidate.findFirst({
-      where: { id: body.candidateId, meetingId, status: 'ACTIVE' },
-      select: { id: true },
-    });
+    const { updatedCandidates, votedMemberCount } = await prisma.$transaction(
+      async (tx) => {
+        const currentMeeting = await tx.meeting.findUnique({
+          where: { id: meetingId },
+          select: { status: true, votingClosesAt: true },
+        });
 
-    if (!candidate) {
-      throw new ApiError('VALIDATION_ERROR', '유효한 투표 후보가 아닙니다.');
-    }
+        if (!currentMeeting) {
+          throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+        }
 
-    await prisma.vote.upsert({
-      where: { meetingId_memberId: { meetingId, memberId: member.id } },
-      update: { candidateId: body.candidateId },
-      create: {
-        meetingId,
-        memberId: member.id,
-        candidateId: body.candidateId,
-      },
-    });
+        if (currentMeeting.status !== 'VOTING') {
+          throw new ApiError(
+            'INVALID_MEETING_STATUS_TRANSITION',
+            '투표는 투표 중 상태에서만 가능합니다.'
+          );
+        }
 
-    const [updatedCandidates, votedMemberCount] = await Promise.all([
-      prisma.placeCandidate.findMany({
-        where: { meetingId, status: 'ACTIVE' },
-        select: { id: true, _count: { select: { votes: true } } },
-      }),
-      prisma.vote.count({ where: { meetingId } }),
-    ]);
+        if (
+          currentMeeting.votingClosesAt &&
+          new Date() > currentMeeting.votingClosesAt
+        ) {
+          throw new ApiError('VOTING_CLOSED', '투표가 마감되었습니다.');
+        }
+
+        const candidate = await tx.placeCandidate.findFirst({
+          where: { id: body.candidateId, meetingId, status: 'ACTIVE' },
+          select: { id: true },
+        });
+
+        if (!candidate) {
+          throw new ApiError(
+            'VALIDATION_ERROR',
+            '유효한 투표 후보가 아닙니다.'
+          );
+        }
+
+        await tx.vote.upsert({
+          where: { meetingId_memberId: { meetingId, memberId: member.id } },
+          update: { candidateId: body.candidateId },
+          create: {
+            meetingId,
+            memberId: member.id,
+            candidateId: body.candidateId,
+          },
+        });
+
+        const [candidates, memberCount] = await Promise.all([
+          tx.placeCandidate.findMany({
+            where: { meetingId, status: 'ACTIVE' },
+            select: { id: true, _count: { select: { votes: true } } },
+          }),
+          tx.vote.count({ where: { meetingId } }),
+        ]);
+
+        return { updatedCandidates: candidates, votedMemberCount: memberCount };
+      }
+    );
 
     const voteCounts = Object.fromEntries(
       updatedCandidates.map((c) => [c.id, c._count.votes])
@@ -120,6 +152,9 @@ export const GET = handleRoute(
           _count: {
             select: { votes: true },
           },
+          votes: {
+            select: { memberId: true },
+          },
         },
         orderBy: [{ votes: { _count: 'desc' } }, { createdAt: 'asc' }],
       }),
@@ -168,7 +203,9 @@ export const GET = handleRoute(
           totalVoters > 0
             ? Math.round((c._count.votes / totalVoters) * 100)
             : 0,
-        voterMemberIds: [],
+        voterMemberIds: meeting.anonymousVoting
+          ? []
+          : c.votes.map((v) => v.memberId),
       })),
     });
   }
