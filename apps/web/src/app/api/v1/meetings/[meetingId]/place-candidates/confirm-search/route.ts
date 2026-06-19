@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
+import { transitionMeetingStatus } from '@/lib/meeting-status';
 import { socketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
 
@@ -112,9 +113,10 @@ export const POST = handleRoute(
           });
 
       if (currentMeeting.status === 'VOTING') {
+        await transitionMeetingStatus(meetingId, 'PLACE_CONFIRMED', { tx });
         await tx.meeting.update({
           where: { id: meetingId },
-          data: { status: 'PLACE_CONFIRMED', confirmedCandidateId: saved.id },
+          data: { confirmedCandidateId: saved.id },
         });
         confirmedStatus = 'PLACE_CONFIRMED';
       } else {
