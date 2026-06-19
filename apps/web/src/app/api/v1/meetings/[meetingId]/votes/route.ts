@@ -50,16 +50,14 @@ export const PUT = handleRoute(
       throw new ApiError('VALIDATION_ERROR', '유효한 투표 후보가 아닙니다.');
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.vote.upsert({
-        where: { meetingId_memberId: { meetingId, memberId: member.id } },
-        update: { candidateId: body.candidateId },
-        create: {
-          meetingId,
-          memberId: member.id,
-          candidateId: body.candidateId,
-        },
-      });
+    await prisma.vote.upsert({
+      where: { meetingId_memberId: { meetingId, memberId: member.id } },
+      update: { candidateId: body.candidateId },
+      create: {
+        meetingId,
+        memberId: member.id,
+        candidateId: body.candidateId,
+      },
     });
 
     const [updatedCandidates, votedMemberCount] = await Promise.all([
