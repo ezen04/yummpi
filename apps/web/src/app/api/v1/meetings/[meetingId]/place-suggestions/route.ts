@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
@@ -55,41 +56,71 @@ export const POST = handleRoute(
 
     const externalPlaceId = body.externalPlaceId.trim();
 
-    const existing = await prisma.placeCandidate.findFirst({
-      where: { meetingId, externalPlaceId },
-      select: { id: true, status: true },
-    });
+    const suggestion = await prisma
+      .$transaction(async (tx) => {
+        const currentMeeting = await tx.meeting.findUnique({
+          where: { id: meetingId },
+          select: { status: true },
+        });
 
-    if (existing) {
-      throw new ApiError(
-        'CANDIDATE_ALREADY_EXISTS',
-        existing.status === 'ACTIVE'
-          ? '이미 투표 후보로 등록된 장소입니다.'
-          : '이미 장소 풀에 추가된 장소입니다.'
-      );
-    }
+        if (
+          !currentMeeting ||
+          !ALLOWED_STATUSES.includes(currentMeeting.status)
+        ) {
+          throw new ApiError(
+            'INVALID_MEETING_STATUS_TRANSITION',
+            '장소 풀 추가는 모집 중 또는 투표 중 상태에서만 가능합니다.'
+          );
+        }
 
-    const suggestion = await prisma.placeCandidate.create({
-      data: {
-        meetingId,
-        createdByMemberId: member.id,
-        externalPlaceId,
-        name: body.name.trim(),
-        categoryName: body.categoryName ?? null,
-        address: body.address ?? null,
-        roadAddress: body.roadAddress ?? null,
-        phone: body.phone ?? null,
-        latitude: body.lat,
-        longitude: body.lng,
-        placeUrl: body.placeUrl ?? null,
-        status: 'REJECTED',
-      },
-      include: {
-        createdBy: {
-          select: { id: true, nickname: true, role: true },
-        },
-      },
-    });
+        const existing = await tx.placeCandidate.findFirst({
+          where: { meetingId, externalPlaceId },
+          select: { id: true, status: true },
+        });
+
+        if (existing) {
+          throw new ApiError(
+            'CANDIDATE_ALREADY_EXISTS',
+            existing.status === 'ACTIVE'
+              ? '이미 투표 후보로 등록된 장소입니다.'
+              : '이미 장소 풀에 추가된 장소입니다.'
+          );
+        }
+
+        return tx.placeCandidate.create({
+          data: {
+            meetingId,
+            createdByMemberId: member.id,
+            externalPlaceId,
+            name: body.name.trim(),
+            categoryName: body.categoryName ?? null,
+            address: body.address ?? null,
+            roadAddress: body.roadAddress ?? null,
+            phone: body.phone ?? null,
+            latitude: body.lat,
+            longitude: body.lng,
+            placeUrl: body.placeUrl ?? null,
+            status: 'REJECTED',
+          },
+          include: {
+            createdBy: {
+              select: { id: true, nickname: true, role: true },
+            },
+          },
+        });
+      })
+      .catch((err: unknown) => {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          throw new ApiError(
+            'CANDIDATE_ALREADY_EXISTS',
+            '이미 장소 풀에 추가된 장소입니다.'
+          );
+        }
+        throw err;
+      });
 
     return apiSuccess(
       {
