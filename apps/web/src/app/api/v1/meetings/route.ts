@@ -105,7 +105,10 @@ export const GET = handleRoute(async (req: Request) => {
   );
 
   const where: Prisma.MeetingWhereInput = {
-    OR: [{ hostUserId: user.id }, { members: { some: { userId: user.id } } }],
+    OR: [
+      { hostUserId: user.id },
+      { members: { some: { userId: user.id, leftAt: null } } },
+    ],
     ...(status ? { status } : {}),
   };
 
