@@ -56,7 +56,24 @@ export const POST = handleRoute(
 
     const externalPlaceId = body.externalPlaceId.trim();
 
+    let confirmedStatus: typeof meeting.status = meeting.status;
+
     const candidate = await prisma.$transaction(async (tx) => {
+      const currentMeeting = await tx.meeting.findUnique({
+        where: { id: meetingId },
+        select: { status: true },
+      });
+
+      if (
+        !currentMeeting ||
+        !ALLOWED_STATUSES.includes(currentMeeting.status)
+      ) {
+        throw new ApiError(
+          'INVALID_MEETING_STATUS_TRANSITION',
+          '장소 확정은 투표 중 또는 장소 확정 상태에서만 가능합니다.'
+        );
+      }
+
       const existing = await tx.placeCandidate.findFirst({
         where: { meetingId, externalPlaceId },
         select: { id: true },
@@ -94,11 +111,12 @@ export const POST = handleRoute(
             },
           });
 
-      if (meeting.status === 'VOTING') {
+      if (currentMeeting.status === 'VOTING') {
         await tx.meeting.update({
           where: { id: meetingId },
           data: { status: 'PLACE_CONFIRMED', confirmedCandidateId: saved.id },
         });
+        confirmedStatus = 'PLACE_CONFIRMED';
       } else {
         await tx.meeting.update({
           where: { id: meetingId },
@@ -128,7 +146,7 @@ export const POST = handleRoute(
       candidate: candidatePayload,
     });
 
-    if (meeting.status === 'VOTING') {
+    if (confirmedStatus === 'PLACE_CONFIRMED' && meeting.status === 'VOTING') {
       socketEmitter.to(`meeting:${meetingId}`).emit('meeting:status-changed', {
         meetingId,
         status: 'PLACE_CONFIRMED',
@@ -140,8 +158,7 @@ export const POST = handleRoute(
         meetingId,
         candidateId: candidate.id,
         candidate: candidatePayload,
-        meetingStatus:
-          meeting.status === 'VOTING' ? 'PLACE_CONFIRMED' : meeting.status,
+        meetingStatus: confirmedStatus,
       },
       '장소가 확정되었습니다.'
     );
