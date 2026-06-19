@@ -200,6 +200,7 @@ type Section =
   | 'summary-progress'
   | 'summary-done'
   | 'member-list-host'
+  | 'host-transfer-confirm'
   | 'not-initialized-host'
   | 'not-initialized-member'
   | 'member-pending'
@@ -216,6 +217,7 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'summary-progress', label: '요약 (진행 중)' },
   { id: 'summary-done', label: '요약 (완료)' },
   { id: 'member-list-host', label: '멤버 리스트 (호스트)' },
+  { id: 'host-transfer-confirm', label: '호스트 — 송금 확인' },
   { id: 'not-initialized-host', label: '미초기화 (호스트)' },
   { id: 'not-initialized-member', label: '미초기화 (멤버)' },
   { id: 'member-pending', label: '멤버 — 송금 전' },
@@ -285,6 +287,22 @@ export default function PaymentPreviewPage() {
               />
             </div>
           )}
+          {active === 'host-transfer-confirm' && (
+            <div className="pt-[104px]">
+              <div className="px-5 mb-4">
+                <PaymentSummaryPanel summary={MOCK_SUMMARY_IN_PROGRESS} />
+              </div>
+              <PaymentMemberList
+                payments={MOCK_PAYMENTS_HOST}
+                onAction={(paymentId, action) =>
+                  alert(`paymentId: ${paymentId}\naction: ${action}`)
+                }
+              />
+              <p className="text-xs text-center text-[var(--label-assistive)] py-2">
+                ↑ TRANSFER_REPORTED 항목의 &quot;송금 확인&quot; 버튼을 눌러보세요
+              </p>
+            </div>
+          )}
           {active === 'not-initialized-host' && (
             <PaymentNotInitializedState
               viewerRole="HOST"
@@ -298,12 +316,14 @@ export default function PaymentPreviewPage() {
             />
           )}
           {active === 'member-pending' && (
-            <TransferActionPanel
-              item={MOCK_ITEM_PENDING}
-              meetingId="00000000-0000-0000-0000-000000000000"
-              hostNickname="지훈"
-              onTransferReported={() => alert('REPORT_TRANSFER 호출!')}
-            />
+            <div className="flex flex-col" style={{ minHeight: 600 }}>
+              <TransferActionPanel
+                item={MOCK_ITEM_PENDING}
+                meetingId="00000000-0000-0000-0000-000000000000"
+                hostNickname="지훈"
+                onTransferReported={() => alert('REPORT_TRANSFER 호출!')}
+              />
+            </div>
           )}
           {active === 'member-reported' && (
             <TransferPendingState
