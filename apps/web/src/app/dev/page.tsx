@@ -1,6 +1,49 @@
+'use client';
+
+import { useState } from 'react';
+
 /**
  * /dev — 공통 컴포넌트 시각 검증 페이지
  */
+import { Header } from '../../components/common/Header';
+import { Menubar } from '../../components/common/Menubar';
+import { Footer } from '../../components/common/Footer';
+import { Badge } from '../../components/common/Badge';
+import {
+  KakaoLoginButton,
+  KakaoPayButton,
+  TossPayButton,
+  RadiusButton,
+} from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
+import { Check } from '../../components/common/Check';
+import { Radio, RadioGroup } from '../../components/common/Radio';
+import { BottomSheet } from '../../components/common/BottomSheet';
+import { Chip } from '../../components/common/Chip';
+import { Toggle } from '../../components/common/Toggle';
+import { Selectbox } from '../../components/common/Selectbox';
+import { YAvatar } from '../../components/common/YAvatar';
+import { Thumbnail } from '../../components/common/Thumbnail';
+import { Confirmbox } from '../../components/common/Confirmbox';
+import {
+  PersonItem,
+  MenuItem,
+  PersonAttendanceItem,
+  PersonResultItem,
+  ResultRow,
+  MenuCheckItem,
+} from '../../components/common/List';
+import { IconButton } from '../../components/common/IconButton';
+import { SolidChip } from '../../components/common/Chip';
+import { TodoCard, WaitingCard } from '../../components/common/GroupDetailCard';
+import { Notification } from '../../components/common/Notification';
+import { VoteResultBar } from '../../components/common/VoteResultBar';
+import { VoteResultSelect } from '../../components/common/VoteResultSelect';
+import { VoteResultCard } from '../../components/common/VoteResultCard';
+import { Attendance } from '../../components/common/Attendance';
+import { Icon } from '../../components/common/Icon';
+import { Tipbox } from '../../components/common/Tipbox';
+import { Step } from '../../components/common/Step';
 import { Button } from '@yummpi/ui';
 // import { KakaoLoginButton } from '@yummpi/ui';
 import {
@@ -17,10 +60,17 @@ import {
   ChevronLeft,
   Sparkles,
   Flame,
-  Check,
+  Check as CheckIcon,
+  Pencil,
+  Calendar,
 } from '@yummpi/ui';
 
 export default function DevPage() {
+  const [bsOpen, setBsOpen] = useState<
+    'background' | 'non-background' | 'solo' | null
+  >(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-[var(--bg-normal)]">
       <div className="max-w-[390px] mx-auto px-4 py-8 space-y-10">
@@ -129,10 +179,10 @@ export default function DevPage() {
               <Button size="md">지원하기</Button>
             </div>
             <div className="flex gap-2">
-              <Button size="lg" leftIcon={<Check strokeWidth={1.5} />}>
+              <Button size="lg" leftIcon={<CheckIcon strokeWidth={1.5} />}>
                 지원하기
               </Button>
-              <Button size="md" leftIcon={<Check strokeWidth={1.5} />}>
+              <Button size="md" leftIcon={<CheckIcon strokeWidth={1.5} />}>
                 지원하기
               </Button>
             </div>
@@ -152,7 +202,7 @@ export default function DevPage() {
               <Button
                 variant="outline"
                 size="lg"
-                leftIcon={<Check strokeWidth={1.5} />}
+                leftIcon={<CheckIcon strokeWidth={1.5} />}
               >
                 지원하기
               </Button>
@@ -340,6 +390,958 @@ export default function DevPage() {
                   className="text-[var(--label-normal)]"
                 />
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Header ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Header
+          </h2>
+          <div className="space-y-2">
+            {/* ① 뒤로가기 + 제목 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header title="송금하기" onBack={() => {}} />
+            </div>
+            {/* ② 대시보드 — 인사 + 벨 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header
+                greeting="안녕하세요"
+                title="김원티님 👋"
+                showBell
+                hasNotification
+              />
+            </div>
+            {/* ③ 뒤로가기 + X */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header onBack={() => {}} onClose={() => {}} />
+            </div>
+            {/* ④ 뒤로가기 + 제목 + 부제목 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header
+                title="장소 추천"
+                subtitle="조건에 맞는 후보 5곳"
+                onBack={() => {}}
+              />
+            </div>
+            {/* ⑤ title-status — 뒤로가기 + 제목 + 상태 배지 (yellow: 투표 중) */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header
+                title="홍대 회식"
+                onBack={() => {}}
+                statusVariant="yellow"
+                statusLabel="투표 중"
+              />
+            </div>
+            {/* ⑥ title-status — green: 완료 */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header
+                title="홍대 회식"
+                onBack={() => {}}
+                statusVariant="green"
+                statusLabel="완료"
+              />
+            </div>
+            {/* ⑦ mypage */}
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Header isMypage onSettings={() => {}} />
+            </div>
+          </div>
+        </section>
+
+        {/* ── GroupDetailCard ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            GroupDetailCard
+          </h2>
+          <p className="text-caption1 text-[var(--label-assistive)]">
+            TodoCard (주최자)
+          </p>
+          <TodoCard type="location-vote" onAction={() => {}} />
+          <TodoCard type="adjustment" onAction={() => {}} />
+          <TodoCard type="transfer" onAction={() => {}} />
+          <p className="text-caption1 text-[var(--label-assistive)] mt-2">
+            WaitingCard (일반 참여자)
+          </p>
+          <WaitingCard type="location-vote" />
+          <WaitingCard type="adjustment" />
+        </section>
+
+        {/* ── Input ── */}
+        <section className="space-y-4">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Input
+          </h2>
+          {/* essential-basic (왼쪽 아이콘 — 펜) */}
+          <Input
+            label="모임 이름"
+            required
+            leftIcon={<Pencil size={18} strokeWidth={1.5} />}
+            placeholder="모임 이름을 입력하세요"
+          />
+          {/* essential-icon-left — 캘린더 */}
+          <Input
+            label="날짜"
+            required
+            leftIcon={<Calendar size={18} strokeWidth={1.5} />}
+            placeholder="날짜를 선택하세요"
+            readOnly
+          />
+          {/* essential-icon-left — 인원 */}
+          <Input
+            label="인원"
+            required
+            leftIcon={<Users size={18} strokeWidth={1.5} />}
+            placeholder="인원 수"
+          />
+          {/* essential-icon-left — 지역 */}
+          <Input
+            label="지역"
+            required
+            leftIcon={<MapPin size={18} strokeWidth={1.5} />}
+            placeholder="지역을 입력하세요"
+          />
+          {/* optional-basic */}
+          <Input label="모임 설명" placeholder="설명을 입력하세요 (선택)" />
+          {/* error */}
+          <Input
+            label="닉네임"
+            required
+            placeholder="닉네임을 입력하세요"
+            error="이미 사용 중인 닉네임입니다"
+          />
+        </section>
+
+        {/* ── Check ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Check
+          </h2>
+          <div className="space-y-3">
+            <Check checked={false} label="삼겹살 2인분 (inactive)" />
+            <Check checked={true} label="소주 3병 (active)" />
+            <Check checked={true} label="비활성 선택됨" disabled />
+            <Check checked={false} />
+            <Check checked={true} />
+          </div>
+        </section>
+
+        {/* ── Radio ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Radio
+          </h2>
+          <div className="space-y-3">
+            <Radio checked={false} label="항목별 정산 (inactive)" />
+            <Radio checked={true} label="1/N 균등 정산 (active)" />
+            <Radio checked={true} label="비활성 선택됨" disabled />
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-2">
+              RadioGroup
+            </p>
+            <RadioGroup
+              options={[
+                { value: 'ITEM_BASED', label: '항목별 정산' },
+                { value: 'EQUAL', label: '1/N 균등 정산' },
+              ]}
+              value="ITEM_BASED"
+              onChange={() => {}}
+            />
+          </div>
+        </section>
+
+        {/* ── Chip ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Chip
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <Chip active>한식</Chip>
+            <Chip active={false}>일식</Chip>
+            <Chip active={false}>중식</Chip>
+            <Chip active={false}>고기</Chip>
+            <Chip active={false}>카페</Chip>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <SolidChip variant="solid-dark">solid-dark</SolidChip>
+            <SolidChip variant="solid-fill">solid-fill</SolidChip>
+          </div>
+        </section>
+
+        {/* ── Toggle ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Toggle
+          </h2>
+          <div className="space-y-3">
+            <Toggle checked={false} label="송금 독촉 알림 (inactive)" />
+            <Toggle checked={true} label="모임 알림 (active)" />
+            <Toggle checked={true} label="비활성" disabled />
+          </div>
+        </section>
+
+        {/* ── Selectbox ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Selectbox
+          </h2>
+          <Selectbox
+            options={[
+              { value: 'ITEM_BASED', label: '항목별 정산' },
+              { value: 'EQUAL', label: '1/N 균등 정산' },
+            ]}
+            value="ITEM_BASED"
+            onChange={() => {}}
+          />
+        </section>
+
+        {/* ── YAvatar ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            YAvatar
+          </h2>
+          <div className="flex gap-3 items-center">
+            <YAvatar variant="host" name="김주최" size={48} />
+            <YAvatar variant="guest" name="이참여" size={48} />
+            <YAvatar variant="host" name="박호스트" size={40} />
+            <YAvatar variant="guest" name="최게스트" size={32} />
+          </div>
+        </section>
+
+        {/* ── Thumbnail ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Thumbnail
+          </h2>
+          <div className="flex gap-2 flex-wrap">
+            <Thumbnail category="korean" />
+            <Thumbnail category="japanese" />
+            <Thumbnail category="chinese" />
+            <Thumbnail category="meat" />
+            <Thumbnail category="cafe" />
+            <Thumbnail category="western" />
+          </div>
+        </section>
+
+        {/* ── Confirmbox ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Confirmbox
+          </h2>
+          <button
+            onClick={() => setConfirmOpen(true)}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 'var(--radius-8)',
+              border: '1px solid var(--line-normal)',
+              font: '400 14px var(--font-sans)',
+              cursor: 'pointer',
+            }}
+          >
+            다이얼로그 열기
+          </button>
+          <Confirmbox
+            open={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={() => setConfirmOpen(false)}
+            title="정산을 확정할까요?"
+            body="확정 후에는 금액을 수정할 수 없어요"
+            confirmLabel="확정"
+          />
+        </section>
+
+        {/* ── List ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            List
+          </h2>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              Person
+            </p>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonItem
+                variant="me"
+                name="김윤아"
+                isHost={true}
+                status="paid"
+              />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonItem variant="other" name="이지훈" status="unpaid" />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonItem variant="other-inactive" name="박민수" />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              Person / attendance
+            </p>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonAttendanceItem name="김윤아" attended isMe />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonAttendanceItem name="이지훈" attended={false} />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              Person / result
+            </p>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonResultItem
+                name="김윤아"
+                isMe
+                resultLabel="홍대 삼겹살"
+                resultVariant="primary"
+              />
+            </div>
+            <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+              <PersonResultItem
+                name="이지훈"
+                resultLabel="마포 고기집"
+                resultVariant="default"
+              />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              result-r / result-b
+            </p>
+            <div className="space-y-2">
+              <ResultRow
+                variant="r"
+                rank={1}
+                label="홍대 삼겹살 마당"
+                address="서울 마포구 홍대입구"
+                votes={3}
+                percent={60}
+              />
+              <ResultRow
+                variant="b"
+                rank={2}
+                label="마포 고기집"
+                address="서울 마포구 마포대로"
+                votes={2}
+                percent={40}
+              />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              Menu
+            </p>
+            <div style={{ borderTop: '1px solid var(--line-normal)' }}>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuItem label="계좌 관리" />
+              </div>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuItem label="알림 설정" value="켜짐" />
+              </div>
+              <MenuItem label="탈퇴하기" destructive />
+            </div>
+          </div>
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              Menu-check (OCR 검수)
+            </p>
+            <div style={{ borderTop: '1px solid var(--line-normal)' }}>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuCheckItem label="삼겹살 2인분" price={28000} checked />
+              </div>
+              <div style={{ borderBottom: '1px solid var(--line-normal)' }}>
+                <MenuCheckItem label="된장찌개" price={9000} />
+              </div>
+              <MenuCheckItem label="소주 2병" price={7000} checked />
+            </div>
+          </div>
+        </section>
+
+        {/* ── VoteResultBar ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            VoteResultBar
+          </h2>
+          <VoteResultBar
+            label="홍대 삼겹살 마당"
+            percent={60}
+            votes={3}
+            variant="active"
+          />
+          <VoteResultBar
+            label="마포 고기집"
+            percent={40}
+            votes={2}
+            variant="inactive"
+          />
+          <VoteResultBar
+            label="연남 이탈리안"
+            percent={0}
+            votes={0}
+            variant="inactive"
+          />
+        </section>
+
+        {/* ── VoteResultSelect ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            VoteResultSelect
+          </h2>
+          <VoteResultSelect
+            label="홍대 삼겹살 마당"
+            address="서울 마포구 홍대입구"
+            category="고기"
+            selected
+          />
+          <VoteResultSelect
+            label="마포 고기집"
+            address="서울 마포구 마포대로"
+            category="고기"
+          />
+          <VoteResultSelect
+            label="연남 이탈리안"
+            address="서울 마포구 연남동"
+            category="양식"
+          />
+        </section>
+
+        {/* ── VoteResultCard ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            VoteResultCard
+          </h2>
+          <VoteResultCard
+            title="장소 투표 결과"
+            items={[
+              { label: '홍대 삼겹살 마당', votes: 3 },
+              { label: '마포 고기집', votes: 2 },
+              { label: '연남 이탈리안', votes: 0 },
+            ]}
+          />
+        </section>
+
+        {/* ── Attendance ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Attendance
+          </h2>
+          <div className="flex gap-4 flex-wrap">
+            <Attendance variant="host" name="김주최" />
+            <Attendance variant="user" name="이참여" />
+            <Attendance variant="user-hover" name="박호버" />
+            <Attendance variant="user-selected" name="최선택" />
+            <Attendance variant="guest" name="게스트" />
+          </div>
+        </section>
+
+        {/* ── Icon ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Icon
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            {(
+              [
+                'bell',
+                'home',
+                'users',
+                'map-pin',
+                'calendar',
+                'check',
+                'plus',
+                'x',
+                'chevron-left',
+                'chevron-right',
+                'chevron-down',
+                'settings',
+                'share',
+                'wallet',
+                'pen',
+                'camera',
+                'arrow-up-right',
+                'sparkles',
+                'flame',
+                'send',
+              ] as const
+            ).map((name) => (
+              <div
+                key={name}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <Icon name={name} size={24} color="var(--label-normal)" />
+                <span
+                  style={{
+                    font: '400 10px var(--font-sans)',
+                    color: 'var(--label-assistive)',
+                  }}
+                >
+                  {name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Notification ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Notification
+          </h2>
+          <div
+            style={{
+              borderRadius: 'var(--radius-12)',
+              overflow: 'hidden',
+              border: '1px solid var(--line-normal)',
+            }}
+          >
+            <Notification
+              variant="unread"
+              title="송금 요청이 도착했어요"
+              body="김지훈님이 15,000원 송금을 요청했어요"
+            />
+            <Notification
+              variant="read"
+              title="모임 장소가 확정됐어요"
+              body="홍대 삼겹살 마당으로 장소가 확정됐어요"
+            />
+          </div>
+        </section>
+
+        {/* ── Tipbox ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Tipbox
+          </h2>
+          <Tipbox variant="normal">
+            초대 링크를 공유하면 게스트도 참여할 수 있어요
+          </Tipbox>
+          <Tipbox variant="completed-vote">
+            투표가 완료됐어요! 주최자가 장소를 확정할 예정이에요
+          </Tipbox>
+          <Tipbox variant="completed-title" title="정산 완료">
+            모든 참여자의 송금이 확인됐어요
+          </Tipbox>
+        </section>
+
+        {/* ── Step ── */}
+        <section className="space-y-4">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Step
+          </h2>
+          <Step steps={['장소 선택', '투표', '예약', '정산']} current={0} />
+          <Step steps={['장소 선택', '투표', '예약', '정산']} current={2} />
+          <Step steps={['장소 선택', '투표', '예약', '정산']} current={4} />
+        </section>
+
+        {/* ── BottomSheet ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            BottomSheet
+          </h2>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setBsOpen('background')}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 'var(--radius-8)',
+                border: '1px solid var(--line-normal)',
+                font: '400 14px var(--font-sans)',
+                cursor: 'pointer',
+              }}
+            >
+              background
+            </button>
+            <button
+              onClick={() => setBsOpen('non-background')}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 'var(--radius-8)',
+                border: '1px solid var(--line-normal)',
+                font: '400 14px var(--font-sans)',
+                cursor: 'pointer',
+              }}
+            >
+              non-background
+            </button>
+            <button
+              onClick={() => setBsOpen('solo')}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 'var(--radius-8)',
+                border: '1px solid var(--line-normal)',
+                font: '400 14px var(--font-sans)',
+                cursor: 'pointer',
+              }}
+            >
+              solo
+            </button>
+          </div>
+        </section>
+
+        <BottomSheet
+          open={bsOpen === 'background'}
+          onClose={() => setBsOpen(null)}
+          variant="background"
+        >
+          <p
+            style={{
+              font: '400 14px/20px var(--font-sans)',
+              color: 'var(--label-alternative)',
+              textAlign: 'center',
+              marginBottom: 16,
+            }}
+          >
+            참여자의 상태를 변경할 수 있습니다.
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => setBsOpen(null)}
+              style={{
+                flex: 1,
+                height: 48,
+                borderRadius: 'var(--radius-12)',
+                border: '1px solid var(--line-normal)',
+                font: '600 16px var(--font-sans)',
+                color: 'var(--label-normal)',
+                background: 'var(--bg-normal)',
+                cursor: 'pointer',
+              }}
+            >
+              지원하기
+            </button>
+            <button
+              onClick={() => setBsOpen(null)}
+              style={{
+                flex: 1,
+                height: 48,
+                borderRadius: 'var(--radius-12)',
+                border: '1px solid var(--line-neutral)',
+                font: '600 16px var(--font-sans)',
+                color: 'var(--primary)',
+                background: 'var(--bg-normal)',
+                cursor: 'pointer',
+              }}
+            >
+              투표 마감
+            </button>
+          </div>
+        </BottomSheet>
+
+        <BottomSheet
+          open={bsOpen === 'non-background'}
+          onClose={() => setBsOpen(null)}
+          variant="non-background"
+        >
+          <p
+            style={{
+              font: '400 14px/20px var(--font-sans)',
+              color: 'var(--label-alternative)',
+              textAlign: 'center',
+              marginBottom: 16,
+            }}
+          >
+            참여자의 상태를 변경할 수 있습니다.
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => setBsOpen(null)}
+              style={{
+                flex: 1,
+                height: 48,
+                borderRadius: 'var(--radius-12)',
+                border: '1px solid var(--line-normal)',
+                font: '600 16px var(--font-sans)',
+                color: 'var(--label-normal)',
+                background: 'var(--bg-normal)',
+                cursor: 'pointer',
+              }}
+            >
+              지원하기
+            </button>
+            <button
+              onClick={() => setBsOpen(null)}
+              style={{
+                flex: 1,
+                height: 48,
+                borderRadius: 'var(--radius-12)',
+                border: '1px solid var(--line-neutral)',
+                font: '600 16px var(--font-sans)',
+                color: 'var(--primary)',
+                background: 'var(--bg-normal)',
+                cursor: 'pointer',
+              }}
+            >
+              투표 마감
+            </button>
+          </div>
+        </BottomSheet>
+
+        <BottomSheet
+          open={bsOpen === 'solo'}
+          onClose={() => setBsOpen(null)}
+          variant="solo"
+        >
+          <p
+            style={{
+              font: '400 14px/20px var(--font-sans)',
+              color: 'var(--label-alternative)',
+              textAlign: 'center',
+              marginBottom: 16,
+            }}
+          >
+            참여자의 상태를 변경할 수 있습니다.
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => setBsOpen(null)}
+              style={{
+                flex: 1,
+                height: 48,
+                borderRadius: 'var(--radius-12)',
+                border: '1px solid var(--line-normal)',
+                font: '600 16px var(--font-sans)',
+                color: 'var(--label-normal)',
+                background: 'var(--bg-normal)',
+                cursor: 'pointer',
+              }}
+            >
+              지원하기
+            </button>
+            <button
+              onClick={() => setBsOpen(null)}
+              style={{
+                flex: 1,
+                height: 48,
+                borderRadius: 'var(--radius-12)',
+                border: '1px solid var(--line-neutral)',
+                font: '600 16px var(--font-sans)',
+                color: 'var(--primary)',
+                background: 'var(--bg-normal)',
+                cursor: 'pointer',
+              }}
+            >
+              투표 마감
+            </button>
+          </div>
+        </BottomSheet>
+
+        {/* ── Button (얌피 전용) ── */}
+        <section className="space-y-4">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Button (얌피 전용)
+          </h2>
+          {/* 브랜드 버튼 */}
+          <div className="space-y-2">
+            <p className="text-caption1 text-[var(--label-assistive)]">
+              브랜드
+            </p>
+            <KakaoLoginButton />
+            <KakaoPayButton />
+            <TossPayButton />
+          </div>
+          {/* Radius 계열 */}
+          <div className="space-y-2">
+            <p className="text-caption1 text-[var(--label-assistive)]">
+              Radius
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <RadiusButton variant="radius">태그</RadiusButton>
+              <RadiusButton variant="radius-border">독촉</RadiusButton>
+              <RadiusButton variant="radius-border-colored">
+                완료 확인
+              </RadiusButton>
+              <RadiusButton variant="radius-border-inactive">
+                비활성
+              </RadiusButton>
+              <RadiusButton variant="radius-border-selected">
+                선택됨
+              </RadiusButton>
+            </div>
+          </div>
+        </section>
+
+        {/* ── IconButton ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            IconButton
+          </h2>
+          <div className="flex gap-3 flex-wrap">
+            {(
+              [
+                'normal',
+                'hover',
+                'clicked',
+                'done',
+                'draft',
+                'disabled',
+              ] as const
+            ).map((v) => (
+              <div
+                key={v}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <IconButton
+                  variant={v}
+                  icon={<Icon name="bell" size={20} color="currentColor" />}
+                />
+                <span
+                  style={{
+                    font: '400 10px var(--font-sans)',
+                    color: 'var(--label-assistive)',
+                  }}
+                >
+                  {v}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Badge ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Badge
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="black">한식</Badge>
+            <Badge variant="green">good</Badge>
+            <Badge variant="red">오류</Badge>
+            <Badge variant="yellow">투표 중</Badge>
+            <Badge variant="guest">게스트</Badge>
+            <Badge variant="unpaid">미송금</Badge>
+            <Badge variant="reservable">예약가능</Badge>
+            <Badge
+              variant="icon-red"
+              icon={
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: 'var(--status-negative)',
+                    display: 'inline-block',
+                  }}
+                />
+              }
+            >
+              미송금
+            </Badge>
+          </div>
+        </section>
+
+        {/* ── Footer ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Footer
+          </h2>
+          {/* button — 힌트 있음 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              button / 힌트 있음
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer
+                variant="button"
+                hint="정산 후 송금 요청이 자동으로 전송됩니다"
+                label="정산 확정"
+                onClick={() => {}}
+              />
+            </div>
+          </div>
+          {/* button — 힌트 없음 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              button / 힌트 없음
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer variant="button" label="다음" onClick={() => {}} />
+            </div>
+          </div>
+          {/* button — disabled */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              button / disabled
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer
+                variant="button"
+                label="다음"
+                onClick={() => {}}
+                disabled
+              />
+            </div>
+          </div>
+          {/* menubar */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              menubar
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Footer
+                variant="menubar"
+                activeTab="home"
+                onTabChange={() => {}}
+                onCreateClick={() => {}}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Menubar ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            Menubar
+          </h2>
+          {/* 홈 활성 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              홈 활성
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Menubar
+                activeTab="home"
+                onTabChange={() => {}}
+                onCreateClick={() => {}}
+              />
+            </div>
+          </div>
+          {/* 모임 활성 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              모임 활성
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Menubar
+                activeTab="meetings"
+                onTabChange={() => {}}
+                onCreateClick={() => {}}
+              />
+            </div>
+          </div>
+          {/* 마이 활성 */}
+          <div>
+            <p className="text-caption1 text-[var(--label-assistive)] mb-1">
+              마이 활성
+            </p>
+            <div className="border border-[var(--line-normal)] [border-radius:var(--radius-12)] overflow-hidden">
+              <Menubar
+                activeTab="mypage"
+                onTabChange={() => {}}
+                onCreateClick={() => {}}
+              />
             </div>
           </div>
         </section>
