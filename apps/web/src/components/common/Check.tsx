@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Check as CheckIcon } from '@yummpi/ui';
 
 interface CheckProps {
   checked: boolean;
@@ -42,17 +43,7 @@ export function Check({
             : 'bg-[var(--bg-normal)] border-[1.5px] border-[var(--line-normal)]',
         )}
       >
-        {checked && (
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path
-              d="M1 5L4.5 8.5L11 1.5"
-              stroke="white"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {checked && <CheckIcon size={12} strokeWidth={1.8} color="white" />}
       </span>
 
       {label && (

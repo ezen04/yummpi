@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Check } from '@yummpi/ui';
 
 interface VoteResultSelectProps {
   label: string;
@@ -45,17 +46,7 @@ export function VoteResultSelect({
             : 'bg-transparent border-[1.5px] border-[var(--line-normal)]',
         )}
       >
-        {selected && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path
-              d="M1 4L3.5 6.5L9 1"
-              stroke="white"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {selected && <Check size={10} strokeWidth={1.6} color="white" />}
       </span>
 
       {/* 텍스트 */}

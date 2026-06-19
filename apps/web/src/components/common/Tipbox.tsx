@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Eye } from '@yummpi/ui';
 
 interface TipboxProps {
   variant?: 'normal' | 'completed-vote' | 'completed-title';
@@ -24,16 +25,7 @@ export function Tipbox({
         className,
       )}
     >
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-        <path
-          d="M1.5 10C1.5 10 4.5 4 10 4C15.5 4 18.5 10 18.5 10C18.5 10 15.5 16 10 16C4.5 16 1.5 10 1.5 10Z"
-          stroke="var(--secondary-strong)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="10" cy="10" r="2.5" stroke="var(--secondary-strong)" strokeWidth="1.5" />
-      </svg>
+      <Eye size={20} strokeWidth={1.5} color="var(--secondary-strong)" className="shrink-0" />
 
       <div className="flex-1">
         {title && variant === 'completed-title' && (

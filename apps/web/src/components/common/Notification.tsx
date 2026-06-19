@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Bell, ChevronRight } from '@yummpi/ui';
 
 interface NotificationProps {
   variant: 'unread' | 'read';
@@ -37,24 +38,7 @@ export function Notification({
         className="shrink-0 flex"
         style={{ color: iconColor }}
       >
-        {icon ?? (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M13.73 21a2 2 0 0 1-3.46 0"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {icon ?? <Bell size={24} strokeWidth={1.5} color="currentColor" />}
       </span>
 
       <div className="flex-1 flex flex-col gap-[3px]">
@@ -68,15 +52,7 @@ export function Notification({
         )}
       </div>
 
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-        <path
-          d="M7.5 5L12.5 10L7.5 15"
-          stroke="var(--label-assistive)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ChevronRight size={20} strokeWidth={1.5} color="var(--label-assistive)" className="shrink-0" />
     </div>
   );
 }

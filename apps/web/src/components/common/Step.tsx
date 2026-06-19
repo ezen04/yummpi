@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Check } from '@yummpi/ui';
 
 interface StepProps {
   steps: string[];
@@ -30,15 +31,7 @@ export function Step({ steps, current, className }: StepProps) {
                 )}
               >
                 {isDone ? (
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                    <path
-                      d="M1 5L4.5 8.5L11 1.5"
-                      stroke="white"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <Check size={12} strokeWidth={1.8} color="white" />
                 ) : (
                   <span
                     className={cn(

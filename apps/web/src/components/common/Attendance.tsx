@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { Check } from '@yummpi/ui';
 
 type AttendanceVariant =
   | 'host'
@@ -76,15 +77,7 @@ export function Attendance({
 
         {isSelected && (
           <span className="absolute bottom-0 right-0 w-[18px] h-[18px] rounded-full bg-[var(--primary)] border-2 border-[var(--bg-normal)] flex items-center justify-center">
-            <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-              <path
-                d="M1 3.5L3.2 5.5L8 1"
-                stroke="white"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <Check size={9} strokeWidth={1.4} color="white" />
           </span>
         )}
       </div>

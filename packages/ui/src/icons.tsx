@@ -15,6 +15,7 @@ export {
   Wallet as Coins,
   Send,
   Receipt,
+  CreditCard,
   Plus,
   X as Close,
   Search,

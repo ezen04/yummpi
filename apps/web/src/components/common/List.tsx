@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Check, ChevronRight } from '@yummpi/ui';
 import { YAvatar } from './YAvatar';
 import { Badge } from './Badge';
 
@@ -123,17 +124,7 @@ export function PersonAttendanceItem({
             : 'border-[1.5px] border-[var(--line-normal)] bg-transparent',
         )}
       >
-        {attended && (
-          <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
-            <path
-              d="M1 5L4.5 8.5L12 1"
-              stroke="white"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {attended && <Check size={13} strokeWidth={1.6} color="white" />}
       </span>
     </div>
   );
@@ -319,15 +310,7 @@ export function MenuItem({
         </span>
       )}
       {!value && (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-          <path
-            d="M6 4L10 8L6 12"
-            stroke="var(--label-assistive)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronRight size={16} strokeWidth={1.5} color="var(--label-assistive)" className="shrink-0" />
       )}
     </button>
   );
@@ -370,17 +353,7 @@ export function MenuCheckItem({
             : 'border-[1.5px] border-[var(--line-normal)] bg-transparent',
         )}
       >
-        {isActive && (
-          <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-            <path
-              d="M1 4L4.5 7.5L11 1"
-              stroke="white"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {isActive && <Check size={12} strokeWidth={1.6} color="white" />}
       </span>
       <span
         className={cn(
