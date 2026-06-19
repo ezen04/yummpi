@@ -6,6 +6,7 @@ import { PaymentEmptyState } from '@/features/payment/components/PaymentEmptySta
 import { PaymentErrorState } from '@/features/payment/components/PaymentErrorState';
 import { PaymentSummaryPanel } from '@/features/payment/components/PaymentSummaryPanel';
 import { PaymentMemberList } from '@/features/payment/components/PaymentMemberList';
+import { PaymentNotInitializedState } from '@/features/payment/components/PaymentNotInitializedState';
 import type { PaymentSummary, PaymentListItem } from '@yummpi/schemas';
 
 const MOCK_SUMMARY_IN_PROGRESS: PaymentSummary = {
@@ -38,7 +39,9 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     amount: 23500,
     status: 'PAID',
     paidAt: '2026-06-19T10:00:00Z',
+    isMine: false,
     canReportTransfer: false,
+    canCancelTransfer: false,
     canMarkPaid: false,
     canMarkPending: true,
     canMarkExempt: false,
@@ -51,7 +54,9 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     amount: 23500,
     status: 'EXEMPT',
     paidAt: null,
+    isMine: false,
     canReportTransfer: false,
+    canCancelTransfer: false,
     canMarkPaid: false,
     canMarkPending: false,
     canMarkExempt: false,
@@ -64,7 +69,9 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     amount: 23500,
     status: 'TRANSFER_REPORTED',
     paidAt: null,
+    isMine: false,
     canReportTransfer: false,
+    canCancelTransfer: false,
     canMarkPaid: true,
     canMarkPending: false,
     canMarkExempt: false,
@@ -77,7 +84,9 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     amount: 23500,
     status: 'PENDING',
     paidAt: null,
+    isMine: false,
     canReportTransfer: false,
+    canCancelTransfer: false,
     canMarkPaid: false,
     canMarkPending: false,
     canMarkExempt: true,
@@ -90,7 +99,9 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     amount: 23500,
     status: 'PENDING',
     paidAt: null,
+    isMine: false,
     canReportTransfer: false,
+    canCancelTransfer: false,
     canMarkPaid: false,
     canMarkPending: false,
     canMarkExempt: true,
@@ -103,7 +114,9 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     amount: 23500,
     status: 'PENDING',
     paidAt: null,
+    isMine: false,
     canReportTransfer: false,
+    canCancelTransfer: false,
     canMarkPaid: false,
     canMarkPending: false,
     canMarkExempt: true,
@@ -117,7 +130,9 @@ type Section =
   | 'error'
   | 'summary-progress'
   | 'summary-done'
-  | 'member-list-host';
+  | 'member-list-host'
+  | 'not-initialized-host'
+  | 'not-initialized-member';
 
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'loading', label: '로딩' },
@@ -126,6 +141,8 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'summary-progress', label: '요약 (진행 중)' },
   { id: 'summary-done', label: '요약 (완료)' },
   { id: 'member-list-host', label: '멤버 리스트 (호스트)' },
+  { id: 'not-initialized-host', label: '미초기화 (호스트)' },
+  { id: 'not-initialized-member', label: '미초기화 (멤버)' },
 ];
 
 export default function PaymentPreviewPage() {
@@ -186,6 +203,18 @@ export default function PaymentPreviewPage() {
                 }
               />
             </div>
+          )}
+          {active === 'not-initialized-host' && (
+            <PaymentNotInitializedState
+              viewerRole="HOST"
+              meetingId="00000000-0000-0000-0000-000000000000"
+            />
+          )}
+          {active === 'not-initialized-member' && (
+            <PaymentNotInitializedState
+              viewerRole="MEMBER"
+              meetingId="00000000-0000-0000-0000-000000000000"
+            />
           )}
         </div>
       </div>

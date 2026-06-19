@@ -1,14 +1,21 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaymentLoadingSkeleton } from '../components/PaymentLoadingSkeleton';
 import { PaymentEmptyState } from '../components/PaymentEmptyState';
 import { PaymentErrorState } from '../components/PaymentErrorState';
+import { PaymentSummaryPanel } from '../components/PaymentSummaryPanel';
+import { PaymentHostView } from '../components/PaymentHostView';
+import { PaymentMemberView } from '../components/PaymentMemberView';
+import { MeetingCompletedView } from '../components/MeetingCompletedView';
+import { PaymentNotInitializedState } from '../components/PaymentNotInitializedState';
 import {
-  initializePayments,
   getPayments,
+  updatePayment,
   isPaymentApiError,
 } from '../lib/paymentApi';
+import type { PaymentAction } from '@yummpi/schemas';
 
 const SETTLEMENT_NOT_READY_CODES = new Set([
   'INVALID_SETTLEMENT_STATUS',
@@ -19,14 +26,13 @@ type Props = {
   meetingId: string;
 };
 
-// initializePayments는 idempotent이므로 queryFn 안에서 매번 호출해도 안전하다.
 export function PaymentStatusPage({ meetingId }: Props) {
+  const queryClient = useQueryClient();
+  const [isCompleted, setIsCompleted] = useState(false);
+
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['payments', meetingId],
-    queryFn: async () => {
-      await initializePayments(meetingId);
-      return getPayments(meetingId);
-    },
+    queryFn: () => getPayments(meetingId),
     retry: false,
     staleTime: 30_000,
   });
@@ -48,17 +54,54 @@ export function PaymentStatusPage({ meetingId }: Props) {
 
   if (!data) return <PaymentLoadingSkeleton />;
 
+  if (isCompleted) {
+    return <MeetingCompletedView summary={data.summary} />;
+  }
+
+  if (data.summary.totalCount === 0) {
+    return (
+      <PaymentNotInitializedState
+        viewerRole={data.viewerRole}
+        meetingId={meetingId}
+      />
+    );
+  }
+
+  async function handleAction(paymentId: string, action: PaymentAction) {
+    await updatePayment(meetingId, paymentId, action);
+    void queryClient.invalidateQueries({ queryKey: ['payments', meetingId] });
+  }
+
+  const myPayment = data.payments.find((p) => p.isMine);
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-[var(--bg-normal)]">
       {/* 헤더 */}
-      <div className="h-[104px] px-5 flex items-end pb-4 border-b border-gray-100">
-        <span className="text-base font-semibold mx-auto">송금 현황</span>
+      <div className="h-[104px] px-5 flex items-end pb-4 border-b border-[var(--line-normal)]">
+        <span className="text-base font-semibold text-[var(--label-strong)] mx-auto">
+          송금 현황
+        </span>
       </div>
 
-      {/* Step 4+에서 PaymentSummaryPanel, PaymentHostView/PaymentMemberView로 교체 */}
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-sm text-gray-400">송금 현황 구현 중...</p>
+      {/* 요약 패널 */}
+      <div className="px-5 pt-4 pb-2">
+        <PaymentSummaryPanel summary={data.summary} />
       </div>
+
+      {/* 호스트 뷰 / 참가자 뷰 */}
+      {data.viewerRole === 'HOST' ? (
+        <PaymentHostView
+          summary={data.summary}
+          payments={data.payments}
+          meetingId={meetingId}
+          onAction={handleAction}
+          onCompleted={() => setIsCompleted(true)}
+        />
+      ) : myPayment ? (
+        <div className="flex-1">
+          <PaymentMemberView item={myPayment} meetingId={meetingId} />
+        </div>
+      ) : null}
     </div>
   );
 }
