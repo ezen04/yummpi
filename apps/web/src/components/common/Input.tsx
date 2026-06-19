@@ -26,9 +26,9 @@ export function Input({
   const [focused, setFocused] = React.useState(false);
 
   const border = error
-    ? '1px solid rgba(255,66,66,0.28)'
+    ? '1px solid var(--status-negative-border)'
     : focused
-      ? '2px solid rgba(233,75,53,0.43)'
+      ? '2px solid var(--primary-border)'
       : '1px solid var(--line-normal)';
 
   const paddingLeft = leftIcon ? 44 : 16;

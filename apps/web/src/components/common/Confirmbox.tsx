@@ -28,7 +28,7 @@ export function Confirmbox({
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center">
-      <div onClick={onClose} className="absolute inset-0 bg-[rgba(43,33,30,0.61)]" />
+      <div onClick={onClose} className="absolute inset-0 bg-[var(--overlay)]" />
 
       <div
         className={cn(

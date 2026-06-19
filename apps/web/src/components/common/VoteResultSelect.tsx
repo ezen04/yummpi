@@ -30,7 +30,7 @@ export function VoteResultSelect({
         'w-full px-4 py-[14px] rounded-[var(--radius-12)] text-left flex items-center gap-3',
         'transition-[border,background] duration-150',
         selected
-          ? 'border-[1.5px] border-[var(--primary)] bg-[rgba(233,75,53,0.04)]'
+          ? 'border-[1.5px] border-[var(--primary)] bg-[var(--primary-tint)]'
           : 'border border-[var(--line-normal)] bg-[var(--bg-normal)]',
         disabled ? 'cursor-default opacity-50' : 'cursor-pointer',
         className,

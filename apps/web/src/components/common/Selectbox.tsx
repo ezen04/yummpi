@@ -32,7 +32,7 @@ export function SelectboxItem({
         'w-full h-12 px-4 border-none cursor-pointer text-left flex items-center',
         'text-[15px] font-[var(--font-sans)] transition-[background] duration-100',
         selected
-          ? 'bg-[rgba(233,75,53,0.06)] text-[var(--primary)] font-semibold'
+          ? 'bg-[var(--primary-tint)] text-[var(--primary)] font-semibold'
           : 'bg-[var(--bg-normal)] text-[var(--label-normal)] font-normal hover:bg-[var(--fill-normal)]',
         RADIUS_CLASSES[position],
         className,

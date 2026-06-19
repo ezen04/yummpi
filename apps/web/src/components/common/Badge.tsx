@@ -25,12 +25,12 @@ const STYLES: Record<BadgeVariant, { classes: string; dotClass: string; dot: boo
     dot: true,
   },
   green: {
-    classes: 'bg-[rgba(0,191,64,0.10)] text-[var(--status-positive)]',
+    classes: 'bg-[var(--status-positive-tint)] text-[var(--status-positive)]',
     dotClass: 'bg-[var(--status-positive)]',
     dot: true,
   },
   red: {
-    classes: 'bg-[rgba(255,66,66,0.08)] text-[var(--status-negative)]',
+    classes: 'bg-[var(--status-negative-tint)] text-[var(--status-negative)]',
     dotClass: 'bg-[var(--status-negative)]',
     dot: true,
   },
@@ -45,7 +45,7 @@ const STYLES: Record<BadgeVariant, { classes: string; dotClass: string; dot: boo
     dot: false,
   },
   unpaid: {
-    classes: 'bg-[rgba(255,66,66,0.08)] text-[var(--status-negative)]',
+    classes: 'bg-[var(--status-negative-tint)] text-[var(--status-negative)]',
     dotClass: '',
     dot: false,
   },
@@ -55,7 +55,7 @@ const STYLES: Record<BadgeVariant, { classes: string; dotClass: string; dot: boo
     dot: false,
   },
   'icon-red': {
-    classes: 'bg-[rgba(255,66,66,0.08)] text-[var(--status-negative)]',
+    classes: 'bg-[var(--status-negative-tint)] text-[var(--status-negative)]',
     dotClass: '',
     dot: false,
   },

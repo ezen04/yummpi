@@ -22,7 +22,7 @@ const VARIANT_CLASSES: Record<IconButtonVariant, string> = {
   normal: 'bg-[var(--bg-alternative)] text-[var(--label-normal)]',
   hover: 'bg-[var(--fill-normal)] text-[var(--label-normal)]',
   clicked:
-    'bg-[rgba(233,75,53,0.10)] text-[var(--primary)] border-[1.5px] border-[var(--primary)]',
+    'bg-[var(--primary-tint)] text-[var(--primary)] border-[1.5px] border-[var(--primary)]',
   done: 'bg-[var(--primary)] text-[var(--static-white)]',
   draft:
     'bg-[var(--fill-alternative)] text-[var(--label-assistive)] border border-dashed border-[var(--line-alternative)]',

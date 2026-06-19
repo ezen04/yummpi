@@ -228,7 +228,7 @@ export function ResultRow({
       className={cn(
         'flex items-center gap-3 px-4 py-3 rounded-[var(--radius-10)]',
         isR
-          ? 'bg-[rgba(233,75,53,0.06)] border border-[var(--primary)]'
+          ? 'bg-[var(--primary-tint)] border border-[var(--primary)]'
           : 'bg-[var(--fill-alternative)] border border-[var(--line-normal)]',
         className,
       )}

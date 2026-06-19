@@ -145,7 +145,7 @@ const RADIUS_CLASSES: Record<RadiusVariant, string> = {
   'radius-border-inactive':
     'bg-[var(--fill-disable)] text-[var(--label-disable)] border border-[var(--line-alternative)] cursor-default',
   'radius-border-selected':
-    'bg-[rgba(233,75,53,0.08)] text-[var(--primary)] border-[1.5px] border-[var(--primary)]',
+    'bg-[var(--primary-tint)] text-[var(--primary)] border-[1.5px] border-[var(--primary)]',
 };
 
 export function RadiusButton({

@@ -41,7 +41,7 @@ export function BottomSheet({
       {hasDim && (
         <div
           onClick={onClose}
-          className="absolute inset-0 bg-[rgba(43,33,30,0.61)]"
+          className="absolute inset-0 bg-[var(--overlay)]"
           style={{ animation: 'bs-fade-in 0.2s ease' }}
         />
       )}

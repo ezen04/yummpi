@@ -29,7 +29,7 @@ export function Chip({
         'text-[14px] font-medium font-[var(--font-sans)] whitespace-nowrap',
         'transition-[background,border,color] duration-150',
         active
-          ? 'border border-[rgba(233,75,53,0.43)] bg-[rgba(233,75,53,0.05)] text-[var(--primary)]'
+          ? 'border border-[var(--primary-border)] bg-[var(--primary-tint)] text-[var(--primary)]'
           : 'border-[1.5px] border-[var(--line-normal)] bg-transparent text-[var(--label-alternative)]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
         className,
