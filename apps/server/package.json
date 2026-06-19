@@ -6,6 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
     "postinstall": "prisma generate"
   },
   "dependencies": {

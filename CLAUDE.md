@@ -38,7 +38,8 @@
 | React Hook Form + Zod | `TBD` | 폼 + 검증 (packages/schemas 공용 스키마) |
 | @serwist/next | `TBD` | PWA |
 | Turborepo + pnpm workspace | `TBD` | 모노레포 |
-| Playwright | `TBD` | E2E |
+| Vitest | `4.1.9` | 단위 테스트 |
+| Playwright | `1.56.1` | E2E |
 
 외부 연동: 카카오 Local/Map API · CLOVA OCR · AWS S3 (presigned URL) · Web Push (VAPID) · Nodemailer.
 
@@ -277,8 +278,8 @@ docker compose up -d
 # 전체 개발 서버 (Turborepo: web + server 동시 기동)
 pnpm dev
 
-# 타입 검사 + 린트 + 빌드
-pnpm typecheck && pnpm lint && pnpm build
+# 타입 검사 + 린트 + 단위 테스트 + 빌드
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
 ```
 
 ### 패키지 추가/삭제 (반드시 --filter 지정)
@@ -289,6 +290,15 @@ pnpm add <패키지> --filter @yummpi/server   # apps/server (Socket·BullMQ·Pr
 pnpm add -D <패키지> --filter @yummpi/web
 pnpm add -D <패키지> -w                      # 루트 공통
 pnpm remove <패키지> --filter @yummpi/web
+```
+
+### 테스트
+
+```bash
+pnpm test                                  # 전체 단위 테스트 (Vitest)
+pnpm --filter @yummpi/web test            # web 단위 테스트
+pnpm --filter @yummpi/schemas test        # 공용 스키마 단위 테스트
+pnpm --filter @yummpi/web test:e2e        # web E2E 테스트 (Playwright)
 ```
 
 ### 워크스페이스 이름 참조
