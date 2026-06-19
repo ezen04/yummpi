@@ -1,10 +1,10 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { TransferActionPanel } from './TransferActionPanel';
-import { TransferPendingState } from './TransferPendingState';
-import { TransferDoneState } from './TransferDoneState';
-import { TransferExemptState } from './TransferExemptState';
+import { TransferActionPanel } from './transfer/TransferActionPanel';
+import { TransferPendingState } from './transfer/TransferPendingState';
+import { TransferDoneState } from './transfer/TransferDoneState';
+import { TransferExemptState } from './transfer/TransferExemptState';
 import type { PaymentListItem } from '@yummpi/schemas';
 
 type Props = {

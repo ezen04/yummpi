@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from '@yummpi/ui';
-import { formatAmount } from '../lib/transferMock';
-import { updatePayment } from '../lib/paymentApi';
+import { formatAmount } from '../../lib/transferMock';
+import { updatePayment } from '../../lib/paymentApi';
 import { useState } from 'react';
 import type { PaymentListItem } from '@yummpi/schemas';
 

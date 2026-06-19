@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { KakaoPayButton, TossPayButton } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Icon } from '@/components/common/Icon';
-import { buildTransferMockData, copyToClipboard } from '../lib/transferMock';
-import { updatePayment } from '../lib/paymentApi';
+import { buildTransferMockData, copyToClipboard } from '../../lib/transferMock';
+import { updatePayment } from '../../lib/paymentApi';
 import type { PaymentListItem } from '@yummpi/schemas';
 
 type Props = {
