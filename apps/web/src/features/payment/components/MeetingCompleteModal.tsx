@@ -41,10 +41,10 @@ export function MeetingCompleteModal({ open, meetingId, onClose, onCompleted }: 
       <DialogContent className="max-w-[342px] rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-base font-semibold text-[var(--label-strong)]">
-            모임을 마감하시겠습니까?
+            모임을 마감하시겠어요?
           </DialogTitle>
           <DialogDescription className="text-sm text-[var(--label-alternative)] mt-1">
-            모임 마감 후에는 송금 관리가 어렵습니다.
+            마감 후 이미 완료된 송금 목록을 확인할 수 있어요.
           </DialogDescription>
         </DialogHeader>
 
@@ -59,14 +59,14 @@ export function MeetingCompleteModal({ open, meetingId, onClose, onCompleted }: 
             onClick={onClose}
             disabled={isPending}
           >
-            취소
+            아니요
           </Button>
           <Button
             className="flex-1 h-11 rounded-xl text-sm"
             onClick={handleConfirm}
             disabled={isPending}
           >
-            {isPending ? '처리 중...' : '종료하기'}
+            {isPending ? '처리 중...' : '마감하기'}
           </Button>
         </DialogFooter>
       </DialogContent>
