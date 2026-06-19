@@ -11,6 +11,7 @@
 
 ```
 features/settlement/**
+app/meetings/[meetingId]/settlement/**
 app/api/v1/meetings/[meetingId]/receipts/** , .../settlements/**
 lib/ocr/** , lib/s3/** , lib/settlement-engine/**
 ```
