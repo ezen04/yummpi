@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+.pnpm-store
 .pnp
 .pnp.js
 
@@ -38,7 +39,9 @@ pnpm-debug.log*
 .DS_Store
 
 # ide
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea
 
 # private work docs
