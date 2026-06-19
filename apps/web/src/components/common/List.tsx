@@ -229,14 +229,14 @@ export function ResultRow({
         'flex items-center gap-3 px-4 py-3 rounded-[var(--radius-10)]',
         isR
           ? 'bg-[rgba(233,75,53,0.06)] border border-[var(--primary)]'
-          : 'bg-[rgba(0,118,230,0.06)] border border-[var(--secondary)]',
+          : 'bg-[var(--fill-alternative)] border border-[var(--line-normal)]',
         className,
       )}
     >
       <span
         className={cn(
           'w-7 h-7 rounded-full text-[var(--static-white)] text-[13px] font-bold font-[var(--font-sans)] inline-flex items-center justify-center shrink-0',
-          isR ? 'bg-[var(--primary)]' : 'bg-[var(--secondary)]',
+          isR ? 'bg-[var(--primary)]' : 'bg-[var(--label-assistive)]',
         )}
       >
         {rank}
@@ -255,7 +255,7 @@ export function ResultRow({
         <p
           className={cn(
             'text-[14px] font-semibold font-[var(--font-sans)] m-0',
-            isR ? 'text-[var(--primary)]' : 'text-[var(--secondary)]',
+            isR ? 'text-[var(--primary)]' : 'text-[var(--label-normal)]',
           )}
         >
           {votes}표
