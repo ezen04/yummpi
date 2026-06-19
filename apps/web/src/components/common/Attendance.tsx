@@ -20,12 +20,6 @@ interface AttendanceProps {
   className?: string;
 }
 
-const AVATAR_BACKGROUNDS = ['#FBE2DF', '#FFF6E4', '#D6F5E0', '#FEE9FB'];
-
-function getAvatarBg(name: string) {
-  const index = name.charCodeAt(0) % AVATAR_BACKGROUNDS.length;
-  return AVATAR_BACKGROUNDS[index];
-}
 
 export function Attendance({
   variant,
@@ -57,7 +51,7 @@ export function Attendance({
           style={{
             width: size,
             height: size,
-            background: isGuest ? 'var(--fill-normal)' : getAvatarBg(name),
+            background: isHost ? 'var(--primary-tint)' : 'var(--fill-normal)',
           }}
         >
           {src ? (
@@ -66,7 +60,7 @@ export function Attendance({
             <span
               className={cn(
                 'font-bold font-[var(--font-sans)] select-none',
-                isGuest ? 'text-[var(--label-assistive)]' : 'text-[var(--label-normal)]',
+                isHost ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]',
               )}
               style={{ fontSize: Math.round(size * 0.4) }}
             >
