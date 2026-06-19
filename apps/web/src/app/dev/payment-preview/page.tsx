@@ -7,9 +7,6 @@ import { PaymentSummaryPanel } from '@/features/payment/components/PaymentSummar
 import { PaymentMemberList } from '@/features/payment/components/PaymentMemberList';
 import { PaymentNotInitializedState } from '@/features/payment/components/PaymentNotInitializedState';
 import { TransferActionPanel } from '@/features/payment/components/transfer/TransferActionPanel';
-import { TransferPendingState } from '@/features/payment/components/transfer/TransferPendingState';
-import { TransferDoneState } from '@/features/payment/components/transfer/TransferDoneState';
-import { TransferExemptState } from '@/features/payment/components/transfer/TransferExemptState';
 import { MeetingCompletedView } from '@/features/payment/components/MeetingCompletedView';
 import type { PaymentSummary, PaymentListItem } from '@yummpi/schemas';
 
@@ -44,6 +41,8 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     status: 'PAID',
     paidAt: '2026-06-19T10:00:00Z',
     isMine: false,
+    isGuest: false,
+    remindCooldownUntil: null,
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
@@ -59,6 +58,8 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     status: 'EXEMPT',
     paidAt: null,
     isMine: false,
+    isGuest: false,
+    remindCooldownUntil: null,
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
@@ -69,11 +70,13 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
   {
     paymentId: '3',
     meetingMemberId: 'm3',
-    displayName: '박민준',
+    displayName: '남남펭권',
     amount: 23500,
     status: 'TRANSFER_REPORTED',
     paidAt: null,
     isMine: false,
+    isGuest: true,
+    remindCooldownUntil: null,
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: true,
@@ -84,11 +87,13 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
   {
     paymentId: '4',
     meetingMemberId: 'm4',
-    displayName: '최서연',
+    displayName: '바삭감자',
     amount: 23500,
     status: 'PENDING',
     paidAt: null,
     isMine: false,
+    isGuest: true,
+    remindCooldownUntil: null,
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
@@ -99,11 +104,13 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
   {
     paymentId: '5',
     meetingMemberId: 'm5',
-    displayName: '정현우',
+    displayName: '최민준',
     amount: 23500,
     status: 'PENDING',
     paidAt: null,
     isMine: false,
+    isGuest: false,
+    remindCooldownUntil: '2026-06-20T11:30:00Z',
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
@@ -119,6 +126,8 @@ const MOCK_PAYMENTS_HOST: PaymentListItem[] = [
     status: 'PENDING',
     paidAt: null,
     isMine: false,
+    isGuest: false,
+    remindCooldownUntil: null,
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
@@ -136,6 +145,8 @@ const MOCK_ITEM_PENDING: PaymentListItem = {
   status: 'PENDING',
   paidAt: null,
   isMine: true,
+  isGuest: false,
+  remindCooldownUntil: null,
   canReportTransfer: true,
   canCancelTransfer: false,
   canMarkPaid: false,
@@ -152,6 +163,8 @@ const MOCK_ITEM_REPORTED: PaymentListItem = {
   status: 'TRANSFER_REPORTED',
   paidAt: null,
   isMine: true,
+  isGuest: false,
+  remindCooldownUntil: null,
   canReportTransfer: false,
   canCancelTransfer: true,
   canMarkPaid: false,
@@ -160,37 +173,7 @@ const MOCK_ITEM_REPORTED: PaymentListItem = {
   transferMock: null,
 };
 
-const MOCK_ITEM_PAID: PaymentListItem = {
-  paymentId: 'p-paid',
-  meetingMemberId: 'm-me',
-  displayName: '나 (박민준)',
-  amount: 23500,
-  status: 'PAID',
-  paidAt: '2026-06-19T12:00:00Z',
-  isMine: true,
-  canReportTransfer: false,
-  canCancelTransfer: false,
-  canMarkPaid: false,
-  canMarkPending: false,
-  canMarkExempt: false,
-  transferMock: null,
-};
 
-const MOCK_ITEM_EXEMPT: PaymentListItem = {
-  paymentId: 'p-exempt',
-  meetingMemberId: 'm-me',
-  displayName: '나 (박민준)',
-  amount: 23500,
-  status: 'EXEMPT',
-  paidAt: null,
-  isMine: true,
-  canReportTransfer: false,
-  canCancelTransfer: false,
-  canMarkPaid: false,
-  canMarkPending: false,
-  canMarkExempt: false,
-  transferMock: null,
-};
 
 type Section =
   | 'loading'
@@ -201,10 +184,9 @@ type Section =
   | 'host-transfer-confirm'
   | 'not-initialized-host'
   | 'not-initialized-member'
+  | 'member-no-account'
   | 'member-pending'
   | 'member-reported'
-  | 'member-paid'
-  | 'member-exempt'
   | 'member-no-payment'
   | 'meeting-completed';
 
@@ -217,16 +199,16 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'host-transfer-confirm', label: '호스트 — 송금 확인' },
   { id: 'not-initialized-host', label: '미초기화 (호스트)' },
   { id: 'not-initialized-member', label: '미초기화 (멤버)' },
+  { id: 'member-no-account', label: '멤버 — 계좌 미등록' },
   { id: 'member-pending', label: '멤버 — 송금 전' },
   { id: 'member-reported', label: '멤버 — 송금 신고' },
-  { id: 'member-paid', label: '멤버 — 입금 확인' },
-  { id: 'member-exempt', label: '멤버 — 면제' },
   { id: 'member-no-payment', label: '멤버 — 내 정보 없음' },
   { id: 'meeting-completed', label: '모임 종료 완료' },
 ];
 
 export default function PaymentPreviewPage() {
   const [active, setActive] = useState<Section>('member-list-host');
+  const [hasHostAccount, setHasHostAccount] = useState(false);
 
   return (
     <div className="min-h-screen bg-[var(--bg-alternative)]">
@@ -235,7 +217,7 @@ export default function PaymentPreviewPage() {
         {SECTIONS.map(({ id, label }) => (
           <button
             key={id}
-            onClick={() => setActive(id)}
+            onClick={() => { setActive(id); setHasHostAccount(false); }}
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               active === id
                 ? 'bg-[var(--primary)] text-white'
@@ -271,7 +253,7 @@ export default function PaymentPreviewPage() {
           )}
           {active === 'member-list-host' && (
             <div className="pt-4">
-              <div className="px-5 mb-4">
+              <div className="mb-4">
                 <PaymentSummaryPanel summary={MOCK_SUMMARY_IN_PROGRESS} />
               </div>
               <PaymentMemberList
@@ -284,7 +266,7 @@ export default function PaymentPreviewPage() {
           )}
           {active === 'host-transfer-confirm' && (
             <div className="pt-4">
-              <div className="px-5 mb-4">
+              <div className="mb-4">
                 <PaymentSummaryPanel summary={MOCK_SUMMARY_IN_PROGRESS} />
               </div>
               <PaymentMemberList
@@ -310,41 +292,51 @@ export default function PaymentPreviewPage() {
               meetingId="00000000-0000-0000-0000-000000000000"
             />
           )}
-          {active === 'member-pending' && (
-            <div className="flex flex-col" style={{ minHeight: 600 }}>
+          {active === 'member-no-account' && (
+            <div className="flex flex-col min-h-[600px]">
               <TransferActionPanel
                 item={MOCK_ITEM_PENDING}
                 meetingId="00000000-0000-0000-0000-000000000000"
                 hostNickname="지훈"
-                onTransferReported={() => alert('REPORT_TRANSFER 호출!')}
+                hasHostAccount={hasHostAccount}
+                onRegisterAccount={() => setHasHostAccount(true)}
+                onRefresh={() => {}}
+              />
+            </div>
+          )}
+          {active === 'member-pending' && (
+            <div className="flex flex-col min-h-[600px]">
+              <TransferActionPanel
+                item={MOCK_ITEM_PENDING}
+                meetingId="00000000-0000-0000-0000-000000000000"
+                hostNickname="지훈"
+                onRefresh={() => alert('REPORT_TRANSFER 호출!')}
               />
             </div>
           )}
           {active === 'member-reported' && (
-            <TransferPendingState
-              item={MOCK_ITEM_REPORTED}
-              meetingId="00000000-0000-0000-0000-000000000000"
-              onReverted={() => alert('MARK_PENDING 호출!')}
-            />
-          )}
-          {active === 'member-paid' && (
-            <TransferDoneState item={MOCK_ITEM_PAID} />
-          )}
-          {active === 'member-exempt' && (
-            <TransferExemptState item={MOCK_ITEM_EXEMPT} />
-          )}
-          {active === 'member-no-payment' && (
-            <div className="flex flex-col items-center justify-center flex-1 px-5 py-16 gap-3 text-center min-h-[400px]">
-              <p className="text-sm font-semibold text-[var(--label-strong)]">
-                내 송금 정보를 찾을 수 없어요
-              </p>
-              <p className="text-xs text-[var(--label-alternative)]">
-                주최자가 송금 정보를 준비 중이에요. 잠시 후 다시 확인해 주세요.
-              </p>
+            <div className="flex flex-col min-h-[600px]">
+              <TransferActionPanel
+                item={MOCK_ITEM_REPORTED}
+                meetingId="00000000-0000-0000-0000-000000000000"
+                hostNickname="지훈"
+                onRefresh={() => alert('MARK_PENDING 호출!')}
+              />
             </div>
           )}
+          {active === 'member-no-payment' && (
+            <PaymentErrorState
+              message="내 송금 정보를 찾을 수 없어요"
+              onRetry={() => alert('재시도 클릭!')}
+            />
+          )}
           {active === 'meeting-completed' && (
-            <MeetingCompletedView summary={MOCK_SUMMARY_ALL_DONE} />
+            <MeetingCompletedView
+              summary={MOCK_SUMMARY_ALL_DONE}
+              meetingName="금요일 저녁 회식"
+              placeName="강남 화로상회"
+              placeDateTime="6.13 (금) 19:00"
+            />
           )}
         </div>
       </div>
