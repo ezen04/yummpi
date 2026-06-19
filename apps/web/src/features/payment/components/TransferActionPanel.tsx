@@ -120,8 +120,11 @@ export function TransferActionPanel({
           <button
             onClick={() => void handleCopy('account')}
             disabled={isReported}
-            className="shrink-0 text-xs font-medium text-[var(--label-alternative)] border border-[var(--line-normal)] rounded-[var(--radius-full)] px-3 h-7 bg-[var(--bg-normal)] disabled:opacity-40 cursor-pointer disabled:cursor-default"
+            className="shrink-0 text-xs font-medium text-[var(--label-alternative)] border border-[var(--line-normal)] rounded-[var(--radius-full)] px-3 h-7 bg-[var(--bg-normal)] disabled:opacity-40 cursor-pointer disabled:cursor-default flex items-center gap-1"
           >
+            {isReported && (
+              <Icon name="check" size={12} color="var(--label-alternative)" />
+            )}
             {copied === 'account' ? '복사됨!' : '계좌 복사'}
           </button>
         </div>
@@ -129,12 +132,17 @@ export function TransferActionPanel({
         {/* 송금 수단 & 금액 복사 */}
         {!isReported && (
           <div className="flex flex-col gap-2">
-            <KakaoPayButton
-              onClick={() => void handlePaymentAppFallback('카카오페이')}
-            />
-            <TossPayButton
-              onClick={() => void handlePaymentAppFallback('토스')}
-            />
+            {/* 카카오페이 / 토스 가로 배치 */}
+            <div className="flex gap-2">
+              <KakaoPayButton
+                className="flex-1 h-12 rounded-[var(--radius-12)]"
+                onClick={() => void handlePaymentAppFallback('카카오페이')}
+              />
+              <TossPayButton
+                className="flex-1 h-12 rounded-[var(--radius-12)]"
+                onClick={() => void handlePaymentAppFallback('토스')}
+              />
+            </div>
             <button
               onClick={() => void handleCopy('amount')}
               className="w-full h-12 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] flex items-center justify-center gap-1.5 text-[14px] font-semibold text-[var(--label-normal)] cursor-pointer"
@@ -147,32 +155,47 @@ export function TransferActionPanel({
           </div>
         )}
 
-        {/* 피드백 메시지 */}
-        {(fallbackMessage || error) && (
-          <p
-            className={`text-xs text-center ${
-              error
-                ? 'text-[var(--status-negative)]'
-                : 'text-[var(--status-positive)]'
-            }`}
-          >
-            {error ?? fallbackMessage}
-          </p>
-        )}
       </div>
 
       {/* 하단 CTA */}
-      <Footer
-        variant="button"
-        label={isReported ? '송금 완료' : isPending ? '처리 중...' : '송금 완료 알림 보내기'}
-        onClick={isReported ? () => {} : () => void handleReportTransfer()}
-        disabled={isReported || isPending}
-        hint={
-          isReported
-            ? `송금 완료! ${countdown}초 후 송금 현황 페이지로 이동합니다.`
-            : '외부 앱에서 송금 후 눌러주세요 · 주최자 확인 전까지 취소할 수 있어요'
-        }
-      />
+      {isReported ? (
+        <Footer
+          variant="button"
+          label="송금 완료"
+          onClick={() => {}}
+          disabled
+          hint={`송금 완료! ${countdown}초 후 송금 현황 페이지로 이동합니다.`}
+        />
+      ) : (
+        <footer className="w-full bg-[var(--bg-normal)] border-t border-[var(--line-alternative)] px-5 pt-[13px] pb-[max(30px,env(safe-area-inset-bottom))] flex flex-col gap-2">
+          <p className="text-[12px] text-[var(--label-alternative)] text-center">
+            외부 앱에서 송금 후 눌러주세요 · 주최자 확인 전까지 취소할 수 있어요
+          </p>
+          {(fallbackMessage || error) && (
+            <p
+              className={`text-xs text-center ${
+                error
+                  ? 'text-[var(--status-negative)]'
+                  : 'text-[var(--status-positive)]'
+              }`}
+            >
+              {error ?? fallbackMessage}
+            </p>
+          )}
+          <button
+            onClick={() => void handleReportTransfer()}
+            disabled={isPending}
+            className="w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center gap-1.5 text-[16px] font-semibold border-none bg-[var(--primary)] text-[var(--static-white)] disabled:bg-[var(--fill-disable)] disabled:text-[var(--label-disable)] cursor-pointer disabled:cursor-default"
+          >
+            <Icon
+              name="send"
+              size={18}
+              color={isPending ? 'var(--label-disable)' : 'var(--static-white)'}
+            />
+            {isPending ? '처리 중...' : '송금 완료 알림 보내기'}
+          </button>
+        </footer>
+      )}
     </div>
   );
 }
