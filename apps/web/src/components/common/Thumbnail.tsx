@@ -37,7 +37,7 @@ export function Thumbnail({ category, size = 56, className }: ThumbnailProps) {
       aria-label={label}
       className={cn(
         'flex items-center justify-center shrink-0 rounded-[var(--radius-12)]',
-        className,
+        className
       )}
       style={{ width: size, height: size, background: bg }}
     >

@@ -40,7 +40,8 @@ export function Header({
 }: HeaderProps) {
   const isDashboard = !!greeting;
 
-  const ICON_BTN = 'flex items-center justify-center w-10 h-10 bg-transparent border-none cursor-pointer text-[var(--label-normal)]';
+  const ICON_BTN =
+    'flex items-center justify-center w-10 h-10 bg-transparent border-none cursor-pointer text-[var(--label-normal)]';
 
   // mypage: 중앙 타이틀 + 오른쪽 설정 아이콘
   if (isMypage) {
@@ -48,14 +49,17 @@ export function Header({
       <header
         className={cn(
           'h-14 bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0',
-          className,
+          className
         )}
       >
         <span className="text-[18px] leading-[26px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)]">
           {title ?? '마이페이지'}
         </span>
         {onSettings && (
-          <button onClick={onSettings} className={cn(ICON_BTN, 'absolute right-3')}>
+          <button
+            onClick={onSettings}
+            className={cn(ICON_BTN, 'absolute right-3')}
+          >
             <Settings size={22} strokeWidth={1.5} />
           </button>
         )}
@@ -68,7 +72,7 @@ export function Header({
       className={cn(
         'h-14 bg-[var(--bg-normal)] flex items-center justify-between shrink-0',
         isDashboard ? 'px-5' : 'pl-2 pr-3',
-        className,
+        className
       )}
     >
       {/* 왼쪽 */}

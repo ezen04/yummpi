@@ -20,7 +20,6 @@ interface AttendanceProps {
   className?: string;
 }
 
-
 export function Attendance({
   variant,
   name,
@@ -46,7 +45,7 @@ export function Attendance({
             isHost || isSelected
               ? 'border-2 border-[var(--primary)]'
               : 'border-[1.5px] border-[var(--line-normal)]',
-            isHover ? 'opacity-70' : 'opacity-100',
+            isHover ? 'opacity-70' : 'opacity-100'
           )}
           style={{
             width: size,
@@ -55,12 +54,20 @@ export function Attendance({
           }}
         >
           {src ? (
-            <Image src={src} alt={name} width={size} height={size} className="object-cover" />
+            <Image
+              src={src}
+              alt={name}
+              width={size}
+              height={size}
+              className="object-cover"
+            />
           ) : (
             <span
               className={cn(
                 'font-bold font-[var(--font-sans)] select-none',
-                isHost ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]',
+                isHost
+                  ? 'text-[var(--primary)]'
+                  : 'text-[var(--label-assistive)]'
               )}
               style={{ fontSize: Math.round(size * 0.4) }}
             >
@@ -79,7 +86,9 @@ export function Attendance({
       <span
         className={cn(
           'text-[11px] leading-[14px] font-[var(--font-sans)] truncate text-center',
-          isHost || isSelected ? 'font-semibold text-[var(--label-normal)]' : 'font-normal text-[var(--label-alternative)]',
+          isHost || isSelected
+            ? 'font-semibold text-[var(--label-normal)]'
+            : 'font-normal text-[var(--label-alternative)]'
         )}
         style={{ maxWidth: size + 8 }}
       >

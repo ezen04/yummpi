@@ -34,7 +34,7 @@ export function Confirmbox({
         className={cn(
           'relative w-[334px] bg-[var(--bg-normal)] rounded-[var(--radius-12)]',
           'px-6 py-8 shadow-[var(--shadow-large)] flex flex-col items-center gap-4',
-          className,
+          className
         )}
       >
         <p className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 text-center">

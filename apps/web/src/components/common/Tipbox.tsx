@@ -22,10 +22,15 @@ export function Tipbox({
       className={cn(
         'flex items-center gap-2 px-4 py-[10px]',
         'rounded-[var(--radius-10)] bg-[var(--secondary-tint)]',
-        className,
+        className
       )}
     >
-      <Eye size={20} strokeWidth={1.5} color="var(--secondary-strong)" className="shrink-0" />
+      <Eye
+        size={20}
+        strokeWidth={1.5}
+        color="var(--secondary-strong)"
+        className="shrink-0"
+      />
 
       <div className="flex-1">
         {title && variant === 'completed-title' && (

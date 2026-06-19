@@ -24,7 +24,7 @@ export function Check({
       className={cn(
         'inline-flex items-center gap-[10px]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
-        className,
+        className
       )}
     >
       <input
@@ -40,17 +40,21 @@ export function Check({
           'transition-[background,border] duration-150',
           checked
             ? 'bg-[var(--primary)] border-none'
-            : 'bg-[var(--bg-normal)] border-[1.5px] border-[var(--line-normal)]',
+            : 'bg-[var(--bg-normal)] border-[1.5px] border-[var(--line-normal)]'
         )}
       >
-        {checked && <CheckIcon size={12} strokeWidth={1.8} color="var(--static-white)" />}
+        {checked && (
+          <CheckIcon size={12} strokeWidth={1.8} color="var(--static-white)" />
+        )}
       </span>
 
       {label && (
         <span
           className={cn(
             'text-[15px] leading-[22px] font-normal font-[var(--font-sans)]',
-            checked ? 'text-[var(--label-normal)]' : 'text-[var(--label-alternative)]',
+            checked
+              ? 'text-[var(--label-normal)]'
+              : 'text-[var(--label-alternative)]'
           )}
         >
           {label}

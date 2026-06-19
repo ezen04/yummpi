@@ -37,7 +37,7 @@ export function VoteResultCard({
       className={cn(
         'flex flex-col gap-[14px] bg-[var(--bg-elevated)] border border-[var(--line-normal)]',
         'rounded-[var(--radius-12)] px-5 py-4',
-        className,
+        className
       )}
     >
       {title && (

@@ -18,7 +18,10 @@ interface BadgeProps {
   className?: string;
 }
 
-const STYLES: Record<BadgeVariant, { classes: string; dotClass: string; dot: boolean }> = {
+const STYLES: Record<
+  BadgeVariant,
+  { classes: string; dotClass: string; dot: boolean }
+> = {
   black: {
     classes: 'bg-[var(--bg-inverse)] text-[var(--inverse-label)]',
     dotClass: 'bg-[var(--inverse-label)]',
@@ -70,15 +73,13 @@ export function Badge({ variant, children, icon, className }: BadgeProps) {
         'inline-flex items-center gap-1 rounded-[var(--radius-8)] px-[6px] py-1',
         'text-[12px] font-semibold font-[var(--font-sans)] whitespace-nowrap',
         classes,
-        className,
+        className
       )}
     >
       {dot && (
         <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotClass)} />
       )}
-      {icon && (
-        <span className="flex items-center shrink-0">{icon}</span>
-      )}
+      {icon && <span className="flex items-center shrink-0">{icon}</span>}
       {children}
     </span>
   );

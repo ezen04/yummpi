@@ -42,7 +42,7 @@ export function IconButton({
       className={cn(
         'inline-flex items-center justify-center shrink-0 cursor-pointer transition-[background,color] duration-150',
         shape === 'circle' ? 'rounded-full' : 'rounded-[var(--radius-12)]',
-        VARIANT_CLASSES[variant],
+        VARIANT_CLASSES[variant]
       )}
       style={{ width: size, height: size }}
       disabled={variant === 'disabled'}

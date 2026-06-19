@@ -32,7 +32,7 @@ export function Chip({
           ? 'border border-[var(--primary-border)] bg-[var(--primary-tint)] text-[var(--primary)]'
           : 'border-[1.5px] border-[var(--line-normal)] bg-transparent text-[var(--label-alternative)]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
-        className,
+        className
       )}
     >
       {children}
@@ -53,8 +53,10 @@ interface SolidChipProps {
 }
 
 const SOLID_CLASSES: Record<SolidChipVariant, string> = {
-  'solid-dark': 'bg-[var(--bg-inverse)] text-[var(--inverse-label)] font-medium',
-  'solid-fill': 'bg-[var(--fill-normal)] text-[var(--label-alternative)] font-normal',
+  'solid-dark':
+    'bg-[var(--bg-inverse)] text-[var(--inverse-label)] font-medium',
+  'solid-fill':
+    'bg-[var(--fill-normal)] text-[var(--label-alternative)] font-normal',
 };
 
 export function SolidChip({
@@ -74,7 +76,7 @@ export function SolidChip({
         'transition-opacity duration-150',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
         SOLID_CLASSES[variant],
-        className,
+        className
       )}
     >
       {children}

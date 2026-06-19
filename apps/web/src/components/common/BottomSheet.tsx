@@ -52,7 +52,7 @@ export function BottomSheet({
           'absolute bottom-0 left-0 right-0 bg-[var(--bg-normal)]',
           'rounded-tl-[36px] rounded-tr-[36px] px-3 pt-3',
           'shadow-[var(--shadow-large)]',
-          className,
+          className
         )}
         style={{
           paddingBottom: 'max(32px, env(safe-area-inset-bottom))',

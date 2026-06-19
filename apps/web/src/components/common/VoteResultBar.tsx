@@ -28,7 +28,7 @@ export function VoteResultBar({
             'text-[14px] leading-5 font-[var(--font-sans)]',
             isActive
               ? 'font-semibold text-[var(--label-normal)]'
-              : 'font-normal text-[var(--label-alternative)]',
+              : 'font-normal text-[var(--label-alternative)]'
           )}
         >
           {label}
@@ -36,7 +36,7 @@ export function VoteResultBar({
         <span
           className={cn(
             'text-[13px] font-normal font-[var(--font-sans)]',
-            isActive ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]',
+            isActive ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]'
           )}
         >
           {votes}표 ({percent}%)
@@ -47,7 +47,7 @@ export function VoteResultBar({
         <div
           className={cn(
             'h-full rounded transition-[width] duration-300 ease-in-out',
-            isActive ? 'bg-[var(--primary)]' : 'bg-[var(--fill-strong)]',
+            isActive ? 'bg-[var(--primary)]' : 'bg-[var(--fill-strong)]'
           )}
           style={{ width: `${percent}%` }}
         />

@@ -51,7 +51,7 @@ export function TodoCard({ type, onAction, className }: TodoCardProps) {
       className={cn(
         'flex flex-col gap-3 bg-[var(--bg-elevated)] border border-[var(--line-normal)]',
         'rounded-[var(--radius-12)] px-5 py-4',
-        className,
+        className
       )}
     >
       <div className="flex items-start gap-3">
@@ -108,7 +108,7 @@ export function WaitingCard({ type, className }: WaitingCardProps) {
     <div
       className={cn(
         'flex items-start gap-3 bg-[var(--fill-normal)] rounded-[var(--radius-12)] px-5 py-4',
-        className,
+        className
       )}
     >
       <span className="shrink-0 mt-[1px]">{config.icon}</span>

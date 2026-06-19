@@ -24,7 +24,7 @@ export function Radio({
       className={cn(
         'inline-flex items-center gap-[10px]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
-        className,
+        className
       )}
     >
       <input
@@ -40,7 +40,7 @@ export function Radio({
           'bg-[var(--bg-normal)] transition-[border] duration-150',
           checked
             ? 'border-2 border-[var(--primary)]'
-            : 'border-[1.5px] border-[var(--line-normal)]',
+            : 'border-[1.5px] border-[var(--line-normal)]'
         )}
       >
         {checked && (
@@ -52,7 +52,9 @@ export function Radio({
         <span
           className={cn(
             'text-[15px] leading-[22px] font-normal font-[var(--font-sans)]',
-            checked ? 'text-[var(--label-normal)]' : 'text-[var(--label-alternative)]',
+            checked
+              ? 'text-[var(--label-normal)]'
+              : 'text-[var(--label-alternative)]'
           )}
         >
           {label}

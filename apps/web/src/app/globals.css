@@ -16,7 +16,7 @@
   --status-positive: #00bf40;
   --status-cautionary: #ff9200;
   --status-negative: #ff4242;
-  --status-positive-tint: rgba(0, 191, 64, 0.10);
+  --status-positive-tint: rgba(0, 191, 64, 0.1);
   --status-negative-tint: rgba(255, 66, 66, 0.08);
   --status-negative-border: rgba(255, 66, 66, 0.28);
   --tinted: #f6b2ab;

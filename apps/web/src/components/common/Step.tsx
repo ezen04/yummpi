@@ -27,16 +27,22 @@ export function Step({ steps, current, className }: StepProps) {
                     ? 'bg-[var(--primary)]'
                     : isNow
                       ? 'bg-transparent border-2 border-[var(--primary)]'
-                      : 'bg-transparent border-[1.5px] border-[var(--line-normal)]',
+                      : 'bg-transparent border-[1.5px] border-[var(--line-normal)]'
                 )}
               >
                 {isDone ? (
-                  <Check size={12} strokeWidth={1.8} color="var(--static-white)" />
+                  <Check
+                    size={12}
+                    strokeWidth={1.8}
+                    color="var(--static-white)"
+                  />
                 ) : (
                   <span
                     className={cn(
                       'text-[11px] font-medium font-[var(--font-sans)] leading-none',
-                      isNow ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]',
+                      isNow
+                        ? 'text-[var(--primary)]'
+                        : 'text-[var(--label-assistive)]'
                     )}
                   >
                     {i + 1}
@@ -48,7 +54,9 @@ export function Step({ steps, current, className }: StepProps) {
                 className={cn(
                   'text-[11px] leading-[14px] font-[var(--font-sans)] whitespace-nowrap',
                   isNow ? 'font-semibold' : 'font-normal',
-                  isDone || isNow ? 'text-[var(--label-normal)]' : 'text-[var(--label-assistive)]',
+                  isDone || isNow
+                    ? 'text-[var(--label-normal)]'
+                    : 'text-[var(--label-assistive)]'
                 )}
               >
                 {label}
@@ -59,7 +67,9 @@ export function Step({ steps, current, className }: StepProps) {
               <div
                 className={cn(
                   'flex-1 h-[1.5px] mb-5 mx-1',
-                  i < current ? 'bg-[var(--primary)]' : 'bg-[var(--line-normal)]',
+                  i < current
+                    ? 'bg-[var(--primary)]'
+                    : 'bg-[var(--line-normal)]'
                 )}
               />
             )}

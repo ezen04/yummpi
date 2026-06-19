@@ -31,13 +31,10 @@ export function Notification({
         'flex items-center gap-4 px-[21px] py-[13px]',
         'w-full bg-[var(--bg-normal)] border-b border-[var(--line-neutral)]',
         onClick ? 'cursor-pointer' : 'cursor-default',
-        className,
+        className
       )}
     >
-      <span
-        className="shrink-0 flex"
-        style={{ color: iconColor }}
-      >
+      <span className="shrink-0 flex" style={{ color: iconColor }}>
         {icon ?? <Bell size={24} strokeWidth={1.5} color="currentColor" />}
       </span>
 
@@ -52,7 +49,12 @@ export function Notification({
         )}
       </div>
 
-      <ChevronRight size={20} strokeWidth={1.5} color="var(--label-assistive)" className="shrink-0" />
+      <ChevronRight
+        size={20}
+        strokeWidth={1.5}
+        color="var(--label-assistive)"
+        className="shrink-0"
+      />
     </div>
   );
 }

@@ -41,7 +41,7 @@ export function Footer(props: FooterProps) {
       className={cn(
         'w-full flex flex-col gap-2 bg-[var(--bg-normal)] border-t border-[var(--line-alternative)]',
         'px-5 pt-[13px] pb-[max(30px,env(safe-area-inset-bottom))]',
-        props.className,
+        props.className
       )}
     >
       {hint && (
@@ -57,7 +57,7 @@ export function Footer(props: FooterProps) {
           'text-[16px] font-semibold font-[var(--font-sans)] border-none',
           disabled
             ? 'bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default'
-            : 'bg-[var(--primary)] text-[var(--static-white)] cursor-pointer',
+            : 'bg-[var(--primary)] text-[var(--static-white)] cursor-pointer'
         )}
       >
         {icon}

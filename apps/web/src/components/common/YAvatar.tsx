@@ -32,17 +32,23 @@ export function YAvatar({
         isHost
           ? 'border-2 border-[var(--primary)]'
           : 'border-[1.5px] border-[var(--line-normal)]',
-        className,
+        className
       )}
       style={{ width: size, height: size }}
     >
       {src ? (
-        <Image src={src} alt={name} width={size} height={size} className="object-cover" />
+        <Image
+          src={src}
+          alt={name}
+          width={size}
+          height={size}
+          className="object-cover"
+        />
       ) : (
         <span
           className={cn(
             'font-semibold font-[var(--font-sans)] select-none',
-            isHost ? 'text-[var(--primary)]' : 'text-[var(--label-alternative)]',
+            isHost ? 'text-[var(--primary)]' : 'text-[var(--label-alternative)]'
           )}
           style={{ fontSize: Math.round(size * 0.38) }}
         >

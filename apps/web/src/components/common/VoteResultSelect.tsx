@@ -34,7 +34,7 @@ export function VoteResultSelect({
           ? 'border-[1.5px] border-[var(--primary)] bg-[var(--primary-tint)]'
           : 'border border-[var(--line-normal)] bg-[var(--bg-normal)]',
         disabled ? 'cursor-default opacity-50' : 'cursor-pointer',
-        className,
+        className
       )}
     >
       {/* 선택 인디케이터 */}
@@ -43,10 +43,12 @@ export function VoteResultSelect({
           'w-5 h-5 rounded-full flex items-center justify-center shrink-0',
           selected
             ? 'bg-[var(--primary)]'
-            : 'bg-transparent border-[1.5px] border-[var(--line-normal)]',
+            : 'bg-transparent border-[1.5px] border-[var(--line-normal)]'
         )}
       >
-        {selected && <Check size={10} strokeWidth={1.6} color="var(--static-white)" />}
+        {selected && (
+          <Check size={10} strokeWidth={1.6} color="var(--static-white)" />
+        )}
       </span>
 
       {/* 텍스트 */}
@@ -54,7 +56,9 @@ export function VoteResultSelect({
         <p
           className={cn(
             'text-[15px] leading-[22px] font-[var(--font-sans)] m-0 truncate',
-            selected ? 'font-semibold text-[var(--primary)]' : 'font-normal text-[var(--label-normal)]',
+            selected
+              ? 'font-semibold text-[var(--primary)]'
+              : 'font-normal text-[var(--label-normal)]'
           )}
         >
           {label}

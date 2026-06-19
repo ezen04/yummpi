@@ -33,7 +33,7 @@ export function PersonItem({
       className={cn(
         'flex items-center gap-3 py-[10px]',
         isInactive ? 'opacity-45' : 'opacity-100',
-        className,
+        className
       )}
     >
       <YAvatar
@@ -47,7 +47,7 @@ export function PersonItem({
         <p
           className={cn(
             'text-[15px] leading-[22px] font-[var(--font-sans)] text-[var(--label-normal)] m-0 flex items-center gap-[6px]',
-            variant === 'me' ? 'font-semibold' : 'font-normal',
+            variant === 'me' ? 'font-semibold' : 'font-normal'
           )}
         >
           {name}
@@ -105,7 +105,7 @@ export function PersonAttendanceItem({
         <p
           className={cn(
             'text-[15px] leading-[22px] font-[var(--font-sans)] text-[var(--label-normal)] m-0 flex items-center gap-[6px]',
-            isMe ? 'font-semibold' : 'font-normal',
+            isMe ? 'font-semibold' : 'font-normal'
           )}
         >
           {name}
@@ -121,10 +121,12 @@ export function PersonAttendanceItem({
           'w-6 h-6 rounded-full inline-flex items-center justify-center shrink-0',
           attended
             ? 'bg-[var(--primary)] border-none'
-            : 'border-[1.5px] border-[var(--line-normal)] bg-transparent',
+            : 'border-[1.5px] border-[var(--line-normal)] bg-transparent'
         )}
       >
-        {attended && <Check size={13} strokeWidth={1.6} color="var(--static-white)" />}
+        {attended && (
+          <Check size={13} strokeWidth={1.6} color="var(--static-white)" />
+        )}
       </span>
     </div>
   );
@@ -170,7 +172,7 @@ export function PersonResultItem({
         <p
           className={cn(
             'text-[15px] leading-[22px] font-[var(--font-sans)] text-[var(--label-normal)] m-0 flex items-center gap-[6px]',
-            isMe ? 'font-semibold' : 'font-normal',
+            isMe ? 'font-semibold' : 'font-normal'
           )}
         >
           {name}
@@ -221,13 +223,13 @@ export function ResultRow({
         isR
           ? 'bg-[var(--primary-tint)] border border-[var(--primary)]'
           : 'bg-[var(--fill-alternative)] border border-[var(--line-normal)]',
-        className,
+        className
       )}
     >
       <span
         className={cn(
           'w-7 h-7 rounded-full text-[var(--static-white)] text-[13px] font-bold font-[var(--font-sans)] inline-flex items-center justify-center shrink-0',
-          isR ? 'bg-[var(--primary)]' : 'bg-[var(--label-assistive)]',
+          isR ? 'bg-[var(--primary)]' : 'bg-[var(--label-assistive)]'
         )}
       >
         {rank}
@@ -246,7 +248,7 @@ export function ResultRow({
         <p
           className={cn(
             'text-[14px] font-semibold font-[var(--font-sans)] m-0',
-            isR ? 'text-[var(--primary)]' : 'text-[var(--label-normal)]',
+            isR ? 'text-[var(--primary)]' : 'text-[var(--label-normal)]'
           )}
         >
           {votes}표
@@ -283,14 +285,16 @@ export function MenuItem({
       onClick={onClick}
       className={cn(
         'w-full flex items-center gap-3 py-[14px] bg-transparent border-none cursor-pointer text-left',
-        className,
+        className
       )}
     >
       {icon && (
         <span
           className={cn(
             'shrink-0',
-            destructive ? 'text-[var(--status-negative)]' : 'text-[var(--label-alternative)]',
+            destructive
+              ? 'text-[var(--status-negative)]'
+              : 'text-[var(--label-alternative)]'
           )}
         >
           {icon}
@@ -299,7 +303,9 @@ export function MenuItem({
       <span
         className={cn(
           'flex-1 text-[15px] leading-[22px] font-normal font-[var(--font-sans)]',
-          destructive ? 'text-[var(--status-negative)]' : 'text-[var(--label-normal)]',
+          destructive
+            ? 'text-[var(--status-negative)]'
+            : 'text-[var(--label-normal)]'
         )}
       >
         {label}
@@ -310,7 +316,12 @@ export function MenuItem({
         </span>
       )}
       {!value && (
-        <ChevronRight size={16} strokeWidth={1.5} color="var(--label-assistive)" className="shrink-0" />
+        <ChevronRight
+          size={16}
+          strokeWidth={1.5}
+          color="var(--label-assistive)"
+          className="shrink-0"
+        />
       )}
     </button>
   );
@@ -342,7 +353,7 @@ export function MenuCheckItem({
       onClick={() => onChange?.(!isActive)}
       className={cn(
         'w-full flex items-center gap-3 py-3 bg-transparent border-none cursor-pointer text-left',
-        className,
+        className
       )}
     >
       <span
@@ -350,15 +361,19 @@ export function MenuCheckItem({
           'w-[22px] h-[22px] rounded-[var(--radius-6)] inline-flex items-center justify-center shrink-0',
           isActive
             ? 'bg-[var(--primary)] border-none'
-            : 'border-[1.5px] border-[var(--line-normal)] bg-transparent',
+            : 'border-[1.5px] border-[var(--line-normal)] bg-transparent'
         )}
       >
-        {isActive && <Check size={12} strokeWidth={1.6} color="var(--static-white)" />}
+        {isActive && (
+          <Check size={12} strokeWidth={1.6} color="var(--static-white)" />
+        )}
       </span>
       <span
         className={cn(
           'flex-1 text-[15px] leading-[22px] font-[var(--font-sans)]',
-          isActive ? 'font-medium text-[var(--label-normal)]' : 'font-normal text-[var(--label-alternative)]',
+          isActive
+            ? 'font-medium text-[var(--label-normal)]'
+            : 'font-normal text-[var(--label-alternative)]'
         )}
       >
         {label}
@@ -367,7 +382,9 @@ export function MenuCheckItem({
         <span
           className={cn(
             'text-[14px] font-[var(--font-sans)] shrink-0',
-            isActive ? 'font-semibold text-[var(--label-normal)]' : 'font-normal text-[var(--label-assistive)]',
+            isActive
+              ? 'font-semibold text-[var(--label-normal)]'
+              : 'font-normal text-[var(--label-assistive)]'
           )}
         >
           {price.toLocaleString()}원

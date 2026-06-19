@@ -83,7 +83,11 @@ export function KakaoLoginButton({
 }: BrandButtonProps) {
   return (
     <button
-      className={cn(BRAND_BASE, 'bg-[var(--brand-kakao)] text-[rgba(0,0,0,0.85)]', className)}
+      className={cn(
+        BRAND_BASE,
+        'bg-[var(--brand-kakao)] text-[rgba(0,0,0,0.85)]',
+        className
+      )}
       {...props}
     >
       <KakaoIcon />
@@ -99,7 +103,11 @@ export function KakaoPayButton({
 }: BrandButtonProps) {
   return (
     <button
-      className={cn(BRAND_BASE, 'bg-[var(--brand-kakao)] text-[rgba(0,0,0,0.85)]', className)}
+      className={cn(
+        BRAND_BASE,
+        'bg-[var(--brand-kakao)] text-[rgba(0,0,0,0.85)]',
+        className
+      )}
       {...props}
     >
       <KakaoIcon />
@@ -115,7 +123,11 @@ export function TossPayButton({
 }: BrandButtonProps) {
   return (
     <button
-      className={cn(BRAND_BASE, 'bg-[var(--brand-toss)] text-[var(--static-white)]', className)}
+      className={cn(
+        BRAND_BASE,
+        'bg-[var(--brand-toss)] text-[var(--static-white)]',
+        className
+      )}
       {...props}
     >
       <TossIcon />
@@ -140,8 +152,10 @@ interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 
 const RADIUS_CLASSES: Record<RadiusVariant, string> = {
   radius: 'bg-[var(--fill-normal)] text-[var(--label-alternative)]',
-  'radius-border': 'bg-transparent text-[var(--label-normal)] border border-[var(--line-normal)]',
-  'radius-border-colored': 'bg-transparent text-[var(--primary)] border border-[var(--primary)]',
+  'radius-border':
+    'bg-transparent text-[var(--label-normal)] border border-[var(--line-normal)]',
+  'radius-border-colored':
+    'bg-transparent text-[var(--primary)] border border-[var(--primary)]',
   'radius-border-inactive':
     'bg-[var(--fill-disable)] text-[var(--label-disable)] border border-[var(--line-alternative)] cursor-default',
   'radius-border-selected':
@@ -160,7 +174,7 @@ export function RadiusButton({
         'inline-flex items-center justify-center gap-1 h-8 px-[14px]',
         'rounded-[var(--radius-full)] text-[13px] font-semibold font-[var(--font-sans)] cursor-pointer',
         RADIUS_CLASSES[variant],
-        className,
+        className
       )}
       {...props}
     >

@@ -23,7 +23,7 @@ export function Toggle({
       className={cn(
         'inline-flex items-center gap-[10px]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
-        className,
+        className
       )}
     >
       <input
@@ -37,7 +37,7 @@ export function Toggle({
       <span
         className={cn(
           'relative w-[51px] h-[31px] rounded-[var(--radius-full)] shrink-0 transition-[background] duration-200',
-          checked ? 'bg-[var(--primary)]' : 'bg-[var(--fill-normal)]',
+          checked ? 'bg-[var(--primary)]' : 'bg-[var(--fill-normal)]'
         )}
       >
         {/* 원 */}
