@@ -62,6 +62,8 @@ export function buildPaymentListItem(
     status: p.status,
     paidAt: p.paidAt?.toISOString() ?? null,
     isMine: isMe,
+    isGuest: sm.member.userId === null,
+    remindCooldownUntil: null,
     canReportTransfer: isMe && p.status === 'PENDING',
     canCancelTransfer: isMe && p.status === 'TRANSFER_REPORTED',
     canMarkPaid: isHost && p.status === 'TRANSFER_REPORTED',

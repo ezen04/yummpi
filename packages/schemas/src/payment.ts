@@ -42,6 +42,8 @@ export const PaymentListItemSchema = z.object({
   status: paymentStatusSchema,
   paidAt: z.string().datetime().nullable(),
   isMine: z.boolean(),
+  isGuest: z.boolean(),
+  remindCooldownUntil: z.string().datetime().nullable(),
   canReportTransfer: z.boolean(),
   canCancelTransfer: z.boolean(),
   canMarkPaid: z.boolean(),
