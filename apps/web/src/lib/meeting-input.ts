@@ -67,3 +67,36 @@ export function optStringArray(
   }
   return v as string[];
 }
+
+export function reqBool(v: unknown, field: string): boolean {
+  if (typeof v !== 'boolean') bad(`${field}는 boolean이어야 합니다.`);
+  return v;
+}
+
+export function optLatitude(v: unknown, field: string): number | undefined {
+  if (v === undefined || v === null) return undefined;
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < -90 || v > 90) {
+    bad(`${field}는 -90~90 사이의 숫자여야 합니다.`);
+  }
+  return v;
+}
+
+export function optLongitude(v: unknown, field: string): number | undefined {
+  if (v === undefined || v === null) return undefined;
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < -180 || v > 180) {
+    bad(`${field}는 -180~180 사이의 숫자여야 합니다.`);
+  }
+  return v;
+}
+
+export function optEnum<T extends string>(
+  v: unknown,
+  field: string,
+  allowed: readonly T[]
+): T | undefined {
+  if (v === undefined || v === null) return undefined;
+  if (typeof v !== 'string' || !allowed.includes(v as T)) {
+    bad(`${field}는 다음 중 하나여야 합니다: ${allowed.join(', ')}`);
+  }
+  return v as T;
+}
