@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import { PaymentLoadingSkeleton } from '@/features/payment/components/PaymentLoadingSkeleton';
-import { PaymentEmptyState } from '@/features/payment/components/PaymentEmptyState';
 import { PaymentErrorState } from '@/features/payment/components/PaymentErrorState';
 import { PaymentSummaryPanel } from '@/features/payment/components/PaymentSummaryPanel';
 import { PaymentMemberList } from '@/features/payment/components/PaymentMemberList';
 import { PaymentNotInitializedState } from '@/features/payment/components/PaymentNotInitializedState';
-import { TransferActionPanel } from '@/features/payment/components/TransferActionPanel';
-import { TransferPendingState } from '@/features/payment/components/TransferPendingState';
-import { TransferDoneState } from '@/features/payment/components/TransferDoneState';
-import { TransferExemptState } from '@/features/payment/components/TransferExemptState';
+import { TransferActionPanel } from '@/features/payment/components/transfer/TransferActionPanel';
+import { TransferPendingState } from '@/features/payment/components/transfer/TransferPendingState';
+import { TransferDoneState } from '@/features/payment/components/transfer/TransferDoneState';
+import { TransferExemptState } from '@/features/payment/components/transfer/TransferExemptState';
 import { MeetingCompletedView } from '@/features/payment/components/MeetingCompletedView';
 import type { PaymentSummary, PaymentListItem } from '@yummpi/schemas';
 
@@ -195,7 +194,6 @@ const MOCK_ITEM_EXEMPT: PaymentListItem = {
 
 type Section =
   | 'loading'
-  | 'empty'
   | 'error'
   | 'summary-progress'
   | 'summary-done'
@@ -212,7 +210,6 @@ type Section =
 
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'loading', label: '로딩' },
-  { id: 'empty', label: '정산 미확정' },
   { id: 'error', label: '에러' },
   { id: 'summary-progress', label: '요약 (진행 중)' },
   { id: 'summary-done', label: '요약 (완료)' },
@@ -250,14 +247,12 @@ export default function PaymentPreviewPage() {
         ))}
       </div>
 
-      {/* 미리보기 영역 — 모바일 프레임 (402px) */}
+      {/* 미리보기 영역 - 모바일 프레임 (390px) */}
       <div className="flex justify-center py-6 px-4">
         <div
-          className="w-full max-w-[402px] bg-[var(--bg-normal)] rounded-2xl overflow-hidden"
-          style={{ minHeight: 600, boxShadow: '0 4px 24px rgba(0,0,0,0.10)' }}
+          className="w-full max-w-[390px] bg-[var(--bg-normal)] rounded-2xl overflow-x-hidden overflow-y-auto h-[844px] shadow-[var(--shadow-medium)]"
         >
           {active === 'loading' && <PaymentLoadingSkeleton />}
-          {active === 'empty' && <PaymentEmptyState />}
           {active === 'error' && (
             <PaymentErrorState
               message="송금 현황을 불러오지 못했어요"
@@ -265,17 +260,17 @@ export default function PaymentPreviewPage() {
             />
           )}
           {active === 'summary-progress' && (
-            <div className="pt-[104px] space-y-4">
+            <div className="pt-4 space-y-4">
               <PaymentSummaryPanel summary={MOCK_SUMMARY_IN_PROGRESS} />
             </div>
           )}
           {active === 'summary-done' && (
-            <div className="pt-[104px] space-y-4">
+            <div className="pt-4 space-y-4">
               <PaymentSummaryPanel summary={MOCK_SUMMARY_ALL_DONE} />
             </div>
           )}
           {active === 'member-list-host' && (
-            <div className="pt-[104px]">
+            <div className="pt-4">
               <div className="px-5 mb-4">
                 <PaymentSummaryPanel summary={MOCK_SUMMARY_IN_PROGRESS} />
               </div>
@@ -288,7 +283,7 @@ export default function PaymentPreviewPage() {
             </div>
           )}
           {active === 'host-transfer-confirm' && (
-            <div className="pt-[104px]">
+            <div className="pt-4">
               <div className="px-5 mb-4">
                 <PaymentSummaryPanel summary={MOCK_SUMMARY_IN_PROGRESS} />
               </div>

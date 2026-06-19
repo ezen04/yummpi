@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaymentLoadingSkeleton } from '../components/PaymentLoadingSkeleton';
-import { PaymentEmptyState } from '../components/PaymentEmptyState';
 import { PaymentErrorState } from '../components/PaymentErrorState';
 import { PaymentSummaryPanel } from '../components/PaymentSummaryPanel';
 import { PaymentHostView } from '../components/PaymentHostView';
 import { PaymentMemberView } from '../components/PaymentMemberView';
 import { MeetingCompletedView } from '../components/MeetingCompletedView';
 import { PaymentNotInitializedState } from '../components/PaymentNotInitializedState';
+import { PaymentHeaderWrapper } from '../components/PaymentHeaderWrapper';
 import {
   getPayments,
   updatePayment,
@@ -42,7 +42,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
   if (isError) {
     const apiError = isPaymentApiError(error) ? error : null;
     if (apiError && SETTLEMENT_NOT_READY_CODES.has(apiError.code)) {
-      return <PaymentEmptyState />;
+      return (
+        <PaymentErrorState message="정산이 아직 확정되지 않았어요" />
+      );
     }
     return (
       <PaymentErrorState
@@ -76,12 +78,7 @@ export function PaymentStatusPage({ meetingId }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg-normal)]">
-      {/* 헤더 */}
-      <div className="h-[104px] px-5 flex items-end pb-4 border-b border-[var(--line-normal)]">
-        <span className="text-base font-semibold text-[var(--label-strong)] mx-auto">
-          송금 현황
-        </span>
-      </div>
+      <PaymentHeaderWrapper />
 
       {/* 요약 패널 */}
       <div className="px-5 pt-4 pb-2">
