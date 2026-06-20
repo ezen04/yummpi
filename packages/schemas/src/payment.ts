@@ -11,6 +11,7 @@ export const PaymentActionSchema = z.enum([
   'MARK_PAID',
   'MARK_PENDING',
   'MARK_EXEMPT',
+  'REMIND',
 ]);
 
 // 목업 송금 표시 데이터. 계좌번호·은행명·예금주·결제 토큰·실제 송금 식별자 포함 금지.
