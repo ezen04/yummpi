@@ -53,6 +53,8 @@ export function buildPaymentListItem(
   const p = sm.payment;
   const isMe = currentMember?.id === sm.memberId;
   const isHost = currentMember?.role === 'HOST';
+  // 주최자 본인 행: 선결제자이므로 모든 액션 비활성 (DN-002)
+  const isHostSelf = isMe && isHost;
 
   return {
     paymentId: p.id,
@@ -64,11 +66,11 @@ export function buildPaymentListItem(
     isMine: isMe,
     isGuest: sm.member.userId === null,
     remindCooldownUntil: null,
-    canReportTransfer: isMe && p.status === 'PENDING',
-    canCancelTransfer: isMe && p.status === 'TRANSFER_REPORTED',
-    canMarkPaid: isHost && p.status === 'TRANSFER_REPORTED',
-    canMarkPending: isHost && p.status !== 'PENDING',
-    canMarkExempt: isHost && p.status !== 'EXEMPT',
+    canReportTransfer: !isHostSelf && isMe && p.status === 'PENDING',
+    canCancelTransfer: !isHostSelf && isMe && p.status === 'TRANSFER_REPORTED',
+    canMarkPaid: !isHostSelf && isHost && p.status === 'TRANSFER_REPORTED',
+    canMarkPending: !isHostSelf && isHost && p.status !== 'PENDING',
+    canMarkExempt: !isHostSelf && isHost && p.status !== 'EXEMPT',
     transferMock: null,
   };
 }

@@ -42,6 +42,8 @@ export const POST = handleRoute(
     }
 
     // idempotent: Payment가 없는 SettlementMember에만 생성
+    // 주최자 본인은 전체 금액을 선결제한 사람이므로 PAID로 초기화/보정 (DN-002)
+    const now = new Date();
     const missing = settlement.settlementMembers.filter(
       (sm) => sm.payment === null
     );
@@ -50,10 +52,34 @@ export const POST = handleRoute(
         data: missing.map((sm) => ({
           settlementMemberId: sm.id,
           amount: sm.finalAmount,
-          status: 'PENDING' as const,
+          status:
+            sm.member.role === 'HOST'
+              ? ('PAID' as const)
+              : ('PENDING' as const),
+          paidAt: sm.member.role === 'HOST' ? now : null,
         })),
         skipDuplicates: true,
       });
+    }
+
+    const hostPaymentsToNormalize = settlement.settlementMembers.filter(
+      (sm) =>
+        sm.member.role === 'HOST' &&
+        sm.payment !== null &&
+        sm.payment.status !== 'PAID'
+    );
+    if (hostPaymentsToNormalize.length > 0) {
+      await prisma.$transaction(
+        hostPaymentsToNormalize.map((sm) =>
+          prisma.payment.update({
+            where: { id: sm.payment!.id },
+            data: {
+              status: 'PAID',
+              paidAt: sm.payment!.paidAt ?? now,
+            },
+          })
+        )
+      );
     }
 
     // 최신 Payment 포함하여 재조회
