@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,32 +9,22 @@ import {
   DialogFooter,
 } from '@yummpi/ui';
 import { Button } from '@yummpi/ui';
-import { completePayments } from '../../lib/paymentApi';
 
 type Props = {
   open: boolean;
-  meetingId: string;
   onClose: () => void;
-  onCompleted: () => void;
+  onConfirm: () => void;
+  isPending?: boolean;
+  errorMessage?: string;
 };
 
-export function MeetingCompleteModal({ open, meetingId, onClose, onCompleted }: Props) {
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleConfirm() {
-    setIsPending(true);
-    setError(null);
-    try {
-      await completePayments(meetingId);
-      onCompleted();
-    } catch {
-      setError('모임 종료에 실패했어요. 다시 시도해주세요.');
-    } finally {
-      setIsPending(false);
-    }
-  }
-
+export function MeetingCompleteModal({
+  open,
+  onClose,
+  onConfirm,
+  isPending = false,
+  errorMessage,
+}: Props) {
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o && !isPending) onClose(); }}>
       <DialogContent className="max-w-[342px] rounded-2xl">
@@ -48,8 +37,10 @@ export function MeetingCompleteModal({ open, meetingId, onClose, onCompleted }: 
           </DialogDescription>
         </DialogHeader>
 
-        {error && (
-          <p className="text-xs text-[var(--status-negative)] px-1">{error}</p>
+        {errorMessage && (
+          <p className="text-xs text-[var(--status-negative)] px-1">
+            {errorMessage}
+          </p>
         )}
 
         <DialogFooter className="flex-row gap-2 mt-2">
@@ -63,7 +54,7 @@ export function MeetingCompleteModal({ open, meetingId, onClose, onCompleted }: 
           </Button>
           <Button
             className="flex-1 h-11 rounded-xl text-sm"
-            onClick={handleConfirm}
+            onClick={onConfirm}
             disabled={isPending}
           >
             {isPending ? '처리 중...' : '마감하기'}

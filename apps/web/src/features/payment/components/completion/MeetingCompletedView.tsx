@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/common/Icon';
-import { formatAmount } from '../../lib/transferMock';
+import { formatAmount } from '../../utils/transferMock';
+import { PaymentHeaderWrapper } from '../page/PaymentHeaderWrapper';
 import type { PaymentSummary } from '@yummpi/schemas';
 
 type Props = {
@@ -21,16 +22,8 @@ export function MeetingCompletedView({
   const router = useRouter();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--bg-alternative)]">
-      {/* 헤더 */}
-      <div className="px-4 pt-14 pb-2 flex items-center">
-        <button
-          onClick={() => router.back()}
-          className="p-1 cursor-pointer"
-        >
-          <Icon name="chevron-left" size={24} color="var(--label-strong)" />
-        </button>
-      </div>
+    <div className="flex flex-col h-dvh overflow-hidden bg-[var(--bg-alternative)]">
+      <PaymentHeaderWrapper />
 
       {/* 본문 */}
       <div className="flex flex-col items-center px-5 pt-8 pb-6 gap-6 flex-1">

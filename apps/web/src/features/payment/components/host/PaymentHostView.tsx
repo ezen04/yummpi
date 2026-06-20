@@ -9,13 +9,33 @@ import type { PaymentListItem, PaymentAction, PaymentSummary } from '@yummpi/sch
 type Props = {
   summary: PaymentSummary;
   payments: PaymentListItem[];
-  meetingId: string;
   onAction: (paymentId: string, action: PaymentAction) => void;
+  onCompleteMeeting: () => Promise<void>;
   onCompleted: () => void;
+  isCompleting?: boolean;
+  completeErrorMessage?: string;
 };
 
-export function PaymentHostView({ summary, payments, meetingId, onAction, onCompleted }: Props) {
+export function PaymentHostView({
+  summary,
+  payments,
+  onAction,
+  onCompleteMeeting,
+  onCompleted,
+  isCompleting,
+  completeErrorMessage,
+}: Props) {
   const [modalOpen, setModalOpen] = useState(false);
+
+  async function handleCompleteConfirm() {
+    try {
+      await onCompleteMeeting();
+      setModalOpen(false);
+      onCompleted();
+    } catch {
+      // Error message is provided by the container through completeErrorMessage.
+    }
+  }
 
   return (
     <>
@@ -26,12 +46,10 @@ export function PaymentHostView({ summary, payments, meetingId, onAction, onComp
       />
       <MeetingCompleteModal
         open={modalOpen}
-        meetingId={meetingId}
         onClose={() => setModalOpen(false)}
-        onCompleted={() => {
-          setModalOpen(false);
-          onCompleted();
-        }}
+        onConfirm={() => void handleCompleteConfirm()}
+        isPending={isCompleting}
+        errorMessage={completeErrorMessage}
       />
     </>
   );

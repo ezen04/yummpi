@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { formatAmount } from '../../lib/transferMock';
+import { formatAmount } from '../../utils/transferMock';
 import { Confirmbox } from '@/components/common/Confirmbox';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
 
@@ -31,6 +31,7 @@ const STATUS_BADGE: Record<
 export function PaymentMemberItem({ item, onAction }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const badge = STATUS_BADGE[item.status] ?? null;
+  const isHostSelf = item.isMine && item.status === 'PAID';
 
   return (
     <>
@@ -51,14 +52,19 @@ export function PaymentMemberItem({ item, onAction }: Props) {
                 게스트
               </span>
             )}
+            {isHostSelf && (
+              <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)]">
+                주최자
+              </span>
+            )}
           </div>
           <span className="text-xs text-[var(--label-alternative)]">
-            {formatAmount(item.amount)}
+            {isHostSelf ? `선결제 · ${formatAmount(item.amount)}` : formatAmount(item.amount)}
           </span>
         </div>
 
         {/* 오른쪽: 배지 또는 액션 버튼 */}
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-1.5">
           {/* PAID / EXEMPT → 완료/면제 배지 */}
           {badge && (
             <span
@@ -81,29 +87,15 @@ export function PaymentMemberItem({ item, onAction }: Props) {
                 </button>
               )}
 
-              {/* PENDING → 독촉 / 쿨다운 */}
+              {/* PENDING → Phase 5 전까지 독촉은 회원에게만 준비 상태로 노출 */}
               {item.status === 'PENDING' && !item.isMine && (() => {
-                const cooldownUntil = item.remindCooldownUntil ? new Date(item.remindCooldownUntil) : null;
-                const inCooldown = cooldownUntil !== null && cooldownUntil > new Date();
-                if (inCooldown) {
-                  const remainingHours = Math.ceil((cooldownUntil.getTime() - Date.now()) / (1000 * 60 * 60));
-                  return (
-                    <button
-                      disabled
-                      className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-assistive)] cursor-default font-medium whitespace-nowrap"
-                    >
-                      {remainingHours}시간 후 재독촉 가능
-                    </button>
-                  );
-                }
+                if (item.isGuest) return null;
                 return (
                   <button
-                    className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] hover:bg-[var(--primary)] hover:text-[var(--static-white)] hover:border-[var(--primary)] transition-colors cursor-pointer font-medium"
-                    onClick={() => {
-                      /* Phase 5: POST /payments/{id}/remind */
-                    }}
+                    disabled
+                    className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-assistive)] cursor-default font-medium whitespace-nowrap"
                   >
-                    독촉
+                    알림 준비 중
                   </button>
                 );
               })()}

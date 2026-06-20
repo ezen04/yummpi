@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Icon } from '@/components/common/Icon';
 import { Footer } from '@/components/common/Footer';
-import { formatAmount } from '../../lib/transferMock';
+import { formatAmount } from '../../utils/transferMock';
 import { RegisterAccountBottomSheet } from './RegisterAccountBottomSheet';
 
 type Props = {

@@ -1,28 +1,30 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { TransferActionPanel } from '../transfer/TransferActionPanel';
 import type { PaymentListItem } from '@yummpi/schemas';
 
 type Props = {
   item: PaymentListItem;
-  meetingId: string;
   hostNickname?: string;
+  onRefresh: () => void;
+  onReportTransfer: (paymentId: string) => Promise<void>;
+  onCancelTransfer: (paymentId: string) => Promise<void>;
 };
 
-export function PaymentMemberView({ item, meetingId, hostNickname }: Props) {
-  const queryClient = useQueryClient();
-
-  function invalidate() {
-    void queryClient.invalidateQueries({ queryKey: ['payments', meetingId] });
-  }
-
+export function PaymentMemberView({
+  item,
+  hostNickname,
+  onRefresh,
+  onReportTransfer,
+  onCancelTransfer,
+}: Props) {
   return (
     <TransferActionPanel
       item={item}
-      meetingId={meetingId}
       hostNickname={hostNickname}
-      onRefresh={invalidate}
+      onRefresh={onRefresh}
+      onReportTransfer={onReportTransfer}
+      onCancelTransfer={onCancelTransfer}
     />
   );
 }

@@ -3,23 +3,32 @@
 import { useState } from 'react';
 import { KakaoPayButton, TossPayButton } from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
-import { buildTransferMockData, copyToClipboard } from '../../lib/transferMock';
-import { updatePayment } from '../../lib/paymentApi';
+import { buildTransferMockData, copyToClipboard } from '../../utils/transferMock';
 import { TransferNoAccountState } from './TransferNoAccountState';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
 import type { PaymentListItem, PaymentSummary } from '@yummpi/schemas';
 
 type Props = {
   item: PaymentListItem;
-  meetingId: string;
   hostNickname?: string;
   onRefresh: () => void;
+  onReportTransfer: (paymentId: string) => Promise<void>;
+  onCancelTransfer: (paymentId: string) => Promise<void>;
   hasHostAccount?: boolean;
   onRegisterAccount?: () => void;
   summary?: PaymentSummary;
 };
 
-export function TransferActionPanel({ item, meetingId, hostNickname, onRefresh, hasHostAccount = true, onRegisterAccount, summary }: Props) {
+export function TransferActionPanel({
+  item,
+  hostNickname,
+  onRefresh,
+  onReportTransfer,
+  onCancelTransfer,
+  hasHostAccount = true,
+  onRegisterAccount,
+  summary,
+}: Props) {
   const mock = buildTransferMockData(item.amount, hostNickname);
   const [isPending, setIsPending] = useState(false);
   const [isReportSuccess, setIsReportSuccess] = useState(false);
@@ -61,7 +70,7 @@ export function TransferActionPanel({ item, meetingId, hostNickname, onRefresh, 
     setIsPending(true);
     setError(null);
     try {
-      await updatePayment(meetingId, item.paymentId, 'REPORT_TRANSFER');
+      await onReportTransfer(item.paymentId);
       setIsReportSuccess(true);
       setTimeout(() => {
         setIsReportSuccess(false);
@@ -78,7 +87,7 @@ export function TransferActionPanel({ item, meetingId, hostNickname, onRefresh, 
     setIsPending(true);
     setError(null);
     try {
-      await updatePayment(meetingId, item.paymentId, 'MARK_PENDING');
+      await onCancelTransfer(item.paymentId);
       onRefresh();
     } catch {
       setError('취소 중 오류가 발생했어요. 다시 시도해 주세요.');
@@ -106,7 +115,7 @@ export function TransferActionPanel({ item, meetingId, hostNickname, onRefresh, 
           {/* 금액 헤더 */}
           <div>
             <p className="text-xs mb-1 flex items-center gap-1 text-[var(--status-positive)]">
-              송금 완료
+              송금 알림 전송 완료
               <Icon name="check" size={13} color="var(--status-positive)" strokeWidth={2.5} />
             </p>
             <p className="text-[28px] font-bold text-[var(--label-strong)] leading-none">
@@ -151,13 +160,13 @@ export function TransferActionPanel({ item, meetingId, hostNickname, onRefresh, 
         {/* 하단 */}
         <footer className="w-full bg-[var(--bg-normal)] border-t border-[var(--line-alternative)] px-5 pt-[13px] pb-[max(30px,env(safe-area-inset-bottom))] flex flex-col gap-2">
           <p className="text-xs text-center text-[var(--label-alternative)]">
-            송금 완료! 3초 후 송금 현황 페이지로 이동합니다.
+            주최자에게 송금 알림을 보냈어요. 확인 전까지 취소할 수 있어요.
           </p>
           <button
             disabled
             className="w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center text-[16px] font-semibold bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default"
           >
-            송금 완료
+            주최자 확인 대기 중
           </button>
         </footer>
       </div>
