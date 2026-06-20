@@ -49,7 +49,15 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
     set((state) => {
       if (state.receipts.find((r) => r.receiptId === receiptId)) return state;
       return {
-        receipts: [...state.receipts, { receiptId, ocrStatus: 'PENDING', ocrItems: [], unclassifiedLines: [] }],
+        receipts: [
+          ...state.receipts,
+          {
+            receiptId,
+            ocrStatus: 'PENDING',
+            ocrItems: [],
+            unclassifiedLines: [],
+          },
+        ],
         selectedReceiptId: state.selectedReceiptId || receiptId,
       };
     }),
@@ -63,11 +71,14 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
       ),
     })),
 
-  clearReceipts: () => set({ receipts: [], selectedReceiptId: null, splitMethod: null }),
+  clearReceipts: () =>
+    set({ receipts: [], selectedReceiptId: null, splitMethod: null }),
 
   deleteReceipt: (receiptId) =>
     set((state) => {
-      const newReceipts = state.receipts.filter((r) => r.receiptId !== receiptId);
+      const newReceipts = state.receipts.filter(
+        (r) => r.receiptId !== receiptId
+      );
       return {
         receipts: newReceipts,
         selectedReceiptId:

@@ -104,7 +104,9 @@ export default function SettlementAssignPage({
         onConfirm={() => {
           setConfirmOpen(false);
           isHost
-            ? router.push(`/meetings/${meetingId}/settlement/${settlementId}/confirm`)
+            ? router.push(
+                `/meetings/${meetingId}/settlement/${settlementId}/confirm`
+              )
             : router.push(`/meetings/${meetingId}`);
         }}
         title="소비 항목을 확정할까요?"

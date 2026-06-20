@@ -54,7 +54,9 @@ export default function SettlementNewPage({
                   if (method.key !== 'equal') {
                     setFlowType(method.key);
                   }
-                  router.push(`/meetings/${meetingId}/settlement/new/${method.key}`);
+                  router.push(
+                    `/meetings/${meetingId}/settlement/new/${method.key}`
+                  );
                 }}
               >
                 <span

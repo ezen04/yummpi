@@ -63,14 +63,24 @@ export default function ReceiptReviewPage({
       open: true,
       editingItem: item ?? null,
       formData: item
-        ? { name: item.name, quantity: item.quantity.toString(), totalPrice: item.totalPrice.toString() }
+        ? {
+            name: item.name,
+            quantity: item.quantity.toString(),
+            totalPrice: item.totalPrice.toString(),
+          }
         : { name: '', quantity: '', totalPrice: '' },
     });
   };
 
   const handleItemSave = () => {
     const { editingItem, formData } = sheet;
-    if (!selectedReceiptId || !formData.name || !formData.quantity || !formData.totalPrice) return;
+    if (
+      !selectedReceiptId ||
+      !formData.name ||
+      !formData.quantity ||
+      !formData.totalPrice
+    )
+      return;
 
     const newItem: OcrItem = {
       id: editingItem?.id || `${selectedReceiptId}-${Date.now()}`,
@@ -303,7 +313,10 @@ export default function ReceiptReviewPage({
             placeholder="예: 삼겹살"
             value={sheet.formData.name}
             onChange={(e) =>
-              setSheet({ ...sheet, formData: { ...sheet.formData, name: e.target.value } })
+              setSheet({
+                ...sheet,
+                formData: { ...sheet.formData, name: e.target.value },
+              })
             }
             required
           />
@@ -314,7 +327,10 @@ export default function ReceiptReviewPage({
             inputMode="numeric"
             value={sheet.formData.quantity}
             onChange={(e) =>
-              setSheet({ ...sheet, formData: { ...sheet.formData, quantity: e.target.value } })
+              setSheet({
+                ...sheet,
+                formData: { ...sheet.formData, quantity: e.target.value },
+              })
             }
             required
           />
@@ -325,7 +341,10 @@ export default function ReceiptReviewPage({
             inputMode="numeric"
             value={sheet.formData.totalPrice}
             onChange={(e) =>
-              setSheet({ ...sheet, formData: { ...sheet.formData, totalPrice: e.target.value } })
+              setSheet({
+                ...sheet,
+                formData: { ...sheet.formData, totalPrice: e.target.value },
+              })
             }
             required
           />
@@ -339,12 +358,20 @@ export default function ReceiptReviewPage({
                 onClick={() => handleItemDelete(sheet.editingItem!.id)}
               />
             )}
-            <Button variant="outline" className="flex-1" onClick={() => setSheet(SHEET_CLOSED)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setSheet(SHEET_CLOSED)}
+            >
               취소
             </Button>
             <Button
               className="flex-1"
-              disabled={!sheet.formData.name || !sheet.formData.quantity || !sheet.formData.totalPrice}
+              disabled={
+                !sheet.formData.name ||
+                !sheet.formData.quantity ||
+                !sheet.formData.totalPrice
+              }
               onClick={handleItemSave}
             >
               확인

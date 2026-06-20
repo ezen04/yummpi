@@ -32,16 +32,16 @@ export default function SettlementConfirmPage({
 
   return (
     <>
-      <Header
-        title="정산 확인"
-        onBack={() => router.back()}
-      />
+      <Header title="정산 확인" onBack={() => router.back()} />
       <div className="px-5 pt-4 pb-2">
         <Step steps={steps} current={current} />
       </div>
 
       <main className="flex-1 overflow-y-auto px-5 py-4">
-        <div className="divide-y" style={{ borderColor: 'var(--line-alternative)' }}>
+        <div
+          className="divide-y"
+          style={{ borderColor: 'var(--line-alternative)' }}
+        >
           {MOCK_MEMBERS.map((member) => (
             <PersonResultItem
               key={member.name}
@@ -57,10 +57,16 @@ export default function SettlementConfirmPage({
           className="flex items-center justify-between pt-4 mt-2 border-t"
           style={{ borderColor: 'var(--line-normal)' }}
         >
-          <p className="text-sm font-medium" style={{ color: 'var(--label-normal)' }}>
+          <p
+            className="text-sm font-medium"
+            style={{ color: 'var(--label-normal)' }}
+          >
             합계
           </p>
-          <p className="text-base font-bold" style={{ color: 'var(--label-normal)' }}>
+          <p
+            className="text-base font-bold"
+            style={{ color: 'var(--label-normal)' }}
+          >
             {total.toLocaleString()}원
           </p>
         </div>
@@ -69,7 +75,11 @@ export default function SettlementConfirmPage({
       <Footer
         variant="button"
         label="정산 확정하기"
-        onClick={() => router.push(`/meetings/${meetingId}/settlement/${settlementId}/result`)}
+        onClick={() =>
+          router.push(
+            `/meetings/${meetingId}/settlement/${settlementId}/result`
+          )
+        }
       />
     </>
   );

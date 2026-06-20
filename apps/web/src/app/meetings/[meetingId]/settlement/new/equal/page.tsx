@@ -35,7 +35,9 @@ export default function SettlementEqualPage({
           type="number"
           inputMode="numeric"
           placeholder="예: 170000"
-          rightIcon={<span className="text-sm text-[var(--label-normal)]">원</span>}
+          rightIcon={
+            <span className="text-sm text-[var(--label-normal)]">원</span>
+          }
           value={totalAmount}
           onChange={(e) => setTotalAmount(e.target.value)}
         />
