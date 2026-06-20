@@ -6,7 +6,7 @@ import { Icon } from '@/components/common/Icon';
 import { buildTransferMockData, copyToClipboard } from '../../lib/transferMock';
 import { updatePayment } from '../../lib/paymentApi';
 import { TransferNoAccountState } from './TransferNoAccountState';
-import { PaymentSummaryPanel } from '../PaymentSummaryPanel';
+import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
 import type { PaymentListItem, PaymentSummary } from '@yummpi/schemas';
 
 type Props = {

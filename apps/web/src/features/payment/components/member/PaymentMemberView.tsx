@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { TransferActionPanel } from './transfer/TransferActionPanel';
+import { TransferActionPanel } from '../transfer/TransferActionPanel';
 import type { PaymentListItem } from '@yummpi/schemas';
 
 type Props = {

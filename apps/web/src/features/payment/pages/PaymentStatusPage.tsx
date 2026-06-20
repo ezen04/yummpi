@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { PaymentLoadingSkeleton } from '../components/PaymentLoadingSkeleton';
-import { PaymentErrorState } from '../components/PaymentErrorState';
-import { PaymentSummaryPanel } from '../components/PaymentSummaryPanel';
-import { PaymentHostView } from '../components/PaymentHostView';
-import { PaymentMemberView } from '../components/PaymentMemberView';
-import { MeetingCompletedView } from '../components/MeetingCompletedView';
-import { PaymentNotInitializedState } from '../components/PaymentNotInitializedState';
-import { PaymentHeaderWrapper } from '../components/PaymentHeaderWrapper';
+import { MeetingCompletedView } from '../components/completion/MeetingCompletedView';
+import { PaymentHostView } from '../components/host/PaymentHostView';
+import { PaymentMemberView } from '../components/member/PaymentMemberView';
+import { PaymentErrorState } from '../components/page/PaymentErrorState';
+import { PaymentHeaderWrapper } from '../components/page/PaymentHeaderWrapper';
+import { PaymentLoadingSkeleton } from '../components/page/PaymentLoadingSkeleton';
+import { PaymentNotInitializedState } from '../components/page/PaymentNotInitializedState';
+import { PaymentSummaryPanel } from '../components/summary/PaymentSummaryPanel';
 import {
   getPayments,
   updatePayment,

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { PaymentLoadingSkeleton } from '@/features/payment/components/PaymentLoadingSkeleton';
-import { PaymentErrorState } from '@/features/payment/components/PaymentErrorState';
-import { PaymentSummaryPanel } from '@/features/payment/components/PaymentSummaryPanel';
-import { PaymentMemberList } from '@/features/payment/components/PaymentMemberList';
-import { PaymentNotInitializedState } from '@/features/payment/components/PaymentNotInitializedState';
+import { MeetingCompletedView } from '@/features/payment/components/completion/MeetingCompletedView';
+import { PaymentMemberList } from '@/features/payment/components/host/PaymentMemberList';
+import { PaymentErrorState } from '@/features/payment/components/page/PaymentErrorState';
+import { PaymentLoadingSkeleton } from '@/features/payment/components/page/PaymentLoadingSkeleton';
+import { PaymentNotInitializedState } from '@/features/payment/components/page/PaymentNotInitializedState';
+import { PaymentSummaryPanel } from '@/features/payment/components/summary/PaymentSummaryPanel';
 import { TransferActionPanel } from '@/features/payment/components/transfer/TransferActionPanel';
-import { MeetingCompletedView } from '@/features/payment/components/MeetingCompletedView';
 import type { PaymentSummary, PaymentListItem } from '@yummpi/schemas';
 
 const MOCK_SUMMARY_IN_PROGRESS: PaymentSummary = {

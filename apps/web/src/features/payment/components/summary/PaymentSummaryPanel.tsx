@@ -1,6 +1,6 @@
 'use client';
 
-import { formatAmount } from '../lib/transferMock';
+import { formatAmount } from '../../lib/transferMock';
 import type { PaymentSummary } from '@yummpi/schemas';
 
 type Props = {

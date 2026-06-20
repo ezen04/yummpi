@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/common/Icon';
-import { formatAmount } from '../lib/transferMock';
+import { formatAmount } from '../../lib/transferMock';
 import type { PaymentSummary } from '@yummpi/schemas';
 
 type Props = {

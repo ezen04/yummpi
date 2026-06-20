@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { formatAmount } from '../lib/transferMock';
+import { formatAmount } from '../../lib/transferMock';
 import { Confirmbox } from '@/components/common/Confirmbox';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
 

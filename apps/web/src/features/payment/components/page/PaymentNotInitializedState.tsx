@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { initializePayments, isPaymentApiError } from '../lib/paymentApi';
+import { initializePayments, isPaymentApiError } from '../../lib/paymentApi';
 
 type Props = {
   viewerRole: 'HOST' | 'MEMBER';

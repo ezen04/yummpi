@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@yummpi/ui';
 import { Button } from '@yummpi/ui';
-import { completePayments } from '../lib/paymentApi';
+import { completePayments } from '../../lib/paymentApi';
 
 type Props = {
   open: boolean;
