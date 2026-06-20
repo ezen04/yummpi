@@ -9,7 +9,10 @@ import { Step } from '@/components/common/Step';
 import { Confirmbox } from '@/components/common/Confirmbox';
 import { useSettlementStore } from '@/features/settlement/store';
 import { IconButton } from '@/components/common/IconButton';
-import { FLOW_STEPS } from '@/features/settlement/constants';
+import {
+  FLOW_STEPS,
+  MOCK_OCR_FAILED_RATE,
+} from '@/features/settlement/constants';
 
 const MAX = 4;
 
@@ -34,6 +37,10 @@ export default function SettlementReceiptPage({
     if (receipts.length >= MAX) return;
     const id = `mock-${Date.now()}`;
     addReceipt(id);
+    if (Math.random() < MOCK_OCR_FAILED_RATE) {
+      updateOcrResult(id, [], 'FAILED');
+      return;
+    }
     // Mock: simulate OCR success with sample items
     updateOcrResult(
       id,

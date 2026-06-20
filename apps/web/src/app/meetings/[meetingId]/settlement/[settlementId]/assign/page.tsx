@@ -33,7 +33,11 @@ export default function SettlementAssignPage({
   const toggle = (id: string) =>
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
 
@@ -103,11 +107,13 @@ export default function SettlementAssignPage({
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
-          isHost
-            ? router.push(
-                `/meetings/${meetingId}/settlement/${settlementId}/confirm`
-              )
-            : router.push(`/meetings/${meetingId}`);
+          if (isHost) {
+            router.push(
+              `/meetings/${meetingId}/settlement/${settlementId}/confirm`
+            );
+          } else {
+            router.push(`/meetings/${meetingId}`);
+          }
         }}
         title="소비 항목을 확정할까요?"
         body="확정 후에는 이전 단계로 돌아갈 수 없어요."

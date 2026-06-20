@@ -6,6 +6,7 @@ import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { Input } from '@/components/common/Input';
 import { useSettlementStore } from '@/features/settlement/store';
+import { MOCK_SETTLEMENT_ID } from '@/features/settlement/constants';
 
 // TODO: 호스트 전용
 export default function SettlementEqualPage({
@@ -47,7 +48,9 @@ export default function SettlementEqualPage({
         label="정산 결과로"
         disabled={!totalAmount || Number(totalAmount) <= 0}
         onClick={() =>
-          router.push(`/meetings/${meetingId}/settlement/mock-id/result`)
+          router.push(
+            `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/result`
+          )
         }
       />
     </>

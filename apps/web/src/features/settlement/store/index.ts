@@ -72,7 +72,12 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
     })),
 
   clearReceipts: () =>
-    set({ receipts: [], selectedReceiptId: null, splitMethod: null }),
+    set({
+      receipts: [],
+      selectedReceiptId: null,
+      splitMethod: null,
+      flowType: null,
+    }),
 
   deleteReceipt: (receiptId) =>
     set((state) => {

@@ -13,9 +13,22 @@ import { Tipbox } from '@/components/common/Tipbox';
 import { Button } from '@/components/common/Button';
 import { Confirmbox } from '@/components/common/Confirmbox';
 import { useSettlementStore, OcrItem } from '@/features/settlement/store';
-import { FLOW_STEPS } from '@/features/settlement/constants';
+import {
+  FLOW_STEPS,
+  MOCK_SETTLEMENT_ID,
+} from '@/features/settlement/constants';
 
 const MANUAL_RECEIPT_ID = 'manual-receipt';
+
+const SHEET_CLOSED: {
+  open: boolean;
+  editingItem: OcrItem | null;
+  formData: { name: string; quantity: string; totalPrice: string };
+} = {
+  open: false,
+  editingItem: null,
+  formData: { name: '', quantity: '', totalPrice: '' },
+};
 
 // TODO: 호스트 전용
 export default function SettlementManualPage({
@@ -32,22 +45,16 @@ export default function SettlementManualPage({
     updateOcrItem,
     deleteOcrItem,
     addOcrItem,
-    addReceipt,
-    setSelectedReceiptId,
   } = useSettlementStore();
 
-  const SHEET_CLOSED = {
-    open: false,
-    editingItem: null as OcrItem | null,
-    formData: { name: '', quantity: '', totalPrice: '' },
-  };
   const [sheet, setSheet] = useState(SHEET_CLOSED);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
-    if (!receipts.find((r) => r.receiptId === MANUAL_RECEIPT_ID)) {
-      addReceipt(MANUAL_RECEIPT_ID);
-      setSelectedReceiptId(MANUAL_RECEIPT_ID);
+    const state = useSettlementStore.getState();
+    if (!state.receipts.find((r) => r.receiptId === MANUAL_RECEIPT_ID)) {
+      state.addReceipt(MANUAL_RECEIPT_ID);
+      state.setSelectedReceiptId(MANUAL_RECEIPT_ID);
     }
   }, []);
 
@@ -131,7 +138,9 @@ export default function SettlementManualPage({
                 >
                   {item.quantity}개 ×{' '}
                   {item.unitPrice ??
-                    Math.floor(item.totalPrice / item.quantity)}
+                    (item.quantity > 0
+                      ? Math.floor(item.totalPrice / item.quantity)
+                      : 0)}
                   원 = {item.totalPrice.toLocaleString()}원
                 </p>
               </div>
@@ -226,9 +235,15 @@ export default function SettlementManualPage({
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
-          splitMethod === 'EQUAL'
-            ? router.push(`/meetings/${meetingId}/settlement/mock-id/result`)
-            : router.push(`/meetings/${meetingId}/settlement/mock-id/assign`);
+          if (splitMethod === 'EQUAL') {
+            router.push(
+              `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/result`
+            );
+          } else {
+            router.push(
+              `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/assign`
+            );
+          }
         }}
         title="정산 방식을 확정할까요?"
         body="확정 후에는 이전 단계로 돌아갈 수 없어요."
@@ -258,12 +273,15 @@ export default function SettlementManualPage({
             type="number"
             inputMode="numeric"
             value={sheet.formData.quantity}
-            onChange={(e) =>
+            onChange={(e) => {
+              const val = e.target.value;
+              // 빈 문자열은 허용(지우는 중), 0/음수는 거부
+              if (val !== '' && parseInt(val) < 1) return;
               setSheet({
                 ...sheet,
-                formData: { ...sheet.formData, quantity: e.target.value },
-              })
-            }
+                formData: { ...sheet.formData, quantity: val },
+              });
+            }}
             required
           />
           <Input
