@@ -46,13 +46,14 @@ e2e/** (Playwright 공통 fixture)
 - 독촉 Worker: 발송 전 반드시 Payment 상태 재확인 (이미 PAID면 스킵)
 - 독촉 Job payload는 `{ meetingId, paymentId, targetMemberId }`를 사용하고, `jobId` 기반 중복 방지를 적용한다.
 - 발송 로그 테이블은 MVP에서 만들지 않는다. Worker guard와 BullMQ job 상태 조회로 운영한다.
+- 게스트는 송금 화면 접근과 본인 `REPORT_TRANSFER`가 가능하지만, MVP 독촉 알림 대상에서는 제외한다.
 
 ## 핵심 주의사항
 
 - **딥링크 prefill은 실기기 검증 전 구현 확정 금지** — 불가 시 "금액 복사 + 앱 열기" fallback
-- 송금 화면 진입 전 `POST /payments/initialize` 호출을 필수 플로우로 둔다.
+- Payment 생성은 호스트가 `POST /payments/initialize`로 명시적으로 수행한다. 일반 멤버/게스트는 `GET /payments`로 조회하고, 미초기화 상태면 초기화 안내를 본다.
 - 송금 상태 변경은 본인/호스트만 (`PATCH /payments/:id`)
-- 웹푸시 없으면 이메일 fallback (PWA 미설치 대응). VAPID 키는 서버 전용
+- 회원은 웹푸시 없으면 이메일 fallback (PWA 미설치 대응). 게스트는 MVP 독촉 알림 대상에서 제외한다. VAPID 키는 서버 전용
 - CI(turbo typecheck·lint·build·e2e)는 전 팀의 게이트 — 워크플로 변경 시 공지
 - iOS PWA: 홈 화면 추가 메타태그 + 설치 안내 UI (①의 마이페이지와 연동)
 
@@ -100,10 +101,32 @@ MVP의 송금하기는 실제 계좌 송금이 아니라 `Payment` 기반의 표
 [직접 송금]
 ```
 
+### 주최자 본인 Payment 정책
+
+`POST /payments/initialize` 호출 시, `SettlementMember` 중 `member.role === 'HOST'`인 항목은 `status: 'PAID', paidAt: new Date()`로 생성한다. 주최자는 식당에서 전체 금액을 선결제한 사람이므로, 본인 몫은 초기화 시점에 이미 완료 처리한다.
+
+- 주최자 본인 행에는 모든 action flag가 false다 (`canReportTransfer`, `canCancelTransfer`, `canMarkPaid`, `canMarkPending`, `canMarkExempt`).
+- `_utils.ts`에서 `isHostSelf = isMe && isHost` 조건으로 판별한다.
+- `EXEMPT`를 쓰지 않는 이유: EXEMPT는 "주최자가 면제 결정을 내린 것"으로 의미가 다르다.
+- 관련 결정: `decision-notes.local.md` DN-002
+
+### 게스트 송금 UX 정책
+
+게스트는 모임 멤버로 인증된 경우 송금 화면(`/meetings/[meetingId]/payments`)에 접근할 수 있다.
+
+- 게스트도 본인 Payment에 대해 `REPORT_TRANSFER`를 수행할 수 있다.
+- 송금 Mock UX는 회원과 동일하게 제공한다. `isGuest`는 뱃지/표시용 메타데이터이며, 송금 플로우 제한 조건으로 사용하지 않는다.
+- 게스트는 대시보드/마이페이지/알림 설정 대상이 아니다.
+- 게스트는 웹푸시·이메일 독촉 알림 대상에서 제외한다.
+- 게스트 토큰이 없거나 만료되어 모임 멤버로 해석되지 않으면 `/meetings/[meetingId]/payments/join-required` 안내 페이지로 보낸다.
+- `join-required` 페이지는 현재 ⑤ 송금 화면 하위에서만 사용하는 ⑤ 소유 페이지로 둔다. 추후 모임 전체 공통 guard가 필요해지면 ①에 별도 요청한다.
+- `meetingId`만으로 `inviteCode`를 역조회해 `/join/{inviteCode}`로 자동 redirect하지 않는다. 사용자는 기존 초대 링크로 다시 입장하도록 안내한다.
+- 관련 결정: `decision-notes.local.md` DN-003
+
 ### 처리 흐름
 
-1. 송금 화면 진입 시 `POST /payments/initialize`를 먼저 호출한다.
-2. `GET /payments`로 송금 현황을 조회한다.
+1. 호스트가 `POST /payments/initialize`로 Payment를 초기화한다.
+2. 회원/게스트는 `GET /payments`로 송금 현황을 조회한다.
    `transferMock`은 현재 `null`로 내려오므로 FE에서 `Payment.amount`와 호스트 닉네임으로 직접 구성한다.
 3. 사용자가 내 Payment의 `송금하기`를 누르면 송금 정보 확인 화면으로 이동한다.
 4. 송금 수단을 선택한다. 선택값은 FE UI 상태로 충분하며 저장은 필수 아님.
