@@ -4,6 +4,7 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { YIcon, Camera, Pencil, Receipt, ChevronRight } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
+import { useSettlementStore } from '@/features/settlement/store';
 
 const METHODS = [
   {
@@ -34,6 +35,7 @@ export default function SettlementNewPage({
 }) {
   const { meetingId } = use(params);
   const router = useRouter();
+  const { clearReceipts, setFlowType } = useSettlementStore();
 
   return (
     <>
@@ -47,11 +49,13 @@ export default function SettlementNewPage({
             <li key={method.key}>
               <button
                 className="w-full flex items-center gap-4 px-5 py-4 bg-transparent border border-transparent cursor-pointer rounded-md text-left active:bg-[var(--fill-normal)] shadow-sm hover:border hover:border-[var(--primary)] active:border active:border-[var(--primary)]"
-                onClick={() =>
-                  router.push(
-                    `/meetings/${meetingId}/settlement/new/${method.key}`
-                  )
-                }
+                onClick={() => {
+                  clearReceipts();
+                  if (method.key !== 'equal') {
+                    setFlowType(method.key);
+                  }
+                  router.push(`/meetings/${meetingId}/settlement/new/${method.key}`);
+                }}
               >
                 <span
                   className="flex items-center justify-center shrink-0 w-12 h-12"
