@@ -2,14 +2,15 @@
 
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera } from '@yummpi/ui';
+import { Camera, Close } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { Step } from '@/components/common/Step';
 import { Confirmbox } from '@/components/common/Confirmbox';
 import { useSettlementStore } from '@/features/settlement/store';
+import { IconButton } from '@/components/common/IconButton';
+import { FLOW_STEPS } from '@/features/settlement/constants';
 
-const STEPS = ['영수증', '검수', '항목 선택', '정산'];
 const MAX = 4;
 
 // TODO: 호스트 전용
@@ -20,8 +21,13 @@ export default function SettlementReceiptPage({
 }) {
   const { meetingId } = use(params);
   const router = useRouter();
-  const { receipts, addReceipt, updateOcrResult, clearReceipts } =
-    useSettlementStore();
+  const {
+    receipts,
+    addReceipt,
+    updateOcrResult,
+    clearReceipts,
+    deleteReceipt,
+  } = useSettlementStore();
   const [leaveOpen, setLeaveOpen] = useState(false);
 
   const handleAdd = () => {
@@ -70,64 +76,66 @@ export default function SettlementReceiptPage({
     <>
       <Header title="영수증 업로드" onBack={handleBack} />
       <div className="px-5 pt-4 pb-2">
-        <Step steps={STEPS} current={0} />
+        <Step steps={FLOW_STEPS.receipt} current={0} />
       </div>
 
-      <main className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
-        {receipts.map((r, i) => (
-          <div
-            key={r.receiptId}
-            className="flex items-center justify-between px-4 py-3 rounded-[var(--radius-10)]"
-            style={{
-              border: '1px solid var(--line-alternative)',
-              background: 'var(--bg-alternative)',
-            }}
-          >
-            <span
-              className="text-sm font-medium"
-              style={{ color: 'var(--label-normal)' }}
-            >
-              영수증 {i + 1}
-            </span>
-            <span
-              className="text-xs"
-              style={{
-                color:
-                  r.ocrStatus === 'FAILED'
-                    ? 'var(--status-negative)'
-                    : 'var(--label-assistive)',
-              }}
-            >
-              {r.ocrStatus === 'SUCCEEDED'
-                ? 'OCR 완료'
-                : r.ocrStatus === 'FAILED'
-                  ? 'OCR 실패'
-                  : '처리 중'}
-            </span>
-          </div>
-        ))}
+      <main className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="grid grid-cols-2 gap-3">
+          {receipts.map((r, i) => (
+            <div key={r.receiptId} className="relative">
+              <div
+                className="aspect-square rounded-[var(--radius-10)] flex flex-col items-center justify-center gap-1 overflow-hidden"
+                style={{
+                  background: 'var(--bg-alternative)',
+                  border: '1px solid var(--line-alternative)',
+                }}
+              >
+                <Camera
+                  size={24}
+                  strokeWidth={1.5}
+                  style={{ color: 'var(--label-assistive)' }}
+                />
+                <span
+                  className="text-xs"
+                  style={{ color: 'var(--label-alternative)' }}
+                >
+                  영수증 {i + 1}
+                </span>
+              </div>
+              <IconButton
+                // variant="normal"
+                size={20}
+                icon={<Close size={14} />}
+                className="absolute top-1 right-1 border rounded-full"
+                onClick={() => deleteReceipt(r.receiptId)}
+              />
+            </div>
+          ))}
 
-        {receipts.length < MAX ? (
-          <button
-            onClick={handleAdd}
-            className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-[var(--radius-10)] bg-transparent cursor-pointer"
-            style={{ border: '1.5px dashed var(--line-normal)' }}
-          >
-            <Camera
-              size={24}
-              strokeWidth={1.5}
-              style={{ color: 'var(--label-assistive)' }}
-            />
-            <span
-              className="text-sm"
-              style={{ color: 'var(--label-alternative)' }}
+          {receipts.length < MAX && (
+            <button
+              onClick={handleAdd}
+              className="aspect-square rounded-[var(--radius-10)] flex flex-col items-center justify-center gap-2 bg-transparent cursor-pointer"
+              style={{ border: '1.5px dashed var(--line-normal)' }}
             >
-              영수증 추가 ({receipts.length}/{MAX})
-            </span>
-          </button>
-        ) : (
+              <Camera
+                size={24}
+                strokeWidth={1.5}
+                style={{ color: 'var(--label-assistive)' }}
+              />
+              <span
+                className="text-xs"
+                style={{ color: 'var(--label-alternative)' }}
+              >
+                추가 ({receipts.length}/{MAX})
+              </span>
+            </button>
+          )}
+        </div>
+
+        {receipts.length >= MAX && (
           <p
-            className="text-xs text-center"
+            className="text-xs text-center mt-3"
             style={{ color: 'var(--label-assistive)' }}
           >
             최대 {MAX}장까지 추가할 수 있습니다
