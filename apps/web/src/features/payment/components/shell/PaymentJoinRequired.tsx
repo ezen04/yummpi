@@ -1,10 +1,13 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
 import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
 
 export function PaymentJoinRequired() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-white">
       <PaymentHeaderWrapper />
@@ -26,12 +29,14 @@ export function PaymentJoinRequired() {
           </p>
         </div>
 
-        <Link
-          href="/"
-          className="mt-2 px-6 h-12 rounded-[var(--radius-12)] bg-[var(--primary)] text-sm font-semibold text-white flex items-center justify-center"
+        <Button
+          variant="basic"
+          size="lg"
+          onClick={() => router.push('/')}
+          className="mt-2 w-auto px-6 text-sm"
         >
           홈으로 가기
-        </Link>
+        </Button>
       </div>
     </div>
   );

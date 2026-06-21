@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/common/Button';
 import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
 
 type Props = {
@@ -35,14 +36,15 @@ export function PaymentNotInitializedState({
         </div>
 
         {isHost && (
-          <button
-            type="button"
+          <Button
+            variant="basic"
+            size="lg"
             onClick={onInitialize}
             disabled={isInitializing}
-            className="mt-2 w-full max-w-[240px] h-12 rounded-lg bg-[var(--primary)] text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 active:opacity-90"
+            className="mt-2 w-full max-w-[240px] text-sm"
           >
             {isInitializing ? '송금 준비 중' : '송금 시작하기'}
-          </button>
+          </Button>
         )}
 
         {errorMessage && (

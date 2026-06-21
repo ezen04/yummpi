@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/common/Button';
 import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
 
 type Props = {
@@ -18,12 +19,14 @@ export function PaymentErrorState({
       <div className="flex-1 flex flex-col items-center justify-center gap-4 px-5 text-center">
         <p className="text-base font-medium text-gray-800">{message}</p>
         {onRetry && (
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onRetry}
-            className="px-5 py-2 rounded-full text-sm font-medium border border-gray-300 text-gray-600 active:bg-gray-50"
+            className="rounded-full px-5"
           >
             다시 시도
-          </button>
+          </Button>
         )}
       </div>
     </div>
