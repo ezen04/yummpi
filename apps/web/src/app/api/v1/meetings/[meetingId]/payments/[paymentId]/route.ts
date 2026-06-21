@@ -22,6 +22,13 @@ export const PATCH = handleRoute(
     const body = UpdatePaymentRequestSchema.parse(await req.json());
     const { action } = body;
 
+    if (action === 'REMIND') {
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        '독촉 알림 기능은 준비 중입니다.'
+      );
+    }
+
     const currentMember = await requireMember(meetingId);
 
     // Payment를 SettlementMember → Settlement → MeetingMember 경로로 조회

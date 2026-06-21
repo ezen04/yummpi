@@ -37,20 +37,6 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const isHost = viewerRole === 'HOST';
   const isHostSelf = item.isMine && isHost;
 
-  /* C-6: 독촉 가능 여부 — 호스트 전용, remindCooldownUntil 기준 */
-  const canRemind =
-    isHost &&
-    item.status === 'PENDING' &&
-    !item.isMine &&
-    !item.isGuest &&
-    item.remindCooldownUntil === null;
-  const isRemindCooldown =
-    isHost &&
-    item.status === 'PENDING' &&
-    !item.isMine &&
-    !item.isGuest &&
-    item.remindCooldownUntil !== null;
-
   return (
     <>
       <div className="flex items-center gap-3 px-5 h-[68px]">
@@ -118,27 +104,6 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                   className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
                 >
                   완료 확인
-                </Button>
-              )}
-
-              {/* PENDING → 독촉 (C-6) */}
-              {canRemind && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onAction(item.paymentId, 'REMIND')}
-                  className="rounded-full h-10 px-[18px] text-[15px] border-[var(--primary-border)] text-[var(--primary)] whitespace-nowrap"
-                >
-                  독촉
-                </Button>
-              )}
-              {isRemindCooldown && (
-                <Button
-                  size="sm"
-                  disabled
-                  className="rounded-full h-10 px-[14px] text-[13px] whitespace-nowrap"
-                >
-                  재독촉 대기 중
                 </Button>
               )}
 
