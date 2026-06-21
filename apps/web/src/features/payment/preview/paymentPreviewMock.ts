@@ -267,6 +267,8 @@ export type PaymentPreviewSection =
   | 'host-in-progress'
   | 'host-all-done'
   | 'host-transfer-confirm'
+  | 'no-account-host'
+  | 'no-account-member'
   | 'member-pending'
   | 'member-reported'
   | 'member-paid'
@@ -286,6 +288,8 @@ export const PAYMENT_PREVIEW_SECTIONS: {
   { id: 'host-in-progress', label: '호스트 — 진행중' },
   { id: 'host-all-done', label: '호스트 — 전원완료' },
   { id: 'host-transfer-confirm', label: '호스트 — 입금 확인 모달' },
+  { id: 'no-account-host', label: '계좌 미등록 — 호스트' },
+  { id: 'no-account-member', label: '계좌 미등록 — 멤버' },
   { id: 'member-pending', label: '멤버 — 송금 전' },
   { id: 'member-reported', label: '멤버 — 확인 대기' },
   { id: 'member-paid', label: '멤버 — 입금 완료' },

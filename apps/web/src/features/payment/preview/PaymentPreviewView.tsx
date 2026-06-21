@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { MeetingCompletedView } from '@/features/payment/components/completion/MeetingCompletedView';
 import { PaymentHostView } from '@/features/payment/components/host/PaymentHostView';
 import { TransferActionPanel } from '@/features/payment/components/transfer/TransferActionPanel';
+import { TransferNoAccountState } from '@/features/payment/components/transfer/TransferNoAccountState';
 import { PaymentErrorState } from '@/features/payment/components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '@/features/payment/components/shell/PaymentHeaderWrapper';
 import { PaymentJoinRequired } from '@/features/payment/components/shell/PaymentJoinRequired';
@@ -118,6 +119,25 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
         payments={MOCK_PAYMENTS_HOST_IN_PROGRESS}
         hint="정산 확인 필요 항목의 완료 확인 버튼으로 모달 문구와 버튼을 확인하세요."
       />
+    );
+  }
+
+  if (active === 'no-account-host') {
+    return (
+      <PaymentScreenShell>
+        <TransferNoAccountState
+          viewerRole="HOST"
+          onRegisterAccount={previewRegisterAccount}
+        />
+      </PaymentScreenShell>
+    );
+  }
+
+  if (active === 'no-account-member') {
+    return (
+      <PaymentScreenShell>
+        <TransferNoAccountState viewerRole="MEMBER" />
+      </PaymentScreenShell>
     );
   }
 
@@ -261,4 +281,8 @@ async function previewReportTransfer(paymentId: string) {
 
 async function previewCancelTransfer(paymentId: string) {
   alert(`MARK_PENDING 호출\npaymentId: ${paymentId}`);
+}
+
+function previewRegisterAccount() {
+  alert('주최자 계좌 등록 완료 (mock)');
 }

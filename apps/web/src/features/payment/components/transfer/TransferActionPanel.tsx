@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { KakaoPayButton, TossPayButton } from '@/components/common/Button';
+import {
+  Button,
+  KakaoPayButton,
+  TossPayButton,
+} from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
 import { buildTransferMockData, copyToClipboard } from '../../utils/transferMock';
 import { TransferNoAccountState } from './TransferNoAccountState';
@@ -19,6 +23,7 @@ type Props = {
   hasHostAccount?: boolean;
   onRegisterAccount?: () => void;
   summary?: PaymentSummary;
+  viewerRole?: 'HOST' | 'MEMBER';
 };
 
 export function TransferActionPanel({
@@ -31,6 +36,7 @@ export function TransferActionPanel({
   hasHostAccount = true,
   onRegisterAccount,
   summary,
+  viewerRole = 'MEMBER',
 }: Props) {
   const mock = buildTransferMockData(item.amount, hostNickname);
   const [isPending, setIsPending] = useState(false);
@@ -98,7 +104,7 @@ export function TransferActionPanel({
   if (isActionable && !hasHostAccount) {
     return (
       <TransferNoAccountState
-        amount={item.amount}
+        viewerRole={viewerRole}
         onRegisterAccount={onRegisterAccount}
       />
     );
@@ -178,14 +184,24 @@ export function TransferActionPanel({
               <p className="mtg-caption1 text-[var(--label-alternative)]">{mock.bank}</p>
               <p className="mtg-body2 font-semibold tracking-[0.3px] [font-variant-numeric:tabular-nums] text-[var(--label-strong)]">{mock.accountNumber}</p>
             </div>
-            <button
+            <Button
+              variant="assistive"
+              size="sm"
               onClick={() => void handleCopy('account')}
               disabled={!isActionable}
-              className="shrink-0 h-[38px] px-4 rounded-[10px] bg-[var(--fill-normal)] text-[var(--label-neutral)] text-sm font-semibold cursor-pointer border-none disabled:opacity-40 disabled:cursor-default flex items-center gap-1.5"
+              leftIcon={
+                isTransferReported ? (
+                  <Icon
+                    name="check"
+                    size={14}
+                    color="var(--label-assistive)"
+                  />
+                ) : undefined
+              }
+              className="shrink-0 h-[38px] px-4 rounded-[10px] text-sm gap-1.5 disabled:opacity-40"
             >
-              {isTransferReported && <Icon name="check" size={14} color="var(--label-assistive)" />}
               {copied === 'account' ? '복사됨' : '계좌 복사'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -202,13 +218,23 @@ export function TransferActionPanel({
                 onClick={() => void handlePaymentAppFallback('토스')}
               />
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="lg"
               onClick={() => void handleCopy('amount')}
-              className="w-full h-[50px] rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] flex items-center justify-center gap-2 text-[15px] font-semibold text-[var(--label-neutral)] cursor-pointer"
+              leftIcon={
+                <Icon
+                  name="wallet"
+                  size={19}
+                  color="var(--label-alternative)"
+                />
+              }
+              className="w-full h-[50px] gap-2 text-[15px] text-[var(--label-neutral)] border-[var(--line-neutral)]"
             >
-              <Icon name="wallet" size={19} color="var(--label-alternative)" />
-              {copied === 'amount' ? '복사됨!' : `금액 복사 (${mock.formattedAmount})`}
-            </button>
+              {copied === 'amount'
+                ? '복사됨!'
+                : `금액 복사 (${mock.formattedAmount})`}
+            </Button>
           </div>
         )}
 
@@ -221,20 +247,23 @@ export function TransferActionPanel({
             <p className="text-xs text-center text-[var(--status-negative)]">{error}</p>
           )}
           {item.canCancelTransfer && (
-            <button
+            <Button
+              variant="outline"
+              size="lg"
               onClick={() => void handleCancelTransfer()}
               disabled={isPending}
-              className="w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center text-[14px] font-semibold border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] disabled:opacity-50 cursor-pointer disabled:cursor-default"
+              className="w-full text-[14px] text-[var(--label-alternative)] disabled:opacity-50"
             >
               {isPending ? '처리 중...' : '송금 취소'}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            size="lg"
             disabled
-            className="w-full h-14 rounded-[14px] flex items-center justify-center text-[16px] font-semibold bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default"
+            className="w-full h-14 rounded-[14px]"
           >
             주최자 확인 대기 중
-          </button>
+          </Button>
         </footer>
       ) : (
         <footer className="w-full bg-[var(--bg-normal)] border-t border-[var(--line-alternative)] px-5 pt-[13px] pb-[max(30px,env(safe-area-inset-bottom))] flex flex-col gap-2">
@@ -247,18 +276,26 @@ export function TransferActionPanel({
             </p>
           )}
           {/* A-4: outline primary */}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             onClick={() => void handleReportTransfer()}
             disabled={isPending}
-            className="w-full h-14 rounded-[14px] flex items-center justify-center gap-1.5 text-[16px] font-semibold border border-[var(--primary)] bg-transparent text-[var(--primary)] disabled:border-none disabled:bg-[var(--fill-disable)] disabled:text-[var(--label-disable)] cursor-pointer disabled:cursor-default"
+            leftIcon={
+              <Icon
+                name="send"
+                size={18}
+                color={isPending ? 'var(--label-disable)' : 'var(--primary)'}
+              />
+            }
+            className={
+              isPending
+                ? 'w-full h-14 rounded-[14px] gap-1.5'
+                : 'w-full h-14 rounded-[14px] gap-1.5 border-[var(--primary)] text-[var(--primary)]'
+            }
           >
-            <Icon
-              name="send"
-              size={18}
-              color={isPending ? 'var(--label-disable)' : 'var(--primary)'}
-            />
             {isPending ? '처리 중...' : '송금 완료 알림 보내기'}
-          </button>
+          </Button>
         </footer>
       )}
     </div>
