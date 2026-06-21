@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentErrorState } from '../components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
@@ -11,6 +11,7 @@ import { useCompletePayments } from '../hooks/useCompletePayments';
 import { useInitializePayments } from '../hooks/useInitializePayments';
 import { usePaymentActions } from '../hooks/usePaymentActions';
 import { usePaymentStatus } from '../hooks/usePaymentStatus';
+import { isPaymentApiError } from '../api/paymentApi';
 import type { PaymentAction } from '@yummpi/schemas';
 
 type Props = {
@@ -22,6 +23,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
   const { updatePayment } = usePaymentActions(meetingId);
   const initializePayments = useInitializePayments(meetingId);
   const completePayments = useCompletePayments(meetingId);
+  const [actionErrorMessage, setActionErrorMessage] = useState<string | null>(
+    null
+  );
 
   const { data, isLoading, isError, apiError, isSettlementNotReady, refetch } =
     usePaymentStatus(meetingId);
@@ -47,7 +51,15 @@ export function PaymentStatusPage({ meetingId }: Props) {
   }, [data, router]);
 
   async function handleHostAction(paymentId: string, action: PaymentAction) {
-    await updatePayment({ paymentId, action });
+    setActionErrorMessage(null);
+    try {
+      await updatePayment({ paymentId, action });
+    } catch (error) {
+      const message = isPaymentApiError(error)
+        ? error.message
+        : '처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
+      setActionErrorMessage(message);
+    }
   }
 
   const initializeErrorMessage = initializePayments.apiError
@@ -106,6 +118,7 @@ export function PaymentStatusPage({ meetingId }: Props) {
           payments={data.payments}
           viewerRole={data.viewerRole}
           onAction={handleHostAction}
+          actionErrorMessage={actionErrorMessage ?? undefined}
           onCompleteMeeting={async () => {
             await completePayments.mutateAsync();
           }}

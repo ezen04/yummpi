@@ -69,7 +69,10 @@ export function buildPaymentListItem(
     canReportTransfer: !isHostSelf && isMe && p.status === 'PENDING',
     canCancelTransfer: !isHostSelf && isMe && p.status === 'TRANSFER_REPORTED',
     canMarkPaid: !isHostSelf && isHost && p.status === 'TRANSFER_REPORTED',
-    canMarkPending: !isHostSelf && isHost && p.status !== 'PENDING',
+    canMarkPending:
+      !isHostSelf &&
+      isHost &&
+      (p.status === 'PAID' || p.status === 'TRANSFER_REPORTED'),
     canMarkExempt: !isHostSelf && isHost && p.status !== 'EXEMPT',
     transferMock: null,
   };
