@@ -258,6 +258,14 @@ export const MOCK_ITEM_GUEST_PENDING: PaymentListItem = {
   isGuest: true,
 };
 
+// 미리보기 진입 시 자동 주입할 주최자 계좌 mock.
+// 사용자가 '계좌 미등록 — 호스트' 탭에서 직접 등록하면 덮어쓰여진다.
+export const PREVIEW_HOST_ACCOUNT = {
+  bank: '신한은행',
+  accountNumber: '110-***-5678',
+  accountHolder: '지훈',
+};
+
 export type PaymentPreviewSection =
   | 'common-loading'
   | 'common-not-ready'

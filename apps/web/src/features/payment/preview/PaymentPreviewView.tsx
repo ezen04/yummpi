@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { MeetingCompletedView } from '@/features/payment/components/completion/MeetingCompletedView';
 import { PaymentHostView } from '@/features/payment/components/host/PaymentHostView';
@@ -12,6 +12,7 @@ import { PaymentJoinRequired } from '@/features/payment/components/shell/Payment
 import { PaymentLoadingSkeleton } from '@/features/payment/components/shell/PaymentLoadingSkeleton';
 import { PaymentNotInitializedState } from '@/features/payment/components/shell/PaymentNotInitializedState';
 import { PaymentSummaryPanel } from '@/features/payment/components/summary/PaymentSummaryPanel';
+import { useHostAccountStore } from '@/features/payment/stores/useHostAccountStore';
 import type {
   PaymentAction,
   PaymentListItem,
@@ -28,12 +29,22 @@ import {
   MOCK_SUMMARY_ALL_DONE,
   MOCK_SUMMARY_IN_PROGRESS,
   PAYMENT_PREVIEW_SECTIONS,
+  PREVIEW_HOST_ACCOUNT,
   type PaymentPreviewSection,
 } from './paymentPreviewMock';
 
 export function PaymentPreviewView() {
   const [active, setActive] =
     useState<PaymentPreviewSection>('host-in-progress');
+  const setAccount = useHostAccountStore((s) => s.setAccount);
+  const clearAccount = useHostAccountStore((s) => s.clearAccount);
+
+  // 멤버/게스트 송금 탭이 '계좌 미등록' 화면으로 빠지지 않도록 mock 계좌를 자동 주입한다.
+  // '계좌 미등록 — 호스트' 탭에서 사용자가 직접 등록하면 그 값으로 덮어쓰여진다.
+  useEffect(() => {
+    setAccount(PREVIEW_HOST_ACCOUNT);
+    return () => clearAccount();
+  }, [setAccount, clearAccount]);
 
   return (
     <div className="h-screen bg-[var(--bg-alternative)] flex flex-col overflow-hidden">
