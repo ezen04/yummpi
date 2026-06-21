@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { PaymentErrorState } from '../components/shell/PaymentErrorState';
+import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
+import { PaymentLoadingSkeleton } from '../components/shell/PaymentLoadingSkeleton';
+import { PaymentNotInitializedState } from '../components/shell/PaymentNotInitializedState';
+import { PaymentHostView } from '../components/host/PaymentHostView';
 import { useCompletePayments } from '../hooks/useCompletePayments';
 import { useInitializePayments } from '../hooks/useInitializePayments';
 import { usePaymentActions } from '../hooks/usePaymentActions';
 import { usePaymentStatus } from '../hooks/usePaymentStatus';
-import { PaymentStatusView } from '../views/PaymentStatusView';
 import type { PaymentAction } from '@yummpi/schemas';
 
 type Props = {
@@ -13,32 +18,36 @@ type Props = {
 };
 
 export function PaymentStatusPage({ meetingId }: Props) {
-  const [isCompleted, setIsCompleted] = useState(false);
-  const { updatePayment, invalidatePayments } = usePaymentActions(meetingId);
+  const router = useRouter();
+  const { updatePayment } = usePaymentActions(meetingId);
   const initializePayments = useInitializePayments(meetingId);
   const completePayments = useCompletePayments(meetingId);
 
   const { data, isLoading, isError, apiError, isSettlementNotReady, refetch } =
     usePaymentStatus(meetingId);
 
-  async function handleAction(paymentId: string, action: PaymentAction) {
+  useEffect(() => {
+    if (!data || data.viewerRole === 'HOST' || data.summary.totalCount === 0)
+      return;
+
+    const myPayment = data.payments.find((p) => p.isMine);
+    if (!myPayment) return;
+
+    // 회원 멤버: PENDING/TRANSFER_REPORTED 일 때만 /transfer로 이동.
+    // PAID/EXEMPT 회원 멤버는 현 위치에서 호스트 현황과 동일 화면을 본다.
+    // 게스트: 상태 관계없이 /transfer (게스트는 호스트 현황 미노출 정책).
+    const shouldRedirect =
+      myPayment.isGuest ||
+      myPayment.status === 'PENDING' ||
+      myPayment.status === 'TRANSFER_REPORTED';
+
+    if (shouldRedirect) {
+      router.replace('./transfer');
+    }
+  }, [data, router]);
+
+  async function handleHostAction(paymentId: string, action: PaymentAction) {
     await updatePayment({ paymentId, action });
-  }
-
-  async function handleReportTransfer(paymentId: string) {
-    await updatePayment({
-      paymentId,
-      action: 'REPORT_TRANSFER',
-      invalidate: false,
-    });
-  }
-
-  async function handleCancelTransfer(paymentId: string) {
-    await updatePayment({
-      paymentId,
-      action: 'MARK_PENDING',
-      invalidate: false,
-    });
   }
 
   const initializeErrorMessage = initializePayments.apiError
@@ -51,28 +60,66 @@ export function PaymentStatusPage({ meetingId }: Props) {
     ? '모임 종료에 실패했어요. 다시 시도해주세요.'
     : undefined;
 
+  const screen = (() => {
+    if (isLoading) return <PaymentLoadingSkeleton />;
+
+    if (isError) {
+      if (isSettlementNotReady) {
+        return <PaymentErrorState message="정산이 아직 확정되지 않았어요" />;
+      }
+      return (
+        <PaymentErrorState
+          message={apiError?.message}
+          onRetry={() => void refetch()}
+        />
+      );
+    }
+
+    if (!data) return <PaymentLoadingSkeleton />;
+
+    if (data.summary.totalCount === 0) {
+      return (
+        <PaymentNotInitializedState
+          viewerRole={data.viewerRole}
+          onInitialize={() => initializePayments.mutate()}
+          isInitializing={initializePayments.isPending}
+          errorMessage={initializeErrorMessage}
+        />
+      );
+    }
+
+    /* 멤버/게스트: 본인 PAID/EXEMPT 회원만 현 위치에 머무름. 그 외는 redirect 대기 — 스켈레톤으로 플래시 방지 */
+    if (data.viewerRole !== 'HOST') {
+      const myPayment = data.payments.find((p) => p.isMine);
+      const stayHere =
+        myPayment &&
+        !myPayment.isGuest &&
+        (myPayment.status === 'PAID' || myPayment.status === 'EXEMPT');
+      if (!stayHere) return <PaymentLoadingSkeleton />;
+    }
+
+    return (
+      <>
+        <PaymentHeaderWrapper />
+        <PaymentHostView
+          summary={data.summary}
+          payments={data.payments}
+          viewerRole={data.viewerRole}
+          onAction={handleHostAction}
+          onCompleteMeeting={async () => {
+            await completePayments.mutateAsync();
+          }}
+          onCompleted={() => router.push('./complete')}
+          isCompleting={completePayments.isPending}
+          completeErrorMessage={completeErrorMessage}
+        />
+      </>
+    );
+  })();
+
   return (
-    <PaymentStatusView
-      data={data}
-      isLoading={isLoading}
-      isError={isError}
-      isCompleted={isCompleted}
-      isSettlementNotReady={isSettlementNotReady}
-      errorMessage={apiError?.message}
-      initializeErrorMessage={initializeErrorMessage}
-      completeErrorMessage={completeErrorMessage}
-      isInitializing={initializePayments.isPending}
-      isCompleting={completePayments.isPending}
-      onRetry={() => void refetch()}
-      onInitialize={() => initializePayments.mutate()}
-      onHostAction={handleAction}
-      onCompleteMeeting={async () => {
-        await completePayments.mutateAsync();
-      }}
-      onRefreshPayments={invalidatePayments}
-      onMemberReportTransfer={handleReportTransfer}
-      onMemberCancelTransfer={handleCancelTransfer}
-      onCompleted={() => setIsCompleted(true)}
-    />
+    <div className="h-dvh flex flex-col overflow-hidden bg-[var(--bg-normal)]">
+      {screen}
+    </div>
   );
 }

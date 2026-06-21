@@ -1,15 +1,12 @@
 'use client';
 
 import { Skeleton } from '@yummpi/ui';
+import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
 
 export function PaymentLoadingSkeleton() {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* 헤더 */}
-      <div className="h-[104px] px-5 flex items-end pb-4">
-        <Skeleton className="w-6 h-6 rounded" />
-        <Skeleton className="mx-auto w-20 h-5 rounded" />
-      </div>
+    <div className="flex flex-col h-full overflow-hidden bg-white">
+      <PaymentHeaderWrapper />
 
       {/* 요약 카드 */}
       <div className="px-5 mt-4">

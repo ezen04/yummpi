@@ -6,7 +6,7 @@ import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
 
 export function PaymentJoinRequired() {
   return (
-    <div className="flex flex-col h-dvh overflow-hidden bg-white">
+    <div className="flex flex-col h-full overflow-hidden bg-white">
       <PaymentHeaderWrapper />
 
       <div className="flex-1 flex flex-col items-center justify-center gap-5 px-5 text-center">

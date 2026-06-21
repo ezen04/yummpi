@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/common/Icon';
 import { formatAmount } from '../../utils/transferMock';
-import { PaymentHeaderWrapper } from '../page/PaymentHeaderWrapper';
+import { PaymentHeaderWrapper } from '../shell/PaymentHeaderWrapper';
 import type { PaymentSummary } from '@yummpi/schemas';
 
 type Props = {

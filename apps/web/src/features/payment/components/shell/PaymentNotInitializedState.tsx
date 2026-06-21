@@ -25,7 +25,7 @@ export function PaymentNotInitializedState({
     : '호스트가 송금 정보를 준비하면 내 송금 금액을 확인할 수 있어요.';
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden bg-white">
+    <div className="flex flex-col h-full overflow-hidden bg-white">
       <PaymentHeaderWrapper />
 
       <div className="flex-1 flex flex-col items-center justify-center gap-4 px-5 text-center">

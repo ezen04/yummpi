@@ -1,5 +1,7 @@
 'use client';
 
+import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
+
 type Props = {
   message?: string;
   onRetry?: () => void;
@@ -10,11 +12,8 @@ export function PaymentErrorState({
   onRetry,
 }: Props) {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* 헤더 */}
-      <div className="h-[104px] px-5 flex items-end pb-4 border-b border-gray-100">
-        <span className="text-base font-semibold mx-auto">송금 현황</span>
-      </div>
+    <div className="flex flex-col h-full overflow-hidden bg-[var(--bg-normal)]">
+      <PaymentHeaderWrapper />
 
       <div className="flex-1 flex flex-col items-center justify-center gap-4 px-5 text-center">
         <p className="text-base font-medium text-gray-800">{message}</p>

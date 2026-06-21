@@ -4,12 +4,12 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { MeetingCompletedView } from '@/features/payment/components/completion/MeetingCompletedView';
 import { PaymentHostView } from '@/features/payment/components/host/PaymentHostView';
-import { PaymentMemberView } from '@/features/payment/components/member/PaymentMemberView';
-import { PaymentErrorState } from '@/features/payment/components/page/PaymentErrorState';
-import { PaymentHeaderWrapper } from '@/features/payment/components/page/PaymentHeaderWrapper';
-import { PaymentJoinRequired } from '@/features/payment/components/page/PaymentJoinRequired';
-import { PaymentLoadingSkeleton } from '@/features/payment/components/page/PaymentLoadingSkeleton';
-import { PaymentNotInitializedState } from '@/features/payment/components/page/PaymentNotInitializedState';
+import { TransferActionPanel } from '@/features/payment/components/transfer/TransferActionPanel';
+import { PaymentErrorState } from '@/features/payment/components/shell/PaymentErrorState';
+import { PaymentHeaderWrapper } from '@/features/payment/components/shell/PaymentHeaderWrapper';
+import { PaymentJoinRequired } from '@/features/payment/components/shell/PaymentJoinRequired';
+import { PaymentLoadingSkeleton } from '@/features/payment/components/shell/PaymentLoadingSkeleton';
+import { PaymentNotInitializedState } from '@/features/payment/components/shell/PaymentNotInitializedState';
 import { PaymentSummaryPanel } from '@/features/payment/components/summary/PaymentSummaryPanel';
 import type {
   PaymentAction,
@@ -18,12 +18,12 @@ import type {
 } from '@yummpi/schemas';
 import {
   MOCK_ITEM_GUEST_PENDING,
-  MOCK_ITEM_MEMBER_EXEMPT,
-  MOCK_ITEM_MEMBER_PAID,
   MOCK_ITEM_MEMBER_PENDING,
   MOCK_ITEM_MEMBER_REPORTED,
   MOCK_PAYMENTS_HOST_ALL_DONE,
   MOCK_PAYMENTS_HOST_IN_PROGRESS,
+  MOCK_PAYMENTS_MEMBER_VIEW_EXEMPT,
+  MOCK_PAYMENTS_MEMBER_VIEW_PAID,
   MOCK_SUMMARY_ALL_DONE,
   MOCK_SUMMARY_IN_PROGRESS,
   PAYMENT_PREVIEW_SECTIONS,
@@ -54,7 +54,7 @@ export function PaymentPreviewView() {
       </div>
 
       <div className="flex-1 min-h-0 flex justify-center py-6 px-4">
-        <div className="w-full max-w-[390px] bg-[var(--bg-normal)] rounded-2xl overflow-x-hidden overflow-y-auto h-full max-h-[844px] shadow-[var(--shadow-medium)]">
+        <div className="w-full max-w-[390px] bg-[var(--bg-normal)] rounded-2xl overflow-hidden h-full max-h-[844px] shadow-[var(--shadow-medium)]">
           <PreviewContent active={active} />
         </div>
       </div>
@@ -131,18 +131,20 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
 
   if (active === 'member-paid') {
     return (
-      <MemberPreview
-        item={MOCK_ITEM_MEMBER_PAID}
-        summary={MOCK_SUMMARY_ALL_DONE}
+      <HostViewShell
+        summary={MOCK_SUMMARY_IN_PROGRESS}
+        payments={MOCK_PAYMENTS_MEMBER_VIEW_PAID}
+        viewerRole="MEMBER"
       />
     );
   }
 
   if (active === 'member-exempt') {
     return (
-      <MemberPreview
-        item={MOCK_ITEM_MEMBER_EXEMPT}
-        summary={MOCK_SUMMARY_ALL_DONE}
+      <HostViewShell
+        summary={MOCK_SUMMARY_IN_PROGRESS}
+        payments={MOCK_PAYMENTS_MEMBER_VIEW_EXEMPT}
+        viewerRole="MEMBER"
       />
     );
   }
@@ -167,9 +169,13 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
 
 function PaymentScreenShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col min-h-[844px] bg-[var(--bg-normal)]">
-      <PaymentHeaderWrapper />
-      <div className="pt-4 pb-2">{children}</div>
+    <div className="h-full flex flex-col bg-[var(--bg-normal)]">
+      <div className="shrink-0">
+        <PaymentHeaderWrapper />
+      </div>
+      <div className="flex-1 min-h-0 flex flex-col">
+        {children}
+      </div>
     </div>
   );
 }
@@ -177,18 +183,20 @@ function PaymentScreenShell({ children }: { children: ReactNode }) {
 function HostViewShell({
   summary,
   payments,
+  viewerRole = 'HOST',
   hint,
 }: {
   summary: PaymentSummary;
   payments: PaymentListItem[];
+  viewerRole?: 'HOST' | 'MEMBER';
   hint?: string;
 }) {
   return (
     <PaymentScreenShell>
-      <PaymentSummaryPanel summary={summary} />
       <PaymentHostView
         summary={summary}
         payments={payments}
+        viewerRole={viewerRole}
         onAction={previewAction}
         onCompleteMeeting={previewCompleteMeeting}
         onCompleted={previewCompleted}
@@ -213,16 +221,16 @@ function MemberPreview({
 }) {
   return (
     <PaymentScreenShell>
-      <PaymentSummaryPanel summary={summary} />
-      <div className="flex-1">
-        <PaymentMemberView
-          item={item}
-          hostNickname={hostNickname}
-          onRefresh={previewRefresh}
-          onReportTransfer={previewReportTransfer}
-          onCancelTransfer={previewCancelTransfer}
-        />
+      <div className="pt-4 pb-2">
+        <PaymentSummaryPanel summary={summary} />
       </div>
+      <TransferActionPanel
+        item={item}
+        hostNickname={hostNickname}
+        onRefresh={previewRefresh}
+        onReportTransfer={previewReportTransfer}
+        onCancelTransfer={previewCancelTransfer}
+      />
     </PaymentScreenShell>
   );
 }

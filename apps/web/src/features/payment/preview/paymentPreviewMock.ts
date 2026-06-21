@@ -75,7 +75,7 @@ export const MOCK_PAYMENTS_HOST_IN_PROGRESS: PaymentListItem[] = [
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
-    canMarkPending: false,
+    canMarkPending: true,
     canMarkExempt: false,
     transferMock: null,
   },
@@ -181,7 +181,7 @@ export const MOCK_PAYMENTS_HOST_ALL_DONE: PaymentListItem[] = [
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
-    canMarkPending: false,
+    canMarkPending: true,
     canMarkExempt: false,
     transferMock: null,
   },
@@ -227,6 +227,28 @@ export const MOCK_ITEM_MEMBER_EXEMPT: PaymentListItem = {
   status: 'EXEMPT',
   canReportTransfer: false,
 };
+
+// 멤버 시점: 본인 + 다른 멤버들. 멤버는 호스트 액션을 가지지 않으므로 모든 액션 플래그 false.
+function asMemberView(payments: PaymentListItem[]): PaymentListItem[] {
+  return payments
+    .filter((p) => !p.isMine)
+    .map((p) => ({
+      ...p,
+      canMarkPaid: false,
+      canMarkPending: false,
+      canMarkExempt: false,
+    }));
+}
+
+export const MOCK_PAYMENTS_MEMBER_VIEW_PAID: PaymentListItem[] = [
+  MOCK_ITEM_MEMBER_PAID,
+  ...asMemberView(MOCK_PAYMENTS_HOST_IN_PROGRESS),
+];
+
+export const MOCK_PAYMENTS_MEMBER_VIEW_EXEMPT: PaymentListItem[] = [
+  MOCK_ITEM_MEMBER_EXEMPT,
+  ...asMemberView(MOCK_PAYMENTS_HOST_IN_PROGRESS),
+];
 
 export const MOCK_ITEM_GUEST_PENDING: PaymentListItem = {
   ...MOCK_ITEM_MEMBER_PENDING,
