@@ -1,11 +1,15 @@
 'use client';
 
 import { PaymentMemberItem } from './PaymentMemberItem';
-import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
+import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
+import { MyExemptNotice } from '../summary/MyExemptNotice';
+import type { PaymentListItem, PaymentAction, PaymentSummary } from '@yummpi/schemas';
 
 type Props = {
   payments: PaymentListItem[];
+  viewerRole: 'HOST' | 'MEMBER';
   onAction?: (paymentId: string, action: PaymentAction) => void;
+  summary?: PaymentSummary;
 };
 
 type SectionDef = {
@@ -30,9 +34,28 @@ const SECTIONS: SectionDef[] = [
   },
 ];
 
-export function PaymentMemberList({ payments, onAction }: Props) {
+export function PaymentMemberList({
+  payments,
+  viewerRole,
+  onAction,
+  summary,
+}: Props) {
+  const myExemptPayment = payments.find(
+    (p) => p.isMine && p.status === 'EXEMPT'
+  );
+
   return (
     <div className="flex flex-col pb-4">
+      {/* C-1: 상단 요약 카드 */}
+      {summary && (
+        <div className="pt-4 pb-2">
+          <PaymentSummaryPanel summary={summary} />
+        </div>
+      )}
+      {/* 본인이 면제 처리된 경우 안내 카드 */}
+      {myExemptPayment && (
+        <MyExemptNotice displayName={myExemptPayment.displayName} />
+      )}
       {SECTIONS.map(({ title, filter, emptyLabel }) => {
         const items = payments.filter(filter);
 
@@ -43,7 +66,7 @@ export function PaymentMemberList({ payments, onAction }: Props) {
           <div key={title}>
             {/* 섹션 헤더 */}
             <div className="px-5 h-[52px] flex items-center">
-              <span className={`text-xs font-semibold ${title === '미송금' ? 'text-[var(--status-negative)]' : 'text-[var(--label-alternative)]'}`}>
+              <span className={`text-xs font-semibold ${title === '미송금' ? 'text-[var(--primary)]' : 'text-[var(--label-alternative)]'}`}>
                 {title}
               </span>
               {items.length > 0 && (
@@ -70,7 +93,11 @@ export function PaymentMemberList({ payments, onAction }: Props) {
                     key={item.paymentId}
                     className="rounded-[var(--radius-12)] bg-[var(--bg-normal)] shadow-[var(--shadow-medium)]"
                   >
-                    <PaymentMemberItem item={item} onAction={onAction} />
+                    <PaymentMemberItem
+                      item={item}
+                      viewerRole={viewerRole}
+                      onAction={onAction}
+                    />
                   </div>
                 ))}
               </div>

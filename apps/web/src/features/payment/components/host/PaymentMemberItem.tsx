@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { formatAmount } from '../../utils/transferMock';
-import { Confirmbox } from '@/components/common/Confirmbox';
+import '../payment-montage.css';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
 
 type Props = {
   item: PaymentListItem;
+  viewerRole: 'HOST' | 'MEMBER';
   onAction?: (paymentId: string, action: PaymentAction) => void;
 };
 
@@ -28,16 +29,28 @@ const STATUS_BADGE: Record<
   PENDING: null,
 };
 
-export function PaymentMemberItem({ item, onAction }: Props) {
+export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const badge = STATUS_BADGE[item.status] ?? null;
-  const isHostSelf = item.isMine && item.status === 'PAID';
+  const isHostSelf = item.isMine && viewerRole === 'HOST';
+
+  /* C-6: 독촉 가능 여부 — remindCooldownUntil 기준 */
+  const canRemind =
+    item.status === 'PENDING' &&
+    !item.isMine &&
+    !item.isGuest &&
+    item.remindCooldownUntil === null;
+  const isRemindCooldown =
+    item.status === 'PENDING' &&
+    !item.isMine &&
+    !item.isGuest &&
+    item.remindCooldownUntil !== null;
 
   return (
     <>
-      <div className="flex items-center gap-3 px-5 h-16">
-        {/* 아바타 */}
-        <div className="w-9 h-9 rounded-full bg-[var(--bg-alternative)] flex items-center justify-center text-sm font-semibold text-[var(--label-neutral)] shrink-0">
+      <div className="flex items-center gap-3 px-5 h-[68px]">
+        {/* 아바타 — C-2: 44px */}
+        <div className="w-11 h-11 rounded-full bg-[var(--bg-alternative)] flex items-center justify-center text-sm font-semibold text-[var(--label-neutral)] shrink-0">
           {item.displayName[0]}
         </div>
 
@@ -47,8 +60,9 @@ export function PaymentMemberItem({ item, onAction }: Props) {
             <span className="text-sm font-medium text-[var(--label-strong)] truncate">
               {item.displayName}
             </span>
+            {/* C-3: 게스트 뱃지 업그레이드 */}
             {item.isGuest && (
-              <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--bg-alternative)] text-[var(--label-assistive)]">
+              <span className="shrink-0 text-[12px] font-semibold px-2 py-0.5 rounded-full bg-[var(--fill-normal)] text-[var(--label-alternative)]">
                 게스트
               </span>
             )}
@@ -57,53 +71,69 @@ export function PaymentMemberItem({ item, onAction }: Props) {
                 주최자
               </span>
             )}
+            {item.isMine && (
+              <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--fill-normal)] text-[var(--label-neutral)]">
+                나
+              </span>
+            )}
           </div>
           <span className="text-xs text-[var(--label-alternative)]">
             {isHostSelf ? `선결제 · ${formatAmount(item.amount)}` : formatAmount(item.amount)}
           </span>
         </div>
 
-        {/* 오른쪽: 배지 또는 액션 버튼 */}
+        {/* 오른쪽: 배지 또는 액션 버튼 — C-5: h-10 (40px) */}
         <div className="shrink-0 flex items-center gap-1.5">
-          {/* PAID / EXEMPT → 완료/면제 배지 */}
           {badge && (
-            <span
-              className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${badge.className}`}
-            >
+            <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${badge.className}`}>
               {badge.label}
             </span>
           )}
 
-          {/* 액션 버튼 (배지 없는 경우만) */}
+          {/* EXEMPT → 면제 취소 (배지와 함께 노출) */}
+          {item.status === 'EXEMPT' && item.canMarkPending && onAction && (
+            <button
+              className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium whitespace-nowrap"
+              onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
+            >
+              면제 취소
+            </button>
+          )}
+
           {!badge && onAction && (
             <>
               {/* TRANSFER_REPORTED → 완료 확인 */}
               {item.canMarkPaid && (
                 <button
-                  className="rounded-full text-xs h-8 px-3 bg-[var(--primary)] text-[var(--static-white)] border-none cursor-pointer font-semibold"
+                  className="rounded-full text-[15px] h-10 px-[18px] bg-[var(--primary)] text-[var(--static-white)] border-none cursor-pointer font-semibold whitespace-nowrap"
                   onClick={() => setConfirmOpen(true)}
                 >
                   완료 확인
                 </button>
               )}
 
-              {/* PENDING → Phase 5 전까지 독촉은 회원에게만 준비 상태로 노출 */}
-              {item.status === 'PENDING' && !item.isMine && (() => {
-                if (item.isGuest) return null;
-                return (
-                  <button
-                    disabled
-                    className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-assistive)] cursor-default font-medium whitespace-nowrap"
-                  >
-                    알림 준비 중
-                  </button>
-                );
-              })()}
+              {/* PENDING → 독촉 (C-6) */}
+              {canRemind && (
+                <button
+                  className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--primary-border)] bg-transparent text-[var(--primary)] cursor-pointer font-semibold whitespace-nowrap"
+                  onClick={() => onAction(item.paymentId, 'REMIND')}
+                >
+                  독촉
+                </button>
+              )}
+              {isRemindCooldown && (
+                <button
+                  disabled
+                  className="rounded-full text-[13px] h-10 px-[14px] bg-[var(--fill-normal)] text-[var(--label-assistive)] border-none cursor-default font-semibold whitespace-nowrap"
+                >
+                  재독촉 대기 중
+                </button>
+              )}
 
               {/* PAID → 되돌리기 */}
               {item.canMarkPending && (
                 <button
-                  className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
+                  className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium whitespace-nowrap"
                   onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
                 >
                   되돌리기
@@ -113,7 +143,7 @@ export function PaymentMemberItem({ item, onAction }: Props) {
               {/* PENDING → 면제 */}
               {item.canMarkExempt && (
                 <button
-                  className="rounded-full text-xs h-8 px-3 border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium"
+                  className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium whitespace-nowrap"
                   onClick={() => onAction(item.paymentId, 'MARK_EXEMPT')}
                 >
                   면제
@@ -124,18 +154,41 @@ export function PaymentMemberItem({ item, onAction }: Props) {
         </div>
       </div>
 
-      {/* 송금 확인 다이얼로그 */}
-      <Confirmbox
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={() => {
-          onAction?.(item.paymentId, 'MARK_PAID');
-          setConfirmOpen(false);
-        }}
-        title={`${item.displayName}님의 금액 '${formatAmount(item.amount)}' 입금이 확인되나요?`}
-        cancelLabel="아니요"
-        confirmLabel="송금 확인"
-      />
+      {/* E: 입금 확인 커스텀 다이얼로그 */}
+      {confirmOpen && (
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center px-7 bg-[rgba(43,33,30,0.45)]"
+          onClick={() => setConfirmOpen(false)}
+        >
+          <div
+            className="w-full max-w-[320px] bg-[var(--bg-normal)] rounded-[20px] px-6 pt-[30px] pb-[22px] text-center shadow-[0_16px_48px_rgba(40,30,25,0.28)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mtg-body2 text-[var(--label-alternative)]">{item.displayName}님의 금액</p>
+            <p className="text-[30px] font-bold tracking-[-0.5px] mt-1.5 mb-1 [font-variant-numeric:tabular-nums]">
+              '{formatAmount(item.amount)}'
+            </p>
+            <p className="mtg-body2 text-[var(--label-alternative)]">입금이 확인되었나요?</p>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setConfirmOpen(false)}
+                className="flex-1 h-[52px] rounded-[14px] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[var(--label-normal)] text-[17px] font-semibold cursor-pointer"
+              >
+                아니요
+              </button>
+              <button
+                onClick={() => {
+                  onAction?.(item.paymentId, 'MARK_PAID');
+                  setConfirmOpen(false);
+                }}
+                className="flex-1 h-[52px] rounded-[14px] border border-[var(--primary-border)] bg-[var(--bg-normal)] text-[var(--primary)] text-[17px] font-bold cursor-pointer"
+              >
+                송금 확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

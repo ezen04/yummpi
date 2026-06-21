@@ -22,7 +22,7 @@ export function MeetingCompletedView({
   const router = useRouter();
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden bg-[var(--bg-alternative)]">
+    <div className="flex flex-col h-full overflow-hidden bg-[var(--bg-alternative)]">
       <PaymentHeaderWrapper />
 
       {/* 본문 */}
@@ -31,7 +31,7 @@ export function MeetingCompletedView({
         <div className="w-20 h-20 rounded-full bg-[var(--status-positive)]/15 flex items-center justify-center">
           <Icon
             name="check"
-            size={36}
+            size={46}
             color="var(--status-positive)"
             strokeWidth={2.5}
           />
@@ -85,16 +85,10 @@ export function MeetingCompletedView({
       </div>
 
       {/* 하단 버튼 */}
-      <div className="px-5 pb-[max(32px,env(safe-area-inset-bottom))] flex flex-col gap-3">
+      <div className="px-5 pb-[max(32px,env(safe-area-inset-bottom))] flex flex-col gap-2">
+        <p className="text-center text-xs text-[var(--label-assistive)]">정산이 모두 완료됐어요!</p>
         <button
-          className="w-full h-[52px] rounded-[var(--radius-12)] bg-[var(--primary)] text-[var(--static-white)] text-base font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-          onClick={() => router.push('/meetings/new')}
-        >
-          <Icon name="plus" size={18} color="var(--static-white)" />
-          새 모임 만들기
-        </button>
-        <button
-          className="w-full h-10 text-sm font-medium text-[var(--label-alternative)] cursor-pointer"
+          className="w-full h-14 rounded-[14px] bg-[var(--primary)] text-[var(--static-white)] text-base font-semibold flex items-center justify-center cursor-pointer"
           onClick={() => router.push('/')}
         >
           홈으로

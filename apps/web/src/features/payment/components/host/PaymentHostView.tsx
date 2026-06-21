@@ -9,6 +9,7 @@ import type { PaymentListItem, PaymentAction, PaymentSummary } from '@yummpi/sch
 type Props = {
   summary: PaymentSummary;
   payments: PaymentListItem[];
+  viewerRole: 'HOST' | 'MEMBER';
   onAction: (paymentId: string, action: PaymentAction) => void;
   onCompleteMeeting: () => Promise<void>;
   onCompleted: () => void;
@@ -19,6 +20,7 @@ type Props = {
 export function PaymentHostView({
   summary,
   payments,
+  viewerRole,
   onAction,
   onCompleteMeeting,
   onCompleted,
@@ -38,19 +40,30 @@ export function PaymentHostView({
   }
 
   return (
-    <>
-      <PaymentMemberList payments={payments} onAction={onAction} />
-      <PaymentHostBottomBar
-        summary={summary}
-        onComplete={() => setModalOpen(true)}
-      />
-      <MeetingCompleteModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onConfirm={() => void handleCompleteConfirm()}
-        isPending={isCompleting}
-        errorMessage={completeErrorMessage}
-      />
-    </>
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <PaymentMemberList
+          payments={payments}
+          viewerRole={viewerRole}
+          onAction={onAction}
+          summary={summary}
+        />
+      </div>
+      {viewerRole === 'HOST' && (
+        <>
+          <PaymentHostBottomBar
+            summary={summary}
+            onComplete={() => setModalOpen(true)}
+          />
+          <MeetingCompleteModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onConfirm={() => void handleCompleteConfirm()}
+            isPending={isCompleting}
+            errorMessage={completeErrorMessage}
+          />
+        </>
+      )}
+    </div>
   );
 }
