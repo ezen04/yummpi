@@ -34,15 +34,18 @@ const STATUS_BADGE: Record<
 export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const badge = STATUS_BADGE[item.status] ?? null;
-  const isHostSelf = item.isMine && viewerRole === 'HOST';
+  const isHost = viewerRole === 'HOST';
+  const isHostSelf = item.isMine && isHost;
 
-  /* C-6: 독촉 가능 여부 — remindCooldownUntil 기준 */
+  /* C-6: 독촉 가능 여부 — 호스트 전용, remindCooldownUntil 기준 */
   const canRemind =
+    isHost &&
     item.status === 'PENDING' &&
     !item.isMine &&
     !item.isGuest &&
     item.remindCooldownUntil === null;
   const isRemindCooldown =
+    isHost &&
     item.status === 'PENDING' &&
     !item.isMine &&
     !item.isGuest &&
