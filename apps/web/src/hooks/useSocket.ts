@@ -43,7 +43,7 @@ export function useSocket(meetingId: string): { isConnected: boolean } {
 
 export function useSocketEvent<K extends keyof ServerToClientEvents>(
   event: K,
-  handler: ServerToClientEvents[K],
+  handler: ServerToClientEvents[K]
 ): void {
   const savedHandler = useRef(handler);
 

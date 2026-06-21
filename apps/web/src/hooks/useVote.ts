@@ -45,10 +45,12 @@ export const voteKeys = {
 async function fetchVotes(meetingId: string): Promise<VotesData> {
   const res = await fetch(`/api/v1/meetings/${meetingId}/votes`);
   if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    const body = (await res.json().catch(() => ({}))) as {
+      error?: { message?: string };
+    };
     throw new Error(body?.error?.message ?? '투표 정보를 불러올 수 없습니다.');
   }
-  const body = await res.json() as { data: VotesData };
+  const body = (await res.json()) as { data: VotesData };
   return body.data;
 }
 
@@ -59,7 +61,9 @@ async function putVote(meetingId: string, candidateId: string): Promise<void> {
     body: JSON.stringify({ candidateId }),
   });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    const body = (await res.json().catch(() => ({}))) as {
+      error?: { message?: string };
+    };
     throw new Error(body?.error?.message ?? '투표에 실패했습니다.');
   }
 }
@@ -111,8 +115,10 @@ export function useVote(meetingId: string) {
             ...old,
             myCandidateId: candidateId,
             candidates: old.candidates.map((c) => {
-              if (c.id === candidateId) return { ...c, voteCount: c.voteCount + 1 };
-              if (c.id === prevCandidateId) return { ...c, voteCount: c.voteCount - 1 };
+              if (c.id === candidateId)
+                return { ...c, voteCount: c.voteCount + 1 };
+              if (c.id === prevCandidateId)
+                return { ...c, voteCount: c.voteCount - 1 };
               return c;
             }),
           };
@@ -129,7 +135,9 @@ export function useVote(meetingId: string) {
     },
     onSettled: () => {
       isMutatingRef.current = false;
-      void queryClient.invalidateQueries({ queryKey: voteKeys.detail(meetingId) });
+      void queryClient.invalidateQueries({
+        queryKey: voteKeys.detail(meetingId),
+      });
     },
   });
 
