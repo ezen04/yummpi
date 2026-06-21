@@ -51,7 +51,7 @@ export function PaymentHostView({
         {actionErrorMessage && (
           <div
             role="alert"
-            className="mx-5 mt-3 rounded-md border border-[var(--status-negative)] bg-[var(--bg-elevated-alternative)] px-3 py-2 text-sm text-[var(--status-negative)]"
+            className="mx-5 mt-3 rounded-md border border-[var(--status-negative)] bg-[var(--status-negative-tint)] px-3 py-2 text-sm text-[var(--status-negative)]"
           >
             {actionErrorMessage}
           </div>

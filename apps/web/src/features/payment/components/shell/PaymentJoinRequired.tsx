@@ -20,7 +20,7 @@ export function PaymentJoinRequired({ meetingId }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-white">
+    <div className="flex flex-col h-full overflow-hidden bg-[var(--bg-normal)]">
       <PaymentHeaderWrapper />
 
       <div className="flex-1 flex flex-col items-center justify-center gap-5 px-5 text-center">
