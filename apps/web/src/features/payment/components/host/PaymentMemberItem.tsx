@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/components/common/Button';
 import { formatAmount } from '../../utils/transferMock';
 import { PaymentConfirmbox } from '../shell/PaymentConfirmbox';
 import '../payment-montage.css';
@@ -93,62 +94,73 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
 
           {/* EXEMPT → 면제 취소 (배지와 함께 노출) */}
           {item.status === 'EXEMPT' && item.canMarkPending && onAction && (
-            <button
-              className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium whitespace-nowrap"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
+              className="rounded-full h-10 px-[18px] text-[15px] font-medium text-[var(--label-alternative)] whitespace-nowrap"
             >
               면제 취소
-            </button>
+            </Button>
           )}
 
           {!badge && onAction && (
             <>
               {/* TRANSFER_REPORTED → 완료 확인 */}
               {item.canMarkPaid && (
-                <button
-                  className="rounded-full text-[15px] h-10 px-[18px] bg-[var(--primary)] text-[var(--static-white)] border-none cursor-pointer font-semibold whitespace-nowrap"
+                <Button
+                  variant="basic"
+                  size="sm"
                   onClick={() => setConfirmOpen(true)}
+                  className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
                 >
                   완료 확인
-                </button>
+                </Button>
               )}
 
               {/* PENDING → 독촉 (C-6) */}
               {canRemind && (
-                <button
-                  className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--primary-border)] bg-transparent text-[var(--primary)] cursor-pointer font-semibold whitespace-nowrap"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => onAction(item.paymentId, 'REMIND')}
+                  className="rounded-full h-10 px-[18px] text-[15px] border-[var(--primary-border)] text-[var(--primary)] whitespace-nowrap"
                 >
                   독촉
-                </button>
+                </Button>
               )}
               {isRemindCooldown && (
-                <button
+                <Button
+                  size="sm"
                   disabled
-                  className="rounded-full text-[13px] h-10 px-[14px] bg-[var(--fill-normal)] text-[var(--label-assistive)] border-none cursor-default font-semibold whitespace-nowrap"
+                  className="rounded-full h-10 px-[14px] text-[13px] whitespace-nowrap"
                 >
                   재독촉 대기 중
-                </button>
+                </Button>
               )}
 
               {/* PAID → 되돌리기 */}
               {item.canMarkPending && (
-                <button
-                  className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium whitespace-nowrap"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
+                  className="rounded-full h-10 px-[18px] text-[15px] font-medium text-[var(--label-alternative)] whitespace-nowrap"
                 >
                   되돌리기
-                </button>
+                </Button>
               )}
 
               {/* PENDING → 면제 */}
               {item.canMarkExempt && (
-                <button
-                  className="rounded-full text-[15px] h-10 px-[18px] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[var(--label-alternative)] cursor-pointer font-medium whitespace-nowrap"
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => onAction(item.paymentId, 'MARK_EXEMPT')}
+                  className="rounded-full h-10 px-[18px] text-[15px] font-medium text-[var(--label-alternative)] whitespace-nowrap"
                 >
                   면제
-                </button>
+                </Button>
               )}
             </>
           )}

@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { BottomSheet } from '@/components/common/BottomSheet';
+import { Button } from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
+import { IconButton } from '@/components/common/IconButton';
+import { Input } from '@/components/common/Input';
 import '../payment-montage.css';
 
 const BANKS = [
@@ -42,12 +45,13 @@ export function RegisterAccountBottomSheet({ isOpen, onClose, onSubmit }: Props)
     >
       <div className="relative">
         {/* 닫기 버튼 */}
-        <button
-          onClick={onClose}
-          className="absolute -top-1 right-0 p-1 cursor-pointer"
-        >
-          <Icon name="x" size={20} color="var(--label-alternative)" />
-        </button>
+        <div className="absolute -top-1 right-0">
+          <IconButton
+            onClick={onClose}
+            size={32}
+            icon={<Icon name="x" size={20} color="var(--label-alternative)" />}
+          />
+        </div>
 
         {/* 타이틀 */}
         <p className="mtg-headline1 is-bold text-[var(--label-strong)] text-center mb-6">
@@ -79,35 +83,27 @@ export function RegisterAccountBottomSheet({ isOpen, onClose, onSubmit }: Props)
           </div>
 
           {/* 계좌번호 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="mtg-label1 is-bold text-[var(--label-normal)] flex items-center gap-1.5">
-              계좌번호
-              <span className="w-1 h-1 rounded-full bg-[var(--primary)] inline-block" />
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9]/g, ''))}
-              placeholder="숫자만 입력해주세요"
-              className="h-[50px] px-[14px] rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[16px] text-[var(--label-strong)] placeholder:text-[var(--label-assistive)] focus:outline-none focus:border-[var(--primary-border)] transition-[border-color]"
-            />
-          </div>
+          <Input
+            label="계좌번호"
+            required
+            type="text"
+            inputMode="numeric"
+            value={accountNumber}
+            onChange={(e) =>
+              setAccountNumber(e.target.value.replace(/[^0-9]/g, ''))
+            }
+            placeholder="숫자만 입력해주세요"
+          />
 
           {/* 예금주 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="mtg-label1 is-bold text-[var(--label-normal)] flex items-center gap-1.5">
-              예금주
-              <span className="w-1 h-1 rounded-full bg-[var(--primary)] inline-block" />
-            </label>
-            <input
-              type="text"
-              value={accountHolder}
-              onChange={(e) => setAccountHolder(e.target.value)}
-              placeholder="예금주명을 입력해주세요"
-              className="h-[50px] px-[14px] rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[16px] text-[var(--label-strong)] placeholder:text-[var(--label-assistive)] focus:outline-none focus:border-[var(--primary-border)] transition-[border-color]"
-            />
-          </div>
+          <Input
+            label="예금주"
+            required
+            type="text"
+            value={accountHolder}
+            onChange={(e) => setAccountHolder(e.target.value)}
+            placeholder="예금주명을 입력해주세요"
+          />
 
           {/* 안내 팁박스 */}
           <div className="rounded-[var(--radius-12)] bg-[var(--status-cautionary)]/10 px-4 py-3 flex items-center gap-2">
@@ -118,13 +114,15 @@ export function RegisterAccountBottomSheet({ isOpen, onClose, onSubmit }: Props)
           </div>
 
           {/* 등록하기 버튼 */}
-          <button
+          <Button
+            variant="basic"
+            size="lg"
             onClick={handleSubmit}
             disabled={!isValid}
-            className="w-full h-[56px] rounded-[14px] text-[16px] font-semibold bg-[var(--primary)] text-[var(--static-white)] disabled:bg-[var(--fill-disable)] disabled:text-[var(--label-disable)] cursor-pointer disabled:cursor-default transition-colors"
+            className="w-full h-[56px] rounded-[14px]"
           >
             등록하기
-          </button>
+          </Button>
         </div>
       </div>
     </BottomSheet>
