@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { formatAmount } from '../../utils/transferMock';
+import { PaymentConfirmbox } from '../shell/PaymentConfirmbox';
 import '../payment-montage.css';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
 
@@ -154,41 +155,26 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
         </div>
       </div>
 
-      {/* E: 입금 확인 커스텀 다이얼로그 */}
-      {confirmOpen && (
-        <div
-          className="fixed inset-0 z-[300] flex items-center justify-center px-7 bg-[rgba(43,33,30,0.45)]"
-          onClick={() => setConfirmOpen(false)}
-        >
-          <div
-            className="w-full max-w-[320px] bg-[var(--bg-normal)] rounded-[20px] px-6 pt-[30px] pb-[22px] text-center shadow-[0_16px_48px_rgba(40,30,25,0.28)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="mtg-body2 text-[var(--label-alternative)]">{item.displayName}님의 금액</p>
-            <p className="text-[30px] font-bold tracking-[-0.5px] mt-1.5 mb-1 [font-variant-numeric:tabular-nums]">
-              '{formatAmount(item.amount)}'
-            </p>
-            <p className="mtg-body2 text-[var(--label-alternative)]">입금이 확인되었나요?</p>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                className="flex-1 h-[52px] rounded-[14px] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[var(--label-normal)] text-[17px] font-semibold cursor-pointer"
-              >
-                아니요
-              </button>
-              <button
-                onClick={() => {
-                  onAction?.(item.paymentId, 'MARK_PAID');
-                  setConfirmOpen(false);
-                }}
-                className="flex-1 h-[52px] rounded-[14px] border border-[var(--primary-border)] bg-[var(--bg-normal)] text-[var(--primary)] text-[17px] font-bold cursor-pointer"
-              >
-                송금 확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PaymentConfirmbox
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          onAction?.(item.paymentId, 'MARK_PAID');
+          setConfirmOpen(false);
+        }}
+        cancelLabel="아니요"
+        confirmLabel="송금 확인"
+      >
+        <p className="mtg-body2 text-[var(--label-alternative)]">
+          {item.displayName}님의 금액
+        </p>
+        <p className="text-[30px] font-bold tracking-[-0.5px] mt-1.5 mb-1 [font-variant-numeric:tabular-nums]">
+          {`'${formatAmount(item.amount)}'`}
+        </p>
+        <p className="mtg-body2 text-[var(--label-alternative)]">
+          입금이 확인되었나요?
+        </p>
+      </PaymentConfirmbox>
     </>
   );
 }
