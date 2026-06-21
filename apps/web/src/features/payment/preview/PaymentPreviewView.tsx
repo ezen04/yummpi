@@ -239,11 +239,15 @@ function MemberPreview({
   hostNickname?: string;
   summary?: PaymentSummary;
 }) {
+  const showSummary = item.status !== 'PENDING';
+
   return (
     <PaymentScreenShell>
-      <div className="pt-4 pb-2">
-        <PaymentSummaryPanel summary={summary} />
-      </div>
+      {showSummary && (
+        <div className="pt-4 pb-2">
+          <PaymentSummaryPanel summary={summary} />
+        </div>
+      )}
       <TransferActionPanel
         item={item}
         hostNickname={hostNickname}
