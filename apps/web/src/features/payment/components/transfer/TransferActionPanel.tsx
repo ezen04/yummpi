@@ -6,6 +6,7 @@ import { Icon } from '@/components/common/Icon';
 import { buildTransferMockData, copyToClipboard } from '../../utils/transferMock';
 import { TransferNoAccountState } from './TransferNoAccountState';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
+import '../payment-montage.css';
 import type { PaymentListItem, PaymentSummary } from '@yummpi/schemas';
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   onRefresh: () => void;
   onReportTransfer: (paymentId: string) => Promise<void>;
   onCancelTransfer: (paymentId: string) => Promise<void>;
+  onReportSuccess?: () => void;
   hasHostAccount?: boolean;
   onRegisterAccount?: () => void;
   summary?: PaymentSummary;
@@ -25,21 +27,22 @@ export function TransferActionPanel({
   onRefresh,
   onReportTransfer,
   onCancelTransfer,
+  onReportSuccess,
   hasHostAccount = true,
   onRegisterAccount,
   summary,
 }: Props) {
   const mock = buildTransferMockData(item.amount, hostNickname);
   const [isPending, setIsPending] = useState(false);
-  const [isReportSuccess, setIsReportSuccess] = useState(false);
   const [copied, setCopied] = useState<'account' | 'amount' | null>(null);
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isActionable = item.status === 'PENDING';
   const isTransferReported = item.status === 'TRANSFER_REPORTED';
-  const isPaid = item.status === 'PAID';
   const isExempt = item.status === 'EXEMPT';
+
+  const avatarChar = hostNickname?.[0] ?? '모';
 
   async function handleCopy(type: 'account' | 'amount') {
     const text = type === 'account' ? mock.accountNumber : mock.formattedAmount;
@@ -71,11 +74,7 @@ export function TransferActionPanel({
     setError(null);
     try {
       await onReportTransfer(item.paymentId);
-      setIsReportSuccess(true);
-      setTimeout(() => {
-        setIsReportSuccess(false);
-        onRefresh();
-      }, 3000);
+      onReportSuccess?.();
     } catch {
       setError('송금 완료 처리에 실패했어요. 다시 시도해주세요.');
     } finally {
@@ -96,8 +95,6 @@ export function TransferActionPanel({
     }
   }
 
-  const avatarChar = hostNickname?.[0] ?? '모';
-
   if (isActionable && !hasHostAccount) {
     return (
       <TransferNoAccountState
@@ -107,100 +104,7 @@ export function TransferActionPanel({
     );
   }
 
-  if (isReportSuccess) {
-    return (
-      <div className="flex flex-col flex-1">
-        <div className="flex flex-col px-5 pt-6 pb-4 gap-6 flex-1">
-
-          {/* 금액 헤더 */}
-          <div>
-            <p className="text-xs mb-1 flex items-center gap-1 text-[var(--status-positive)]">
-              송금 알림 전송 완료
-              <Icon name="check" size={13} color="var(--status-positive)" strokeWidth={2.5} />
-            </p>
-            <p className="text-[28px] font-bold text-[var(--label-strong)] leading-none">
-              {mock.formattedAmount}
-            </p>
-          </div>
-
-          {/* 계좌 카드 — 성공 레이아웃 */}
-          <div className="rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] overflow-hidden">
-            {/* 수신자 */}
-            <div className="px-4 py-3 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--primary)]/15 flex items-center justify-center text-sm font-semibold text-[var(--primary)] shrink-0">
-                {avatarChar}
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <p className="text-xs text-[var(--label-alternative)]">받는 사람 (주최자)</p>
-                <p className="text-sm font-semibold text-[var(--label-strong)]">{mock.recipientLabel}</p>
-              </div>
-            </div>
-
-            {/* 구분선 */}
-            <div className="h-px bg-[var(--line-alternative)]" />
-
-            {/* 계좌 정보 */}
-            <div className="px-4 py-3 flex items-center justify-between">
-              <div className="flex flex-col gap-0.5">
-                <p className="text-xs text-[var(--label-alternative)]">{mock.bank}</p>
-                <p className="text-sm font-medium text-[var(--label-strong)]">{mock.accountNumber}</p>
-              </div>
-              <button
-                disabled
-                className="shrink-0 text-xs font-medium text-[var(--label-alternative)] border border-[var(--line-normal)] rounded-[var(--radius-full)] px-3 h-7 bg-[var(--bg-normal)] opacity-60 flex items-center gap-1 cursor-default"
-              >
-                <Icon name="check" size={12} color="var(--label-alternative)" />
-                계좌 복사
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        {/* 하단 */}
-        <footer className="w-full bg-[var(--bg-normal)] border-t border-[var(--line-alternative)] px-5 pt-[13px] pb-[max(30px,env(safe-area-inset-bottom))] flex flex-col gap-2">
-          <p className="text-xs text-center text-[var(--label-alternative)]">
-            주최자에게 송금 알림을 보냈어요. 확인 전까지 취소할 수 있어요.
-          </p>
-          <button
-            disabled
-            className="w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center text-[16px] font-semibold bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default"
-          >
-            주최자 확인 대기 중
-          </button>
-        </footer>
-      </div>
-    );
-  }
-
-  if (isPaid) {
-    return (
-      <div className="flex flex-col flex-1">
-        <div className="flex flex-col px-5 pt-6 pb-4 gap-6 flex-1">
-          <div className="rounded-[var(--radius-12)] bg-[var(--status-positive)]/10 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--status-positive)]/20 flex items-center justify-center text-xl shrink-0">
-              ✅
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-sm font-semibold text-[var(--status-positive)]">입금이 확인됐어요</p>
-              <p className="text-xs text-[var(--label-alternative)]">{mock.formattedAmount} 정산 완료</p>
-            </div>
-          </div>
-          <div className="rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-alternative)] p-4 flex items-center gap-3 opacity-50">
-            <div className="w-10 h-10 rounded-full bg-[var(--bg-normal)] flex items-center justify-center text-sm font-semibold text-[var(--label-neutral)] shrink-0">
-              {avatarChar}
-            </div>
-            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-              <p className="text-xs text-[var(--label-alternative)]">받는 사람 (주최자)</p>
-              <p className="text-sm font-semibold text-[var(--label-strong)] truncate">{mock.recipientLabel}</p>
-              <p className="text-xs text-[var(--label-alternative)]">{mock.bank} · {mock.accountNumber}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  /* ── EXEMPT ────────────────────────────────────────────────────── */
   if (isExempt) {
     return (
       <div className="flex flex-col flex-1">
@@ -224,9 +128,10 @@ export function TransferActionPanel({
     );
   }
 
+  /* ── PENDING / TRANSFER_REPORTED ───────────────────────── A-1~A-4 */
   return (
     <div className="flex flex-col flex-1">
-      <div className="flex flex-col px-5 pt-6 pb-4 gap-6 flex-1">
+      <div className="flex flex-col px-5 pt-5 pb-4 gap-3 flex-1">
 
         {/* TRANSFER_REPORTED 팁박스 */}
         {isTransferReported && (
@@ -241,63 +146,67 @@ export function TransferActionPanel({
           </div>
         )}
 
-        {/* 금액 헤더 */}
-        <div>
-          <p className="text-xs text-[var(--label-alternative)] mb-1">
-            {isTransferReported ? (
-              <span className="flex items-center gap-1 text-[var(--status-positive)]">
-                <Icon name="check" size={14} color="var(--status-positive)" />
-                송금 신고 완료
-              </span>
-            ) : (
-              '내가 보낼 금액'
-            )}
-          </p>
-          <p className="text-[28px] font-bold text-[var(--label-strong)] leading-none">
+        {/* 금액 헤더 — A-1: 40px 중앙 정렬 */}
+        <div className="text-center py-5">
+          {isTransferReported ? (
+            <div className="inline-flex items-center gap-1.5">
+              <span className="mtg-label1 text-[var(--status-positive)]">송금 신고 완료</span>
+              <Icon name="check" size={18} color="var(--status-positive)" />
+            </div>
+          ) : (
+            <p className="mtg-label1 text-[var(--label-alternative)]">내가 보낼 금액</p>
+          )}
+          <p className="text-[40px] font-bold text-[var(--label-strong)] leading-tight tracking-[-1px] mt-2 [font-variant-numeric:tabular-nums]">
             {mock.formattedAmount}
           </p>
         </div>
 
-        {/* 계좌 정보 카드 */}
-        <div className={`rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-alternative)] p-4 flex items-center gap-3 ${isTransferReported ? 'opacity-60' : ''}`}>
-          <div className="w-10 h-10 rounded-full bg-[var(--bg-normal)] flex items-center justify-center text-sm font-semibold text-[var(--label-neutral)] shrink-0">
-            {avatarChar}
+        {/* 계좌 카드 — A-2: 2단 구조 */}
+        <div className={`rounded-[14px] border border-[var(--line-alternative)] bg-[var(--bg-normal)] shadow-[var(--shadow-small)] overflow-hidden ${isTransferReported ? 'opacity-60' : ''}`}>
+          <div className="px-4 py-3 flex items-center gap-3">
+            <div className="w-[42px] h-[42px] rounded-full bg-[var(--primary)]/15 flex items-center justify-center text-sm font-bold text-[var(--primary)] shrink-0">
+              {avatarChar}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <p className="mtg-caption1 text-[var(--label-alternative)]">받는 사람 (주최자)</p>
+              <p className="mtg-body2 is-bold text-[var(--label-strong)]">{mock.recipientLabel}</p>
+            </div>
           </div>
-          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-            <p className="text-xs text-[var(--label-alternative)]">받는 사람 (주최자)</p>
-            <p className="text-sm font-semibold text-[var(--label-strong)] truncate">{mock.recipientLabel}</p>
-            <p className="text-xs text-[var(--label-alternative)]">{mock.bank} · {mock.accountNumber}</p>
+          <div className="h-px bg-[var(--line-alternative)]" />
+          <div className="px-4 py-3 flex items-center gap-2">
+            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+              <p className="mtg-caption1 text-[var(--label-alternative)]">{mock.bank}</p>
+              <p className="mtg-body2 font-semibold tracking-[0.3px] [font-variant-numeric:tabular-nums] text-[var(--label-strong)]">{mock.accountNumber}</p>
+            </div>
+            <button
+              onClick={() => void handleCopy('account')}
+              disabled={!isActionable}
+              className="shrink-0 h-[38px] px-4 rounded-[10px] bg-[var(--fill-normal)] text-[var(--label-neutral)] text-sm font-semibold cursor-pointer border-none disabled:opacity-40 disabled:cursor-default flex items-center gap-1.5"
+            >
+              {isTransferReported && <Icon name="check" size={14} color="var(--label-assistive)" />}
+              {copied === 'account' ? '복사됨' : '계좌 복사'}
+            </button>
           </div>
-          <button
-            onClick={() => void handleCopy('account')}
-            disabled={!isActionable}
-            className="shrink-0 text-xs font-medium text-[var(--label-alternative)] border border-[var(--line-normal)] rounded-[var(--radius-full)] px-3 h-7 bg-[var(--bg-normal)] disabled:opacity-40 cursor-pointer disabled:cursor-default flex items-center gap-1"
-          >
-            {isTransferReported && (
-              <Icon name="check" size={12} color="var(--label-alternative)" />
-            )}
-            {copied === 'account' ? '복사됨!' : '계좌 복사'}
-          </button>
         </div>
 
-        {/* 송금 수단 & 금액 복사 — PENDING일 때만 */}
+        {/* 송금 수단 & 금액 복사 — A-3: 58px 버튼 */}
         {isActionable && (
           <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <KakaoPayButton
-                className="flex-1 h-12 rounded-[var(--radius-12)]"
+                className="flex-1 h-[58px] rounded-[14px]"
                 onClick={() => void handlePaymentAppFallback('카카오페이')}
               />
               <TossPayButton
-                className="flex-1 h-12 rounded-[var(--radius-12)]"
+                className="flex-1 h-[58px] rounded-[14px]"
                 onClick={() => void handlePaymentAppFallback('토스')}
               />
             </div>
             <button
               onClick={() => void handleCopy('amount')}
-              className="w-full h-12 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] flex items-center justify-center gap-1.5 text-[14px] font-semibold text-[var(--label-normal)] cursor-pointer"
+              className="w-full h-[50px] rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] flex items-center justify-center gap-2 text-[15px] font-semibold text-[var(--label-neutral)] cursor-pointer"
             >
-              <Icon name="wallet" size={16} color="var(--label-alternative)" />
+              <Icon name="wallet" size={19} color="var(--label-alternative)" />
               {copied === 'amount' ? '복사됨!' : `금액 복사 (${mock.formattedAmount})`}
             </button>
           </div>
@@ -322,7 +231,7 @@ export function TransferActionPanel({
           )}
           <button
             disabled
-            className="w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center text-[16px] font-semibold bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default"
+            className="w-full h-14 rounded-[14px] flex items-center justify-center text-[16px] font-semibold bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default"
           >
             주최자 확인 대기 중
           </button>
@@ -337,15 +246,16 @@ export function TransferActionPanel({
               {error ?? fallbackMessage}
             </p>
           )}
+          {/* A-4: outline primary */}
           <button
             onClick={() => void handleReportTransfer()}
             disabled={isPending}
-            className="w-full h-12 rounded-[var(--radius-12)] flex items-center justify-center gap-1.5 text-[16px] font-semibold border-none bg-[var(--primary)] text-[var(--static-white)] disabled:bg-[var(--fill-disable)] disabled:text-[var(--label-disable)] cursor-pointer disabled:cursor-default"
+            className="w-full h-14 rounded-[14px] flex items-center justify-center gap-1.5 text-[16px] font-semibold border border-[var(--primary)] bg-transparent text-[var(--primary)] disabled:border-none disabled:bg-[var(--fill-disable)] disabled:text-[var(--label-disable)] cursor-pointer disabled:cursor-default"
           >
             <Icon
               name="send"
               size={18}
-              color={isPending ? 'var(--label-disable)' : 'var(--static-white)'}
+              color={isPending ? 'var(--label-disable)' : 'var(--primary)'}
             />
             {isPending ? '처리 중...' : '송금 완료 알림 보내기'}
           </button>
