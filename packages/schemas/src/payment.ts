@@ -11,6 +11,7 @@ export const PaymentActionSchema = z.enum([
   'MARK_PAID',
   'MARK_PENDING',
   'MARK_EXEMPT',
+  'REMIND',
 ]);
 
 // 목업 송금 표시 데이터. 계좌번호·은행명·예금주·결제 토큰·실제 송금 식별자 포함 금지.
@@ -41,7 +42,11 @@ export const PaymentListItemSchema = z.object({
   amount: z.number().int().nonnegative(),
   status: paymentStatusSchema,
   paidAt: z.string().datetime().nullable(),
+  isMine: z.boolean(),
+  isGuest: z.boolean(),
+  remindCooldownUntil: z.string().datetime().nullable(),
   canReportTransfer: z.boolean(),
+  canCancelTransfer: z.boolean(),
   canMarkPaid: z.boolean(),
   canMarkPending: z.boolean(),
   canMarkExempt: z.boolean(),
@@ -52,6 +57,8 @@ export const PaymentListResponseSchema = z.object({
   meetingId: idSchema,
   settlementId: idSchema,
   settlementStatus: settlementStatusSchema,
+  viewerRole: z.enum(['HOST', 'MEMBER']),
+  host: z.object({ nickname: z.string().min(1) }),
   summary: PaymentSummarySchema,
   payments: z.array(PaymentListItemSchema),
 });

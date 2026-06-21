@@ -22,6 +22,10 @@ export const PATCH = handleRoute(
     const body = UpdatePaymentRequestSchema.parse(await req.json());
     const { action } = body;
 
+    if (action === 'REMIND') {
+      throw new ApiError('VALIDATION_ERROR', '독촉 알림 기능은 준비 중입니다.');
+    }
+
     const currentMember = await requireMember(meetingId);
 
     // Payment를 SettlementMember → Settlement → MeetingMember 경로로 조회
@@ -60,8 +64,14 @@ export const PATCH = handleRoute(
           'PENDING 상태에서만 송금 신고가 가능합니다.'
         );
       }
+    } else if (action === 'MARK_PENDING') {
+      const canOwnerCancelTransfer =
+        isOwner && payment.status === 'TRANSFER_REPORTED';
+      if (!isHost && !canOwnerCancelTransfer) {
+        throw new ApiError('FORBIDDEN', '송금 취소 권한이 없습니다.');
+      }
     } else {
-      // MARK_PAID / MARK_PENDING / MARK_EXEMPT
+      // MARK_PAID / MARK_EXEMPT
       if (!isHost) {
         throw new ApiError('FORBIDDEN', '주최자만 수행할 수 있습니다.');
       }

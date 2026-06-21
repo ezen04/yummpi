@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
+import { transitionMeetingStatus } from '@/lib/meeting-status';
 
 const paramsSchema = z.object({ meetingId: z.string().uuid() });
 
@@ -15,35 +16,56 @@ export const POST = handleRoute(
 
     await assertHost(meetingId);
 
-    const meeting = await prisma.meeting.findUnique({
-      where: { id: meetingId },
+    const settlement = await prisma.settlement.findUnique({
+      where: { meetingId },
+      include: {
+        settlementMembers: {
+          include: { payment: true },
+        },
+      },
     });
-    if (!meeting)
-      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
 
-    const payments = await prisma.payment.findMany({
-      where: { settlementMember: { settlement: { meetingId } } },
-    });
+    if (!settlement) {
+      throw new ApiError(
+        'SETTLEMENT_NOT_FOUND',
+        '정산 정보를 찾을 수 없습니다.'
+      );
+    }
 
+    const payments = settlement.settlementMembers
+      .map((member) => member.payment)
+      .filter((payment) => payment !== null);
+    const missingPaymentCount =
+      settlement.settlementMembers.length - payments.length;
     const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
     const reportedCount = payments.filter(
       (p) => p.status === 'TRANSFER_REPORTED'
     ).length;
 
-    if (pendingCount > 0 || reportedCount > 0) {
+    if (
+      settlement.settlementMembers.length === 0 ||
+      payments.length === 0 ||
+      missingPaymentCount > 0 ||
+      pendingCount > 0 ||
+      reportedCount > 0
+    ) {
       throw new ApiError(
         'PAYMENTS_NOT_COMPLETED',
         '완료되지 않은 송금이 있습니다.',
-        { pendingCount, reportedCount }
+        { pendingCount, reportedCount, missingPaymentCount }
       );
     }
 
-    // TODO: ① transitionMeetingStatus helper 머지 후 아래 주석 해제
-    // await transitionMeetingStatus(meetingId, 'COMPLETED');
-    // 현재는 검증만 수행하고 상태 전환은 보류한다.
+    const updatedMeeting = await transitionMeetingStatus(
+      meetingId,
+      'COMPLETED',
+      {
+        reason: 'PAYMENTS_COMPLETED',
+      }
+    );
 
     return apiSuccess(
-      { meetingId, meetingStatus: meeting.status },
+      { meetingId, meetingStatus: updatedMeeting.status },
       '전원 송금이 확인되었습니다.'
     );
   }
