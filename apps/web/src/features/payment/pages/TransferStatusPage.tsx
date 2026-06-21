@@ -75,6 +75,7 @@ export function TransferStatusPage({ meetingId }: Props) {
         <PaymentHeaderWrapper />
         <TransferActionPanel
           item={myPayment}
+          hostNickname={data.host.nickname}
           viewerRole="MEMBER"
           onRefresh={invalidatePayments}
           onReportTransfer={handleReportTransfer}

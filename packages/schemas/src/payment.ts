@@ -58,6 +58,7 @@ export const PaymentListResponseSchema = z.object({
   settlementId: idSchema,
   settlementStatus: settlementStatusSchema,
   viewerRole: z.enum(['HOST', 'MEMBER']),
+  host: z.object({ nickname: z.string().min(1) }),
   summary: PaymentSummarySchema,
   payments: z.array(PaymentListItemSchema),
 });

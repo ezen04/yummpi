@@ -46,6 +46,7 @@ export function TransferDonePage({ meetingId }: Props) {
         <PaymentHeaderWrapper />
         <TransferActionPanel
           item={myPayment}
+          hostNickname={data.host.nickname}
           onRefresh={invalidatePayments}
           onReportTransfer={async () => {}}
           onCancelTransfer={handleCancelTransfer}

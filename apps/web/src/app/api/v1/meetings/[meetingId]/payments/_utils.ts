@@ -89,12 +89,16 @@ export function buildPaymentListResponse(
     .filter((p): p is Payment => p !== null);
 
   const isHost = currentMember?.role === 'HOST';
+  const hostMember = settlement.settlementMembers.find(
+    (sm) => sm.member.role === 'HOST'
+  );
 
   return {
     meetingId,
     settlementId: settlement.id,
     settlementStatus: settlement.status,
     viewerRole: isHost ? 'HOST' : 'MEMBER',
+    host: { nickname: hostMember?.member.nickname ?? '모임장' },
     summary: buildSummary(payments),
     payments: items,
   };
