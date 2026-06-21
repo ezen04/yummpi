@@ -79,7 +79,9 @@ function SummaryCell({
     : '';
 
   return (
-    <div className={`${basis} ${dividerClass} flex flex-col ${alignClass} gap-1`}>
+    <div
+      className={`${basis} ${dividerClass} flex flex-col ${alignClass} gap-1`}
+    >
       <span className="text-xs text-[var(--label-alternative)]">{label}</span>
       <span
         className={`text-xl font-bold whitespace-nowrap [font-variant-numeric:tabular-nums] ${valueClass}`}

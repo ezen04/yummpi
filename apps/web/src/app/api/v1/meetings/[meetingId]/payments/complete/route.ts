@@ -56,9 +56,13 @@ export const POST = handleRoute(
       );
     }
 
-    const updatedMeeting = await transitionMeetingStatus(meetingId, 'COMPLETED', {
-      reason: 'PAYMENTS_COMPLETED',
-    });
+    const updatedMeeting = await transitionMeetingStatus(
+      meetingId,
+      'COMPLETED',
+      {
+        reason: 'PAYMENTS_COMPLETED',
+      }
+    );
 
     return apiSuccess(
       { meetingId, meetingStatus: updatedMeeting.status },

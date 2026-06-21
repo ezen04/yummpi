@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { PaymentMemberList } from './PaymentMemberList';
 import { PaymentHostBottomBar } from './PaymentHostBottomBar';
 import { MeetingCompleteModal } from './MeetingCompleteModal';
-import type { PaymentListItem, PaymentAction, PaymentSummary } from '@yummpi/schemas';
+import type {
+  PaymentListItem,
+  PaymentAction,
+  PaymentSummary,
+} from '@yummpi/schemas';
 
 type Props = {
   summary: PaymentSummary;

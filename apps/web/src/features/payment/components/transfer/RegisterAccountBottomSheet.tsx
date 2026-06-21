@@ -9,20 +9,43 @@ import { Input } from '@/components/common/Input';
 import '../payment-montage.css';
 
 const BANKS = [
-  'KB국민은행', '신한은행', '우리은행', '하나은행', 'IBK기업은행',
-  'NH농협은행', '카카오뱅크', '토스뱅크', 'SC제일은행', '씨티은행',
-  '케이뱅크', '새마을금고', '신협', '우체국', '수협은행',
-  'BNK부산은행', 'DGB대구은행', '광주은행', '전북은행', '제주은행',
+  'KB국민은행',
+  '신한은행',
+  '우리은행',
+  '하나은행',
+  'IBK기업은행',
+  'NH농협은행',
+  '카카오뱅크',
+  '토스뱅크',
+  'SC제일은행',
+  '씨티은행',
+  '케이뱅크',
+  '새마을금고',
+  '신협',
+  '우체국',
+  '수협은행',
+  'BNK부산은행',
+  'DGB대구은행',
+  '광주은행',
+  '전북은행',
+  '제주은행',
 ];
-
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { bank: string; accountNumber: string; accountHolder: string }) => void;
+  onSubmit: (data: {
+    bank: string;
+    accountNumber: string;
+    accountHolder: string;
+  }) => void;
 };
 
-export function RegisterAccountBottomSheet({ isOpen, onClose, onSubmit }: Props) {
+export function RegisterAccountBottomSheet({
+  isOpen,
+  onClose,
+  onSubmit,
+}: Props) {
   const [bank, setBank] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountHolder, setAccountHolder] = useState('');
@@ -71,13 +94,21 @@ export function RegisterAccountBottomSheet({ isOpen, onClose, onSubmit }: Props)
                 onChange={(e) => setBank(e.target.value)}
                 className="w-full h-full px-[14px] appearance-none border-none outline-none bg-transparent text-[16px] cursor-pointer text-[var(--label-strong)] [&:invalid]:text-[var(--label-assistive)]"
               >
-                <option value="" disabled>선택해주세요</option>
+                <option value="" disabled>
+                  선택해주세요
+                </option>
                 {BANKS.map((b) => (
-                  <option key={b} value={b}>{b}</option>
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
                 ))}
               </select>
               <div className="pointer-events-none absolute right-[14px]">
-                <Icon name="chevron-down" size={20} color="var(--label-assistive)" />
+                <Icon
+                  name="chevron-down"
+                  size={20}
+                  color="var(--label-assistive)"
+                />
               </div>
             </div>
           </div>

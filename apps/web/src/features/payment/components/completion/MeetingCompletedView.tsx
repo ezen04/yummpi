@@ -72,11 +72,21 @@ export function MeetingCompletedView({
           {/* 정산 rows */}
           <div className="flex flex-col gap-3">
             <Row label="참석자" value={`${summary.totalCount}명`} />
-            <Row label="총 결제 금액" value={formatAmount(summary.totalAmount)} />
+            <Row
+              label="총 결제 금액"
+              value={formatAmount(summary.totalAmount)}
+            />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--label-alternative)]">송금 완료</span>
+              <span className="text-sm text-[var(--label-alternative)]">
+                송금 완료
+              </span>
               <span className="text-sm font-semibold text-[var(--status-positive)] flex items-center gap-1">
-                <Icon name="check" size={14} color="var(--status-positive)" strokeWidth={2.5} />
+                <Icon
+                  name="check"
+                  size={14}
+                  color="var(--status-positive)"
+                  strokeWidth={2.5}
+                />
                 {summary.completedCount} / {summary.totalCount}명 완료
               </span>
             </div>
@@ -86,7 +96,9 @@ export function MeetingCompletedView({
 
       {/* 하단 버튼 */}
       <div className="px-5 pb-[max(32px,env(safe-area-inset-bottom))] flex flex-col gap-2">
-        <p className="text-center text-xs text-[var(--label-assistive)]">정산이 모두 완료됐어요!</p>
+        <p className="text-center text-xs text-[var(--label-assistive)]">
+          정산이 모두 완료됐어요!
+        </p>
         <button
           className="w-full h-14 rounded-[14px] bg-[var(--primary)] text-[var(--static-white)] text-base font-semibold flex items-center justify-center cursor-pointer"
           onClick={() => router.push('/')}
@@ -102,7 +114,9 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center">
       <span className="text-sm text-[var(--label-alternative)]">{label}</span>
-      <span className="text-sm font-semibold text-[var(--label-strong)]">{value}</span>
+      <span className="text-sm font-semibold text-[var(--label-strong)]">
+        {value}
+      </span>
     </div>
   );
 }

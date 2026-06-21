@@ -69,14 +69,18 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
             )}
           </div>
           <span className="text-xs text-[var(--label-alternative)]">
-            {isHostSelf ? `선결제 · ${formatAmount(item.amount)}` : formatAmount(item.amount)}
+            {isHostSelf
+              ? `선결제 · ${formatAmount(item.amount)}`
+              : formatAmount(item.amount)}
           </span>
         </div>
 
         {/* 오른쪽: 배지 또는 액션 버튼 — C-5: h-10 (40px) */}
         <div className="shrink-0 flex items-center gap-1.5">
           {badge && (
-            <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${badge.className}`}>
+            <span
+              className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${badge.className}`}
+            >
               {badge.label}
             </span>
           )}

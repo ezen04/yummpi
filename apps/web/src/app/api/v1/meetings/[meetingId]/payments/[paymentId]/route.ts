@@ -23,10 +23,7 @@ export const PATCH = handleRoute(
     const { action } = body;
 
     if (action === 'REMIND') {
-      throw new ApiError(
-        'VALIDATION_ERROR',
-        '독촉 알림 기능은 준비 중입니다.'
-      );
+      throw new ApiError('VALIDATION_ERROR', '독촉 알림 기능은 준비 중입니다.');
     }
 
     const currentMember = await requireMember(meetingId);

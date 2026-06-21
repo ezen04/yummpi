@@ -2,12 +2,12 @@
 // 이 파일의 더미값은 UI 표시 전용이며 결제 증빙과 무관하다.
 
 export type TransferMockDisplayData = {
-  recipientLabel: string;      // '모임장' 또는 '모임장 지훈'
-  bank: string;                // '윰피뱅크' (더미)
-  accountNumber: string;       // '***-**-1234' (더미)
-  amount: number;              // Payment.amount (원 단위 정수)
-  formattedAmount: string;     // '21,000원'
-  copyAccountLabel: string;    // 계좌 복사 버튼용 텍스트
+  recipientLabel: string; // '모임장' 또는 '모임장 지훈'
+  bank: string; // '윰피뱅크' (더미)
+  accountNumber: string; // '***-**-1234' (더미)
+  amount: number; // Payment.amount (원 단위 정수)
+  formattedAmount: string; // '21,000원'
+  copyAccountLabel: string; // 계좌 복사 버튼용 텍스트
   fallbackActionLabel: string; // '금액 복사'
 };
 

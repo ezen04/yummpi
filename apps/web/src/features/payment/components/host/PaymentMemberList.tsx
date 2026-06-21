@@ -3,7 +3,11 @@
 import { PaymentMemberItem } from './PaymentMemberItem';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
 import { MyExemptNotice } from '../summary/MyExemptNotice';
-import type { PaymentListItem, PaymentAction, PaymentSummary } from '@yummpi/schemas';
+import type {
+  PaymentListItem,
+  PaymentAction,
+  PaymentSummary,
+} from '@yummpi/schemas';
 
 type Props = {
   payments: PaymentListItem[];
@@ -66,7 +70,9 @@ export function PaymentMemberList({
           <div key={title}>
             {/* 섹션 헤더 */}
             <div className="px-5 h-[52px] flex items-center">
-              <span className={`text-xs font-semibold ${title === '미송금' ? 'text-[var(--primary)]' : 'text-[var(--label-alternative)]'}`}>
+              <span
+                className={`text-xs font-semibold ${title === '미송금' ? 'text-[var(--primary)]' : 'text-[var(--label-alternative)]'}`}
+              >
                 {title}
               </span>
               {items.length > 0 && (

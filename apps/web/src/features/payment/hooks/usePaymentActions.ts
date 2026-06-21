@@ -16,7 +16,9 @@ export function usePaymentActions(meetingId: string) {
   const queryClient = useQueryClient();
 
   const invalidatePayments = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: paymentKeys.list(meetingId) });
+    void queryClient.invalidateQueries({
+      queryKey: paymentKeys.list(meetingId),
+    });
   }, [meetingId, queryClient]);
 
   const updatePaymentMutation = useMutation({

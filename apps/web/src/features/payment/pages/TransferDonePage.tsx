@@ -37,7 +37,11 @@ export function TransferDonePage({ meetingId }: Props) {
       );
 
     async function handleCancelTransfer(paymentId: string) {
-      await updatePayment({ paymentId, action: 'MARK_PENDING', invalidate: false });
+      await updatePayment({
+        paymentId,
+        action: 'MARK_PENDING',
+        invalidate: false,
+      });
       invalidatePayments();
     }
 

@@ -204,9 +204,7 @@ function PaymentScreenShell({ children }: { children: ReactNode }) {
       <div className="shrink-0">
         <PaymentHeaderWrapper />
       </div>
-      <div className="flex-1 min-h-0 flex flex-col">
-        {children}
-      </div>
+      <div className="flex-1 min-h-0 flex flex-col">{children}</div>
     </div>
   );
 }
