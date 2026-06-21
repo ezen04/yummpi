@@ -13,10 +13,11 @@ export type TransferMockDisplayData = {
 
 export function buildTransferMockData(
   amount: number,
-  hostNickname?: string
+  hostNickname?: string,
+  account?: { bank: string; accountNumber: string } | null
 ): TransferMockDisplayData {
-  const bank = '윰피뱅크';
-  const accountNumber = '***-**-1234';
+  const bank = account?.bank ?? '윰피뱅크';
+  const accountNumber = account?.accountNumber ?? '***-**-1234';
   const recipientLabel = hostNickname ? `모임장 ${hostNickname}` : '모임장';
 
   return {

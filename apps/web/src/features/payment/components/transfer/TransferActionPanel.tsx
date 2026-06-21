@@ -7,6 +7,7 @@ import {
   TossPayButton,
 } from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
+import { useHostAccountStore } from '../../stores/useHostAccountStore';
 import { buildTransferMockData, copyToClipboard } from '../../utils/transferMock';
 import { TransferNoAccountState } from './TransferNoAccountState';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
@@ -20,7 +21,6 @@ type Props = {
   onReportTransfer: (paymentId: string) => Promise<void>;
   onCancelTransfer: (paymentId: string) => Promise<void>;
   onReportSuccess?: () => void;
-  hasHostAccount?: boolean;
   onRegisterAccount?: () => void;
   summary?: PaymentSummary;
   viewerRole?: 'HOST' | 'MEMBER';
@@ -33,12 +33,13 @@ export function TransferActionPanel({
   onReportTransfer,
   onCancelTransfer,
   onReportSuccess,
-  hasHostAccount = true,
   onRegisterAccount,
   summary,
   viewerRole = 'MEMBER',
 }: Props) {
-  const mock = buildTransferMockData(item.amount, hostNickname);
+  const hostAccount = useHostAccountStore((s) => s.account);
+  const mock = buildTransferMockData(item.amount, hostNickname, hostAccount);
+  const hasHostAccount = hostAccount !== null;
   const [isPending, setIsPending] = useState(false);
   const [copied, setCopied] = useState<'account' | 'amount' | null>(null);
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);

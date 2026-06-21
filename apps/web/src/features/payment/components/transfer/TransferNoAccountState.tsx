@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { Icon } from '@/components/common/Icon';
+import {
+  type HostAccountMock,
+  useHostAccountStore,
+} from '../../stores/useHostAccountStore';
 import { RegisterAccountBottomSheet } from './RegisterAccountBottomSheet';
 import '../payment-montage.css';
 
@@ -16,9 +20,11 @@ export function TransferNoAccountState({
   onRegisterAccount,
 }: Props) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const setAccount = useHostAccountStore((s) => s.setAccount);
   const isHost = viewerRole === 'HOST';
 
-  function handleSubmit() {
+  function handleSubmit(data: HostAccountMock) {
+    setAccount(data);
     setIsSheetOpen(false);
     onRegisterAccount?.();
   }
