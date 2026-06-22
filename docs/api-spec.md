@@ -557,6 +557,7 @@ io(SOCKET_URL, {
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
 | `INVALID_MEETING_STATUS_TRANSITION` | 409 | 잘못된 모임 상태 전이 |
+| `INSUFFICIENT_CANDIDATES` ★ | 409 | 후보 0개 상태에서 투표 시작 시도 (POST /votes/start, 2026-06-22 추가) |
 | `INVALID_SETTLEMENT_STATUS` ★ | 409 | 잘못된 정산 상태 (예: 미확정 정산에 송금 초기화 시도) |
 | `INVALID_PAYMENT_STATUS` ★ | 409 | 잘못된 송금 상태 전환 (예: PENDING 아닌 상태에서 송금 신고) |
 | `VOTING_CLOSED` | 409 | 투표 종료 |
