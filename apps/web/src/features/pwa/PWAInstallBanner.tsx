@@ -21,7 +21,7 @@ export function PWAInstallBanner() {
   if (!canInstall || dismissed) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-base)] border-t border-[var(--line-normal)] px-5 py-4 flex flex-col gap-3 safe-area-bottom">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-elevated)] border-t border-[var(--line-normal)] px-5 py-4 flex flex-col gap-3 safe-area-bottom">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-[15px] font-semibold text-[var(--label-strong)]">
