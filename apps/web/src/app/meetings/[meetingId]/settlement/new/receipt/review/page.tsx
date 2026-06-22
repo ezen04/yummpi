@@ -93,8 +93,8 @@ export default function ReceiptReviewPage({
     const newItem: OcrItem = {
       id: editingItem?.id || `${selectedReceiptId}-${Date.now()}`,
       name: formData.name,
-      quantity: parseInt(formData.quantity),
-      totalPrice: parseInt(formData.totalPrice),
+      quantity: parseInt(formData.quantity, 10),
+      totalPrice: parseInt(formData.totalPrice, 10),
     };
 
     if (editingItem?.id) {
@@ -345,7 +345,7 @@ export default function ReceiptReviewPage({
             onChange={(e) => {
               const val = e.target.value;
               // 빈 문자열은 허용(지우는 중), 0/음수는 거부
-              if (val !== '' && parseInt(val) < 1) return;
+              if (val !== '' && parseInt(val, 10) < 1) return;
               setSheet({
                 ...sheet,
                 formData: { ...sheet.formData, quantity: val },
@@ -359,12 +359,14 @@ export default function ReceiptReviewPage({
             type="number"
             inputMode="numeric"
             value={sheet.formData.totalPrice}
-            onChange={(e) =>
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val !== '' && parseInt(val, 10) < 1) return;
               setSheet({
                 ...sheet,
-                formData: { ...sheet.formData, totalPrice: e.target.value },
-              })
-            }
+                formData: { ...sheet.formData, totalPrice: val },
+              });
+            }}
             required
           />
           <div className="flex gap-2 pt-2">

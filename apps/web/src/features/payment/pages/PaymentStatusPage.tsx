@@ -12,6 +12,7 @@ import { useInitializePayments } from '../hooks/useInitializePayments';
 import { usePaymentActions } from '../hooks/usePaymentActions';
 import { usePaymentStatus } from '../hooks/usePaymentStatus';
 import { isPaymentApiError } from '../api/paymentApi';
+import { formatCooldownUntil } from '../utils/transferMock';
 import type { PaymentAction } from '@yummpi/schemas';
 
 type Props = {
@@ -55,10 +56,25 @@ export function PaymentStatusPage({ meetingId }: Props) {
     try {
       await updatePayment({ paymentId, action });
     } catch (error) {
-      const message = isPaymentApiError(error)
-        ? error.message
-        : '처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
-      setActionErrorMessage(message);
+      if (isPaymentApiError(error)) {
+        if (error.code === 'REMIND_COOLDOWN') {
+          const details = error.details as
+            | { remindCooldownUntil?: string }
+            | undefined;
+          const until = details?.remindCooldownUntil;
+          setActionErrorMessage(
+            until
+              ? `독촉 알림은 24시간에 한 번만 보낼 수 있어요. ${formatCooldownUntil(until)} 이후 다시 보낼 수 있습니다.`
+              : error.message
+          );
+        } else {
+          setActionErrorMessage(error.message);
+        }
+      } else {
+        setActionErrorMessage(
+          '처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.'
+        );
+      }
     }
   }
 
