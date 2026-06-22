@@ -1,5 +1,48 @@
 'use client';
 
+import Script from 'next/script';
+import { useEffect, useRef, useState } from 'react';
+
+// 카카오 Maps SDK 최소 타입 선언 (전역 window.kakao)
+declare global {
+  interface Window {
+    kakao: {
+      maps: {
+        load: (callback: () => void) => void;
+        Map: new (
+          container: HTMLElement,
+          options: { center: KakaoLatLng; level: number }
+        ) => KakaoMapInstance;
+        LatLng: new (lat: number, lng: number) => KakaoLatLng;
+        Marker: new (options: {
+          position: KakaoLatLng;
+          map?: KakaoMapInstance;
+        }) => KakaoMarker;
+        event: {
+          addListener: (
+            target: KakaoMarker,
+            type: string,
+            handler: () => void
+          ) => void;
+        };
+      };
+    };
+  }
+}
+
+interface KakaoLatLng {
+  getLat: () => number;
+  getLng: () => number;
+}
+
+interface KakaoMapInstance {
+  setCenter: (latlng: KakaoLatLng) => void;
+}
+
+interface KakaoMarker {
+  setMap: (map: KakaoMapInstance | null) => void;
+}
+
 export interface Marker {
   lat: number;
   lng: number;
@@ -20,19 +63,110 @@ export interface KakaoMapProps {
   onMarkerClick?: (markerId: string) => void;
 }
 
-/**
- * 카카오 지도 공통 컴포넌트.
- * 현재는 placeholder — 6/22에 Kakao Maps SDK로 교체 예정.
- */
-export function KakaoMap({ height = '40vh' }: KakaoMapProps) {
+export function KakaoMap({
+  center,
+  markers = [],
+  height = '40vh',
+  onMarkerClick,
+}: KakaoMapProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<KakaoMapInstance | null>(null);
+  const markerRefs = useRef<KakaoMarker[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
+    'loading'
+  );
+
+  const initMap = () => {
+    if (!containerRef.current) return;
+    window.kakao.maps.load(() => {
+      if (!containerRef.current) return;
+      const map = new window.kakao.maps.Map(containerRef.current, {
+        center: new window.kakao.maps.LatLng(center.lat, center.lng),
+        level: 3,
+      });
+      mapRef.current = map;
+      setStatus('ready');
+    });
+  };
+
+  // SDK가 이미 로드된 경우 (HMR, 두 번째 마운트 등) 바로 초기화
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.kakao?.maps) {
+      initMap();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // center가 바뀌면 지도 중심 이동
+  useEffect(() => {
+    if (status !== 'ready' || !mapRef.current) return;
+    const latlng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    mapRef.current.setCenter(latlng);
+  }, [center.lat, center.lng, status]);
+
+  // markers가 바뀌면 기존 핀 제거 후 새로 꽂기
+  useEffect(() => {
+    if (status !== 'ready' || !mapRef.current) return;
+
+    // 기존 마커 전부 지우기
+    markerRefs.current.forEach((m) => m.setMap(null));
+    markerRefs.current = [];
+
+    markers.forEach((marker) => {
+      const position = new window.kakao.maps.LatLng(marker.lat, marker.lng);
+      const kakaoMarker = new window.kakao.maps.Marker({
+        position,
+        map: mapRef.current ?? undefined,
+      });
+
+      if (onMarkerClick && marker.id) {
+        const id = marker.id;
+        window.kakao.maps.event.addListener(kakaoMarker, 'click', () => {
+          onMarkerClick(id);
+        });
+      }
+
+      markerRefs.current.push(kakaoMarker);
+    });
+  }, [markers, status, onMarkerClick]);
+
   return (
-    <div
-      style={{ height }}
-      className="w-full rounded-xl bg-[var(--bg-alternative)] flex items-center justify-center"
-    >
-      <span className="text-[var(--label-alternative)] text-sm">
-        지도 로딩 중...
-      </span>
-    </div>
+    <>
+      {/* SDK가 아직 로드 안 됐을 때만 Script 렌더 */}
+      {typeof window === 'undefined' || !window.kakao?.maps ? (
+        <Script
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false`}
+          strategy="afterInteractive"
+          onLoad={initMap}
+          onError={() => setStatus('error')}
+        />
+      ) : null}
+
+      <div
+        style={{ height }}
+        className="w-full rounded-xl overflow-hidden relative"
+      >
+        {/* 로딩 중 */}
+        {status === 'loading' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-alternative)]">
+            <span className="text-[var(--label-alternative)] text-sm">
+              지도 로딩 중...
+            </span>
+          </div>
+        )}
+
+        {/* 에러 fallback */}
+        {status === 'error' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-alternative)]">
+            <span className="text-[var(--label-alternative)] text-sm">
+              지도를 불러올 수 없어요
+            </span>
+          </div>
+        )}
+
+        {/* 실제 지도가 그려질 div — 항상 DOM에 있어야 SDK가 그릴 수 있음 */}
+        <div ref={containerRef} style={{ height }} className="w-full" />
+      </div>
+    </>
   );
 }
