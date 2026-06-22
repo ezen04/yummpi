@@ -48,7 +48,9 @@ export function GuestJoinForm({
               if (suggestion) {
                 setNickname(suggestion);
                 setTouched(true);
-                setError(`이미 쓰는 닉네임이에요. '${suggestion}'(으)로 바꿔봤어요.`);
+                setError(
+                  `이미 쓰는 닉네임이에요. '${suggestion}'(으)로 바꿔봤어요.`
+                );
               } else {
                 setError('이미 사용 중인 닉네임이에요.');
               }
@@ -71,7 +73,10 @@ export function GuestJoinForm({
         style={{ background: 'var(--bg-alternative)' }}
       >
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
+          <h1
+            className="text-2xl font-bold"
+            style={{ color: 'var(--primary)' }}
+          >
             입장 완료!
           </h1>
           <p style={{ color: 'var(--label-alternative)' }}>

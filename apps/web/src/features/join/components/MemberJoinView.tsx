@@ -78,7 +78,10 @@ export function MemberJoinView({
         style={{ background: 'var(--bg-alternative)' }}
       >
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
+          <h1
+            className="text-2xl font-bold"
+            style={{ color: 'var(--primary)' }}
+          >
             입장 완료!
           </h1>
           <p style={{ color: 'var(--label-alternative)' }}>
@@ -116,7 +119,10 @@ export function MemberJoinView({
             {info.title}
           </h1>
           {info.hostNickname && (
-            <p className="text-sm" style={{ color: 'var(--label-alternative)' }}>
+            <p
+              className="text-sm"
+              style={{ color: 'var(--label-alternative)' }}
+            >
               {info.hostNickname} 님의 모임
             </p>
           )}
