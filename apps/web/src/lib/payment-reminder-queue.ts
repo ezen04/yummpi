@@ -34,5 +34,7 @@ export async function enqueuePaymentReminder(
     jobId: `remind:${data.paymentId}`,
     removeOnComplete: true,
     removeOnFail: { count: 5 },
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 5000 },
   });
 }

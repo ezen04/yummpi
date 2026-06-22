@@ -569,6 +569,7 @@ io(SOCKET_URL, {
 | `RECEIPT_LOCKED` ★ | 409 | 소비 선택 시작 후 영수증 추가/삭제 시도 |
 | `SETTLEMENT_CALCULATION_PENDING` ★ | 409 | 계산 미완료 상태에서 확정 시도 |
 | `RECEIPT_ALREADY_OCR_SUCCEEDED` ★ | 409 | OCR 성공한 영수증에 수동 입력 시도 |
+| `REMIND_COOLDOWN` ★ | 409 | 독촉 알림 쿨다운 중 (24h, details: { remindCooldownUntil: ISO8601 }) |
 | `RECEIPT_REQUIRED` ★ | 422 | ITEM_BASED 정산인데 영수증 없음 |
 | `RECEIPT_LIMIT_EXCEEDED` ★ | 422 | 영수증 장수 제한 초과 |
 | `SETTLEMENT_AMOUNT_MISMATCH` | 422 | 배분/총액 불일치 |

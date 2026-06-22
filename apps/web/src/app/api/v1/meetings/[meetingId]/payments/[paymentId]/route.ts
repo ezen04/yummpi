@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { UpdatePaymentRequestSchema } from '@yummpi/schemas';
+import { UpdatePaymentRequestSchema, type PaymentAction } from '@yummpi/schemas';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
@@ -79,7 +79,15 @@ export const PATCH = handleRoute(
         paymentId,
         targetUserId: targetMember.userId,
       });
-      const cooldownUntil = await setRemindCooldown(paymentId);
+      // enqueue 성공 후 쿨다운 설정 실패 시에도 클라이언트에 성공을 반환한다.
+      // Job ID 중복(remind:paymentId)으로 BullMQ가 재enqueue를 차단함.
+      let cooldownUntil: string;
+      try {
+        cooldownUntil = await setRemindCooldown(paymentId);
+      } catch (err) {
+        console.error('[remind] cooldown 설정 실패 (enqueue는 성공)', err);
+        cooldownUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      }
       const cooldownMap = new Map([[paymentId, cooldownUntil]]);
       const item = buildPaymentListItem(
         { ...payment.settlementMember, payment },
@@ -135,14 +143,15 @@ export const PATCH = handleRoute(
       }
     }
 
-    // 상태 전이 결정
-    const statusMap: Record<typeof action, PaymentStatus> = {
+    // 상태 전이 결정 (REMIND는 위에서 early return → 여기 도달 불가)
+    type StatusAction = Exclude<PaymentAction, 'REMIND'>;
+    const statusMap: Record<StatusAction, PaymentStatus> = {
       REPORT_TRANSFER: 'TRANSFER_REPORTED',
       MARK_PAID: 'PAID',
       MARK_PENDING: 'PENDING',
       MARK_EXEMPT: 'EXEMPT',
     };
-    const nextStatus: PaymentStatus = statusMap[action];
+    const nextStatus: PaymentStatus = statusMap[action as StatusAction];
 
     // 이미 같은 상태이면 DB 업데이트 없이 현재 값을 그대로 반환
     if (payment.status === nextStatus) {
