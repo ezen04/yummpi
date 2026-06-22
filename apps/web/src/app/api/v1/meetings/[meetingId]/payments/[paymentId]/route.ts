@@ -65,9 +65,28 @@ export const PATCH = handleRoute(
         );
       }
     } else if (action === 'MARK_PENDING') {
-      const canOwnerCancelTransfer =
-        isOwner && payment.status === 'TRANSFER_REPORTED';
-      if (!isHost && !canOwnerCancelTransfer) {
+      const isHostSelf = isHost && isOwner;
+      if (isHostSelf) {
+        throw new ApiError(
+          'FORBIDDEN',
+          '주최자 본인 결제는 되돌릴 수 없습니다.'
+        );
+      }
+      if (isHost) {
+        if (
+          payment.status !== 'PAID' &&
+          payment.status !== 'TRANSFER_REPORTED'
+        ) {
+          throw new ApiError(
+            'INVALID_PAYMENT_STATUS',
+            'PAID 또는 송금 신고 상태에서만 되돌릴 수 있습니다.'
+          );
+        }
+      } else if (isOwner) {
+        if (payment.status !== 'TRANSFER_REPORTED') {
+          throw new ApiError('FORBIDDEN', '송금 취소 권한이 없습니다.');
+        }
+      } else {
         throw new ApiError('FORBIDDEN', '송금 취소 권한이 없습니다.');
       }
     } else {

@@ -81,6 +81,7 @@ export const CompleteMeetingResponseSchema = z.object({
 export const PaymentsNotCompletedDetailsSchema = z.object({
   pendingCount: z.number().int().nonnegative(),
   reportedCount: z.number().int().nonnegative(),
+  missingPaymentCount: z.number().int().nonnegative(),
 });
 
 export type PaymentAction = z.infer<typeof PaymentActionSchema>;

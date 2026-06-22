@@ -74,7 +74,7 @@
   --radius-full: 999px;
 
   /* ---- Shadcn compatibility ---- */
-  --muted: var(--bg-alternative);
+  --muted: var(--fill-strong);
   --muted-foreground: var(--label-alternative);
 
   /* ---- Shadow ---- */
