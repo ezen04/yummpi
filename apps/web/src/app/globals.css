@@ -104,3 +104,7 @@ body {
   background: var(--bg-normal);
   color: var(--label-normal);
 }
+
+@utility safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
