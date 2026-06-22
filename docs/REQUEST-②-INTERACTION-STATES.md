@@ -6,7 +6,8 @@
 > **포함 범위**:
 > - §1–§4: hover/active 인터랙션 상태 (패턴·컴포넌트별 변경)
 > - §5: Header 좌측 chevron placeholder (타이틀 위치 일관성)
-> - §6–§10: 우선순위·검증·운영
+> - §6: Header safe-area top padding (PWA standalone 노치·Dynamic Island 대응)
+> - §7–§11: 우선순위·검증·운영
 
 ---
 
@@ -351,7 +352,75 @@ DOM 노드 단일을 선호하는 경우:
 
 ---
 
-## 6. 적용 우선순위
+## 6. 레이아웃 일관성 — Header safe-area top padding
+
+### 6-1. 문제
+
+`Header.tsx`의 root는 고정 높이(`h-14` = 56px)만 잡는다. PWA standalone 모드에서 iOS 노치/Dynamic Island, Android status bar가 Header 영역과 겹쳐 타이틀·좌측 chevron·우측 아이콘이 가려진다.
+
+**증상**:
+- iOS standalone(홈 화면 추가 후 실행)에서 Dynamic Island가 Header 타이틀과 겹침
+- 노치 단말기에서 좌측 chevron이 OS 시계/시그널과 겹침
+- Android edge-to-edge 모드에서 status bar가 Header 위로 침범
+
+### 6-2. 원칙
+
+OS가 제공하는 `env(safe-area-inset-top)`을 Header root의 top padding으로 적용. 이미 `Menubar.tsx:97`이 하단에 `env(safe-area-inset-bottom)`를 쓰고 있어 상단도 같은 패턴으로 일관성을 유지한다.
+
+### 6-3. 변경 (권장)
+
+**현재** (`Header.tsx:51`):
+```tsx
+'h-14 bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0'
+```
+
+**옵션 A — `box-content`로 고정 높이 보장 (단일 레이어 유지)**:
+```tsx
+'h-14 box-content pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0'
+```
+
+`box-content` + `h-14`로 내용 영역 높이 56px는 그대로 유지되고, safe-area padding은 외곽으로 추가된다.
+
+**옵션 B — 2-layer 구조 (스타일 격리)**:
+```tsx
+<header className="pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] shrink-0">
+  <div className="h-14 flex items-center justify-center px-3 relative">
+    {/* 기존 내용 */}
+  </div>
+</header>
+```
+
+DOM 구조 변경이지만 layout/스타일 격리가 명확. ②가 두 옵션 중 코드 영향 적은 쪽 선택.
+
+### 6-4. Menubar 인라인 style 정리 (같은 PR 권장)
+
+`Menubar.tsx:97`이 현재 인라인 `style`로 처리:
+```tsx
+style={{ paddingBottom: 'max(30px, env(safe-area-inset-bottom))' }}
+```
+
+프로젝트 컨벤션(Tailwind 인라인 style 금지)에 맞춰 Tailwind 클래스로 마이그레이션 권장:
+```tsx
+className="pb-[max(30px,env(safe-area-inset-bottom))]"
+```
+
+Header safe-area 작업과 같은 PR에서 함께 처리하면 상·하 safe-area 처리 방식이 통일된다.
+
+### 6-5. 검증
+
+- [ ] iOS PWA standalone (Safari → "홈 화면에 추가" 후 실행)에서 Dynamic Island/노치가 Header 타이틀과 겹치지 않음
+- [ ] iPhone SE(노치 없음), iPhone 15 Pro(Dynamic Island), iPhone XR(노치)에서 모두 정상
+- [ ] Android Chrome PWA에서 status bar 영역 침범 없음
+- [ ] 데스크탑 브라우저(미리보기 모바일 프레임)에서는 `env()`가 0 반환 → 기존 모습 그대로
+
+### 6-6. 적용 범위
+
+- **대상**: `Header` 컴포넌트 전 variant (기본·mypage 등) 일괄 적용
+- **함께 처리**: `Menubar` 인라인 style → Tailwind 클래스 마이그레이션
+
+---
+
+## 7. 적용 우선순위
 
 | 우선 | 컴포넌트 | 근거 |
 |:---:|:---|:---|
@@ -363,7 +432,7 @@ DOM 노드 단일을 선호하는 경우:
 
 ---
 
-## 7. 검증
+## 8. 검증
 
 적용 후 다음 페이지를 수동 검증:
 
@@ -380,13 +449,13 @@ DOM 노드 단일을 선호하는 경우:
 
 ---
 
-## 8. 다크 모드 노트
+## 9. 다크 모드 노트
 
 토큰 기반 적용이므로 `--fill-normal`, `--fill-strong`, `--primary-strong` 등이 다크 모드용으로 정의되면 자동 적용된다. 현재 다크 모드 토큰은 `DESIGN.md`에 부분 정의되어 있고, 인터랙션 상태 토큰의 다크값은 ②가 별도 조율 필요.
 
 ---
 
-## 9. FAQ
+## 10. FAQ
 
 **Q. `hover:` 가 모바일에서 동작하면 sticky hover 문제 없나?**
 A. iOS/Android는 터치 후 tap-away까지 `:hover`가 유지됨. 짧은 `transition-colors`(~150ms)면 사용자가 인지하기 전에 사라져 문제 안 됨. 강한 시각 변화는 `active:` 쪽으로 몰고 hover는 옅게 설정한 이유.
@@ -399,9 +468,10 @@ A. 본 문서 범위 밖. 접근성 audit 별도 진행 시 `:focus-visible` 패
 
 ---
 
-## 10. 변경 이력
+## 11. 변경 이력
 
 | 일자 | 내용 |
 |:---|:---|
-| 2026-06-22 | 초안 작성 — 인터랙션 상태(§1-§4, §6-§9) (⑤ 작업 중 발견) |
+| 2026-06-22 | 초안 작성 — 인터랙션 상태(§1-§4, §7-§10) (⑤ 작업 중 발견) |
 | 2026-06-22 | §5 Header 좌측 chevron placeholder 이슈 추가 (⑤ 추가 요청) |
+| 2026-06-22 | §6 Header safe-area top padding(노치/Dynamic Island 대응) 추가. 기존 §6–§10 → §7–§11 번호 이동. Menubar 인라인 style 정리 함께 권장 (⑤ 추가 요청) |
