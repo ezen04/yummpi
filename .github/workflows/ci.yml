@@ -73,4 +73,4 @@ jobs:
       - name: Run E2E tests
         run: pnpm --filter @yummpi/web test:e2e
         env:
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.AUTH_SECRET }}
