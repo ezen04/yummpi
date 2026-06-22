@@ -21,7 +21,12 @@ describe('runSettlementEngine — EQUAL', () => {
 
     expect(output.totalAmount).toBe(10000);
     expect(output.members).toEqual([
-      { memberId: 'A', itemAmount: 0, adjustmentAmount: 10000, finalAmount: 10000 },
+      {
+        memberId: 'A',
+        itemAmount: 0,
+        adjustmentAmount: 10000,
+        finalAmount: 10000,
+      },
     ]);
     expect(output.itemAssignments).toBeUndefined();
   });

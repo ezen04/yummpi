@@ -29,7 +29,10 @@ function assertCommonGuards(input: SettlementEngineInput): void {
   if (!input.participantMemberIds.includes(input.hostMemberId)) {
     throw new Error('hostMemberId must be included in participantMemberIds');
   }
-  if (input.splitMethod === 'ITEM_BASED' && input.itemAssignments.length === 0) {
+  if (
+    input.splitMethod === 'ITEM_BASED' &&
+    input.itemAssignments.length === 0
+  ) {
     throw new Error('itemAssignments must not be empty');
   }
 }
@@ -42,15 +45,17 @@ function runEqual(
   const base = Math.floor(totalAmount / n);
   const remainder = totalAmount - base * n;
 
-  const members: SettlementMemberOutput[] = participantMemberIds.map((memberId) => {
-    const finalAmount = base + (memberId === hostMemberId ? remainder : 0);
-    return {
-      memberId,
-      itemAmount: 0,
-      adjustmentAmount: finalAmount,
-      finalAmount,
-    };
-  });
+  const members: SettlementMemberOutput[] = participantMemberIds.map(
+    (memberId) => {
+      const finalAmount = base + (memberId === hostMemberId ? remainder : 0);
+      return {
+        memberId,
+        itemAmount: 0,
+        adjustmentAmount: finalAmount,
+        finalAmount,
+      };
+    }
+  );
 
   return { totalAmount, members };
 }
@@ -93,16 +98,18 @@ function runItemBased(
   );
   const diff = totalAmount - assignedSum;
 
-  const members: SettlementMemberOutput[] = participantMemberIds.map((memberId) => {
-    const itemAmount = itemAmountByMember.get(memberId) ?? 0;
-    const finalAmount = itemAmount + (memberId === hostMemberId ? diff : 0);
-    return {
-      memberId,
-      itemAmount,
-      adjustmentAmount: finalAmount - itemAmount,
-      finalAmount,
-    };
-  });
+  const members: SettlementMemberOutput[] = participantMemberIds.map(
+    (memberId) => {
+      const itemAmount = itemAmountByMember.get(memberId) ?? 0;
+      const finalAmount = itemAmount + (memberId === hostMemberId ? diff : 0);
+      return {
+        memberId,
+        itemAmount,
+        adjustmentAmount: finalAmount - itemAmount,
+        finalAmount,
+      };
+    }
+  );
 
   return { totalAmount, members, itemAssignments: outputAssignments };
 }
