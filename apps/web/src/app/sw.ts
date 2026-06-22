@@ -18,7 +18,7 @@ const serwist = new Serwist({
       matcher: ({ url }) => url.hostname === 'cdn.jsdelivr.net',
       handler: new CacheFirst({
         cacheName: 'cdn-fonts',
-        plugins: [new ExpirationPlugin({ maxAgeSeconds: 60 * 60 * 24 * 365 })],
+        plugins: [new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 })],
       }),
     },
     ...defaultCache,
