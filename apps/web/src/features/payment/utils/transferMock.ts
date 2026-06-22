@@ -35,6 +35,31 @@ export function formatAmount(amount: number): string {
   return `${amount.toLocaleString('ko-KR')}원`;
 }
 
+export function formatCooldownUntil(isoString: string): string {
+  const until = new Date(isoString);
+  const now = new Date();
+  const todayStr = now.toDateString();
+  const tomorrowStr = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1
+  ).toDateString();
+
+  const timeStr = until.toLocaleTimeString('ko-KR', {
+    hour: 'numeric',
+    hour12: true,
+    ...(until.getMinutes() > 0 ? { minute: '2-digit' } : {}),
+  });
+
+  if (until.toDateString() === todayStr) return `오늘 ${timeStr}`;
+  if (until.toDateString() === tomorrowStr) return `내일 ${timeStr}`;
+  return (
+    until.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }) +
+    ' ' +
+    timeStr
+  );
+}
+
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
