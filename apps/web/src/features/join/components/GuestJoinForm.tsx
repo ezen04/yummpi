@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@yummpi/ui';
 import { Input } from '@/components/common/Input';
@@ -22,19 +22,15 @@ export function GuestJoinForm({
   const random = useRandomNickname(true);
   const join = useGuestJoin();
 
-  // 사용자가 아직 손대지 않았을 때만 랜덤 닉네임으로 prefill
-  useEffect(() => {
-    if (!touched && random.data?.nickname) {
-      setNickname(random.data.nickname);
-    }
-  }, [random.data, touched]);
+  // 사용자가 입력하기 전에는 랜덤 닉네임을 그대로 노출(effect 동기화 대신 파생값).
+  const effectiveNickname = touched ? nickname : (random.data?.nickname ?? '');
 
   const isFull =
     info.maxMembers !== null && info.memberCount >= info.maxMembers;
 
   const submit = () => {
     setError(null);
-    const trimmed = nickname.trim();
+    const trimmed = effectiveNickname.trim();
     if (trimmed.length < 1 || trimmed.length > 20) {
       setError('닉네임은 1~20자로 입력해 주세요.');
       return;
@@ -133,7 +129,7 @@ export function GuestJoinForm({
         ) : (
           <Input
             label="닉네임"
-            value={nickname}
+            value={effectiveNickname}
             onChange={(e) => {
               setTouched(true);
               setNickname(e.target.value);
