@@ -1,0 +1,101 @@
+import type { MeetingDetail } from '@/features/vote/hooks/useMeetingDetail';
+import type { VotesData } from '@/hooks/useVote';
+
+export const MOCK_MEETING_ID = 'preview-meeting-id';
+export const MOCK_VIEWER_MEMBER_ID = 'preview-member-id';
+
+const oneHourLater = new Date(Date.now() + 3600_000).toISOString();
+const oneDayLater = new Date(Date.now() + 86400_000).toISOString();
+
+export const MOCK_MEETING: MeetingDetail = {
+  id: MOCK_MEETING_ID,
+  title: '강남역 모임 (DEV PREVIEW)',
+  status: 'RECRUITING',
+  scheduledAt: oneDayLater,
+  votingClosesAt: oneHourLater,
+  anonymousVoting: true,
+  confirmedCandidateId: null,
+};
+
+export const MOCK_VOTES: VotesData = {
+  isAnonymous: true,
+  votingClosesAt: oneHourLater,
+  confirmedCandidateId: null,
+  myCandidateId: null,
+  totalVoters: 8,
+  votedMemberCount: 5,
+  candidates: [
+    {
+      id: 'cand-1',
+      externalPlaceId: 'kakao-1',
+      name: '강남 화로상회',
+      categoryName: '음식점 > 한식 > 고기 > 삼겹살',
+      address: '서울 강남구 강남대로 102길 8',
+      roadAddress: null,
+      phone: null,
+      lat: '37.498',
+      lng: '127.028',
+      distanceM: 320,
+      placeUrl: null,
+      status: 'ACTIVE',
+      createdBy: { memberId: 'm-1', nickname: '지훈', isHost: true },
+      voteCount: 4,
+      voteRate: 50,
+      voterMemberIds: [],
+    },
+    {
+      id: 'cand-2',
+      externalPlaceId: 'kakao-2',
+      name: '미도인 강남점',
+      categoryName: '음식점 > 한식 > 덮밥',
+      address: '서울 강남구 봉은사로 6길 21',
+      roadAddress: null,
+      phone: null,
+      lat: '37.500',
+      lng: '127.030',
+      distanceM: 450,
+      placeUrl: null,
+      status: 'ACTIVE',
+      createdBy: { memberId: 'm-2', nickname: '수민', isHost: false },
+      voteCount: 3,
+      voteRate: 38,
+      voterMemberIds: [],
+    },
+    {
+      id: 'cand-3',
+      externalPlaceId: 'kakao-3',
+      name: '쿠우쿠우 강남',
+      categoryName: '음식점 > 뷔페 > 초밥뷔페',
+      address: '서울 강남구 강남대로 396',
+      roadAddress: null,
+      phone: null,
+      lat: '37.497',
+      lng: '127.027',
+      distanceM: 280,
+      placeUrl: null,
+      status: 'ACTIVE',
+      createdBy: { memberId: 'm-3', nickname: '재현', isHost: false },
+      voteCount: 1,
+      voteRate: 13,
+      voterMemberIds: [],
+    },
+    {
+      id: 'cand-4',
+      externalPlaceId: 'kakao-4',
+      name: '하카타 분코',
+      categoryName: '음식점 > 일식 > 라멘',
+      address: '서울 강남구 테헤란로 4길 12',
+      roadAddress: null,
+      phone: null,
+      lat: '37.499',
+      lng: '127.029',
+      distanceM: 610,
+      placeUrl: null,
+      status: 'ACTIVE',
+      createdBy: { memberId: 'm-4', nickname: '도윤', isHost: false },
+      voteCount: 0,
+      voteRate: 0,
+      voterMemberIds: [],
+    },
+  ],
+};
