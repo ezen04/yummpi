@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { formatAmount } from '../../utils/transferMock';
 import type { PaymentSummary } from '@yummpi/schemas';
 
@@ -42,8 +43,8 @@ export function PaymentSummaryPanel({ summary }: Props) {
       </div>
       <div className="mt-4 h-2 rounded-full bg-[var(--fill-normal)] overflow-hidden">
         <div
-          className="h-full rounded-full bg-[var(--status-positive)] transition-[width]"
-          style={{ width: `${progress}%` }}
+          className="h-full w-[var(--progress)] rounded-full bg-[var(--status-positive)] transition-[width]"
+          style={{ '--progress': `${progress}%` } as CSSProperties}
         />
       </div>
     </div>

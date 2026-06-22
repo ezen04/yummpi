@@ -15,6 +15,7 @@ type Props = {
   payments: PaymentListItem[];
   viewerRole: 'HOST' | 'MEMBER';
   onAction: (paymentId: string, action: PaymentAction) => void;
+  actionErrorMessage?: string;
   onCompleteMeeting: () => Promise<void>;
   onCompleted: () => void;
   isCompleting?: boolean;
@@ -26,6 +27,7 @@ export function PaymentHostView({
   payments,
   viewerRole,
   onAction,
+  actionErrorMessage,
   onCompleteMeeting,
   onCompleted,
   isCompleting,
@@ -46,6 +48,14 @@ export function PaymentHostView({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 min-h-0 overflow-y-auto">
+        {actionErrorMessage && (
+          <div
+            role="alert"
+            className="mx-5 mt-3 rounded-md border border-[var(--status-negative)] bg-[var(--status-negative-tint)] px-3 py-2 text-sm text-[var(--status-negative)]"
+          >
+            {actionErrorMessage}
+          </div>
+        )}
         <PaymentMemberList
           payments={payments}
           viewerRole={viewerRole}

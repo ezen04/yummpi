@@ -29,6 +29,9 @@ export function usePaymentActions(meetingId: string) {
         invalidatePayments();
       }
     },
+    onError: () => {
+      invalidatePayments();
+    },
   });
 
   return {
