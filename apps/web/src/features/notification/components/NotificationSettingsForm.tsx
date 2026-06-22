@@ -1,70 +1,108 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check } from '@yummpi/ui';
 import { Toggle } from '@/components/common/Toggle';
 import { usePushSubscription } from '../hooks/usePushSubscription';
+import { useAppInstalled } from '../hooks/useAppInstalled';
+import { usePushPermission } from '../hooks/usePushPermission';
 
-interface Props {
-  initialPushEnabled: boolean;
-  initialPaymentReminderEnabled: boolean;
-  appInstalled?: boolean;
-  pushPermissionGranted?: boolean;
+interface UserSettings {
+  pushEnabled: boolean;
+  paymentReminderEnabled: boolean;
 }
 
-export function NotificationSettingsForm({
-  initialPushEnabled,
-  initialPaymentReminderEnabled,
-  appInstalled = true,
-  pushPermissionGranted = true,
-}: Props) {
-  const [pushEnabled, setPushEnabled] = useState(initialPushEnabled);
-  const [paymentReminderEnabled, setPaymentReminderEnabled] = useState(
-    initialPaymentReminderEnabled
-  );
-  const [error, setError] = useState<string | null>(null);
+const USER_SETTINGS_KEY = ['user', 'me'] as const;
+
+async function getUserSettings(): Promise<UserSettings> {
+  const res = await fetch('/api/v1/users/me');
+  if (!res.ok) throw new Error('Failed to fetch user settings');
+  const envelope = (await res.json()) as { data: UserSettings };
+  return {
+    pushEnabled: envelope.data.pushEnabled,
+    paymentReminderEnabled: envelope.data.paymentReminderEnabled,
+  };
+}
+
+async function patchUserSettings(
+  patch: Partial<UserSettings>
+): Promise<UserSettings> {
+  const res = await fetch('/api/v1/users/me', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error('Failed to patch user settings');
+  const envelope = (await res.json()) as { data: UserSettings };
+  return {
+    pushEnabled: envelope.data.pushEnabled,
+    paymentReminderEnabled: envelope.data.paymentReminderEnabled,
+  };
+}
+
+export function NotificationSettingsForm() {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: USER_SETTINGS_KEY,
+    queryFn: getUserSettings,
+    staleTime: 60_000,
+  });
+
+  const appInstalled = useAppInstalled();
+  const pushPermissionGranted = usePushPermission();
   const { subscribe, unsubscribe } = usePushSubscription();
+  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: patchUserSettings,
+    onMutate: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: USER_SETTINGS_KEY });
+      const previous =
+        queryClient.getQueryData<UserSettings>(USER_SETTINGS_KEY);
+      queryClient.setQueryData<UserSettings>(USER_SETTINGS_KEY, (old) =>
+        old ? { ...old, ...patch } : old
+      );
+      return { previous };
+    },
+    onError: (_err, _patch, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(USER_SETTINGS_KEY, ctx.previous);
+      }
+      setError('설정 변경에 실패했습니다. 다시 시도해주세요.');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: USER_SETTINGS_KEY });
+    },
+  });
 
   async function handleToggle(
     field: 'pushEnabled' | 'paymentReminderEnabled',
     value: boolean
   ) {
-    const prev = field === 'pushEnabled' ? pushEnabled : paymentReminderEnabled;
-
-    if (field === 'pushEnabled') setPushEnabled(value);
-    else setPaymentReminderEnabled(value);
     setError(null);
 
-    try {
-      if (field === 'pushEnabled' && value) {
-        const result = await subscribe();
-        if (!result.ok) {
-          setPushEnabled(false);
-          setError(result.error ?? '알림 설정에 실패했어요.');
-          return;
-        }
+    if (field === 'pushEnabled' && value) {
+      const result = await subscribe();
+      if (!result.ok) {
+        setError(result.error ?? '알림 설정에 실패했어요.');
+        return;
       }
-
-      if (field === 'pushEnabled' && !value) {
-        const result = await unsubscribe();
-        if (!result.ok) {
-          setPushEnabled(true);
-          setError(result.error ?? '알림 해제에 실패했어요.');
-          return;
-        }
-      }
-
-      const res = await fetch('/api/v1/users/me', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value }),
-      });
-      if (!res.ok) throw new Error();
-    } catch {
-      if (field === 'pushEnabled') setPushEnabled(prev);
-      else setPaymentReminderEnabled(prev);
-      setError('설정 변경에 실패했습니다. 다시 시도해주세요.');
     }
+
+    if (field === 'pushEnabled' && !value) {
+      const result = await unsubscribe();
+      if (!result.ok) {
+        setError(result.error ?? '알림 해제에 실패했어요.');
+        return;
+      }
+    }
+
+    mutation.mutate({ [field]: value });
+  }
+
+  if (isLoading || !data) {
+    return <SkeletonCard />;
   }
 
   return (
@@ -73,13 +111,13 @@ export function NotificationSettingsForm({
         <ToggleRow
           label="송금 독촉 알림"
           description="미송금 알림 받기"
-          checked={paymentReminderEnabled}
+          checked={data.paymentReminderEnabled}
           onChange={(v) => handleToggle('paymentReminderEnabled', v)}
         />
         <ToggleRow
           label="모임 활동 알림"
           description="투표·예약·정산 알림"
-          checked={pushEnabled}
+          checked={data.pushEnabled}
           onChange={(v) => handleToggle('pushEnabled', v)}
         />
         <StatusRow
@@ -100,6 +138,16 @@ export function NotificationSettingsForm({
           {error}
         </p>
       )}
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-[var(--bg-normal)] rounded-2xl overflow-hidden divide-y divide-[var(--line-alternative)]">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="px-4 py-3.5 h-[60px] animate-pulse" />
+      ))}
     </div>
   );
 }
