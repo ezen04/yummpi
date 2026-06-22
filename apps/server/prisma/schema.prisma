@@ -326,10 +326,6 @@ model Receipt {
   rawOcrJson          Json?     @map("raw_ocr_json") // OCR 원본·미분류 라인
   merchantName        String?   @map("merchant_name")
   purchasedAt         DateTime? @map("purchased_at")
-  subtotalAmount      Int?      @map("subtotal_amount")
-  taxAmount           Int?      @map("tax_amount")
-  serviceChargeAmount Int?      @map("service_charge_amount")
-  discountAmount      Int?      @map("discount_amount")
   totalAmount         Int?      @map("total_amount")
   currency            String    @default("KRW")
   createdAt           DateTime  @default(now()) @map("created_at")
@@ -403,9 +399,6 @@ model SettlementMember {
   settlementId        String   @map("settlement_id") @db.Uuid
   memberId            String   @map("member_id") @db.Uuid
   itemAmount          Int      @default(0) @map("item_amount")
-  taxAmount           Int      @default(0) @map("tax_amount")
-  serviceChargeAmount Int      @default(0) @map("service_charge_amount")
-  discountAmount      Int      @default(0) @map("discount_amount")
   adjustmentAmount    Int      @default(0) @map("adjustment_amount")
   finalAmount         Int      @default(0) @map("final_amount")
   createdAt           DateTime @default(now()) @map("created_at")

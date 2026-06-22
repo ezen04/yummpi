@@ -17,6 +17,7 @@
 | 8 | RECEIPT에 `raw_ocr_json`(JSON) 추가 | F7 검수 화면 "미분류 텍스트 영역" + OCR 원본 보관(④) |
 | 9 | RESERVATION 예약 담당자 FK **추가 안 함** | 예약 상태 변경 권한을 **호스트로 통일**(`assertHost`) |
 | 10 | MEETING에 `series_id`(nullable self-FK) 추가 ★ ADR-0001(post-v2.2) | B-lite "이 멤버로 새 모임" 클론 회차 스탬프. V2 그룹 히스토리 묶기용. 클론 시 `source.series_id ?? source.id` |
+| 11 | RECEIPT `subtotal/tax/service_charge/discount` · SETTLEMENT_MEMBER `tax/service_charge/discount` **제거** ★ post-v2.2 | 정산 엔진 정리로 미사용(④). 세금·봉사료·할인은 `final_amount`/`adjustment_amount`에 반영, 합계는 영수증/정산에서 파생(비정규화 금지) |
 
 **불변식 (앱 레벨 강제)** — v2.1 유지 + 추가
 - `vote.candidate.meeting_id == vote.meeting_id`
@@ -24,7 +25,6 @@
 - `meeting.host_user_id` ↔ `meeting_members(role=HOST).user_id` 항상 일치 (모임 생성 시 HOST 멤버 자동 생성)
 - `meeting.series_id`는 nullable self-FK(같은 모임 시리즈 묶기). 클론 시 `source.series_id ?? source.id`로 스탬프 (히스토리 UI는 V2)
 - 확정 장소의 단일 진실은 `meeting.confirmed_candidate_id`
-- `receipt: subtotal + tax + service_charge − discount == total`
 - `settlement.total_amount == SUM(meeting의 모든 receipt.total_amount)` — **정산에 포함되는 receipt가 1개 이상 있고, 각 `receipt.total_amount`가 확정된 경우에만** 적용
   - receipt 없는 EQUAL 정산: 요청의 `totalAmount`를 `settlements.total_amount`로 저장 → 위 합산 불변식 **적용 제외**
   - receipt 있는 EQUAL/ITEM_BASED 정산: 서버가 `receipts.total_amount` 합산으로 `settlements.total_amount` 결정
@@ -201,10 +201,6 @@ erDiagram
       json raw_ocr_json "OCR 원본·미분류 라인"
       string merchant_name
       datetime purchased_at
-      int subtotal_amount
-      int tax_amount
-      int service_charge_amount
-      int discount_amount
       int total_amount
       string currency
       datetime created_at
@@ -250,9 +246,6 @@ erDiagram
       uuid settlement_id FK
       uuid member_id FK
       int item_amount
-      int tax_amount
-      int service_charge_amount
-      int discount_amount
       int adjustment_amount
       int final_amount
       datetime created_at
