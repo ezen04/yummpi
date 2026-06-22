@@ -16,6 +16,23 @@ export interface MidpointResult {
  *
  * @returns 중간지점 좌표. 유효한 좌표가 0개면 null.
  */
+const EARTH_RADIUS_M = 6_371_000;
+
+/** 두 좌표 사이의 직선 거리를 미터 단위로 반환한다 (Haversine 공식). */
+export function calcDistance(a: Coord, b: Coord): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const sinDLat = Math.sin(dLat / 2);
+  const sinDLng = Math.sin(dLng / 2);
+  const chord =
+    sinDLat * sinDLat +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * sinDLng * sinDLng;
+  return (
+    2 * EARTH_RADIUS_M * Math.atan2(Math.sqrt(chord), Math.sqrt(1 - chord))
+  );
+}
+
 export function calcMidpoint(
   coords: (Coord | null | undefined)[]
 ): MidpointResult | null {
