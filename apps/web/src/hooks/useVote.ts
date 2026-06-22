@@ -42,6 +42,10 @@ export const voteKeys = {
   detail: (meetingId: string) => ['votes', meetingId] as const,
 };
 
+function computeVoteRate(voteCount: number, totalVoters: number): number {
+  return totalVoters > 0 ? Math.round((voteCount / totalVoters) * 100) : 0;
+}
+
 async function fetchVotes(meetingId: string): Promise<VotesData> {
   const res = await fetch(`/api/v1/meetings/${meetingId}/votes`);
   if (!res.ok) {
@@ -70,7 +74,9 @@ async function putVote(meetingId: string, candidateId: string): Promise<void> {
 
 export function useVote(meetingId: string) {
   const queryClient = useQueryClient();
-  const isMutatingRef = useRef(false);
+  // 동시 mutation 중복 카운팅: 한 mutation의 onSettled가 ref를 비워도
+  // 다른 mutation이 진행 중이면 소켓 이벤트를 계속 차단해야 한다
+  const mutatingCountRef = useRef(0);
 
   const { data: votesData, isLoading } = useQuery({
     queryKey: voteKeys.detail(meetingId),
@@ -78,7 +84,7 @@ export function useVote(meetingId: string) {
   });
 
   useSocketEvent('vote:updated', (data: VoteUpdatedPayload) => {
-    if (isMutatingRef.current) return;
+    if (mutatingCountRef.current > 0) return;
 
     queryClient.setQueryData(
       voteKeys.detail(meetingId),
@@ -86,10 +92,14 @@ export function useVote(meetingId: string) {
         if (!old) return old;
         return {
           ...old,
-          candidates: old.candidates.map((c) => ({
-            ...c,
-            voteCount: data.voteCounts[c.id] ?? c.voteCount,
-          })),
+          candidates: old.candidates.map((c) => {
+            const nextVoteCount = data.voteCounts[c.id] ?? c.voteCount;
+            return {
+              ...c,
+              voteCount: nextVoteCount,
+              voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
+            };
+          }),
           votedMemberCount: data.votedMemberCount,
         };
       }
@@ -100,7 +110,7 @@ export function useVote(meetingId: string) {
     mutationFn: (candidateId: string) => putVote(meetingId, candidateId),
     onMutate: async (candidateId) => {
       await queryClient.cancelQueries({ queryKey: voteKeys.detail(meetingId) });
-      isMutatingRef.current = true;
+      mutatingCountRef.current += 1;
 
       const snapshot = queryClient.getQueryData<VotesData>(
         voteKeys.detail(meetingId)
@@ -115,10 +125,22 @@ export function useVote(meetingId: string) {
             ...old,
             myCandidateId: candidateId,
             candidates: old.candidates.map((c) => {
-              if (c.id === candidateId)
-                return { ...c, voteCount: c.voteCount + 1 };
-              if (c.id === prevCandidateId)
-                return { ...c, voteCount: c.voteCount - 1 };
+              if (c.id === candidateId) {
+                const nextVoteCount = c.voteCount + 1;
+                return {
+                  ...c,
+                  voteCount: nextVoteCount,
+                  voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
+                };
+              }
+              if (c.id === prevCandidateId) {
+                const nextVoteCount = c.voteCount - 1;
+                return {
+                  ...c,
+                  voteCount: nextVoteCount,
+                  voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
+                };
+              }
               return c;
             }),
           };
@@ -131,10 +153,9 @@ export function useVote(meetingId: string) {
       if (context?.snapshot !== undefined) {
         queryClient.setQueryData(voteKeys.detail(meetingId), context.snapshot);
       }
-      isMutatingRef.current = false;
     },
     onSettled: () => {
-      isMutatingRef.current = false;
+      mutatingCountRef.current = Math.max(0, mutatingCountRef.current - 1);
       void queryClient.invalidateQueries({
         queryKey: voteKeys.detail(meetingId),
       });
