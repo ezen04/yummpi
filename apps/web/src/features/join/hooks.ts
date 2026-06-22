@@ -5,8 +5,10 @@ import {
   getInviteInfo,
   getRandomNickname,
   joinAsGuest,
+  joinAsMember,
   type GuestJoinResult,
   type InviteInfo,
+  type MemberJoinResult,
 } from './api/joinApi';
 
 // 초대 링크 정보 (비로그인). 실패(잘못된 코드 등)는 차단 화면에서 처리하므로 retry 없음.
@@ -36,5 +38,15 @@ export function useGuestJoin() {
     { meetingId: string; inviteCode: string; nickname: string }
   >({
     mutationFn: joinAsGuest,
+  });
+}
+
+export function useMemberJoin() {
+  return useMutation<
+    MemberJoinResult,
+    unknown,
+    { meetingId: string; inviteCode: string; nickname?: string }
+  >({
+    mutationFn: joinAsMember,
   });
 }

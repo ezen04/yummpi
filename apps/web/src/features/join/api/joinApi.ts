@@ -71,6 +71,12 @@ export interface GuestJoinResult {
   nickname: string;
 }
 
+// POST /api/v1/meetings/:id/members 응답(selfMember) 중 화면에 필요한 부분
+export interface MemberJoinResult {
+  id: string;
+  nickname: string;
+}
+
 export function getInviteInfo(inviteCode: string): Promise<InviteInfo> {
   return apiFetch<InviteInfo>(
     `/api/v1/meetings/invite/${encodeURIComponent(inviteCode)}`
@@ -90,4 +96,22 @@ export function joinAsGuest(input: {
     method: 'POST',
     body: JSON.stringify(input),
   });
+}
+
+// 로그인 회원 참여. nickname 미지정 시 서버가 세션 닉네임 사용(결정#3). 충돌 시에만 명시.
+export function joinAsMember(input: {
+  meetingId: string;
+  inviteCode: string;
+  nickname?: string;
+}): Promise<MemberJoinResult> {
+  return apiFetch<MemberJoinResult>(
+    `/api/v1/meetings/${input.meetingId}/members`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        inviteCode: input.inviteCode,
+        ...(input.nickname ? { nickname: input.nickname } : {}),
+      }),
+    }
+  );
 }
