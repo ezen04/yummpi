@@ -81,19 +81,27 @@ export function NotificationSettingsForm({
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[15px] font-medium text-[var(--label-normal)]">
-            송금 독촉 알림
-          </span>
-          <span className="text-[13px] text-[var(--label-alternative)]">
-            미송금 알림 받기
-          </span>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[15px] font-medium text-[var(--label-normal)]">
+              송금 독촉 알림
+            </span>
+            <span className="text-[13px] text-[var(--label-alternative)]">
+              미송금 알림 받기
+            </span>
+          </div>
+          <Toggle
+            checked={paymentReminderEnabled}
+            onChange={(v) => handleToggle('paymentReminderEnabled', v)}
+            disabled={!pushEnabled}
+          />
         </div>
-        <Toggle
-          checked={paymentReminderEnabled}
-          onChange={(v) => handleToggle('paymentReminderEnabled', v)}
-        />
+        {!pushEnabled && (
+          <p className="text-[12px] text-[var(--label-assistive)]">
+            모임 활동 알림을 먼저 켜주세요
+          </p>
+        )}
       </div>
 
       {error && (
