@@ -1,20 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePWAInstall } from './usePWAInstall';
-
-const SESSION_KEY = 'pwa-install-banner-dismissed';
+import { usePWAInstall, PWA_BANNER_SESSION_KEY } from './usePWAInstall';
 
 export function PWAInstallBanner() {
   const { canInstall, install } = usePWAInstall();
   const [dismissed, setDismissed] = useState(true); // 초기값 true로 SSR flicker 방지
 
   useEffect(() => {
-    setDismissed(sessionStorage.getItem(SESSION_KEY) === 'true');
+    setDismissed(sessionStorage.getItem(PWA_BANNER_SESSION_KEY) === 'true');
   }, []);
 
   function handleDismiss() {
-    sessionStorage.setItem(SESSION_KEY, 'true');
+    sessionStorage.setItem(PWA_BANNER_SESSION_KEY, 'true');
     setDismissed(true);
   }
 

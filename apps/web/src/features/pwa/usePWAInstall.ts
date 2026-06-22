@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+export const PWA_BANNER_SESSION_KEY = 'pwa-install-banner-dismissed';
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
@@ -45,7 +47,7 @@ export function usePWAInstall() {
     await deferredPrompt.current.prompt();
     const { outcome } = await deferredPrompt.current.userChoice;
     if (outcome === 'accepted') {
-      sessionStorage.setItem('pwa-install-banner-dismissed', 'true');
+      sessionStorage.setItem(PWA_BANNER_SESSION_KEY, 'true');
       deferredPrompt.current = null;
       setCanInstall(false);
     }
