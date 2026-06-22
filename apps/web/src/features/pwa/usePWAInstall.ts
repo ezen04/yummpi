@@ -45,6 +45,7 @@ export function usePWAInstall() {
     await deferredPrompt.current.prompt();
     const { outcome } = await deferredPrompt.current.userChoice;
     if (outcome === 'accepted') {
+      sessionStorage.setItem('pwa-install-banner-dismissed', 'true');
       deferredPrompt.current = null;
       setCanInstall(false);
     }
