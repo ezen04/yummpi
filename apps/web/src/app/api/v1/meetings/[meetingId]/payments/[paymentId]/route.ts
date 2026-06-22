@@ -5,6 +5,8 @@ import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
 import { buildPaymentListItem, buildSummary } from '../_utils';
+import { getRemindCooldown, setRemindCooldown } from '@/lib/remind-redis';
+import { enqueuePaymentReminder } from '@/lib/payment-reminder-queue';
 import type { PaymentStatus } from '@prisma/client';
 
 const paramsSchema = z.object({
@@ -21,10 +23,6 @@ export const PATCH = handleRoute(
 
     const body = UpdatePaymentRequestSchema.parse(await req.json());
     const { action } = body;
-
-    if (action === 'REMIND') {
-      throw new ApiError('VALIDATION_ERROR', '독촉 알림 기능은 준비 중입니다.');
-    }
 
     const currentMember = await requireMember(meetingId);
 
@@ -52,6 +50,47 @@ export const PATCH = handleRoute(
 
     const isHost = currentMember.role === 'HOST';
     const isOwner = currentMember.id === payment.settlementMember.memberId;
+
+    if (action === 'REMIND') {
+      if (!isHost) {
+        throw new ApiError('FORBIDDEN', '주최자만 독촉 알림을 보낼 수 있습니다.');
+      }
+      const targetMember = payment.settlementMember.member;
+      if (targetMember.userId === null) {
+        throw new ApiError(
+          'VALIDATION_ERROR',
+          '게스트에게는 알림을 보낼 수 없습니다.'
+        );
+      }
+      if (payment.status !== 'PENDING') {
+        throw new ApiError(
+          'INVALID_PAYMENT_STATUS',
+          'PENDING 상태에서만 독촉 알림을 보낼 수 있습니다.'
+        );
+      }
+      const cooldown = await getRemindCooldown(paymentId);
+      if (cooldown) {
+        throw new ApiError('REMIND_COOLDOWN', '쿨다운 중입니다.', {
+          remindCooldownUntil: cooldown,
+        });
+      }
+      await enqueuePaymentReminder({
+        meetingId,
+        paymentId,
+        targetUserId: targetMember.userId,
+      });
+      const cooldownUntil = await setRemindCooldown(paymentId);
+      const cooldownMap = new Map([[paymentId, cooldownUntil]]);
+      const item = buildPaymentListItem(
+        { ...payment.settlementMember, payment },
+        currentMember,
+        cooldownMap
+      );
+      if (!item) {
+        throw new ApiError('INTERNAL_ERROR', '결제 항목을 생성할 수 없습니다.');
+      }
+      return apiSuccess({ payment: item });
+    }
 
     // action별 권한 검증
     if (action === 'REPORT_TRANSFER') {
