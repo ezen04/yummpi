@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calcMidpoint } from './haversine';
+import { calcDistance, calcMidpoint } from './haversine';
 
 describe('calcMidpoint', () => {
   it('출발지 0명이면 null 반환', () => {
@@ -49,5 +49,32 @@ describe('calcMidpoint', () => {
     expect(result?.excludedCount).toBe(2);
     expect(result?.lat).toBeCloseTo(37.52);
     expect(result?.lng).toBeCloseTo(126.97);
+  });
+});
+
+describe('calcDistance', () => {
+  it('같은 좌표면 거리는 0', () => {
+    const result = calcDistance(
+      { lat: 37.49, lng: 127.02 },
+      { lat: 37.49, lng: 127.02 },
+    );
+    expect(result).toBe(0);
+  });
+
+  it('강남↔홍대 거리는 약 9.5km', () => {
+    const result = calcDistance(
+      { lat: 37.498, lng: 127.028 }, // 강남역
+      { lat: 37.557, lng: 126.924 }, // 홍대입구역
+    );
+    expect(result).toBeGreaterThan(11_000);
+    expect(result).toBeLessThan(12_000);
+  });
+
+  it('거리는 항상 0 이상', () => {
+    const result = calcDistance(
+      { lat: 37.55, lng: 126.92 },
+      { lat: 37.49, lng: 127.02 },
+    );
+    expect(result).toBeGreaterThanOrEqual(0);
   });
 });
