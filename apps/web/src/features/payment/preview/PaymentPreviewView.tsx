@@ -12,6 +12,8 @@ import { PaymentJoinRequired } from '@/features/payment/components/shell/Payment
 import { PaymentLoadingSkeleton } from '@/features/payment/components/shell/PaymentLoadingSkeleton';
 import { PaymentNotInitializedState } from '@/features/payment/components/shell/PaymentNotInitializedState';
 import { PaymentSummaryPanel } from '@/features/payment/components/summary/PaymentSummaryPanel';
+import { Notification } from '@/components/common/Notification';
+import { NotificationSettingsForm } from '@/features/notification/components/NotificationSettingsForm';
 import { useHostAccountStore } from '@/features/payment/stores/useHostAccountStore';
 import type {
   PaymentAction,
@@ -192,6 +194,65 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
         placeName="강남 화로상회"
         placeDateTime="6.13 (금) 19:00"
       />
+    );
+  }
+
+  if (active === 'notification') {
+    return (
+      <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-normal)]">
+        <Notification
+          variant="unread"
+          title="지훈님이 송금을 완료했어요"
+          body="강남 화로상회 · 18,000원"
+          onClick={() => alert('unread 클릭')}
+        />
+        <Notification
+          variant="unread"
+          title="정산이 시작됐어요. 확인해 주세요"
+          onClick={() => alert('unread (body 없음) 클릭')}
+        />
+        <Notification
+          variant="read"
+          title="민지님이 송금을 완료했어요"
+          body="강남 화로상회 · 23,500원"
+          onClick={() => alert('read 클릭')}
+          className="bg-[var(--bg-alternative)]"
+        />
+        <Notification
+          variant="read"
+          title="모임이 종료됐어요"
+          body="금요일 저녁 회식이 성공적으로 마무리됐어요"
+          className="bg-[var(--bg-alternative)]"
+        />
+      </div>
+    );
+  }
+
+  if (active === 'notification-settings') {
+    return (
+      <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-normal)] px-5 py-6">
+        <p className="text-xs text-[var(--label-assistive)] mb-4">
+          push ON/OFF·독촉 알림 ON/OFF 각 조합을 초기값으로 확인하세요.
+        </p>
+        <div className="mb-8">
+          <p className="text-[13px] font-medium text-[var(--label-alternative)] mb-3">
+            초기값: 둘 다 ON
+          </p>
+          <NotificationSettingsForm
+            initialPushEnabled={true}
+            initialPaymentReminderEnabled={true}
+          />
+        </div>
+        <div>
+          <p className="text-[13px] font-medium text-[var(--label-alternative)] mb-3">
+            초기값: 둘 다 OFF
+          </p>
+          <NotificationSettingsForm
+            initialPushEnabled={false}
+            initialPaymentReminderEnabled={false}
+          />
+        </div>
+      </div>
     );
   }
 
