@@ -94,9 +94,7 @@ export function NotificationsView({
               iconStyle="filled"
               onClick={() => router.push(getNotificationHref(n))}
               className={
-                n.variant === 'read'
-                  ? 'bg-[var(--bg-alternative)]'
-                  : undefined
+                n.variant === 'read' ? 'bg-[var(--bg-alternative)]' : undefined
               }
             />
           ))}
