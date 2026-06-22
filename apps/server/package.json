@@ -17,10 +17,13 @@
     "handlebars": "4.7.8",
     "ioredis": "5.11.1",
     "nodemailer": "7.0.10",
-    "socket.io": "4.8.1"
+    "socket.io": "4.8.1",
+    "web-push": "3.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/nodemailer": "^8.0.1",
+    "@types/web-push": "^3.6.4",
     "prisma": "6.19.0",
     "tsx": "4.22.4",
     "typescript": "5.9.3"

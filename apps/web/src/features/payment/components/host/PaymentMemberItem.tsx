@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
-import { formatAmount } from '../../utils/transferMock';
+import { formatAmount, formatCooldownUntil } from '../../utils/transferMock';
 import { PaymentConfirmbox } from '../shell/PaymentConfirmbox';
 import '../payment-montage.css';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
@@ -36,6 +36,9 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const badge = STATUS_BADGE[item.status] ?? null;
   const isHost = viewerRole === 'HOST';
   const isHostSelf = item.isMine && isHost;
+  const isCooldown =
+    item.remindCooldownUntil !== null &&
+    new Date(item.remindCooldownUntil) > new Date();
 
   return (
     <>
@@ -122,6 +125,30 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                   되돌리기
                 </Button>
               )}
+
+              {/* PENDING → 독촉 (회원만, 쿨다운 중 비활성) */}
+              {isHost &&
+                !isHostSelf &&
+                item.status === 'PENDING' &&
+                !item.isGuest && (
+                  <div className="flex flex-col items-end gap-0.5">
+                    <Button
+                      variant="basic"
+                      size="sm"
+                      onClick={() => onAction(item.paymentId, 'REMIND')}
+                      disabled={isCooldown}
+                      className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
+                    >
+                      독촉
+                    </Button>
+                    {isCooldown && item.remindCooldownUntil && (
+                      <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap">
+                        {formatCooldownUntil(item.remindCooldownUntil)} 이후
+                        가능
+                      </span>
+                    )}
+                  </div>
+                )}
 
               {/* PENDING → 면제 */}
               {item.canMarkExempt && (
