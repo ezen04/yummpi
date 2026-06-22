@@ -139,7 +139,7 @@ export const MOCK_PAYMENTS_HOST_IN_PROGRESS: PaymentListItem[] = [
     paidAt: null,
     isMine: false,
     isGuest: false,
-    remindCooldownUntil: null,
+    remindCooldownUntil: new Date(Date.now() + 20 * 60 * 60 * 1000).toISOString(),
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,

@@ -123,6 +123,22 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                 </Button>
               )}
 
+              {/* PENDING → 독촉 (회원만, 쿨다운 중 비활성) */}
+              {isHost && !isHostSelf && item.status === 'PENDING' && !item.isGuest && (
+                <Button
+                  variant="basic"
+                  size="sm"
+                  onClick={() => onAction(item.paymentId, 'REMIND')}
+                  disabled={
+                    item.remindCooldownUntil !== null &&
+                    new Date(item.remindCooldownUntil) > new Date()
+                  }
+                  className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
+                >
+                  독촉
+                </Button>
+              )}
+
               {/* PENDING → 면제 */}
               {item.canMarkExempt && (
                 <Button
