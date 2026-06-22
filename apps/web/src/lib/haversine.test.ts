@@ -56,15 +56,15 @@ describe('calcDistance', () => {
   it('같은 좌표면 거리는 0', () => {
     const result = calcDistance(
       { lat: 37.49, lng: 127.02 },
-      { lat: 37.49, lng: 127.02 },
+      { lat: 37.49, lng: 127.02 }
     );
     expect(result).toBe(0);
   });
 
-  it('강남↔홍대 거리는 약 9.5km', () => {
+  it('강남↔홍대 거리는 약 11.3km', () => {
     const result = calcDistance(
       { lat: 37.498, lng: 127.028 }, // 강남역
-      { lat: 37.557, lng: 126.924 }, // 홍대입구역
+      { lat: 37.557, lng: 126.924 } // 홍대입구역
     );
     expect(result).toBeGreaterThan(11_000);
     expect(result).toBeLessThan(12_000);
@@ -73,7 +73,7 @@ describe('calcDistance', () => {
   it('거리는 항상 0 이상', () => {
     const result = calcDistance(
       { lat: 37.55, lng: 126.92 },
-      { lat: 37.49, lng: 127.02 },
+      { lat: 37.49, lng: 127.02 }
     );
     expect(result).toBeGreaterThanOrEqual(0);
   });
