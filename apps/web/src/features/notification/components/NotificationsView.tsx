@@ -53,24 +53,28 @@ export function NotificationsView({
   const router = useRouter();
 
   return (
-    <div className="h-full flex flex-col bg-[var(--bg-normal)]">
+    <div className="h-full flex flex-col bg-[var(--bg-alternative)]">
       <Header title="알림" />
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {items.map((n, i) => (
-          <Notification
-            key={i}
-            variant={n.variant}
-            title={n.title}
-            body={n.body}
-            iconStyle="filled"
-            onClick={() => {
-              // TODO: 알림 상세로 라우팅 연결 (현재는 hover/active state 활성화 목적)
-            }}
-            className={
-              n.variant === 'read' ? 'bg-[var(--bg-alternative)]' : undefined
-            }
-          />
-        ))}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+        <div className="rounded-2xl overflow-hidden bg-[var(--bg-normal)]">
+          {items.map((n, i) => (
+            <Notification
+              key={i}
+              variant={n.variant}
+              title={n.title}
+              body={n.body}
+              iconStyle="filled"
+              onClick={() => {
+                // TODO: 알림 상세로 라우팅 연결 (현재는 hover/active state 활성화 목적)
+              }}
+              className={
+                n.variant === 'read'
+                  ? 'bg-[var(--bg-alternative)]'
+                  : undefined
+              }
+            />
+          ))}
+        </div>
       </div>
       <Footer
         variant="menubar"
