@@ -51,7 +51,10 @@ export function usePushSubscription() {
         body: JSON.stringify(subscription.toJSON()),
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.code ?? String(res.status));
+      }
       return { ok: true };
     } catch {
       return { ok: false, error: '알림 구독 등록에 실패했어요. 다시 시도해주세요.' };
@@ -73,7 +76,10 @@ export function usePushSubscription() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          throw new Error(body?.error?.code ?? String(res.status));
+        }
       }
 
       return { ok: true };
