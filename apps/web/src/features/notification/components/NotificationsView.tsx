@@ -84,6 +84,7 @@ export function NotificationsView({
       <Header title="알림" />
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
         <div className="rounded-2xl overflow-hidden bg-[var(--bg-normal)]">
+          {/* TODO: 실 API 연결 시 NotificationItem.id 추가 → key={n.id}로 변경. */}
           {items.map((n, i) => (
             <Notification
               key={i}
