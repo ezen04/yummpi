@@ -203,7 +203,7 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
 
   if (active === 'notification-settings') {
     return (
-      <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-normal)] px-5 py-6">
+      <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-alternative)] px-5 py-6">
         <p className="text-xs text-[var(--label-assistive)] mb-4">
           push ON/OFF·독촉 알림 ON/OFF 각 조합을 초기값으로 확인하세요.
         </p>
