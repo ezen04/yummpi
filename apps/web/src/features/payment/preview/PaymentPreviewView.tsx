@@ -205,26 +205,9 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
     return (
       <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-alternative)] px-5 py-6">
         <p className="text-xs text-[var(--label-assistive)] mb-4">
-          push ON/OFF·독촉 알림 ON/OFF 각 조합을 초기값으로 확인하세요.
+          실제 API(/api/v1/users/me) 연결 — 로그인 회원의 설정이 표시됩니다.
         </p>
-        <div className="mb-8">
-          <p className="text-[13px] font-medium text-[var(--label-alternative)] mb-3">
-            초기값: 둘 다 ON
-          </p>
-          <NotificationSettingsForm
-            initialPushEnabled={true}
-            initialPaymentReminderEnabled={true}
-          />
-        </div>
-        <div>
-          <p className="text-[13px] font-medium text-[var(--label-alternative)] mb-3">
-            초기값: 둘 다 OFF
-          </p>
-          <NotificationSettingsForm
-            initialPushEnabled={false}
-            initialPaymentReminderEnabled={false}
-          />
-        </div>
+        <NotificationSettingsForm />
       </div>
     );
   }
