@@ -12,7 +12,7 @@ import { PaymentJoinRequired } from '@/features/payment/components/shell/Payment
 import { PaymentLoadingSkeleton } from '@/features/payment/components/shell/PaymentLoadingSkeleton';
 import { PaymentNotInitializedState } from '@/features/payment/components/shell/PaymentNotInitializedState';
 import { PaymentSummaryPanel } from '@/features/payment/components/summary/PaymentSummaryPanel';
-import { Notification } from '@/components/common/Notification';
+import { NotificationsView } from '@/features/notification/components/NotificationsView';
 import { NotificationSettingsForm } from '@/features/notification/components/NotificationSettingsForm';
 import { useHostAccountStore } from '@/features/payment/stores/useHostAccountStore';
 import type {
@@ -198,34 +198,7 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
   }
 
   if (active === 'notification') {
-    return (
-      <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-normal)]">
-        <Notification
-          variant="unread"
-          title="지훈님이 송금을 완료했어요"
-          body="강남 화로상회 · 18,000원"
-          onClick={() => alert('unread 클릭')}
-        />
-        <Notification
-          variant="unread"
-          title="정산이 시작됐어요. 확인해 주세요"
-          onClick={() => alert('unread (body 없음) 클릭')}
-        />
-        <Notification
-          variant="read"
-          title="민지님이 송금을 완료했어요"
-          body="강남 화로상회 · 23,500원"
-          onClick={() => alert('read 클릭')}
-          className="bg-[var(--bg-alternative)]"
-        />
-        <Notification
-          variant="read"
-          title="모임이 종료됐어요"
-          body="금요일 저녁 회식이 성공적으로 마무리됐어요"
-          className="bg-[var(--bg-alternative)]"
-        />
-      </div>
-    );
+    return <NotificationsView />;
   }
 
   if (active === 'notification-settings') {
