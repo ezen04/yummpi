@@ -127,24 +127,28 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
               )}
 
               {/* PENDING → 독촉 (회원만, 쿨다운 중 비활성) */}
-              {isHost && !isHostSelf && item.status === 'PENDING' && !item.isGuest && (
-                <div className="flex flex-col items-end gap-0.5">
-                  <Button
-                    variant="basic"
-                    size="sm"
-                    onClick={() => onAction(item.paymentId, 'REMIND')}
-                    disabled={isCooldown}
-                    className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
-                  >
-                    독촉
-                  </Button>
-                  {isCooldown && item.remindCooldownUntil && (
-                    <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap">
-                      {formatCooldownUntil(item.remindCooldownUntil)} 이후 가능
-                    </span>
-                  )}
-                </div>
-              )}
+              {isHost &&
+                !isHostSelf &&
+                item.status === 'PENDING' &&
+                !item.isGuest && (
+                  <div className="flex flex-col items-end gap-0.5">
+                    <Button
+                      variant="basic"
+                      size="sm"
+                      onClick={() => onAction(item.paymentId, 'REMIND')}
+                      disabled={isCooldown}
+                      className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
+                    >
+                      독촉
+                    </Button>
+                    {isCooldown && item.remindCooldownUntil && (
+                      <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap">
+                        {formatCooldownUntil(item.remindCooldownUntil)} 이후
+                        가능
+                      </span>
+                    )}
+                  </div>
+                )}
 
               {/* PENDING → 면제 */}
               {item.canMarkExempt && (

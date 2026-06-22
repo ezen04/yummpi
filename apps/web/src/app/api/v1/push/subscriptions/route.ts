@@ -23,7 +23,13 @@ export const POST = handleRoute(async (req: Request) => {
 
   const subscription = await prisma.pushSubscription.upsert({
     where: { endpoint },
-    create: { userId: user.id, endpoint, p256dhKey: p256dh, authKey: auth, userAgent },
+    create: {
+      userId: user.id,
+      endpoint,
+      p256dhKey: p256dh,
+      authKey: auth,
+      userAgent,
+    },
     update: { p256dhKey: p256dh, authKey: auth, userAgent },
   });
 
@@ -49,7 +55,10 @@ export const DELETE = handleRoute(async (req: Request) => {
     where: { endpoint, userId: user.id },
   });
   if (!subscription) {
-    throw new ApiError('PUSH_SUBSCRIPTION_NOT_FOUND', '구독을 찾을 수 없습니다.');
+    throw new ApiError(
+      'PUSH_SUBSCRIPTION_NOT_FOUND',
+      '구독을 찾을 수 없습니다.'
+    );
   }
 
   await prisma.pushSubscription.delete({ where: { id: subscription.id } });

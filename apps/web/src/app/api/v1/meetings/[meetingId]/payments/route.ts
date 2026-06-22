@@ -43,7 +43,12 @@ export const GET = handleRoute(
 
     // 순수 조회 — Payment가 없어도 생성하지 않는다.
     return apiSuccess(
-      buildPaymentListResponse(meetingId, settlement, currentMember, cooldownMap)
+      buildPaymentListResponse(
+        meetingId,
+        settlement,
+        currentMember,
+        cooldownMap
+      )
     );
   }
 );

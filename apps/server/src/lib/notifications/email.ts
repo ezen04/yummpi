@@ -32,6 +32,9 @@ export async function sendPaymentReminderEmail(opts: {
     html,
   });
   if (!process.env.SMTP_HOST) {
-    console.log('[email:mock]', (info as unknown as { message: string }).message);
+    console.log(
+      '[email:mock]',
+      (info as unknown as { message: string }).message
+    );
   }
 }

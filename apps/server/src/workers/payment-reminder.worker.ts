@@ -117,6 +117,10 @@ if (process.env.NODE_ENV !== 'test') {
   worker.on('failed', (job, err) =>
     console.error(`[reminder] failed job=${job?.id}`, err)
   );
-  process.on('SIGTERM', () => { worker.close().catch(console.error); });
-  process.on('SIGINT', () => { worker.close().catch(console.error); });
+  process.on('SIGTERM', () => {
+    worker.close().catch(console.error);
+  });
+  process.on('SIGINT', () => {
+    worker.close().catch(console.error);
+  });
 }

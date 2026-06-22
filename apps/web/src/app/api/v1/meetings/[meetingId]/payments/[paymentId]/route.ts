@@ -1,6 +1,9 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { UpdatePaymentRequestSchema, type PaymentAction } from '@yummpi/schemas';
+import {
+  UpdatePaymentRequestSchema,
+  type PaymentAction,
+} from '@yummpi/schemas';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
@@ -53,7 +56,10 @@ export const PATCH = handleRoute(
 
     if (action === 'REMIND') {
       if (!isHost) {
-        throw new ApiError('FORBIDDEN', '주최자만 독촉 알림을 보낼 수 있습니다.');
+        throw new ApiError(
+          'FORBIDDEN',
+          '주최자만 독촉 알림을 보낼 수 있습니다.'
+        );
       }
       const targetMember = payment.settlementMember.member;
       if (targetMember.userId === null) {
@@ -86,7 +92,9 @@ export const PATCH = handleRoute(
         cooldownUntil = await setRemindCooldown(paymentId);
       } catch (err) {
         console.error('[remind] cooldown 설정 실패 (enqueue는 성공)', err);
-        cooldownUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        cooldownUntil = new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        ).toISOString();
       }
       const cooldownMap = new Map([[paymentId, cooldownUntil]]);
       const item = buildPaymentListItem(

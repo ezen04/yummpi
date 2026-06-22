@@ -3,7 +3,7 @@ import webPush from 'web-push';
 webPush.setVapidDetails(
   'mailto:hello@yummpi.app',
   process.env.VAPID_PUBLIC_KEY ?? '',
-  process.env.VAPID_PRIVATE_KEY ?? '',
+  process.env.VAPID_PRIVATE_KEY ?? ''
 );
 
 interface PushSubscription {
@@ -20,7 +20,7 @@ interface PushPayload {
 
 export async function sendWebPush(
   subscription: PushSubscription,
-  payload: PushPayload,
+  payload: PushPayload
 ): Promise<void> {
   await webPush.sendNotification(
     {
@@ -30,6 +30,6 @@ export async function sendWebPush(
         auth: subscription.authKey,
       },
     },
-    JSON.stringify(payload),
+    JSON.stringify(payload)
   );
 }
