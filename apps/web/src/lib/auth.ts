@@ -11,6 +11,10 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'database',
   },
+  pages: {
+    // OAuth 실패·취소 시 NextAuth 기본 화면 대신 커스텀 안내로.
+    error: '/login/error',
+  },
   providers: [
     KakaoProvider({
       clientId: process.env.KAKAO_CLIENT_ID!,

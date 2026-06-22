@@ -41,6 +41,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Unit Tests
+        run: pnpm test
+
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
@@ -69,3 +72,5 @@ jobs:
 
       - name: Run E2E tests
         run: pnpm --filter @yummpi/web test:e2e
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.AUTH_SECRET }}

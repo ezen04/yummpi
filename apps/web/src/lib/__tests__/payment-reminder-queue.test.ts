@@ -4,7 +4,6 @@ const mockAdd = vi.fn().mockResolvedValue({ id: 'job-1' });
 
 vi.mock('bullmq', () => ({
   Queue: class {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     add(...args: any[]) {
       return mockAdd(...args);
     }

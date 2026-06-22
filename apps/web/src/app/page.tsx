@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Button } from '@yummpi/ui';
 import { KakaoLoginButton } from '@/components/auth/KakaoLoginButton';
 
@@ -20,14 +21,12 @@ export default function Home() {
       {/* 진입 CTA */}
       <div className="flex w-full max-w-xs flex-col gap-3">
         <KakaoLoginButton callbackUrl="/" />
-        {/*
-          "초대 링크로 입장하기"는 결정#2(딥링크 전용 vs 코드 직접 입력)
-          확정 전까지 보류. 결정 후 활성화한다.
-          (docs/온보딩-화면-체크리스트.md 결정 대기 2번)
-        */}
-        <Button variant="outline" className="w-full" disabled>
-          초대 링크로 입장하기 (준비 중)
-        </Button>
+        {/* 결정#2: 딥링크 + 코드 직접 입력 둘 다 허용 → /join 코드 입력 화면으로 */}
+        <Link href="/join" className="w-full">
+          <Button variant="outline" className="w-full">
+            초대 링크로 입장하기
+          </Button>
+        </Link>
       </div>
     </main>
   );
