@@ -1,0 +1,82 @@
+'use client';
+
+import { useState } from 'react';
+import { Toggle } from '@/components/common/Toggle';
+
+interface Props {
+  initialPushEnabled: boolean;
+  initialPaymentReminderEnabled: boolean;
+}
+
+export function NotificationSettingsForm({
+  initialPushEnabled,
+  initialPaymentReminderEnabled,
+}: Props) {
+  const [pushEnabled, setPushEnabled] = useState(initialPushEnabled);
+  const [paymentReminderEnabled, setPaymentReminderEnabled] = useState(
+    initialPaymentReminderEnabled
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleToggle(
+    field: 'pushEnabled' | 'paymentReminderEnabled',
+    value: boolean
+  ) {
+    const prev = field === 'pushEnabled' ? pushEnabled : paymentReminderEnabled;
+
+    if (field === 'pushEnabled') setPushEnabled(value);
+    else setPaymentReminderEnabled(value);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/v1/users/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      if (field === 'pushEnabled') setPushEnabled(prev);
+      else setPaymentReminderEnabled(prev);
+      setError('설정 변경에 실패했습니다. 다시 시도해주세요.');
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[15px] font-medium text-[var(--label-normal)]">
+            모임 활동 알림
+          </span>
+          <span className="text-[13px] text-[var(--label-alternative)]">
+            투표·예약·정산 알림
+          </span>
+        </div>
+        <Toggle
+          checked={pushEnabled}
+          onChange={(v) => handleToggle('pushEnabled', v)}
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[15px] font-medium text-[var(--label-normal)]">
+            송금 독촉 알림
+          </span>
+          <span className="text-[13px] text-[var(--label-alternative)]">
+            미송금 알림 받기
+          </span>
+        </div>
+        <Toggle
+          checked={paymentReminderEnabled}
+          onChange={(v) => handleToggle('paymentReminderEnabled', v)}
+        />
+      </div>
+
+      {error && (
+        <p className="text-[13px] text-[var(--status-negative)]">{error}</p>
+      )}
+    </div>
+  );
+}

@@ -46,7 +46,8 @@ export function buildSummary(payments: Payment[]): PaymentSummary {
 
 export function buildPaymentListItem(
   sm: SettlementMember & { member: MeetingMember; payment: Payment | null },
-  currentMember: MeetingMember | null
+  currentMember: MeetingMember | null,
+  cooldownMap?: Map<string, string>
 ): PaymentListItem | null {
   if (!sm.payment) return null;
 
@@ -65,7 +66,7 @@ export function buildPaymentListItem(
     paidAt: p.paidAt?.toISOString() ?? null,
     isMine: isMe,
     isGuest: sm.member.userId === null,
-    remindCooldownUntil: null,
+    remindCooldownUntil: cooldownMap?.get(p.id) ?? null,
     canReportTransfer: !isHostSelf && isMe && p.status === 'PENDING',
     canCancelTransfer: !isHostSelf && isMe && p.status === 'TRANSFER_REPORTED',
     canMarkPaid: !isHostSelf && isHost && p.status === 'TRANSFER_REPORTED',
@@ -81,10 +82,11 @@ export function buildPaymentListItem(
 export function buildPaymentListResponse(
   meetingId: string,
   settlement: SettlementWithMembers,
-  currentMember: MeetingMember | null
+  currentMember: MeetingMember | null,
+  cooldownMap?: Map<string, string>
 ): PaymentListResponse {
   const items = settlement.settlementMembers
-    .map((sm) => buildPaymentListItem(sm, currentMember))
+    .map((sm) => buildPaymentListItem(sm, currentMember, cooldownMap))
     .filter((item): item is PaymentListItem => item !== null);
 
   const payments = settlement.settlementMembers
