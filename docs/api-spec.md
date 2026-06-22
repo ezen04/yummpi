@@ -362,8 +362,8 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ### 금액 계산 — BE 자동 트리거 ★ v2.2 수정 (클라이언트 직접 호출 없음)
 - **트리거**: EQUAL — 정산 생성 즉시 실행. ITEM_BASED — 출석(`ATTENDING`) 전원 `assignments/me` 제출 완료 시 자동 실행
-- **ITEM_BASED**: 품목별 `total_price` ÷ 해당 품목 선택 참여자 수 → 멤버별 배분금 합산 후 `SETTLEMENT_MEMBER` upsert. 반올림 차액 → 주최자 +1원 보정
-- **EQUAL**: `total_amount` ÷ 출석(`ATTENDING`) 인원수 균등 배분. 반올림 차액 → 주최자 +1원 보정
+- **ITEM_BASED**: 품목별 `total_price` ÷ 해당 품목 선택 참여자 수(`floor`) → 멤버별 배분금 합산 후 `SETTLEMENT_MEMBER` upsert. **반올림 차액(`totalAmount − Σ memberItemAmount`)은 주최자(`role=HOST`)에게 전액 흡수**
+- **EQUAL**: `total_amount` ÷ 출석(`ATTENDING`) 인원수(`floor`) 균등 배분. **반올림 차액(`totalAmount − floor(totalAmount/N)×N`)은 주최자에게 전액 흡수**
 - 부가세·봉사료·할인은 별도 배분하지 않음. 영수증 `total_amount`(최종 청구액)를 그대로 사용
 - `Σ finalAmount ≠ totalAmount` 시 서버 에러 로깅 (클라이언트 미노출)
 
@@ -388,7 +388,7 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - `settlementMembers[].items`: 해당 멤버가 선택한 **모든 receipt의 품목 통합** 목록. EQUAL 시 `null`
 - `settlementMembers[].isMe`: 요청자 본인 여부 (서버가 세션 기준으로 판단)
 - `settlementMembers[].role`: `"HOST" | "MEMBER"`
-- 불변식: `settlementMember.finalAmount == SUM(items[].assignedAmount)`
+- 불변식: 일반 멤버는 `settlementMember.finalAmount == SUM(items[].assignedAmount)`. **주최자(`role=HOST`)는 반올림 차액 흡수분만큼 `finalAmount ≥ SUM(items[].assignedAmount)`** (차액 = `adjustmentAmount`)
 - 불변식: `SUM(settlementMembers[].finalAmount) == settlement.totalAmount`
 - `GET .../settlements/:settlementId` — V2 보류 (MVP 미구현. Gathering 분리 모델 전환 시 활성화)
 
