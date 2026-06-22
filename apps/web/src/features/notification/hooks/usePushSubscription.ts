@@ -4,9 +4,7 @@ const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = atob(base64);
   const output = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; i++) {
@@ -30,7 +28,8 @@ export function usePushSubscription() {
     if (permission === 'denied') {
       return {
         ok: false,
-        error: '브라우저 알림 권한이 거부됐어요. 브라우저 설정에서 허용해주세요.',
+        error:
+          '브라우저 알림 권한이 거부됐어요. 브라우저 설정에서 허용해주세요.',
       };
     }
 
@@ -57,7 +56,10 @@ export function usePushSubscription() {
       }
       return { ok: true };
     } catch {
-      return { ok: false, error: '알림 구독 등록에 실패했어요. 다시 시도해주세요.' };
+      return {
+        ok: false,
+        error: '알림 구독 등록에 실패했어요. 다시 시도해주세요.',
+      };
     }
   }
 
@@ -66,8 +68,7 @@ export function usePushSubscription() {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      const subscription =
-        await registration.pushManager.getSubscription();
+      const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
         await subscription.unsubscribe();
@@ -84,7 +85,10 @@ export function usePushSubscription() {
 
       return { ok: true };
     } catch {
-      return { ok: false, error: '알림 구독 해제에 실패했어요. 다시 시도해주세요.' };
+      return {
+        ok: false,
+        error: '알림 구독 해제에 실패했어요. 다시 시도해주세요.',
+      };
     }
   }
 

@@ -24,10 +24,9 @@ test.describe.skip('송금 — 무인증 접근 차단', () => {
   });
 
   test('무인증 PATCH /payments/:id → 401 UNAUTHORIZED', async ({ request }) => {
-    const res = await request.patch(
-      `${BASE}/meetings/${MID}/payments/${PID}`,
-      { data: { action: 'MARK_PAID' } }
-    );
+    const res = await request.patch(`${BASE}/meetings/${MID}/payments/${PID}`, {
+      data: { action: 'MARK_PAID' },
+    });
     expect(res.status()).toBe(401);
     const body = await res.json();
     expect(body.success).toBe(false);
@@ -39,9 +38,6 @@ test.describe.skip('송금 — 무인증 접근 차단', () => {
 test.describe.skip('송금 — 세션·시드 필��� (fixme)', () => {
   test.fixme('비참여자가 GET /payments → 403 FORBIDDEN', () => {});
   test.fixme('일반 멤버가 MARK_PAID → 403 FORBIDDEN', () => {});
-  test.fixme(
-    '주최자 본인 Payment에 MARK_PENDING → 409 INVALID_PAYMENT_STATUS',
-    () => {}
-  );
+  test.fixme('주최자 본인 Payment에 MARK_PENDING → 409 INVALID_PAYMENT_STATUS', () => {});
   test.fixme('비참여자가 PATCH /payments/:id → 403 FORBIDDEN', () => {});
 });
