@@ -13,7 +13,7 @@ const PID = 'any-payment-id';
  *    CI에 AUTH_SECRET 시크릿 추가(⑤) 또는 current-member.ts try-catch ���가(①) 후 skip 해제.
  */
 
-// 무인증 접근 — AUTH_SECRET 필요
+// 무인증 접근 — CI에 AUTH_SECRET 시크릿 등록 후 skip 해제 (NEXTAUTH_SECRET으로 주입)
 test.describe.skip('송금 — 무인증 접근 차단', () => {
   test('무인증 GET /payments → 401 UNAUTHORIZED', async ({ request }) => {
     const res = await request.get(`${BASE}/meetings/${MID}/payments`);
