@@ -1,13 +1,13 @@
 export interface Coord {
-  lat: number
-  lng: number
+  lat: number;
+  lng: number;
 }
 
 export interface MidpointResult {
-  lat: number
-  lng: number
+  lat: number;
+  lng: number;
   /** 출발지 미입력으로 계산에서 제외된 인원 수 */
-  excludedCount: number
+  excludedCount: number;
 }
 
 /**
@@ -17,19 +17,19 @@ export interface MidpointResult {
  * @returns 중간지점 좌표. 유효한 좌표가 0개면 null.
  */
 export function calcMidpoint(
-  coords: (Coord | null | undefined)[],
+  coords: (Coord | null | undefined)[]
 ): MidpointResult | null {
-  const valid = coords.filter((c): c is Coord => c != null)
-  const excludedCount = coords.length - valid.length
+  const valid = coords.filter((c): c is Coord => c != null);
+  const excludedCount = coords.length - valid.length;
 
-  if (valid.length === 0) return null
+  if (valid.length === 0) return null;
 
-  const sumLat = valid.reduce((sum, c) => sum + c.lat, 0)
-  const sumLng = valid.reduce((sum, c) => sum + c.lng, 0)
+  const sumLat = valid.reduce((sum, c) => sum + c.lat, 0);
+  const sumLng = valid.reduce((sum, c) => sum + c.lng, 0);
 
   return {
     lat: sumLat / valid.length,
     lng: sumLng / valid.length,
     excludedCount,
-  }
+  };
 }
