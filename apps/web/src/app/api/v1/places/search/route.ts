@@ -1,5 +1,5 @@
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
-import { requireUser } from '@/lib/current-member';
+import { requireMember } from '@/lib/current-member';
 
 const KAKAO_KEYWORD_URL = 'https://dapi.kakao.com/v2/local/search/keyword.json';
 
@@ -21,8 +21,13 @@ interface KakaoResponse {
 }
 
 export const GET = handleRoute(async (req: Request) => {
-  await requireUser();
   const { searchParams } = new URL(req.url);
+
+  const meetingId = searchParams.get('meetingId');
+  if (!meetingId?.trim()) {
+    throw new ApiError('VALIDATION_ERROR', 'meetingId는 필수입니다.');
+  }
+  await requireMember(meetingId);
 
   const query = searchParams.get('query') ?? '';
   const x = searchParams.get('x');

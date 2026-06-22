@@ -1,4 +1,9 @@
 @import 'tailwindcss';
+
+@theme inline {
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+}
 @source '../../../../packages/ui/src';
 
 :root {
@@ -68,10 +73,15 @@
   --radius-16: 16px;
   --radius-full: 999px;
 
+  /* ---- Shadcn compatibility ---- */
+  --muted: var(--fill-strong);
+  --muted-foreground: var(--label-alternative);
+
   /* ---- Shadow ---- */
   --shadow-xsmall: 0 1px 0.5px rgba(23, 23, 23, 0.05);
   --shadow-small:
     0 2px 1px rgba(23, 23, 23, 0.03), 0 4px 2.5px rgba(23, 23, 23, 0.03);
+  --shadow-medium: 0 4px 24px rgba(0, 0, 0, 0.1);
   --shadow-large:
     0 6px 3px rgba(23, 23, 23, 0.04), 0 16px 9px rgba(23, 23, 23, 0.04);
 
