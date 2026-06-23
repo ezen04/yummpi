@@ -5,7 +5,8 @@ export type OcrFailureKind =
   | 'INFER_FAILURE'
   | 'INFER_ERROR'
   | 'CONFIG'
-  | 'MALFORMED_RESPONSE';
+  | 'MALFORMED_RESPONSE'
+  | 'QUEUE_OVERFLOW';
 
 export class OcrFailedError extends Error {
   readonly kind: OcrFailureKind;

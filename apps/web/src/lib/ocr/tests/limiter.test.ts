@@ -88,4 +88,74 @@ describe('QueueLimiter', () => {
     await expect(p1).rejects.toThrow('sync boom');
     await expect(p2).resolves.toBe('recovered');
   });
+
+  it('maxQueueSize 초과 시 OcrFailedError(QUEUE_OVERFLOW)로 즉시 reject', async () => {
+    const limiter = new QueueLimiter(1, 2);
+    const d1 = deferred<void>();
+
+    const p1 = limiter.enqueue(async () => {
+      await d1.promise;
+    });
+    const p2 = limiter.enqueue(async () => 'two');
+    const p3 = limiter.enqueue(async () => 'three');
+    // queue=[p2, p3] → length=2 == maxQueueSize. 4번째는 reject.
+    const p4 = limiter.enqueue(async () => 'four');
+
+    await expect(p4).rejects.toMatchObject({
+      name: 'OcrFailedError',
+      kind: 'QUEUE_OVERFLOW',
+    });
+
+    // 정상 흐름 복구 — p1·p2·p3는 영향 없이 진행
+    d1.resolve();
+    await expect(p1).resolves.toBeUndefined();
+    await expect(p2).resolves.toBe('two');
+    await expect(p3).resolves.toBe('three');
+  });
+
+  it('overflow 후 큐가 비면 다시 enqueue 가능 (transient backpressure)', async () => {
+    const limiter = new QueueLimiter(1, 1);
+    const d1 = deferred<void>();
+
+    const p1 = limiter.enqueue(async () => {
+      await d1.promise;
+    });
+    const p2 = limiter.enqueue(async () => 'two'); // 큐에 들어감
+    const p3 = limiter.enqueue(async () => 'three'); // overflow
+
+    await expect(p3).rejects.toMatchObject({ kind: 'QUEUE_OVERFLOW' });
+
+    d1.resolve();
+    await p1;
+    await p2;
+
+    const p4 = limiter.enqueue(async () => 'four');
+    await expect(p4).resolves.toBe('four');
+  });
+
+  it('maxQueueSize 미지정 시 무제한 (기존 동작 유지)', async () => {
+    const limiter = new QueueLimiter(1);
+    const d1 = deferred<void>();
+
+    const blocker = limiter.enqueue(async () => {
+      await d1.promise;
+    });
+    // 50개 enqueue — 모두 큐에 쌓이고 reject 안 됨
+    const tasks = Array.from({ length: 50 }, (_, i) =>
+      limiter.enqueue(async () => i)
+    );
+
+    // 동기 단계에서 reject 발생 여부 점검 — 0ms 대기 후 어떤 promise도 settled-reject 상태가 아님
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const settled = await Promise.race([
+      Promise.allSettled(tasks).then(() => 'all-settled'),
+      new Promise((resolve) => setTimeout(() => resolve('still-pending'), 5)),
+    ]);
+    expect(settled).toBe('still-pending');
+
+    d1.resolve();
+    await blocker;
+    const results = await Promise.all(tasks);
+    expect(results).toHaveLength(50);
+  });
 });

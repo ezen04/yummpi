@@ -22,8 +22,9 @@ const tokens = await callGeneralOcr(imageBase64, 'jpg');
 | `TRANSPORT` | 네트워크/timeout/non-2xx 3회 실패 | "OCR 일시 오류. 잠시 후 다시 시도해주세요" |
 | `INFER_FAILURE` | 200 응답 `inferResult: FAILURE` (영수증 흐림·잘림) | "영수증이 흐릿해요. 다시 찍어주세요" |
 | `INFER_ERROR` | 200 응답 `inferResult: ERROR` (이미지별 처리 예외) | "OCR 처리 중 오류가 발생했어요. 잠시 후 다시 시도해주세요" |
-| `CONFIG` | CLOVA env 미설정 | (서버 설정 오류 — 운영 알림) |
+| `CONFIG` | CLOVA env 미설정 또는 입력 크기(6MB) 초과 | (서버 설정 오류 — 운영 알림) |
 | `MALFORMED_RESPONSE` | CLOVA 응답 형식 이상 | (서버 알림 + 사용자 일반 오류) |
+| `QUEUE_OVERFLOW` | OCR 큐 가득 (한도 50건) — 동시 업로드 폭주 시 | "지금 처리량이 많아요. 잠시 후 다시 시도해주세요" |
 
 서버 Route Handler가 `OcrFailedError`를 catch해서 API 응답으로 변환한 뒤, 클라이언트는 응답 봉투의 `error.code`/`error.details.kind`로 분기하는 게 일반 흐름. 만약 클라이언트 코드에서 직접 `OcrFailedError` 타입을 참조해야 한다면 (드물지만), `'server-only'` 가드를 우회하기 위해 `errors`에서 **직접 import**한다:
 
