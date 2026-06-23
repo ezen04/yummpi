@@ -284,7 +284,7 @@ export function MenuItem({
     <button
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-3 py-[14px] bg-transparent border-none cursor-pointer text-left',
+        'w-full flex items-center gap-3 py-[14px] bg-transparent border-none cursor-pointer text-left transition-colors hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]',
         className
       )}
     >
@@ -352,7 +352,7 @@ export function MenuCheckItem({
     <button
       onClick={() => onChange?.(!isActive)}
       className={cn(
-        'w-full flex items-center gap-3 py-3 bg-transparent border-none cursor-pointer text-left',
+        'w-full flex items-center gap-3 py-3 bg-transparent border-none cursor-pointer text-left transition-colors hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]',
         className
       )}
     >

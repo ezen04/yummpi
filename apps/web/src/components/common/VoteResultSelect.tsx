@@ -33,6 +33,9 @@ export function VoteResultSelect({
         selected
           ? 'border-[1.5px] border-[var(--primary)] bg-[var(--primary-tint)]'
           : 'border border-[var(--line-normal)] bg-[var(--bg-normal)]',
+        !selected &&
+          !disabled &&
+          'hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]',
         disabled ? 'cursor-default opacity-50' : 'cursor-pointer',
         className
       )}
