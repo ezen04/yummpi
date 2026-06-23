@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { runSettlementEngine } from './engine.js';
-import type { SettlementEngineInput } from './types.js';
+import { runSettlementEngine } from './engine';
+import type { SettlementEngineInput } from './types';
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 const memberOf = (
