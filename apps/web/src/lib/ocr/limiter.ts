@@ -8,7 +8,7 @@ interface QueueEntry {
   reject: (reason: unknown) => void;
 }
 
-class QueueLimiter {
+export class QueueLimiter {
   private running = 0;
   private readonly queue: QueueEntry[] = [];
 
