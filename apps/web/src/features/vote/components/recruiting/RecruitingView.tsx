@@ -8,6 +8,7 @@ import { KakaoMap } from '@/components/common/KakaoMap';
 import { Tipbox } from '@/components/common/Tipbox';
 import { PlaceFilterChips } from '@/features/place/components/recommendation/PlaceFilterChips';
 import { PlaceRecommendationList } from '@/features/place/components/recommendation/PlaceRecommendationList';
+import { useOptimalPoint } from '@/features/place/hooks/useOptimalPoint';
 import { usePlaceCandidates } from '@/features/place/hooks/usePlaceCandidates';
 import { usePlaceRecommendations } from '@/features/place/hooks/usePlaceRecommendations';
 import type { RecommendationItem } from '@/features/place/api/placeApi';
@@ -41,8 +42,9 @@ export function RecruitingView({
   const router = useRouter();
   const isHost = viewerRole === 'HOST';
 
-  const lat = meeting.host?.startLatitude ?? null;
-  const lng = meeting.host?.startLongitude ?? null;
+  const { data: optimal } = useOptimalPoint(meeting.id);
+  const lat = optimal?.lat ?? null;
+  const lng = optimal?.lng ?? null;
 
   const { data: recommendations, isLoading: recLoading } =
     usePlaceRecommendations(meeting.id, lat, lng);
