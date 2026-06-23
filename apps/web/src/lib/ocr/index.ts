@@ -15,17 +15,26 @@ export async function callGeneralOcr(
     const result = await retryTransport(() =>
       callClovaGeneralOcr(imageBase64, format)
     );
-    if (result.status === 'SUCCESS') return result.tokens;
-    if (result.status === 'FAILURE') {
-      throw new OcrFailedError(
-        'INFER_FAILURE',
-        result.message ?? 'CLOVA inferResult: FAILURE'
-      );
+    switch (result.status) {
+      case 'SUCCESS':
+        return result.tokens;
+      case 'FAILURE':
+        throw new OcrFailedError(
+          'INFER_FAILURE',
+          result.message ?? 'CLOVA inferResult: FAILURE'
+        );
+      case 'ERROR':
+        throw new OcrFailedError(
+          'INFER_ERROR',
+          result.message ?? 'CLOVA inferResult: ERROR'
+        );
+      default:
+        result satisfies never;
+        throw new OcrFailedError(
+          'MALFORMED_RESPONSE',
+          'unexpected CLOVA inferResult status'
+        );
     }
-    throw new OcrFailedError(
-      'INFER_ERROR',
-      result.message ?? 'CLOVA inferResult: ERROR'
-    );
   });
 }
 
