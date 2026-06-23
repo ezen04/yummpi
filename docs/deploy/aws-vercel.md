@@ -191,6 +191,7 @@ GET /health  →  { "ok": true }
 - server Docker image 빌드 성공 · `/health` 응답 확인
 - server `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` 주입 확인 — **미설정 시 부팅 크래시**(webPush 초기화)
 - web `DATABASE_URL`(pooling) / server `DATABASE_URL`(직접) 분리 확인
+- web Prisma client에 Accelerate extension(`@prisma/extension-accelerate` · `.$extends(withAccelerate())`) 적용 확인 — `prisma://` 경로는 미적용 시 연결 실패
 - `REDIS_URL`(Upstash) web·server 양쪽 주입 + BullMQ enqueue→consume 1회 통과
 - 쿠키 domain `.yummpi.app`로 wss 핸드셰이크 인증(회원·게스트) 통과
 - `prisma migrate deploy` 적용 순서·백업 정책 확인
