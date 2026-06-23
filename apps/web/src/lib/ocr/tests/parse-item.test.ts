@@ -3,7 +3,15 @@ import type { OcrToken } from '@yummpi/schemas';
 import { parseItemLine } from '../parser';
 
 function tok(text: string, opts: Partial<OcrToken> = {}): OcrToken {
-  return { text, cx: 0, cy: 0, confidence: 0.99, width: 20, height: 20, ...opts };
+  return {
+    text,
+    cx: 0,
+    cy: 0,
+    confidence: 0.99,
+    width: 20,
+    height: 20,
+    ...opts,
+  };
 }
 const line = (...texts: string[]) => texts.map((t) => tok(t));
 
