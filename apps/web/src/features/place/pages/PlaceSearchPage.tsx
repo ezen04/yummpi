@@ -3,9 +3,9 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/common/Header';
-import { useMeetingDetail } from '@/features/vote/hooks/useMeetingDetail';
 import { useVote } from '@/hooks/useVote';
 import type { RecommendationItem } from '../api/placeApi';
+import { useOptimalPoint } from '../hooks/useOptimalPoint';
 import { usePlaceCandidates } from '../hooks/usePlaceCandidates';
 import { usePlaceSearch } from '../hooks/usePlaceSearch';
 import { usePlaceChangeStore } from '../stores/usePlaceChangeStore';
@@ -41,11 +41,13 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   const [query, setQuery] = React.useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
 
-  const { data: meeting } = useMeetingDetail(meetingId);
   const { votesData } = useVote(meetingId);
 
-  const lat = meeting?.host?.startLatitude ?? null;
-  const lng = meeting?.host?.startLongitude ?? null;
+  // 중간지점 좌표 — 멤버 출발지 0명이면 훅이 error 상태가 되어 lat/lng = null
+  // → 검색은 전국 단위로 fallback (UX (b))
+  const { data: optimal } = useOptimalPoint(meetingId);
+  const lat = optimal?.lat ?? null;
+  const lng = optimal?.lng ?? null;
 
   const { data: results, isLoading } = usePlaceSearch(
     meetingId,
