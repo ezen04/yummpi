@@ -49,7 +49,8 @@ FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=4000
 WORKDIR /app
-COPY --from=builder /app/out ./
+# node:slim 기본 제공 비-root 유저로 실행 (최소권한). 번들은 읽기 전용으로 충분.
+COPY --from=builder --chown=node:node /app/out ./
 
 EXPOSE 4000
 
@@ -57,4 +58,5 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||4000)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
+USER node
 CMD ["node", "dist/index.js"]
