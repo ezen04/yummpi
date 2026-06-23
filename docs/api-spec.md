@@ -267,7 +267,9 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ### `POST .../receipts/:receiptId/ocr` — OCR 분석 (영수증별 독립) ★ v2.1
 - 응답: `receiptId·ocrStatus·total·items[]`(name·quantity·unitPrice?·totalPrice·confidence)
 - **1장 실패해도 나머지 진행** — 실패 영수증만 `ocrStatus: FAILED` + 수동 입력 fallback
-- ★ v2.2(④ 추가 예정): 응답에 `unclassifiedLines[]`(파서 미분류 원문 라인) 노출 — 검수 화면에서 품목 승격용. 원본은 `receipts.raw_ocr_json`에 보관. 필드 형태는 ④가 확정
+- ★ v2.2(④ 확정): 응답에 `unclassifiedLines: string[]` 노출 — **마스킹된 라인 텍스트만** 반환(토큰·좌표·분류 kind는 서버 내부 보관). 검수 화면에서 품목 승격용. → ⑤ Zod 계약(`@yummpi/schemas`) 반영
+- ★ v2.2(④ 확정): 원본은 `receipts.raw_ocr_json`에 **카드번호 마스킹 후 저장**(파서 `maskSensitive`와 동일 규칙). 마스킹·미분류 라인 추출 모두 **OCR 파서 단계 스코프에 포함**
+- ★ v2.2(④ 예정, **BE 연결 단계**): 응답에 검산 결과 `validation`(`{ ok, issues: [{ code, level, diff? }] }`) 노출 추가 — 검수 화면 SUM_MISMATCH 배너용. 파서 출력(`ocrParserOutputSchema`, 내부)을 라우트에서 응답으로 매핑한다. 파서 출력 `totalAmount` ↔ 응답 `total`은 내부/외부 레이어 차이라 라우트 매핑으로 흡수. (대안: FE가 `total − Σitems`로 직접 산출 가능하나, 서버 단일 출처 위해 응답 노출로 확정.)
 
 ### `GET .../receipts` — 목록
 응답:
