@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import type { MeetingStatus } from '@prisma/client';
 import { Button } from '@yummpi/ui';
 import { prisma } from '@/lib/prisma';
+import { getCurrentMember } from '@/lib/current-member';
+import { StartRecruitingButton } from '@/features/meeting/components/StartRecruitingButton';
 
 /**
  * 입장 후 상태별 라우팅 허브 (결정#4, 2026-06-21).
@@ -69,7 +71,14 @@ export default async function MeetingHubPage({
   });
   if (!meeting) notFound();
 
+  // 상위 layout이 멤버 가드를 통과시키므로 member는 보통 존재. 호스트 전용 액션 판별용.
+  const member = await getCurrentMember(meetingId);
+  const isDraftHost = meeting.status === 'DRAFT' && member?.role === 'HOST';
+
   const stage = stageConfig(meetingId)[meeting.status];
+  const desc = isDraftHost
+    ? '모집을 시작하면 초대 링크로 친구들이 참여할 수 있어요.'
+    : stage.desc;
 
   return (
     <main
@@ -93,12 +102,14 @@ export default async function MeetingHubPage({
           >
             {meeting.title}
           </h1>
-          <p style={{ color: 'var(--label-alternative)' }}>{stage.desc}</p>
+          <p style={{ color: 'var(--label-alternative)' }}>{desc}</p>
         </div>
       </div>
 
       <div className="w-full">
-        {stage.cta ? (
+        {isDraftHost ? (
+          <StartRecruitingButton meetingId={meetingId} />
+        ) : stage.cta ? (
           <Link href={stage.cta.href} className="block w-full">
             <Button className="w-full">{stage.cta.label}</Button>
           </Link>
