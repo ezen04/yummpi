@@ -41,7 +41,10 @@ export default function SettlementResultPage({
       splitMethod: 'ITEM_BASED',
       hostMemberId: HOST_MEMBER_ID,
       participantMemberIds,
-      itemAssignments: seedItemAssignments(allItems, new Set(mySelectedItemIds)),
+      itemAssignments: seedItemAssignments(
+        allItems,
+        new Set(mySelectedItemIds)
+      ),
     });
   } else if (splitMethod === 'EQUAL') {
     const total =

@@ -104,8 +104,8 @@ export default function SettlementConfirmPage({
           // ── 분기 1: 전원 미완료 (게이트) ──
           <>
             <Tipbox>
-              아직 모든 참여자가 소비 항목을 선택하지 않았어요. ({submittedCount}/
-              {MOCK_MEMBERS.length})
+              아직 모든 참여자가 소비 항목을 선택하지 않았어요. (
+              {submittedCount}/{MOCK_MEMBERS.length})
             </Tipbox>
             <p
               className="text-sm font-medium mt-4 mb-2"

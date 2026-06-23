@@ -271,7 +271,10 @@ export default function ReceiptReviewPage({
             >
               전체 영수증 합계 ({receipts.length}장)
             </p>
-            <p className="text-lg font-bold" style={{ color: 'var(--primary)' }}>
+            <p
+              className="text-lg font-bold"
+              style={{ color: 'var(--primary)' }}
+            >
               {grandTotal.toLocaleString()}원
             </p>
           </div>
