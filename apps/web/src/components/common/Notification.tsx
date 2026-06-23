@@ -50,7 +50,9 @@ export function Notification({
       className={cn(
         'flex items-center gap-4 px-[21px] py-[13px]',
         'w-full bg-[var(--bg-normal)] border-b border-[var(--line-neutral)]',
-        onClick ? 'cursor-pointer' : 'cursor-default',
+        onClick
+          ? 'cursor-pointer transition-colors hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]'
+          : 'cursor-default',
         className
       )}
     >

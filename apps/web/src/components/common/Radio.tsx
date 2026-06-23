@@ -24,6 +24,8 @@ export function Radio({
       className={cn(
         'inline-flex items-center gap-[10px]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
+        !disabled && !checked && 'hover:opacity-80',
+        !disabled && 'active:opacity-70 transition-opacity',
         className
       )}
     >

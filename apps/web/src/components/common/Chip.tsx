@@ -31,6 +31,9 @@ export function Chip({
         active
           ? 'border border-[var(--primary-border)] bg-[var(--primary-tint)] text-[var(--primary)]'
           : 'border-[1.5px] border-[var(--line-normal)] bg-transparent text-[var(--label-alternative)]',
+        !active &&
+          !disabled &&
+          'hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]',
         disabled ? 'cursor-default opacity-40' : 'cursor-pointer',
         className
       )}

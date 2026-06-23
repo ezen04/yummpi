@@ -68,7 +68,7 @@ export function TodoCard({ type, onAction, className }: TodoCardProps) {
 
       <button
         onClick={onAction}
-        className="h-9 rounded-[var(--radius-8)] border border-[var(--primary)] bg-transparent text-[13px] font-medium font-[var(--font-sans)] text-[var(--primary)] cursor-pointer"
+        className="h-9 rounded-[var(--radius-8)] border border-[var(--primary)] bg-transparent text-[13px] font-medium font-[var(--font-sans)] text-[var(--primary)] cursor-pointer transition-colors hover:bg-[var(--primary-tint)] active:bg-[var(--primary-tint)]"
       >
         {config.action}
       </button>

@@ -57,7 +57,7 @@ export function Footer(props: FooterProps) {
           'text-[16px] font-semibold font-[var(--font-sans)] border-none',
           disabled
             ? 'bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default'
-            : 'bg-[var(--primary)] text-[var(--static-white)] cursor-pointer'
+            : 'bg-[var(--primary)] text-[var(--static-white)] cursor-pointer transition-colors hover:bg-[var(--primary-strong)] active:bg-[var(--primary-heavy)]'
         )}
       >
         {icon}
