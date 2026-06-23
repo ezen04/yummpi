@@ -17,7 +17,7 @@ export default function SettlementEqualPage({
   const { meetingId } = use(params);
   const router = useRouter();
   const [totalAmount, setTotalAmount] = useState('');
-  const { setSplitMethod } = useSettlementStore();
+  const { setSplitMethod, setEqualAmount } = useSettlementStore();
 
   useEffect(() => {
     setSplitMethod('EQUAL');
@@ -47,11 +47,13 @@ export default function SettlementEqualPage({
         variant="button"
         label="정산 결과로"
         disabled={!totalAmount || Number(totalAmount) <= 0}
-        onClick={() =>
+        onClick={() => {
+          // TODO: POST /settlements { splitMethod:'EQUAL', totalAmount } → 응답 settlementId로 교체
+          setEqualAmount(Number(totalAmount));
           router.push(
             `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/result`
-          )
-        }
+          );
+        }}
       />
     </>
   );
