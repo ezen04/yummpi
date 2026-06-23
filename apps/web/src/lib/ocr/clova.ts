@@ -1,7 +1,6 @@
 import 'server-only';
 
 import axios from 'axios';
-import { randomUUID } from 'node:crypto';
 
 import type { OcrToken } from '@yummpi/schemas';
 
@@ -39,7 +38,7 @@ export async function callClovaGeneralOcr(
     url,
     {
       version: 'V2',
-      requestId: randomUUID(),
+      requestId: crypto.randomUUID(),
       timestamp: Date.now(),
       images: [{ format, name: 'receipt', data: imageBase64 }],
     },
