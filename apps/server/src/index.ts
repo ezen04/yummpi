@@ -11,7 +11,10 @@ const PORT = process.env.PORT ?? 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? 'http://localhost:3000';
 
 const httpServer = createServer((req, res) => {
-  if (req.method === 'GET' && (req.url === '/health' || req.url === '/health/')) {
+  if (
+    req.method === 'GET' &&
+    (req.url === '/health' || req.url === '/health/')
+  ) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
