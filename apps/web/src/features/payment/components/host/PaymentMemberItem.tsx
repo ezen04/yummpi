@@ -41,7 +41,7 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
     () =>
       item.remindCooldownUntil !== null &&
       new Date(item.remindCooldownUntil) > new Date(),
-    () => false,
+    () => false
   );
 
   return (
