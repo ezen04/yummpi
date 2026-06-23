@@ -74,7 +74,7 @@ interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 const BRAND_BASE =
-  'w-full h-12 rounded-[var(--radius-12)] border-none text-[16px] font-semibold font-[var(--font-sans)] cursor-pointer flex items-center justify-center gap-2';
+  'w-full h-12 rounded-[var(--radius-12)] border-none text-[16px] font-semibold font-[var(--font-sans)] cursor-pointer flex items-center justify-center gap-2 transition-opacity hover:opacity-90 active:opacity-80';
 
 export function KakaoLoginButton({
   children = '카카오로 시작하기',
@@ -151,11 +151,12 @@ interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const RADIUS_CLASSES: Record<RadiusVariant, string> = {
-  radius: 'bg-[var(--fill-normal)] text-[var(--label-alternative)]',
+  radius:
+    'bg-[var(--fill-normal)] text-[var(--label-alternative)] hover:bg-[var(--fill-strong)] active:bg-[var(--fill-strong)]',
   'radius-border':
-    'bg-transparent text-[var(--label-normal)] border border-[var(--line-normal)]',
+    'bg-transparent text-[var(--label-normal)] border border-[var(--line-normal)] hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]',
   'radius-border-colored':
-    'bg-transparent text-[var(--primary)] border border-[var(--primary)]',
+    'bg-transparent text-[var(--primary)] border border-[var(--primary)] hover:bg-[var(--primary-tint)] active:bg-[var(--primary-tint)]',
   'radius-border-inactive':
     'bg-[var(--fill-disable)] text-[var(--label-disable)] border border-[var(--line-alternative)] cursor-default',
   'radius-border-selected':
@@ -172,7 +173,7 @@ export function RadiusButton({
     <button
       className={cn(
         'inline-flex items-center justify-center gap-1 h-8 px-[14px]',
-        'rounded-[var(--radius-full)] text-[13px] font-semibold font-[var(--font-sans)] cursor-pointer',
+        'rounded-[var(--radius-full)] text-[13px] font-semibold font-[var(--font-sans)] cursor-pointer transition-colors',
         RADIUS_CLASSES[variant],
         className
       )}

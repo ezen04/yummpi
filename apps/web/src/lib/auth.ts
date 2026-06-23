@@ -11,10 +11,16 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'database',
   },
+  pages: {
+    // OAuth 실패·취소 시 NextAuth 기본 화면 대신 커스텀 안내로.
+    error: '/login/error',
+  },
   providers: [
     KakaoProvider({
       clientId: process.env.KAKAO_CLIENT_ID!,
       clientSecret: process.env.KAKAO_CLIENT_SECRET!,
+      // 카카오 닉네임 수집(정책: 닉네임만, 이메일 제외). 콘솔 동의항목 ON 필요.
+      authorization: { params: { scope: 'profile_nickname' } },
     }),
   ],
   callbacks: {

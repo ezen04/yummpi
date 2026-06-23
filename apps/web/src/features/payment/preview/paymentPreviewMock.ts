@@ -139,7 +139,9 @@ export const MOCK_PAYMENTS_HOST_IN_PROGRESS: PaymentListItem[] = [
     paidAt: null,
     isMine: false,
     isGuest: false,
-    remindCooldownUntil: null,
+    remindCooldownUntil: new Date(
+      Date.now() + 20 * 60 * 60 * 1000
+    ).toISOString(),
     canReportTransfer: false,
     canCancelTransfer: false,
     canMarkPaid: false,
@@ -282,7 +284,9 @@ export type PaymentPreviewSection =
   | 'member-paid'
   | 'member-exempt'
   | 'guest-pending'
-  | 'meeting-completed';
+  | 'meeting-completed'
+  | 'notification'
+  | 'notification-settings';
 
 export const PAYMENT_PREVIEW_SECTIONS: {
   id: PaymentPreviewSection;
@@ -304,4 +308,6 @@ export const PAYMENT_PREVIEW_SECTIONS: {
   { id: 'member-exempt', label: '멤버 — 면제' },
   { id: 'guest-pending', label: '게스트 — 송금 전' },
   { id: 'meeting-completed', label: '모임 종료 완료' },
+  { id: 'notification', label: '알림 컴포넌트' },
+  { id: 'notification-settings', label: '알림 설정 폼' },
 ];

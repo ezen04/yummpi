@@ -1,7 +1,14 @@
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Button } from '@yummpi/ui';
 import { KakaoLoginButton } from '@/components/auth/KakaoLoginButton';
+import { getCurrentUser } from '@/lib/current-member';
 
-export default function Home() {
+// 로그인 회원은 대시보드로 보낸다(결정: /dashboard 생기면 자동 리다이렉트 연결).
+export default async function Home() {
+  const user = await getCurrentUser();
+  if (user) redirect('/dashboard');
+
   return (
     <main
       className="min-h-screen flex flex-col items-center justify-between px-6 py-16"
@@ -19,15 +26,13 @@ export default function Home() {
 
       {/* 진입 CTA */}
       <div className="flex w-full max-w-xs flex-col gap-3">
-        <KakaoLoginButton callbackUrl="/" />
-        {/*
-          "초대 링크로 입장하기"는 결정#2(딥링크 전용 vs 코드 직접 입력)
-          확정 전까지 보류. 결정 후 활성화한다.
-          (docs/온보딩-화면-체크리스트.md 결정 대기 2번)
-        */}
-        <Button variant="outline" className="w-full" disabled>
-          초대 링크로 입장하기 (준비 중)
-        </Button>
+        <KakaoLoginButton callbackUrl="/dashboard" />
+        {/* 결정#2: 딥링크 + 코드 직접 입력 둘 다 허용 → /join 코드 입력 화면으로 */}
+        <Link href="/join" className="w-full">
+          <Button variant="outline" className="w-full">
+            초대 링크로 입장하기
+          </Button>
+        </Link>
       </div>
     </main>
   );

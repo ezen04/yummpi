@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
+import { PWAInstallBanner } from '@/features/pwa/PWAInstallBanner';
 
 export const metadata: Metadata = {
   title: 'yummpi',
@@ -33,9 +34,12 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
         />
       </head>
-      <body>
+      <body className="bg-[var(--bg-alternative)]">
         <SessionProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            {children}
+            <PWAInstallBanner />
+          </QueryProvider>
         </SessionProvider>
       </body>
     </html>
