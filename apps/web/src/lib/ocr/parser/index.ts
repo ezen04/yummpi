@@ -82,13 +82,7 @@ export function parseItemLine(tokens: OcrToken[]): ParsedItem | null {
   // 3숫자: 곱셈 매치 + 작은 쪽 ≤99 → 작은 쪽=수량·큰 쪽=단가. 아니면 금액만 확정·폴백.
   const [x, y] = nums;
   if (x * y === total && Math.min(x, y) <= 99) {
-    return item(
-      name,
-      Math.min(x, y),
-      Math.max(x, y),
-      total,
-      confidence
-    );
+    return item(name, Math.min(x, y), Math.max(x, y), total, confidence);
   }
   return item(name, 1, null, total, confidence);
 }
@@ -194,10 +188,7 @@ export function parseReceipt(tokens: OcrToken[]): OcrParserOutput {
       if (totalKwIdx !== -1) {
         const amount = extractLastNumber(lineTokens);
         if (amount !== null) {
-          if (
-            totalCandidate === null ||
-            totalKwIdx < totalCandidate.priority
-          ) {
+          if (totalCandidate === null || totalKwIdx < totalCandidate.priority) {
             totalCandidate = { priority: totalKwIdx, amount };
           }
           afterTotal = true;
