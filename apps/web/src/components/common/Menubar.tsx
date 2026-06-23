@@ -1,9 +1,17 @@
 'use client';
 
-import { Home, Users, Plus, Bell, User } from '@yummpi/ui';
+import Image from 'next/image';
+import { Plus } from '@yummpi/ui';
 import { cn } from '@/lib/utils';
 
 type TabKey = 'home' | 'meetings' | 'notifications' | 'mypage';
+
+interface TabConfig {
+  key: TabKey;
+  activeIcon: string;
+  mutedIcon: string;
+  label: string;
+}
 
 interface MenubarProps {
   activeTab: TabKey;
@@ -12,14 +20,34 @@ interface MenubarProps {
   className?: string;
 }
 
-const LEFT_TABS = [
-  { key: 'home' as TabKey, Icon: Home, label: '홈' },
-  { key: 'meetings' as TabKey, Icon: Users, label: '모임' },
+const LEFT_TABS: TabConfig[] = [
+  {
+    key: 'home',
+    activeIcon: '/icons/home_active.png',
+    mutedIcon: '/icons/home_muted.png',
+    label: '홈',
+  },
+  {
+    key: 'meetings',
+    activeIcon: '/icons/people_active.png',
+    mutedIcon: '/icons/people_muted.png',
+    label: '모임',
+  },
 ];
 
-const RIGHT_TABS = [
-  { key: 'notifications' as TabKey, Icon: Bell, label: '알림' },
-  { key: 'mypage' as TabKey, Icon: User, label: '마이' },
+const RIGHT_TABS: TabConfig[] = [
+  {
+    key: 'notifications',
+    activeIcon: '/icons/notification_active.png',
+    mutedIcon: '/icons/notification_muted.png',
+    label: '알림',
+  },
+  {
+    key: 'mypage',
+    activeIcon: '/icons/mypage_active.png',
+    mutedIcon: '/icons/mypage_muted.png',
+    label: '마이',
+  },
 ];
 
 export function Menubar({
@@ -33,6 +61,32 @@ export function Menubar({
   const TAB_LABEL =
     'text-[11px] leading-[14px] font-normal font-[var(--font-sans)]';
 
+  const renderTab = (tab: TabConfig) => {
+    const isActive = activeTab === tab.key;
+    return (
+      <button
+        key={tab.key}
+        onClick={() => onTabChange(tab.key)}
+        className={TAB_BTN}
+      >
+        <Image
+          src={isActive ? tab.activeIcon : tab.mutedIcon}
+          alt=""
+          width={20}
+          height={20}
+        />
+        <span
+          className={cn(
+            TAB_LABEL,
+            isActive ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]'
+          )}
+        >
+          {tab.label}
+        </span>
+      </button>
+    );
+  };
+
   return (
     <nav
       className={cn(
@@ -42,32 +96,7 @@ export function Menubar({
       )}
       style={{ paddingBottom: 'max(30px, env(safe-area-inset-bottom))' }}
     >
-      {LEFT_TABS.map(({ key, Icon, label }) => {
-        const isActive = activeTab === key;
-        return (
-          <button
-            key={key}
-            onClick={() => onTabChange(key)}
-            className={TAB_BTN}
-          >
-            <Icon
-              size={20}
-              strokeWidth={1.5}
-              color={isActive ? 'var(--primary)' : 'var(--label-assistive)'}
-            />
-            <span
-              className={cn(
-                TAB_LABEL,
-                isActive
-                  ? 'text-[var(--primary)]'
-                  : 'text-[var(--label-assistive)]'
-              )}
-            >
-              {label}
-            </span>
-          </button>
-        );
-      })}
+      {LEFT_TABS.map(renderTab)}
 
       <button
         onClick={onCreateClick}
@@ -81,32 +110,7 @@ export function Menubar({
         </span>
       </button>
 
-      {RIGHT_TABS.map(({ key, Icon, label }) => {
-        const isActive = activeTab === key;
-        return (
-          <button
-            key={key}
-            onClick={() => onTabChange(key)}
-            className={TAB_BTN}
-          >
-            <Icon
-              size={20}
-              strokeWidth={1.5}
-              color={isActive ? 'var(--primary)' : 'var(--label-assistive)'}
-            />
-            <span
-              className={cn(
-                TAB_LABEL,
-                isActive
-                  ? 'text-[var(--primary)]'
-                  : 'text-[var(--label-assistive)]'
-              )}
-            >
-              {label}
-            </span>
-          </button>
-        );
-      })}
+      {RIGHT_TABS.map(renderTab)}
     </nav>
   );
 }
