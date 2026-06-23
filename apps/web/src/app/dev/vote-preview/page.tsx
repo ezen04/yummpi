@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { PlaceConfirmedView } from '@/features/vote/components/completed/PlaceConfirmedView';
 import { RecruitingView } from '@/features/vote/components/recruiting/RecruitingView';
@@ -39,11 +39,15 @@ function DevBanner({
   currentRole,
   currentCandidates,
   currentMyVote,
+  currentTied,
+  currentClosed,
 }: {
   currentStatus: MeetingStatus;
   currentRole: 'HOST' | 'MEMBER';
   currentCandidates: number;
   currentMyVote: number | null;
+  currentTied: boolean;
+  currentClosed: boolean;
 }) {
   const router = useRouter();
 
@@ -52,13 +56,25 @@ function DevBanner({
     role?: 'HOST' | 'MEMBER';
     candidates?: number;
     myVote?: number | null;
+    tied?: boolean;
+    closed?: boolean;
   }) => {
     const status = next.status ?? currentStatus;
     const role = next.role ?? currentRole;
     const candidates = next.candidates ?? currentCandidates;
     const myVote = 'myVote' in next ? next.myVote : currentMyVote;
     const myVoteParam = myVote == null ? '' : String(myVote);
-    return `/dev/vote-preview?status=${status}&role=${role}&candidates=${candidates}&myVote=${myVoteParam}`;
+    const tied = next.tied ?? currentTied;
+    const closed = next.closed ?? currentClosed;
+    const params = new URLSearchParams({
+      status,
+      role,
+      candidates: String(candidates),
+      myVote: myVoteParam,
+      tied: tied ? '1' : '0',
+      closed: closed ? '1' : '0',
+    });
+    return `/dev/vote-preview?${params.toString()}`;
   };
 
   return (
@@ -124,6 +140,24 @@ function DevBanner({
           {i}
         </button>
       ))}
+      <span>·</span>
+      <button
+        onClick={() => router.push(buildHref({ tied: !currentTied }))}
+        className={
+          'underline ' + (currentTied ? 'font-bold' : 'font-normal opacity-60')
+        }
+      >
+        tied
+      </button>
+      <button
+        onClick={() => router.push(buildHref({ closed: !currentClosed }))}
+        className={
+          'underline ' +
+          (currentClosed ? 'font-bold' : 'font-normal opacity-60')
+        }
+      >
+        closed
+      </button>
     </div>
   );
 }
@@ -155,8 +189,15 @@ function VotePreviewInner() {
       ? Math.max(0, Math.min(3, Number(myVoteParam)))
       : null;
 
+  const tied = searchParams.get('tied') === '1';
+  const closed = searchParams.get('closed') === '1';
+
   const meeting = { ...MOCK_MEETING, status };
-  const votesData = buildMockVotes(candidateCount, { myVoteIndex });
+  const votesData = buildMockVotes(candidateCount, {
+    myVoteIndex,
+    tied,
+    closed,
+  });
 
   // 추천 장소를 query 캐시에 직접 주입 → fetch 우회
   useEffect(() => {
@@ -216,6 +257,8 @@ function VotePreviewInner() {
         currentRole={viewerRole}
         currentCandidates={candidateCount}
         currentMyVote={myVoteIndex}
+        currentTied={tied}
+        currentClosed={closed}
       />
       <div className="flex-1 min-h-0 flex flex-col">{view}</div>
     </VoteScreenContainer>
@@ -223,6 +266,9 @@ function VotePreviewInner() {
 }
 
 export default function VotePreviewPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
   return (
     <Suspense fallback={null}>
       <VotePreviewInner />

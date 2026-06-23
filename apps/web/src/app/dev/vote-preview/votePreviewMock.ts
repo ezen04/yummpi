@@ -102,11 +102,24 @@ const MOCK_CANDIDATES: VoteCandidate[] = [
   },
 ];
 
+const oneHourAgo = new Date(Date.now() - 3600_000).toISOString();
+
 export function buildMockVotes(
   candidateCount: number,
-  options: { myVoteIndex?: number | null } = {}
+  options: {
+    myVoteIndex?: number | null;
+    tied?: boolean;
+    closed?: boolean;
+  } = {}
 ): VotesData {
-  const candidates = MOCK_CANDIDATES.slice(
+  const sourceCandidates = options.tied
+    ? // 동률 시나리오: 1·2번 후보 모두 4표
+      MOCK_CANDIDATES.map((c, i) =>
+        i === 1 ? { ...c, voteCount: 4, voteRate: 50 } : c
+      )
+    : MOCK_CANDIDATES;
+
+  const candidates = sourceCandidates.slice(
     0,
     Math.min(Math.max(candidateCount, 0), MOCK_CANDIDATES.length)
   );
@@ -115,9 +128,12 @@ export function buildMockVotes(
     myVoteIndex != null && candidates[myVoteIndex]
       ? candidates[myVoteIndex].id
       : null;
+
+  const votingClosesAt = options.closed ? oneHourAgo : oneHourLater;
+
   return {
     isAnonymous: true,
-    votingClosesAt: oneHourLater,
+    votingClosesAt,
     confirmedCandidateId: null,
     myCandidateId,
     totalVoters: 8,
