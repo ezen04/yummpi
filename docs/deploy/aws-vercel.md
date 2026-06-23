@@ -71,7 +71,7 @@ secret은 각 플랫폼 secret store에서 관리한다. Vercel = Project Enviro
 
 ## 5. 환경변수 (이름만, 실값 제외)
 
-> 키 이름은 코드 기준 확정 후 통일한다(예: S3 버킷, Auth secret).
+> 키 이름은 코드(`process.env.*`) 기준으로 확정했다. S3 키는 2차 구현 전이라 CLAUDE.md 컨벤션(`AWS_S3_BUCKET`)을 따른다.
 
 ### Vercel (`apps/web`)
 
@@ -81,14 +81,17 @@ NEXTAUTH_SECRET
 DATABASE_URL                 # Accelerate(pooling) 경로
 REDIS_URL                    # Upstash rediss://
 NEXT_PUBLIC_SOCKET_URL       # https://ws.yummpi.app
+GUEST_TOKEN_SECRET
 KAKAO_CLIENT_ID
 KAKAO_CLIENT_SECRET
 KAKAO_REST_API_KEY           # 서버사이드 전용
 NEXT_PUBLIC_KAKAO_MAP_KEY    # 브라우저 지도
+CLOVA_OCR_INVOKE_URL         # OCR (web API route)
+CLOVA_OCR_SECRET
 NEXT_PUBLIC_VAPID_PUBLIC_KEY
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
-S3_BUCKET
+AWS_S3_BUCKET
 AWS_REGION
 ```
 
