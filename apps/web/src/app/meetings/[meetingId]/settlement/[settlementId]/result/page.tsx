@@ -203,10 +203,7 @@ export default function SettlementResultPage({
       <Footer
         variant="button"
         label="송금하기"
-        onClick={() =>
-          // TODO: ⑤ 송금 화면 경로 받으면 교체 (현재는 임시로 모임으로 이동)
-          router.push(`/meetings/${meetingId}`)
-        }
+        onClick={() => router.push(`/meetings/${meetingId}/payments`)}
       />
     </>
   );
