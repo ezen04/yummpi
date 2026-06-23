@@ -12,6 +12,8 @@ import { PaymentJoinRequired } from '@/features/payment/components/shell/Payment
 import { PaymentLoadingSkeleton } from '@/features/payment/components/shell/PaymentLoadingSkeleton';
 import { PaymentNotInitializedState } from '@/features/payment/components/shell/PaymentNotInitializedState';
 import { PaymentSummaryPanel } from '@/features/payment/components/summary/PaymentSummaryPanel';
+import { NotificationsView } from '@/features/notification/components/NotificationsView';
+import { NotificationSettingsForm } from '@/features/notification/components/NotificationSettingsForm';
 import { useHostAccountStore } from '@/features/payment/stores/useHostAccountStore';
 import type {
   PaymentAction,
@@ -192,6 +194,21 @@ function PreviewContent({ active }: { active: PaymentPreviewSection }) {
         placeName="강남 화로상회"
         placeDateTime="6.13 (금) 19:00"
       />
+    );
+  }
+
+  if (active === 'notification') {
+    return <NotificationsView />;
+  }
+
+  if (active === 'notification-settings') {
+    return (
+      <div className="flex flex-col h-full overflow-y-auto bg-[var(--bg-alternative)] px-5 py-6">
+        <p className="text-xs text-[var(--label-assistive)] mb-4">
+          실제 API(/api/v1/users/me) 연결 — 로그인 회원의 설정이 표시됩니다.
+        </p>
+        <NotificationSettingsForm />
+      </div>
     );
   }
 

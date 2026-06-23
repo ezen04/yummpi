@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { Button } from '@/components/common/Button';
 import { formatAmount, formatCooldownUntil } from '../../utils/transferMock';
 import { PaymentConfirmbox } from '../shell/PaymentConfirmbox';
@@ -36,9 +36,13 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const badge = STATUS_BADGE[item.status] ?? null;
   const isHost = viewerRole === 'HOST';
   const isHostSelf = item.isMine && isHost;
-  const isCooldown =
-    item.remindCooldownUntil !== null &&
-    new Date(item.remindCooldownUntil) > new Date();
+  const isCooldown = useSyncExternalStore(
+    () => () => {},
+    () =>
+      item.remindCooldownUntil !== null &&
+      new Date(item.remindCooldownUntil) > new Date(),
+    () => false
+  );
 
   return (
     <>
