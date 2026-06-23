@@ -127,8 +127,9 @@ model Account {
   type              String
   provider          String // 'kakao'
   providerAccountId String  @map("provider_account_id") // = kakaoId
-  refresh_token     String? @map("refresh_token") @db.Text
-  access_token      String? @map("access_token") @db.Text
+  refresh_token            String? @map("refresh_token") @db.Text
+  refresh_token_expires_in Int?    @map("refresh_token_expires_in")
+  access_token             String? @map("access_token") @db.Text
   expires_at        Int?    @map("expires_at")
   token_type        String? @map("token_type")
   scope             String?
