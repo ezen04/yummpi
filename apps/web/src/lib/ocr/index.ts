@@ -7,10 +7,18 @@ import { OcrFailedError } from './errors';
 import { ocrLimiter } from './limiter';
 import { retryTransport } from './retry';
 
+const MAX_BASE64_BYTES = 6 * 1024 * 1024;
+
 export async function callGeneralOcr(
   imageBase64: string,
   format: 'jpg' | 'png' | 'jpeg'
 ): Promise<OcrToken[]> {
+  if (imageBase64.length > MAX_BASE64_BYTES) {
+    throw new OcrFailedError(
+      'CONFIG',
+      `imageBase64 length ${imageBase64.length} exceeds CLOVA OCR limit (${MAX_BASE64_BYTES} bytes)`
+    );
+  }
   return ocrLimiter.enqueue(async () => {
     const result = await retryTransport(() =>
       callClovaGeneralOcr(imageBase64, format)
