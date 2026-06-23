@@ -152,11 +152,11 @@ interface RadiusButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 
 const RADIUS_CLASSES: Record<RadiusVariant, string> = {
   radius:
-    'bg-[var(--fill-normal)] text-[var(--label-alternative)] hover:bg-[var(--fill-strong)] active:opacity-80',
+    'bg-[var(--fill-normal)] text-[var(--label-alternative)] hover:bg-[var(--fill-strong)] active:bg-[var(--fill-strong)]',
   'radius-border':
     'bg-transparent text-[var(--label-normal)] border border-[var(--line-normal)] hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]',
   'radius-border-colored':
-    'bg-transparent text-[var(--primary)] border border-[var(--primary)] hover:bg-[var(--primary-tint)] active:opacity-80',
+    'bg-transparent text-[var(--primary)] border border-[var(--primary)] hover:bg-[var(--primary-tint)] active:bg-[var(--primary-tint)]',
   'radius-border-inactive':
     'bg-[var(--fill-disable)] text-[var(--label-disable)] border border-[var(--line-alternative)] cursor-default',
   'radius-border-selected':
