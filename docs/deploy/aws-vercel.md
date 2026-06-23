@@ -189,6 +189,7 @@ GET /health  →  { "ok": true }
 - `pnpm --filter @yummpi/server typecheck` / `test`
 - `pnpm --filter @yummpi/web typecheck` / `lint`
 - server Docker image 빌드 성공 · `/health` 응답 확인
+- server `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` 주입 확인 — **미설정 시 부팅 크래시**(webPush 초기화)
 - web `DATABASE_URL`(pooling) / server `DATABASE_URL`(직접) 분리 확인
 - `REDIS_URL`(Upstash) web·server 양쪽 주입 + BullMQ enqueue→consume 1회 통과
 - 쿠키 domain `.yummpi.app`로 wss 핸드셰이크 인증(회원·게스트) 통과
