@@ -84,7 +84,7 @@ export function TransferStatusPage({ meetingId }: Props) {
           onRefresh={invalidatePayments}
           onReportTransfer={handleReportTransfer}
           onCancelTransfer={handleCancelTransfer}
-          onReportSuccess={() => router.push('./done')}
+          onReportSuccess={() => router.push(`/meetings/${meetingId}/payments/transfer/done`)}
         />
       </>
     );
