@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check } from '@yummpi/ui';
 import { Toggle } from '@/components/common/Toggle';
+import { type ApiEnvelope } from '@yummpi/schemas';
 import { usePushSubscription } from '../hooks/usePushSubscription';
 import { useAppInstalled } from '../hooks/useAppInstalled';
 import { usePushPermission } from '../hooks/usePushPermission';
@@ -15,14 +16,8 @@ interface UserSettings {
 
 const USER_SETTINGS_KEY = ['user', 'me'] as const;
 
-interface ApiEnvelope<T> {
-  success: boolean;
-  data?: T;
-  error?: { code: string; message: string };
-}
-
 function extractData<T>(envelope: ApiEnvelope<T>): T {
-  if (!envelope.success || !envelope.data) {
+  if (!envelope.success || envelope.data === undefined) {
     throw new Error(envelope.error?.message ?? 'API error');
   }
   return envelope.data;
