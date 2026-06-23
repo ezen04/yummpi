@@ -1,4 +1,5 @@
 export * from './common';
 export * from './enums';
+export * from './ocr-response';
 export * from './payment';
 export * from './pushSubscription';
