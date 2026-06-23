@@ -12,7 +12,7 @@ import { z } from 'zod';
 export const ocrValidationIssueSchema = z.object({
   code: z.enum(['NO_TOTAL', 'SUM_MISMATCH']),
   level: z.literal('error'), // P0 은 error 만. '품목 누락 의심'(warn)은 P1
-  diff: z.number().int().optional(), // SUM_MISMATCH 차액(residual = total − Σitems, 음수)
+  diff: z.number().int().optional(), // 부호 있는 residual = total − Σitems (양수=품목 누락/저인식, 음수=과대인식)
 });
 
 export const ocrValidationSchema = z.object({
