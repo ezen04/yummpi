@@ -38,6 +38,11 @@ export async function callClovaGeneralOcr(
     url,
     {
       version: 'V2',
+      // NCloud OCR 공식 문서상 requestId는 단순 추적용 UUID이며 멱등성·중복
+      // 제거 정책이 명시돼 있지 않다. retry layer에서 호출이 반복되면 매번
+      // 새 UUID가 발급된다 → CLOVA 측 dedup이 있더라도 의존하지 않는 안전
+      // 기본값. ④이 CLOVA 콘솔에서 quota 영향을 관찰한 뒤 stable id로
+      // 바꿀지 결정한다.
       requestId: crypto.randomUUID(),
       timestamp: Date.now(),
       images: [{ format, name: 'receipt', data: imageBase64 }],
