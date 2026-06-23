@@ -82,7 +82,13 @@ export function Header({
             <ChevronLeft size={24} strokeWidth={1.5} />
           </button>
         ) : (
-          <div className={cn(ICON_BTN, 'shrink-0 pointer-events-none cursor-default')} aria-hidden="true" />
+          <div
+            className={cn(
+              ICON_BTN,
+              'shrink-0 pointer-events-none cursor-default'
+            )}
+            aria-hidden="true"
+          />
         )}
 
         {greeting ? (
