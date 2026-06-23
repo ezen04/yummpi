@@ -12,6 +12,7 @@ import { IconButton } from '@/components/common/IconButton';
 import {
   FLOW_STEPS,
   MOCK_OCR_FAILED_RATE,
+  MOCK_RECEIPT_SETS,
 } from '@/features/settlement/constants';
 
 const MAX = 4;
@@ -41,34 +42,10 @@ export default function SettlementReceiptPage({
       updateOcrResult(id, [], 'FAILED');
       return;
     }
-    // Mock: simulate OCR success with sample items
-    updateOcrResult(
-      id,
-      [
-        {
-          id: `${id}-1`,
-          name: '삼겹살',
-          quantity: 2,
-          unitPrice: 15000,
-          totalPrice: 30000,
-        },
-        {
-          id: `${id}-2`,
-          name: '냉면',
-          quantity: 1,
-          unitPrice: 12000,
-          totalPrice: 12000,
-        },
-        {
-          id: `${id}-3`,
-          name: '소주',
-          quantity: 3,
-          unitPrice: 5000,
-          totalPrice: 15000,
-        },
-      ],
-      'SUCCEEDED'
-    );
+    // Mock: 영수증 index별로 다른 항목 세트 (다중 영수증 합산 검증용)
+    const set = MOCK_RECEIPT_SETS[receipts.length % MOCK_RECEIPT_SETS.length];
+    const items = set.map((it, i) => ({ ...it, id: `${id}-${i + 1}` }));
+    updateOcrResult(id, items, 'SUCCEEDED');
   };
 
   const handleBack = () => {

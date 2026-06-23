@@ -1,19 +1,22 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ChevronRight } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { PersonResultItem } from '@/components/common/List';
-
-// TODO: 실제 API 연결 시 settlement.members(final_amount 포함) · settlement.totalAmount 그대로 사용.
-// 서버 분배 엔진이 splitMethod 기준으로 이미 계산해서 보내므로 클라이언트 분기/재계산 불필요.
-const MOCK_MEMBERS = [
-  { name: '홍길동', amount: 32000, isMe: true },
-  { name: '김철수', amount: 15000, isMe: false },
-  { name: '이영희', amount: 22700, isMe: false },
-  { name: '박민준', amount: 9000, isMe: false },
-];
+import { useSettlementStore } from '@/features/settlement/store';
+import {
+  runSettlementEngine,
+  type SettlementEngineOutput,
+} from '@/lib/settlement-engine';
+import {
+  MOCK_MEMBERS,
+  HOST_MEMBER_ID,
+  ME_MEMBER_ID,
+  seedItemAssignments,
+} from '@/features/settlement/constants';
 
 export default function SettlementResultPage({
   params,
@@ -22,8 +25,55 @@ export default function SettlementResultPage({
 }) {
   const { meetingId } = use(params);
   const router = useRouter();
+  const { receipts, splitMethod, equalAmount, mySelectedItemIds } =
+    useSettlementStore();
 
-  const total = MOCK_MEMBERS.reduce((sum, m) => sum + m.amount, 0);
+  const [myOpen, setMyOpen] = useState(false);
+
+  // mock 한정 FE 계산. 실제: GET /settlement.settlementMembers[].finalAmount 그대로 표시
+  // (서버가 계산 — 클라 재계산/엔진 호출 제거).
+  const allItems = receipts.flatMap((r) => r.ocrItems);
+  const participantMemberIds = MOCK_MEMBERS.map((m) => m.memberId);
+
+  let result: SettlementEngineOutput | null = null;
+  if (splitMethod === 'ITEM_BASED' && allItems.length > 0) {
+    result = runSettlementEngine({
+      splitMethod: 'ITEM_BASED',
+      hostMemberId: HOST_MEMBER_ID,
+      participantMemberIds,
+      itemAssignments: seedItemAssignments(
+        allItems,
+        new Set(mySelectedItemIds)
+      ),
+    });
+  } else if (splitMethod === 'EQUAL') {
+    const total =
+      receipts.length > 0
+        ? allItems.reduce((s, it) => s + it.totalPrice, 0)
+        : (equalAmount ?? 0);
+    if (total > 0) {
+      result = runSettlementEngine({
+        splitMethod: 'EQUAL',
+        totalAmount: total,
+        hostMemberId: HOST_MEMBER_ID,
+        participantMemberIds,
+      });
+    }
+  }
+
+  const memberById = new Map(MOCK_MEMBERS.map((m) => [m.memberId, m]));
+  const myAmount =
+    result?.members.find((m) => m.memberId === ME_MEMBER_ID)?.finalAmount ?? 0;
+
+  // 내가 선택한 항목(이름 + 배분 금액). ITEM_BASED만 존재 — 엔진 itemAssignments에서 나만 필터.
+  // 실제: GET /settlement.itemAssignments에서 memberId===me 필터로 동일하게 매핑.
+  const itemNameById = new Map(allItems.map((it) => [it.id, it.name]));
+  const myItems = (result?.itemAssignments ?? [])
+    .filter((a) => a.memberId === ME_MEMBER_ID)
+    .map((a) => ({
+      name: itemNameById.get(a.receiptItemId) ?? a.receiptItemId,
+      assignedAmount: a.assignedAmount,
+    }));
 
   return (
     <>
@@ -47,48 +97,113 @@ export default function SettlementResultPage({
             className="text-[13px] mt-1 mb-0"
             style={{ color: 'var(--label-assistive)' }}
           >
-            각자의 정산 금액을 확인해보세요
+            내 송금 금액 {myAmount.toLocaleString()}원
           </p>
         </div>
 
-        <div
-          className="px-5 divide-y"
-          style={{ borderColor: 'var(--line-alternative)' }}
-        >
-          {MOCK_MEMBERS.map((member) => (
-            <PersonResultItem
-              key={member.name}
-              name={member.name}
-              isMe={member.isMe}
-              resultLabel={`${member.amount.toLocaleString()}원`}
-              resultVariant={member.isMe ? 'primary' : 'default'}
-            />
-          ))}
-        </div>
+        {result ? (
+          <>
+            <div
+              className="px-5 divide-y"
+              style={{ borderColor: 'var(--line-alternative)' }}
+            >
+              {result.members.map((mem) => {
+                const info = memberById.get(mem.memberId);
+                const isMe = mem.memberId === ME_MEMBER_ID;
+                const canToggle = isMe && myItems.length > 0;
+                return (
+                  <div key={mem.memberId}>
+                    {canToggle ? (
+                      <button
+                        type="button"
+                        onClick={() => setMyOpen((v) => !v)}
+                        className="w-full flex items-center text-left"
+                      >
+                        <PersonResultItem
+                          className="flex-1 pointer-events-none"
+                          name={info?.nickname ?? mem.memberId}
+                          isMe={isMe}
+                          isHost={mem.memberId === HOST_MEMBER_ID}
+                          resultLabel={`${mem.finalAmount.toLocaleString()}원`}
+                          resultVariant="primary"
+                        />
+                        <ChevronRight
+                          size={16}
+                          color="var(--label-assistive)"
+                          className={`shrink-0 transition-transform ${
+                            myOpen ? 'rotate-90' : ''
+                          }`}
+                        />
+                      </button>
+                    ) : (
+                      <PersonResultItem
+                        name={info?.nickname ?? mem.memberId}
+                        isMe={isMe}
+                        isHost={mem.memberId === HOST_MEMBER_ID}
+                        resultLabel={`${mem.finalAmount.toLocaleString()}원`}
+                        resultVariant={isMe ? 'primary' : 'default'}
+                      />
+                    )}
+                    {canToggle && myOpen && (
+                      <div className="pl-[52px] pb-2">
+                        {myItems.map((it, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between py-1"
+                          >
+                            <span
+                              className="text-[13px]"
+                              style={{ color: 'var(--label-alternative)' }}
+                            >
+                              {it.name}
+                            </span>
+                            <span
+                              className="text-[13px]"
+                              style={{ color: 'var(--label-assistive)' }}
+                            >
+                              {it.assignedAmount.toLocaleString()}원
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
-        <div
-          className="flex items-center justify-between px-5 pt-4 mt-2 border-t"
-          style={{ borderColor: 'var(--line-normal)' }}
-        >
+            <div
+              className="flex items-center justify-between px-5 pt-4 mt-2 border-t"
+              style={{ borderColor: 'var(--line-normal)' }}
+            >
+              <p
+                className="text-sm font-medium"
+                style={{ color: 'var(--label-normal)' }}
+              >
+                합계
+              </p>
+              <p
+                className="text-base font-bold"
+                style={{ color: 'var(--label-normal)' }}
+              >
+                {result.totalAmount.toLocaleString()}원
+              </p>
+            </div>
+          </>
+        ) : (
           <p
-            className="text-sm font-medium"
-            style={{ color: 'var(--label-normal)' }}
+            className="text-sm text-center py-10"
+            style={{ color: 'var(--label-assistive)' }}
           >
-            합계
+            정산 정보를 불러올 수 없습니다.
           </p>
-          <p
-            className="text-base font-bold"
-            style={{ color: 'var(--label-normal)' }}
-          >
-            {total.toLocaleString()}원
-          </p>
-        </div>
+        )}
       </main>
 
       <Footer
         variant="button"
-        label="모임으로 돌아가기"
-        onClick={() => router.push(`/meetings/${meetingId}`)}
+        label="송금하기"
+        onClick={() => router.push(`/meetings/${meetingId}/payments`)}
       />
     </>
   );

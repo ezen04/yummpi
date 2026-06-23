@@ -21,7 +21,7 @@ export default function SettlementAssignPage({
 }) {
   const { meetingId, settlementId } = use(params);
   const router = useRouter();
-  const { receipts, flowType } = useSettlementStore();
+  const { receipts, flowType, setMySelectedItemIds } = useSettlementStore();
 
   const steps = FLOW_STEPS[flowType === 'manual' ? 'manual' : 'receipt'];
   const current = steps.length - 2;
@@ -47,7 +47,10 @@ export default function SettlementAssignPage({
 
   return (
     <>
-      <Header title="소비 선택" onBack={() => router.back()} />
+      <Header
+        title="소비 선택"
+        onBack={() => router.push(`/meetings/${meetingId}`)}
+      />
       <div className="px-5 pt-4 pb-2">
         <Step steps={steps} current={current} />
       </div>
@@ -107,6 +110,8 @@ export default function SettlementAssignPage({
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => {
           setConfirmOpen(false);
+          // 내 소비 선택 영속 (PUT .../assignments/me { receiptItemIds })
+          setMySelectedItemIds(Array.from(selectedIds));
           if (isHost) {
             router.push(
               `/meetings/${meetingId}/settlement/${settlementId}/confirm`
