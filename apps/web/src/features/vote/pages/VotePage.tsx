@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useSocket } from '@/hooks/useSocket';
 import { useVote } from '@/hooks/useVote';
@@ -10,7 +11,6 @@ import { NotInVoteFlowView } from '../components/shell/NotInVoteFlowView';
 import { VoteScreenContainer } from '../components/shell/VoteScreenContainer';
 import { RecruitingView } from '../components/recruiting/RecruitingView';
 import { VotingView } from '../components/voting/VotingView';
-import { PlaceConfirmedView } from '../components/completed/PlaceConfirmedView';
 
 export interface VotePageProps {
   meetingId: string;
@@ -37,6 +37,14 @@ export function VotePage({
   useSocket(meetingId);
 
   const handleBack = () => router.back();
+
+  // PLACE_CONFIRMED 상태로 진입(직접 URL 또는 socket으로 자동 전환)하면
+  // 모임 상세 페이지로 redirect — vote 페이지는 RECRUITING/VOTING 단계 전용
+  React.useEffect(() => {
+    if (meeting?.status === 'PLACE_CONFIRMED') {
+      router.replace(`/meetings/${meetingId}`);
+    }
+  }, [meeting?.status, meetingId, router]);
 
   const renderContent = () => {
     if (meetingLoading || votesLoading) {
@@ -66,7 +74,8 @@ export function VotePage({
       case 'VOTING':
         return <VotingView {...viewProps} />;
       case 'PLACE_CONFIRMED':
-        return <PlaceConfirmedView {...viewProps} />;
+        // useEffect로 redirect 진행 중 — 로딩 화면을 보여 깜빡임 방지
+        return <VoteLoadingSkeleton />;
       default:
         return (
           <NotInVoteFlowView

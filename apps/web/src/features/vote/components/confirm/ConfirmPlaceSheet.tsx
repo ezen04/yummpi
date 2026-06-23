@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { Flame, Sparkles } from '@yummpi/ui';
+import { useRouter } from 'next/navigation';
+import { Flame, Sparkles, toast } from '@yummpi/ui';
 import { BottomSheet } from '@/components/common/BottomSheet';
 import { Button } from '@/components/common/Button';
 import { PlaceThumbnail } from '@/features/place/components/recommendation/PlaceThumbnail';
@@ -28,6 +29,7 @@ export function ConfirmPlaceSheet({
   votesData,
   flow3 = false,
 }: ConfirmPlaceSheetProps) {
+  const router = useRouter();
   const close = useVoteUiStore((s) => s.closeConfirmPlace);
   const selectedCandidateId = useVoteUiStore((s) => s.selectedCandidateId);
 
@@ -47,7 +49,11 @@ export function ConfirmPlaceSheet({
         requiresVotingTransition: flow3,
       },
       {
-        onSuccess: () => close(),
+        onSuccess: () => {
+          close();
+          toast.success('장소가 확정되었어요!');
+          router.push(`/meetings/${meetingId}`);
+        },
       }
     );
   };
