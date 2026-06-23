@@ -9,12 +9,10 @@ export type OcrFailureKind =
 
 export class OcrFailedError extends Error {
   readonly kind: OcrFailureKind;
-  readonly cause?: unknown;
 
   constructor(kind: OcrFailureKind, message: string, cause?: unknown) {
-    super(message);
+    super(message, cause !== undefined ? { cause } : undefined);
     this.name = 'OcrFailedError';
     this.kind = kind;
-    this.cause = cause;
   }
 }
