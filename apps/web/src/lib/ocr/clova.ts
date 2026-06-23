@@ -27,7 +27,7 @@ export type CallClovaResult =
 
 export async function callClovaGeneralOcr(
   imageBase64: string,
-  format: 'jpg' | 'png' | 'jpeg',
+  format: 'jpg' | 'png' | 'jpeg'
 ): Promise<CallClovaResult> {
   const url = process.env.CLOVA_OCR_INVOKE_URL;
   const secret = process.env.CLOVA_OCR_SECRET;
@@ -46,14 +46,14 @@ export async function callClovaGeneralOcr(
     {
       headers: { 'X-OCR-SECRET': secret },
       timeout: TIMEOUT_MS,
-    },
+    }
   );
 
   const image = response.data.images?.[0];
   if (!image) {
     throw new OcrFailedError(
       'MALFORMED_RESPONSE',
-      'CLOVA response missing images[]',
+      'CLOVA response missing images[]'
     );
   }
 
@@ -68,6 +68,6 @@ export async function callClovaGeneralOcr(
   }
   throw new OcrFailedError(
     'MALFORMED_RESPONSE',
-    `unexpected inferResult: ${image.inferResult}`,
+    `unexpected inferResult: ${image.inferResult}`
   );
 }

@@ -4,10 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { ocrAnalysisSchema, type OcrAnalysis } from '@yummpi/schemas';
 
-const FIXTURES_DIR = join(
-  dirname(fileURLToPath(import.meta.url)),
-  'fixtures',
-);
+const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 
 export interface OcrFixture {
   name: string;
@@ -22,10 +19,10 @@ export function loadOcrFixtures(): OcrFixture[] {
   return tokenFiles.map((tokenFile) => {
     const name = tokenFile.replace(/\.tokens\.json$/, '');
     const tokensRaw = JSON.parse(
-      readFileSync(join(FIXTURES_DIR, tokenFile), 'utf-8'),
+      readFileSync(join(FIXTURES_DIR, tokenFile), 'utf-8')
     ) as unknown;
     const expectedRaw = JSON.parse(
-      readFileSync(join(FIXTURES_DIR, `${name}.expected.json`), 'utf-8'),
+      readFileSync(join(FIXTURES_DIR, `${name}.expected.json`), 'utf-8')
     ) as unknown;
 
     return {

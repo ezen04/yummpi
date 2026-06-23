@@ -25,7 +25,7 @@ describe('QueueLimiter', () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         running -= 1;
         return i;
-      }),
+      })
     );
 
     await Promise.all(tasks);

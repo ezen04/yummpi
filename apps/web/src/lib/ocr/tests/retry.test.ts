@@ -68,7 +68,7 @@ describe('retryTransport', () => {
   it('OcrFailedError(MALFORMED_RESPONSE)도 재시도 없이 즉시 re-throw', async () => {
     const malformedError = new OcrFailedError(
       'MALFORMED_RESPONSE',
-      'missing images',
+      'missing images'
     );
     const fn = vi.fn().mockRejectedValue(malformedError);
 

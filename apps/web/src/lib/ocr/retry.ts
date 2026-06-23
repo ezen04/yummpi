@@ -12,7 +12,7 @@ export async function retryTransport<T>(fn: () => Promise<T>): Promise<T> {
       lastError = err;
       if (attempt < BACKOFFS_MS.length) {
         await new Promise((resolve) =>
-          setTimeout(resolve, BACKOFFS_MS[attempt]),
+          setTimeout(resolve, BACKOFFS_MS[attempt])
         );
       }
     }
@@ -20,6 +20,6 @@ export async function retryTransport<T>(fn: () => Promise<T>): Promise<T> {
   throw new OcrFailedError(
     'TRANSPORT',
     'OCR transport failed after retries',
-    lastError,
+    lastError
   );
 }

@@ -150,7 +150,8 @@ describe('callClovaGeneralOcr', () => {
     mockedPost.mockRejectedValueOnce(axiosError);
 
     await expect(callClovaGeneralOcr('base64', 'jpg')).rejects.toBe(axiosError);
-    await expect(callClovaGeneralOcr('base64', 'jpg').catch((e: unknown) => e))
-      .resolves.not.toBeInstanceOf(OcrFailedError);
+    await expect(
+      callClovaGeneralOcr('base64', 'jpg').catch((e: unknown) => e)
+    ).resolves.not.toBeInstanceOf(OcrFailedError);
   });
 });

@@ -80,7 +80,11 @@ describe('normalizeFields', () => {
 
   it('boundingPoly가 없는 토큰은 drop한다', () => {
     const fields: ClovaField[] = [
-      { inferText: '있음', inferConfidence: 0.9, boundingPoly: { vertices: RECT } },
+      {
+        inferText: '있음',
+        inferConfidence: 0.9,
+        boundingPoly: { vertices: RECT },
+      },
       { inferText: '없음', inferConfidence: 0.9 },
     ];
 
