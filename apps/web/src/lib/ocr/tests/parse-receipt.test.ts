@@ -154,4 +154,32 @@ describe('parseReceipt (E)', () => {
     expect(out.items.map((i) => i.name)).not.toContain('합 계');
     expect(out.items).toHaveLength(1);
   });
+
+  it('P10: "과세 합계"(소계)는 총액 아님 — 뒤의 "판매 합계"를 totalAmount로 (실제 다이소)', () => {
+    // 실측: 다이소 영수증에 "합계"가 두 번. 위=과세 합계(세 전 소계=공급가액), 아래=판매 합계(진짜 총액).
+    // TOTAL 키워드가 있어도 소계 한정어(과세/면세/공급)가 섞인 줄은 총액 후보에서 제외해야 한다.
+    const tokens = [
+      ...row(100, '안경닦이', '2000'),
+      ...row(200, '이젤', '2000'),
+      ...row(300, '과세', '합계', '3636'), // 소계 — 무시돼야 (afterTotal도 켜지면 안 됨)
+      ...row(400, '부가세', '364'),
+      ...row(500, '판매', '합계', '4000'), // 진짜 총액
+    ];
+    const out = parseReceipt(tokens);
+    expect(out.totalAmount).toBe(4000);
+    expect(out.validation).toEqual({ ok: true, issues: [] });
+  });
+
+  it('P11: "주문번호" 메타 줄은 품목이 아님 (실제 카페 영수증)', () => {
+    // 실측: "주문번호 - 0066" 끝의 0066을 금액으로 읽어 품목(66원)으로 오인. 메타 줄은 폐기.
+    const tokens = [
+      ...row(100, '주문번호', '0066'),
+      ...row(200, '민트라떼', '3500'),
+      ...row(300, '합계', '3500'),
+    ];
+    const out = parseReceipt(tokens);
+    expect(out.items.map((i) => i.name)).not.toContain('주문번호');
+    expect(out.items).toHaveLength(1);
+    expect(out.totalAmount).toBe(3500);
+  });
 });

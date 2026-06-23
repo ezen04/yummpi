@@ -157,7 +157,11 @@ const TOTAL_KEYWORD_PRIORITY = [
   'TOTAL',
 ] as const;
 
-const HEADER_KEYWORDS = ['사업자', '대표자', 'TEL', '전화', '주소'];
+const HEADER_KEYWORDS = ['사업자', '대표자', 'TEL', '전화', '주소', '주문번호'];
+
+// 소계 한정어 — 줄에 TOTAL 키워드("합계")가 있어도 이 한정어가 섞이면 세 전 소계(공급가액·
+// 과세/면세 합계)라 진짜 총액이 아니다. 실측: 다이소 영수증 "과세 합계 3,636" vs "판매 합계 4,000".
+const SUBTOTAL_QUALIFIERS = ['과세', '면세', '공급'];
 
 // 줄의 마지막 숫자 토큰을 amount로 추출 (합계 30,000 / TOTAL 30000 등).
 function extractLastNumber(tokens: OcrToken[]): number | null {
@@ -185,11 +189,19 @@ export function parseReceipt(tokens: OcrToken[]): OcrParserOutput {
     // 있어 TOTAL 키워드만 공백 제거 후 비교한다. 그 외 요약 키워드는 오탐 방지를 위해
     // 기존(공백 유지) 매칭을 유지.
     const lineCompact = lineText.replace(/\s/g, '');
-    const totalKwIdx = TOTAL_KEYWORD_PRIORITY.findIndex((k) =>
+    const rawTotalKwIdx = TOTAL_KEYWORD_PRIORITY.findIndex((k) =>
       lineCompact.includes(k.replace(/\s/g, ''))
     );
+    // "과세 합계"처럼 소계 한정어(과세/면세/공급) + 합계 키워드가 함께 있는 줄만 소계로 본다.
+    // 그래야 "과세 합계"(소계)를 건너뛰고 뒤의 "판매 합계"(진짜 총액)를 잡고 afterTotal 조기 발동도
+    // 막는다. 한정어만 있고 합계 키워드가 없는 줄(예: 품목명에 "공급")은 건드리지 않는다.
+    const isSubtotal =
+      rawTotalKwIdx !== -1 &&
+      SUBTOTAL_QUALIFIERS.some((q) => lineCompact.includes(q));
+    const totalKwIdx = isSubtotal ? -1 : rawTotalKwIdx;
     if (
       totalKwIdx !== -1 ||
+      isSubtotal ||
       SUMMARY_KEYWORDS.some((k) => lineText.includes(k))
     ) {
       if (totalKwIdx !== -1) {
