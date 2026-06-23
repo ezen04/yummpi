@@ -41,14 +41,14 @@ export function Header({
   const isDashboard = !!greeting;
 
   const ICON_BTN =
-    'flex items-center justify-center w-10 h-10 bg-transparent border-none cursor-pointer text-[var(--label-normal)]';
+    'flex items-center justify-center w-10 h-10 bg-transparent border-none cursor-pointer text-[var(--label-normal)] rounded-[var(--radius-full)] transition-colors hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]';
 
   // mypage: 중앙 타이틀 + 오른쪽 설정 아이콘
   if (isMypage) {
     return (
       <header
         className={cn(
-          'h-14 bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0',
+          'h-14 box-content pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0',
           className
         )}
       >
@@ -70,17 +70,19 @@ export function Header({
   return (
     <header
       className={cn(
-        'h-14 bg-[var(--bg-normal)] flex items-center justify-between shrink-0',
+        'h-14 box-content pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] flex items-center justify-between shrink-0',
         isDashboard ? 'px-5' : 'pl-2 pr-3',
         className
       )}
     >
       {/* 왼쪽 */}
       <div className="flex items-center gap-1 flex-1">
-        {onBack && (
+        {onBack ? (
           <button onClick={onBack} className={cn(ICON_BTN, 'shrink-0')}>
             <ChevronLeft size={24} strokeWidth={1.5} />
           </button>
+        ) : (
+          <div className={cn(ICON_BTN, 'shrink-0')} aria-hidden="true" />
         )}
 
         {greeting ? (
@@ -116,7 +118,7 @@ export function Header({
         {badge && !statusVariant && <Badge variant="green">{badge}</Badge>}
 
         {showBell && (
-          <button className="relative flex items-center justify-center w-[42px] h-[42px] bg-[var(--bg-alternative)] rounded-[var(--radius-full)] border-none cursor-pointer text-[var(--label-normal)]">
+          <button className="relative flex items-center justify-center w-[42px] h-[42px] bg-[var(--bg-alternative)] rounded-[var(--radius-full)] border-none cursor-pointer text-[var(--label-normal)] transition-colors hover:bg-[var(--fill-strong)] active:bg-[var(--fill-strong)]">
             <Bell size={22} strokeWidth={1.5} />
             {hasNotification && (
               <span className="absolute top-[9px] right-[10px] w-2 h-2 rounded-full bg-[var(--primary)] border-[1.5px] border-[var(--bg-normal)]" />
