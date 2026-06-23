@@ -141,4 +141,17 @@ describe('parseReceipt (E)', () => {
       issues: [{ code: 'SUM_MISMATCH', level: 'error', diff: 5000 }],
     });
   });
+
+  it('P9: OCR이 "합 계"로 쪼갠 합계 토큰도 totalAmount로 인식 (실제 이마트 영수증)', () => {
+    // 실측: CLOVA가 "합계"를 "합"(cx 19) + "계"(cx 105) 두 토큰으로 분리 → lineText "합 계".
+    // TOTAL 키워드 매칭이 공백을 무시해야 총액 인식 + 합계행의 품목 오인을 막는다.
+    const tokens = [
+      ...row(100, '삼겹살', '30000'),
+      ...row(200, '합', '계', '30000'),
+    ];
+    const out = parseReceipt(tokens);
+    expect(out.totalAmount).toBe(30000);
+    expect(out.items.map((i) => i.name)).not.toContain('합 계');
+    expect(out.items).toHaveLength(1);
+  });
 });

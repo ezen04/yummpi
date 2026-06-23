@@ -181,10 +181,17 @@ export function parseReceipt(tokens: OcrToken[]): OcrParserOutput {
     const lineText = lineTokens.map((t) => t.text).join(' ');
 
     // 1) SUMMARY 우선 — TOTAL_KEYWORD 후보면 우선순위 비교 후 채택, 그 외 요약 줄은 폐기.
-    if (SUMMARY_KEYWORDS.some((k) => lineText.includes(k))) {
-      const totalKwIdx = TOTAL_KEYWORD_PRIORITY.findIndex((k) =>
-        lineText.includes(k)
-      );
+    // OCR이 한글 합계 키워드를 "합 계"처럼 토큰으로 쪼개 읽는 사례(실측: 이마트 영수증)가
+    // 있어 TOTAL 키워드만 공백 제거 후 비교한다. 그 외 요약 키워드는 오탐 방지를 위해
+    // 기존(공백 유지) 매칭을 유지.
+    const lineCompact = lineText.replace(/\s/g, '');
+    const totalKwIdx = TOTAL_KEYWORD_PRIORITY.findIndex((k) =>
+      lineCompact.includes(k.replace(/\s/g, ''))
+    );
+    if (
+      totalKwIdx !== -1 ||
+      SUMMARY_KEYWORDS.some((k) => lineText.includes(k))
+    ) {
       if (totalKwIdx !== -1) {
         const amount = extractLastNumber(lineTokens);
         if (amount !== null) {
