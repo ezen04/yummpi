@@ -35,18 +35,15 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
   );
   const confirmPlaceSheetOpen = useVoteUiStore((s) => s.confirmPlaceSheetOpen);
 
-  const [selection, setSelection] = React.useState<Selection>(null);
-
-  // pendingSearchPlace가 새로 추가되면 자동으로 그 카드를 선택
-  // (effect 내 setState를 직접 호출하면 react-hooks/set-state-in-effect 위반 → setTimeout으로 우회)
-  React.useEffect(() => {
-    if (!pendingSearchPlace) return;
-    const timer = setTimeout(
-      () => setSelection({ type: 'search' }),
-      0
-    );
-    return () => clearTimeout(timer);
-  }, [pendingSearchPlace]);
+  // 검색에서 돌아왔을 때 자동으로 검색 카드를 선택하지만, 사용자가 다른 카드 클릭 시
+  // 그 선택이 우선이어야 한다. effect + setState는 race condition을 유발하므로
+  // derived state 패턴 사용 — 사용자 명시 선택(explicitChoice)이 있으면 그 값,
+  // 없으면 pendingSearchPlace 기반 자동 선택.
+  // 페이지 unmount/mount 시 explicitChoice는 새 인스턴스에서 null로 시작 →
+  // 검색에서 돌아온 직후에는 항상 검색 카드 자동 선택.
+  const [explicitChoice, setExplicitChoice] = React.useState<Selection>(null);
+  const selection: Selection =
+    explicitChoice ?? (pendingSearchPlace ? { type: 'search' } : null);
 
   // 현재 확정된 후보 (기존 1위 장소)
   const confirmedCandidate = React.useMemo(
@@ -151,7 +148,7 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
               categoryName={pendingSearchPlace.categoryName}
               distanceM={pendingSearchPlace.distanceM}
               isSelected={selection?.type === 'search'}
-              onClick={() => setSelection({ type: 'search' })}
+              onClick={() => setExplicitChoice({ type: 'search' })}
             />
           )}
         </section>
@@ -175,7 +172,7 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
                     selection.id === candidate.id
                   }
                   onClick={() =>
-                    setSelection({ type: 'candidate', id: candidate.id })
+                    setExplicitChoice({ type: 'candidate', id: candidate.id })
                   }
                 />
               ))}

@@ -13,8 +13,11 @@ import { PlaceSearchInput } from '../components/search/PlaceSearchInput';
 import { PlaceSearchResultList } from '../components/search/PlaceSearchResultList';
 
 export interface PlaceSearchPageProps {
+  /**
+   * 호스트 전용 화면. server page에서 `assertHost`로 비호스트는 차단되므로
+   * 이 컴포넌트는 항상 호스트가 진입한다고 가정한다.
+   */
   meetingId: string;
-  viewerRole: 'HOST' | 'MEMBER';
 }
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
@@ -28,10 +31,7 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debounced;
 }
 
-export function PlaceSearchPage({
-  meetingId,
-  viewerRole: _viewerRole,
-}: PlaceSearchPageProps) {
+export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
