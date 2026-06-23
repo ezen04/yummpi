@@ -61,3 +61,34 @@ export async function addPlaceCandidate(
     );
   }
 }
+
+export interface SearchPlacesParams {
+  meetingId: string;
+  query: string;
+  x?: string;
+  y?: string;
+  radius?: number;
+  page?: number;
+}
+
+export async function searchPlaces(
+  params: SearchPlacesParams
+): Promise<RecommendationItem[]> {
+  const search = new URLSearchParams({
+    meetingId: params.meetingId,
+    query: params.query,
+  });
+  if (params.x) search.set('x', params.x);
+  if (params.y) search.set('y', params.y);
+  if (params.radius != null) search.set('radius', String(params.radius));
+  if (params.page != null) search.set('page', String(params.page));
+
+  const res = await fetch(`/api/v1/places/search?${search.toString()}`);
+  if (!res.ok) {
+    throw new Error(await parseErrorMessage(res, '장소 검색에 실패했습니다.'));
+  }
+  const body = (await res.json()) as {
+    data: { items: RecommendationItem[] };
+  };
+  return body.data.items;
+}

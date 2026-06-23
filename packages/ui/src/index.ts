@@ -9,3 +9,4 @@ export * from './drawer';
 export * from './progress';
 export * from './select';
 export * from './skeleton';
+export { Toaster, toast } from './sonner';

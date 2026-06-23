@@ -2,15 +2,22 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { voteKeys } from '@/hooks/useVote';
+import type { RecommendationItem } from '@/features/place/api/placeApi';
 import { meetingKeys } from './useMeetingDetail';
-import { confirmByCandidate, patchMeetingStatus } from '../api/voteApi';
+import {
+  confirmByCandidate,
+  confirmBySearch,
+  patchMeetingStatus,
+} from '../api/voteApi';
 
 interface ConfirmPayload {
-  candidateId: string;
+  /** 기존 후보 ID로 확정 */
+  candidateId?: string;
+  /** 검색 결과로 확정 (POST /confirm-search) */
+  searchPlace?: RecommendationItem;
   /**
    * Flow 3 (RECRUITING 단계에서 단일 후보 자동 확정).
-   * true일 때 `PATCH /status` (RECRUITING → VOTING)를 먼저 호출한 뒤 confirm을 진행한다.
-   * VOTING 단계에서 호출되는 일반 확정·동률 확정은 false.
+   * candidateId 경로에서만 의미 있음 (검색 확정은 RECRUITING에서 호출되지 않음).
    */
   requiresVotingTransition?: boolean;
 }
@@ -19,7 +26,28 @@ export function useConfirmPlace(meetingId: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<void, Error, ConfirmPayload>({
-    mutationFn: async ({ candidateId, requiresVotingTransition }) => {
+    mutationFn: async ({
+      candidateId,
+      searchPlace,
+      requiresVotingTransition,
+    }) => {
+      if (searchPlace) {
+        await confirmBySearch(meetingId, {
+          externalPlaceId: searchPlace.externalPlaceId,
+          name: searchPlace.name,
+          categoryName: searchPlace.categoryName,
+          address: searchPlace.address,
+          roadAddress: searchPlace.roadAddress,
+          phone: searchPlace.phone,
+          lat: searchPlace.lat,
+          lng: searchPlace.lng,
+          placeUrl: searchPlace.placeUrl,
+        });
+        return;
+      }
+      if (!candidateId) {
+        throw new Error('candidateId 또는 searchPlace가 필요합니다.');
+      }
       if (requiresVotingTransition) {
         await patchMeetingStatus(meetingId, { status: 'VOTING' });
       }

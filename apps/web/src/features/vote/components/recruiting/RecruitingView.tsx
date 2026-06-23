@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Coins, Flame, Plus } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
+import { KakaoMap } from '@/components/common/KakaoMap';
 import { Tipbox } from '@/components/common/Tipbox';
 import { PlaceFilterChips } from '@/features/place/components/recommendation/PlaceFilterChips';
 import { PlaceRecommendationList } from '@/features/place/components/recommendation/PlaceRecommendationList';
@@ -135,14 +136,22 @@ export function RecruitingView({
         </div>
       )}
 
-      <div className="shrink-0 px-5 pb-4">
-        {/* TODO(Step 11): KakaoMap 컴포넌트가 들어올 자리 (Figma 362x148) */}
-        <div className="w-full h-[148px] rounded-[var(--radius-12)] border border-dashed border-[var(--line-normal)] bg-[var(--fill-normal)] flex items-center justify-center">
-          <p className="text-[12px] font-normal font-[var(--font-sans)] text-[var(--label-assistive)] m-0">
-            지도 영역 (추후 추가)
-          </p>
+      {lat && lng && (
+        <div className="shrink-0 px-5 pb-4">
+          <div className="w-full h-[148px] rounded-[var(--radius-12)] overflow-hidden">
+            <KakaoMap
+              center={{ lat: Number(lat), lng: Number(lng) }}
+              markers={(recommendations ?? []).map((item) => ({
+                lat: Number(item.lat),
+                lng: Number(item.lng),
+                label: item.name,
+                id: item.externalPlaceId,
+              }))}
+              height="148px"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="shrink-0 px-5 pb-2 flex items-center justify-between">
         <h2 className="text-[16px] leading-6 font-semibold font-[var(--font-sans)] text-[var(--label-normal)] m-0">
