@@ -13,6 +13,7 @@ import type { RecommendationItem } from '@/features/place/api/placeApi';
 import type { VotesData } from '@/hooks/useVote';
 import type { MeetingDetail } from '../../hooks/useMeetingDetail';
 import { useVoteUiStore } from '../../stores/useVoteUiStore';
+import { ConfirmPlaceSheet } from '../confirm/ConfirmPlaceSheet';
 import { VotingClosesAtSheet } from '../confirm/VotingClosesAtSheet';
 import { RecruitingHostActions } from './RecruitingHostActions';
 
@@ -104,17 +105,21 @@ export function RecruitingView({
   };
 
   const openVotingClosesAt = useVoteUiStore((s) => s.openVotingClosesAt);
+  const openConfirmPlace = useVoteUiStore((s) => s.openConfirmPlace);
   const votingClosesAtSheetOpen = useVoteUiStore(
     (s) => s.votingClosesAtSheetOpen
   );
+  const confirmPlaceSheetOpen = useVoteUiStore((s) => s.confirmPlaceSheetOpen);
 
   const handleStartVoting = () => {
     openVotingClosesAt();
   };
 
   const handleConfirmSingle = () => {
-    // Step 6에서 ConfirmPlaceSheet 열기로 교체
-    alert('Step 6에서 단일 후보 확정 시트가 열립니다');
+    // 후보가 1개일 때만 호출됨 — 그 1개를 selected로 사용
+    const single = votesData.candidates[0];
+    if (!single) return;
+    openConfirmPlace(single.id);
   };
 
   const hasNoLocation = !lat || !lng;
@@ -189,6 +194,10 @@ export function RecruitingView({
           meetingId={meeting.id}
           meetingScheduledAt={meeting.scheduledAt}
         />
+      )}
+
+      {isHost && confirmPlaceSheetOpen && (
+        <ConfirmPlaceSheet meetingId={meeting.id} votesData={votesData} flow3 />
       )}
     </div>
   );
