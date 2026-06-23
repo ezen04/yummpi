@@ -31,7 +31,7 @@ small-restaurant-1.expected.json
 자동 update 금지. 사람 검수 후 명시 갱신만 허용:
 
 ```bash
-pnpm --filter @yummpi/web test:ocr -- -u
+pnpm --filter @yummpi/web test:ocr:regen
 ```
 
 `-u` 없이 실행하면 expected와 다를 경우 실패한다.
