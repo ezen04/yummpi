@@ -15,13 +15,27 @@ interface UserSettings {
 
 const USER_SETTINGS_KEY = ['user', 'me'] as const;
 
+interface ApiEnvelope<T> {
+  success: boolean;
+  data?: T;
+  error?: { code: string; message: string };
+}
+
+function extractData<T>(envelope: ApiEnvelope<T>): T {
+  if (!envelope.success || !envelope.data) {
+    throw new Error(envelope.error?.message ?? 'API error');
+  }
+  return envelope.data;
+}
+
 async function getUserSettings(): Promise<UserSettings> {
   const res = await fetch('/api/v1/users/me');
   if (!res.ok) throw new Error('Failed to fetch user settings');
-  const envelope = (await res.json()) as { data: UserSettings };
+  const envelope = (await res.json()) as ApiEnvelope<UserSettings>;
+  const data = extractData(envelope);
   return {
-    pushEnabled: envelope.data.pushEnabled,
-    paymentReminderEnabled: envelope.data.paymentReminderEnabled,
+    pushEnabled: data.pushEnabled,
+    paymentReminderEnabled: data.paymentReminderEnabled,
   };
 }
 
@@ -34,10 +48,11 @@ async function patchUserSettings(
     body: JSON.stringify(patch),
   });
   if (!res.ok) throw new Error('Failed to patch user settings');
-  const envelope = (await res.json()) as { data: UserSettings };
+  const envelope = (await res.json()) as ApiEnvelope<UserSettings>;
+  const data = extractData(envelope);
   return {
-    pushEnabled: envelope.data.pushEnabled,
-    paymentReminderEnabled: envelope.data.paymentReminderEnabled,
+    pushEnabled: data.pushEnabled,
+    paymentReminderEnabled: data.paymentReminderEnabled,
   };
 }
 
@@ -50,7 +65,8 @@ export function NotificationSettingsForm() {
   });
 
   const appInstalled = useAppInstalled();
-  const pushPermissionGranted = usePushPermission();
+  const { granted: pushPermissionGranted, refresh: refreshPushPermission } =
+    usePushPermission();
   const { subscribe, unsubscribe } = usePushSubscription();
   const [error, setError] = useState<string | null>(null);
 
@@ -88,6 +104,7 @@ export function NotificationSettingsForm() {
         setError(result.error ?? '알림 설정에 실패했어요.');
         return;
       }
+      refreshPushPermission();
     }
 
     if (field === 'pushEnabled' && !value) {
