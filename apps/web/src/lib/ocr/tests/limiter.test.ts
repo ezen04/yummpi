@@ -75,4 +75,17 @@ describe('QueueLimiter', () => {
     await expect(p1).rejects.toThrow('boom');
     await expect(p2).resolves.toBe('ok');
   });
+
+  it('동기 throw하는 task도 running 카운터를 복구하고 다음 task 계속', async () => {
+    const limiter = new QueueLimiter(1);
+
+    // async 키워드 없이 동기 throw — 타입 시스템은 막지만 런타임에선 가능
+    const p1 = limiter.enqueue((() => {
+      throw new Error('sync boom');
+    }) as () => Promise<never>);
+    const p2 = limiter.enqueue(async () => 'recovered');
+
+    await expect(p1).rejects.toThrow('sync boom');
+    await expect(p2).resolves.toBe('recovered');
+  });
 });

@@ -35,8 +35,11 @@ export class QueueLimiter {
       const entry = this.queue.shift();
       if (!entry) return;
       this.running += 1;
-      entry
-        .task()
+      // task가 동기 throw해도 finally까지 진입하도록 Promise.resolve로 감싼다.
+      // 직접 entry.task()를 호출하면 sync throw 시 running 카운터가 감소되지 않아
+      // limiter slot이 영구 소실됨.
+      Promise.resolve()
+        .then(() => entry.task())
         .then((value) => entry.resolve(value))
         .catch((err: unknown) => entry.reject(err))
         .finally(() => {
