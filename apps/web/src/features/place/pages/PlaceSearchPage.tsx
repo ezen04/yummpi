@@ -44,8 +44,8 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   const { votesData } = useVote(meetingId);
 
   // 중간지점 좌표 — 멤버 출발지 0명이면 훅이 error 상태가 되어 lat/lng = null
-  // → 검색은 전국 단위로 fallback (UX (b))
-  const { data: optimal } = useOptimalPoint(meetingId);
+  // → 검색은 전국 단위로 fallback (UX (b)), 사용자에게는 input 아래 안내로 사유 노출
+  const { data: optimal, isError: optimalError } = useOptimalPoint(meetingId);
   const lat = optimal?.lat ?? null;
   const lng = optimal?.lng ?? null;
 
@@ -106,6 +106,11 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
 
       <div className="shrink-0 px-5 pt-4 pb-3">
         <PlaceSearchInput value={query} onChange={setQuery} />
+        {optimalError && (
+          <p className="mt-2 text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
+            출발지 정보가 없어 거리 정렬 없이 키워드만으로 검색해요.
+          </p>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
