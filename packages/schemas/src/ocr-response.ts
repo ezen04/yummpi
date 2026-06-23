@@ -2,11 +2,11 @@ import { z } from 'zod';
 
 export const ocrTokenSchema = z.object({
   text: z.string(),
-  confidence: z.number(),
-  cx: z.number(),
-  cy: z.number(),
-  width: z.number(),
-  height: z.number(),
+  confidence: z.number().finite().min(0).max(1),
+  cx: z.number().finite(),
+  cy: z.number().finite(),
+  width: z.number().finite().nonnegative(),
+  height: z.number().finite().nonnegative(),
   lineBreak: z.boolean().optional(),
   type: z.string().optional(),
 });

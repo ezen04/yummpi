@@ -105,4 +105,62 @@ describe('normalizeFields', () => {
 
     expect(tokens).toHaveLength(0);
   });
+
+  it('vertex 좌표에 NaN 섞이면 MALFORMED_RESPONSE throw', () => {
+    const badRect = [
+      { x: NaN, y: 100 },
+      { x: 50, y: 100 },
+      { x: 50, y: 120 },
+      { x: 10, y: 120 },
+    ];
+
+    expect(() =>
+      normalizeFields([
+        {
+          inferText: 'bad',
+          inferConfidence: 0.9,
+          boundingPoly: { vertices: badRect },
+        },
+      ])
+    ).toThrow(
+      expect.objectContaining({
+        name: 'OcrFailedError',
+        kind: 'MALFORMED_RESPONSE',
+      })
+    );
+  });
+
+  it('confidence가 0~1 범위 밖이면 MALFORMED_RESPONSE throw', () => {
+    expect(() =>
+      normalizeFields([
+        {
+          inferText: 'bad',
+          inferConfidence: 1.5,
+          boundingPoly: { vertices: RECT },
+        },
+      ])
+    ).toThrow(
+      expect.objectContaining({
+        name: 'OcrFailedError',
+        kind: 'MALFORMED_RESPONSE',
+      })
+    );
+  });
+
+  it('confidence가 NaN이어도 MALFORMED_RESPONSE throw', () => {
+    expect(() =>
+      normalizeFields([
+        {
+          inferText: 'bad',
+          inferConfidence: NaN,
+          boundingPoly: { vertices: RECT },
+        },
+      ])
+    ).toThrow(
+      expect.objectContaining({
+        name: 'OcrFailedError',
+        kind: 'MALFORMED_RESPONSE',
+      })
+    );
+  });
 });
