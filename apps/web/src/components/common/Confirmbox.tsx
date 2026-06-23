@@ -50,13 +50,13 @@ export function Confirmbox({
         <div className="flex gap-3 w-full">
           <button
             onClick={onClose}
-            className="flex-1 h-12 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[16px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)] cursor-pointer"
+            className="flex-1 h-12 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[16px] font-semibold font-[var(--font-sans)] text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 h-12 rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[16px] font-semibold font-[var(--font-sans)] text-[var(--primary)] cursor-pointer"
+            className="flex-1 h-12 rounded-[var(--radius-12)] border border-[var(--line-neutral)] bg-[var(--bg-normal)] text-[16px] font-semibold font-[var(--font-sans)] text-[var(--primary)] cursor-pointer transition-colors hover:bg-[var(--primary-tint)] active:opacity-80"
           >
             {confirmLabel}
           </button>

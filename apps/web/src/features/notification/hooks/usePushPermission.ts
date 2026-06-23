@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 function readPermission(): NotificationPermission | 'unsupported' {
   if (typeof window === 'undefined' || typeof Notification === 'undefined') {
@@ -9,7 +9,12 @@ function readPermission(): NotificationPermission | 'unsupported' {
   return Notification.permission;
 }
 
-export function usePushPermission(): boolean {
+interface UsePushPermissionResult {
+  granted: boolean;
+  refresh: () => void;
+}
+
+export function usePushPermission(): UsePushPermissionResult {
   const [permission, setPermission] = useState(readPermission);
 
   // Notification.permission은 변화 이벤트를 제공하지 않아서 visibility 변화 시 재점검한다.
@@ -19,5 +24,7 @@ export function usePushPermission(): boolean {
     return () => document.removeEventListener('visibilitychange', handler);
   }, []);
 
-  return permission === 'granted';
+  const refresh = useCallback(() => setPermission(readPermission()), []);
+
+  return { granted: permission === 'granted', refresh };
 }

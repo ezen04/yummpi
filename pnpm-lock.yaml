@@ -117,6 +117,9 @@ importers:
       react-hook-form:
         specifier: 7.68.0
         version: 7.68.0(react@19.2.7)
+      server-only:
+        specifier: 0.0.1
+        version: 0.0.1
       socket.io-client:
         specifier: 4.8.1
         version: 4.8.1
@@ -3368,6 +3371,9 @@ packages:
     resolution: {integrity: sha512-wnilbGyMxzbY7dNOl7jpKbLSjcfeweJWU5j4+u5qW+6/wuGD9KzIGOyZnQVSBM9E7DtWaaH3CyHkppYrKYoxwg==}
     engines: {node: '>=10'}
     hasBin: true
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   serwist@9.0.10:
     resolution: {integrity: sha512-r6DiPmR99ZqfSo1T0SePgyUnQz0QmbVF6XywjWtCk1Qgk4EBAdrYRr9Y4Ul8Xge/jAnpEMyrmdSX9N1vgxWVgA==}
@@ -7106,6 +7112,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.8.3: {}
+
+  server-only@0.0.1: {}
 
   serwist@9.0.10(typescript@5.9.3):
     dependencies:
