@@ -37,7 +37,8 @@ export function Toggle({
       <span
         className={cn(
           'relative w-[51px] h-[31px] rounded-[var(--radius-full)] shrink-0 transition-[background] duration-200',
-          checked ? 'bg-[var(--primary)]' : 'bg-[var(--fill-normal)]'
+          checked ? 'bg-[var(--primary)]' : 'bg-[var(--fill-normal)]',
+          !checked && !disabled && 'hover:bg-[var(--fill-strong)]'
         )}
       >
         {/* 원 */}
