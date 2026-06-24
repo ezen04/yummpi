@@ -1,0 +1,50 @@
+{
+  "family": "yummpi-server",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "REPLACE_EXECUTION_ROLE_ARN",
+  "taskRoleArn": "REPLACE_TASK_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "name": "yummpi-server",
+      "image": "REPLACE_IMAGE",
+      "essential": true,
+      "portMappings": [{ "containerPort": 4000, "protocol": "tcp" }],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "4000" }
+      ],
+      "secrets": [
+        { "name": "CLIENT_ORIGIN", "valueFrom": "REPLACE_SSM_CLIENT_ORIGIN" },
+        { "name": "DATABASE_URL", "valueFrom": "REPLACE_SSM_DATABASE_URL" },
+        { "name": "REDIS_URL", "valueFrom": "REPLACE_SSM_REDIS_URL" },
+        { "name": "VAPID_PUBLIC_KEY", "valueFrom": "REPLACE_SSM_VAPID_PUBLIC_KEY" },
+        { "name": "VAPID_PRIVATE_KEY", "valueFrom": "REPLACE_SSM_VAPID_PRIVATE_KEY" },
+        { "name": "SMTP_HOST", "valueFrom": "REPLACE_SSM_SMTP_HOST" },
+        { "name": "SMTP_PORT", "valueFrom": "REPLACE_SSM_SMTP_PORT" },
+        { "name": "SMTP_USER", "valueFrom": "REPLACE_SSM_SMTP_USER" },
+        { "name": "SMTP_PASS", "valueFrom": "REPLACE_SSM_SMTP_PASS" }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/yummpi-server",
+          "awslogs-region": "REPLACE_AWS_REGION",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
