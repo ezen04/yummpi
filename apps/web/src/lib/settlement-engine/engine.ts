@@ -3,7 +3,7 @@ import type {
   SettlementEngineOutput,
   SettlementMemberOutput,
   SettlementItemAssignmentOutput,
-} from './types.js';
+} from './types';
 
 export function runSettlementEngine(
   input: SettlementEngineInput

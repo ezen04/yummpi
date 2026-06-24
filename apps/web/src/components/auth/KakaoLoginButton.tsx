@@ -23,11 +23,7 @@ export function KakaoLoginButton({
     <button
       type="button"
       onClick={() => signIn('kakao', { callbackUrl })}
-      className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold transition-[filter] duration-100 active:[filter:brightness(0.95)]"
-      style={{
-        backgroundColor: 'var(--brand-kakao)',
-        color: 'var(--static-black)',
-      }}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold transition-[filter] duration-100 active:[filter:brightness(0.95)] bg-[var(--brand-kakao)] text-[var(--static-black)]"
     >
       {label}
     </button>

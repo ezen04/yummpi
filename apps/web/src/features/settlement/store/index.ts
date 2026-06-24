@@ -21,6 +21,8 @@ interface SettlementStore {
   selectedReceiptId: string | null;
   splitMethod: 'ITEM_BASED' | 'EQUAL' | null;
   flowType: 'receipt' | 'manual' | null;
+  equalAmount: number | null; // EQUAL(영수증 없는 /equal)만 사용. 그 외 null
+  mySelectedItemIds: string[]; // ITEM_BASED /assign에서만 채움. 그 외 []
 
   addReceipt: (receiptId: string) => void;
   updateOcrResult: (
@@ -34,6 +36,8 @@ interface SettlementStore {
   setSelectedReceiptId: (receiptId: string) => void;
   setSplitMethod: (method: 'ITEM_BASED' | 'EQUAL') => void;
   setFlowType: (flow: 'receipt' | 'manual') => void;
+  setEqualAmount: (amount: number | null) => void;
+  setMySelectedItemIds: (ids: string[]) => void;
   updateOcrItem: (receiptId: string, itemId: string, item: OcrItem) => void;
   deleteOcrItem: (receiptId: string, itemId: string) => void;
   addOcrItem: (receiptId: string, item: OcrItem) => void;
@@ -44,6 +48,8 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
   selectedReceiptId: null,
   splitMethod: null,
   flowType: null,
+  equalAmount: null,
+  mySelectedItemIds: [],
 
   addReceipt: (receiptId) =>
     set((state) => {
@@ -77,6 +83,8 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
       selectedReceiptId: null,
       splitMethod: null,
       flowType: null,
+      equalAmount: null,
+      mySelectedItemIds: [],
     }),
 
   deleteReceipt: (receiptId) =>
@@ -97,6 +105,8 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
 
   setSplitMethod: (method) => set({ splitMethod: method }),
   setFlowType: (flow) => set({ flowType: flow }),
+  setEqualAmount: (amount) => set({ equalAmount: amount }),
+  setMySelectedItemIds: (ids) => set({ mySelectedItemIds: ids }),
 
   updateOcrItem: (receiptId, itemId, item) =>
     set((state) => ({

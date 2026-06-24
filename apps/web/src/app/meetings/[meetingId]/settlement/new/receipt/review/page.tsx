@@ -58,6 +58,10 @@ export default function ReceiptReviewPage({
   const totalAmount =
     selectedReceipt?.ocrItems.reduce((sum, item) => sum + item.totalPrice, 0) ||
     0;
+  const grandTotal = receipts.reduce(
+    (sum, r) => sum + r.ocrItems.reduce((s, it) => s + it.totalPrice, 0),
+    0
+  );
 
   const canProceed =
     splitMethod !== null && receipts.some((r) => r.ocrItems.length > 0);
@@ -253,6 +257,27 @@ export default function ReceiptReviewPage({
               </div>
             )}
           </>
+        )}
+
+        {/* 전체 영수증 합계 (EQUAL 시 이 금액을 균등 분배) */}
+        {receipts.length > 0 && (
+          <div
+            className="flex items-center justify-between p-4 rounded-md"
+            style={{ background: 'var(--primary-tint)' }}
+          >
+            <p
+              className="text-sm font-medium"
+              style={{ color: 'var(--primary)' }}
+            >
+              전체 영수증 합계 ({receipts.length}장)
+            </p>
+            <p
+              className="text-lg font-bold"
+              style={{ color: 'var(--primary)' }}
+            >
+              {grandTotal.toLocaleString()}원
+            </p>
+          </div>
         )}
 
         {/* 구분선 */}
