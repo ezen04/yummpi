@@ -19,6 +19,14 @@ const httpServer = createServer((req, res) => {
     res.end(JSON.stringify({ ok: true }));
     return;
   }
+  // readiness — pub/sub Redis 연결이 모두 ready면 200, 아니면 503.
+  // 운영 중 Redis 순단 시 ioredis가 status를 자동 전환 → ECS readiness probe로 트래픽 격리.
+  if (req.method === 'GET' && (req.url === '/ready' || req.url === '/ready/')) {
+    const ready = pubClient.status === 'ready' && subClient.status === 'ready';
+    res.writeHead(ready ? 200 : 503, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ready }));
+    return;
+  }
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ ok: false }));
 });
