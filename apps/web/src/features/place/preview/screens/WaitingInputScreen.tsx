@@ -1,15 +1,45 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Check, Clock } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
-import { MOCK_MEMBERS, MOCK_REMAINING } from '../optimalPreviewMock';
+import { MOCK_MEMBERS, DEFAULT_WAIT_SECONDS } from '../optimalPreviewMock';
 
 // 화면⑤ 다른 게스트의 역을 입력받고 있어요 (타이머 + 멤버목록) (Figma 755-4323)
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-export function WaitingInputScreen() {
-  const { h, m, s } = MOCK_REMAINING;
+interface WaitingInputScreenProps {
+  /** ④에서 설정한 대기시간(초). 미지정 시 기본값으로 진입(프리뷰 토글 단독 사용) */
+  startSeconds?: number;
+  /** 타이머가 0에 도달했을 때 호출 (→ ⑥ 입력완료 화면 전환) */
+  onExpire?: () => void;
+}
+
+export function WaitingInputScreen({
+  startSeconds = DEFAULT_WAIT_SECONDS,
+  onExpire,
+}: WaitingInputScreenProps) {
+  const [remaining, setRemaining] = useState(startSeconds);
+
+  // 마운트 시 카운트다운 시작 (startSeconds는 useState 초기값으로 반영됨).
+  // ④→⑤ 전환마다 새로 마운트되므로 재설정 불필요.
+  // 업데이터는 순수하게 값 감소만 — 부모 setState(onExpire)는 별도 effect에서.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRemaining((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 0 도달 시 만료 콜백 (렌더 이후 effect에서 호출 → setState-in-render 경고 방지)
+  useEffect(() => {
+    if (remaining === 0) onExpire?.();
+  }, [remaining, onExpire]);
+
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-normal)]">
