@@ -1,19 +1,6 @@
 {
+  "$comment": "리포 루트 .claude/settings.json 으로 배치(이 파일을 복사). 경로는 실제 모노레포 구조(apps/server, packages/schemas) 기준으로 교정됨. .aiignore 대체 — Claude Code는 .aiignore를 읽지 않으므로 permission deny로 강제한다.",
   "permissions": {
-    "allow": [
-      "Bash(curl -s -m 3 http://127.0.0.1:3845/mcp -o /dev/null -w \"%{http_code}\\\\n\")",
-      "Read(//Users/adora/**)",
-      "Bash(node -e \"try{const c=require\\('/Users/adora/.claude.json'\\); const find=\\(o,p=''\\)=>{for\\(const k in o\\){if\\(k==='mcpServers'&&o[k]&&Object.keys\\(o[k]\\).length\\){console.log\\(p||'\\(root\\)',JSON.stringify\\(o[k]\\)\\);}else if\\(typeof o[k]==='object'&&o[k]\\){find\\(o[k],p+'/'+k\\)}}};find\\(c\\)}catch\\(e\\){console.log\\('err',e.message\\)}\")",
-      "Bash(node -e \"const c=require\\('/Users/adora/.claude/settings.json'\\); console.log\\(JSON.stringify\\(c.mcpServers||c.enabledMcpjsonServers||'no mcpServers key',null,2\\)\\)\")",
-      "Bash(node -e \"const d=require\\('/tmp/figma_node.json'\\); const n=d.nodes['755:4180']; if\\(!n\\){console.log\\('NODE NOT FOUND. keys:',Object.keys\\(d.nodes||{}\\), 'err:',d.err||d.status\\);process.exit\\(\\)} const doc=n.document; console.log\\('root:',doc.name,doc.type, 'size:', JSON.stringify\\(doc.absoluteBoundingBox\\)\\)\")",
-      "Bash(cat /tmp/figma_node.json; echo)",
-      "Read(//private/tmp/**)",
-      "Bash(git check-ignore *)",
-      "Bash(sed 's/figd_[A-Za-z0-9_-]*/figd_여기가_죽은_토큰/g')",
-      "Bash(node -e \"const c=require\\('/Users/adora/.claude.json'\\); let f=0; const w=\\(o\\)=>{for\\(const k in o\\){if\\(k==='mcpServers'&&o[k]&&o[k].figma\\){f=1}else if\\(o[k]&&typeof o[k]==='object'\\)w\\(o[k]\\)}}; w\\(c\\); console.log\\(f?'중복 있음 ⚠️':'중복 없음 ✅ \\(settings.json 단일 소스\\)'\\)\")",
-      "Bash(grep -o 'figd_[A-Za-z0-9_-]*' ~/.claude/settings.json)",
-      "Bash(git add *)"
-    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
@@ -42,6 +29,5 @@
       "Edit(./apps/server/**)",
       "Edit(./.github/**)"
     ]
-  },
-  "$comment": "리포 루트 .claude/settings.json 으로 배치(이 파일을 복사). 경로는 실제 모노레포 구조(apps/server, packages/schemas) 기준으로 교정됨. .aiignore 대체 — Claude Code는 .aiignore를 읽지 않으므로 permission deny로 강제한다."
+  }
 }
