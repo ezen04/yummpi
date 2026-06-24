@@ -43,12 +43,10 @@ export function DepartureSearchScreen() {
         <div className="relative -mt-4 bg-[var(--bg-normal)] rounded-t-[20px] shadow-[var(--shadow-medium)] pt-2 pb-4">
           <div className="mx-auto w-10 h-1 rounded-full bg-[var(--line-normal)] mb-1" />
           <ul>
-            {MOCK_STATION_RESULTS.map((s, i) => (
+            {MOCK_STATION_RESULTS.map((s) => (
               <li
                 key={`${s.name}-${s.lineLabel}`}
-                className={`flex items-center justify-between px-5 py-3.5 ${
-                  i === 1 ? 'bg-[var(--primary-tint)]' : ''
-                }`}
+                className="flex items-center justify-between px-5 py-3.5 cursor-pointer transition-colors hover:bg-[var(--primary-tint)]"
               >
                 <span className="text-[15px] text-[var(--label-normal)]">
                   {s.name}
