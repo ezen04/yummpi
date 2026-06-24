@@ -119,7 +119,7 @@ server 컨테이너가 읽을 환경변수를 등록한다. 상세 키 목록은
   - `DATABASE_URL` = Accelerate `prisma://`(pooling) · `REDIS_URL` = Upstash `rediss://`
   - `NEXT_PUBLIC_SOCKET_URL` = `https://ws.yummpi.app` · `NEXTAUTH_URL` = 운영 도메인
   - `NEXT_PUBLIC_*`은 브라우저 노출 가능 값만
-- [ ] web Prisma client에 Accelerate extension 적용 확인(`prisma://`는 미적용 시 연결 실패) — §12
+- [x] web Prisma client에 Accelerate extension 적용 — ✅ **코드 적용 완료(#75)**(`apps/web/src/lib/prisma.ts`). 발급된 `prisma://`만 주입하면 됨 — §12
 - [ ] PWA(serwist) 서비스워커가 **production 빌드**에서 생성·등록되는지 확인(§6.3)
 - [ ] ⚠️ **NextAuth 쿠키 `domain=.yummpi.app`(§3.3)는 ① Auth 영역** — 도메인 연결 후 ①과 확인. ⑤이 코드 수정하지 않음(§6.3 노트)
 
