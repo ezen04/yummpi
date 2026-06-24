@@ -31,6 +31,22 @@ export function useRandomNickname(enabled: boolean) {
   });
 }
 
+// 닉네임 추천 칩용 — 랜덤 닉네임 N개 병렬 fetch + 중복 제거. 랜덤 버튼은 refetch로 갱신.
+export function useRandomNicknames(count: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['nickname', 'random-set', count],
+    queryFn: async () => {
+      const results = await Promise.all(
+        Array.from({ length: count }, () => getRandomNickname())
+      );
+      return Array.from(new Set(results.map((r) => r.nickname)));
+    },
+    enabled,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
 export function useGuestJoin() {
   return useMutation<
     GuestJoinResult,
