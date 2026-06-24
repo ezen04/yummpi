@@ -233,17 +233,22 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 ## 8. 예약 관리 API (MVP 수동 기록)
 
-### `POST /api/v1/meetings/:meetingId/reservations` — 생성
-`{ "placeCandidateId", "reservationName", "reservationAt", "partySize", "confirmationNumber", "memo" }`
-- ★ v2.1: 생성 시 `status: "NONE"` 기본. 모임당 1건 (UNIQUE)
-- 후보는 동일 모임 소속이어야 함 (교차 무결성)
+> 외부(카카오 등) 예약 API 연동이 아니다. 호스트가 오프라인(전화 등)으로 잡은 예약을 **수동 기록**하고
+> 모임원이 상태를 확인하는 트래커. 확정 장소(카카오맵)로 가는 딥링크는 허브 FE에서 별도 제공. (팀 합의 2026-06-24)
 
-### `GET .../reservations` — 조회 (★ `status` 포함)
+### `POST /api/v1/meetings/:meetingId/reservations` — 생성 (**호스트 전용** `assertHost`)
+`{ "reservationName"?, "reservationAt"?, "partySize"?, "confirmationNumber"?, "memo"?, "status"? }`
+- ★ v2.2(2026-06-24, ① 결정): `placeCandidateId`는 **바디로 받지 않고 서버가 `meeting.confirmedCandidateId`에서 도출**한다(교차무결성·확정 게이트를 한 번에 처리). 확정 장소가 없으면 `409 INVALID_MEETING_STATUS_TRANSITION`("장소 확정 후 기록 가능").
+- 생성 시 `status: "NONE"` 기본. 모임당 1건(UNIQUE) → 이미 있으면 `409 RESERVATION_ALREADY_EXISTS`.
 
-### `PATCH .../reservations/:reservationId` — 수정
-- ★ v2.1: `"status": "NONE" | "PENDING" | "DONE"` 변경 가능 — **호스트 전용**(`assertHost`) ★ v2.2 정정 (예약 담당자 개념 제거, 호스트로 통일)
+### `GET .../reservations` — 조회 (★ `status` 포함, 멤버 전체)
+- 예약 미존재 시 `data: null` + `200`.
 
-### `DELETE .../reservations/:reservationId` — 삭제
+### `PATCH .../reservations/:reservationId` — 수정 (**호스트 전용** `assertHost`)
+- ★ v2.1: `"status": "NONE" | "PENDING" | "DONE"` 변경 가능 — ★ v2.2 정정(예약 담당자 개념 제거, 호스트로 통일). 해당 모임 예약이 아니면 `404 RESERVATION_NOT_FOUND`.
+
+### `DELETE .../reservations/:reservationId` — 삭제 (**호스트 전용** `assertHost`)
+- 없으면 `404 RESERVATION_NOT_FOUND`.
 
 ---
 
@@ -555,6 +560,7 @@ io(SOCKET_URL, {
 | `SETTLEMENT_NOT_FOUND` | 404 | 정산 없음 |
 | `PAYMENT_NOT_FOUND` ★ | 404 | 송금 정보 없음 |
 | `PUSH_SUBSCRIPTION_NOT_FOUND` ★ | 404 | 웹푸시 구독 없음 또는 본인 구독 아님 |
+| `RESERVATION_NOT_FOUND` ★ | 404 | 예약 없음 또는 해당 모임 예약 아님 (2026-06-24 추가) |
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
@@ -565,6 +571,7 @@ io(SOCKET_URL, {
 | `VOTING_CLOSED` | 409 | 투표 종료 |
 | `CANDIDATE_ALREADY_EXISTS` | 409 | 동일 장소(externalPlaceId) 중복 추가 |
 | `ALREADY_CONFIRMED_PLACE` | 409 | 장소 확정됨 |
+| `RESERVATION_ALREADY_EXISTS` ★ | 409 | 모임에 예약이 이미 존재 (2026-06-24 추가) |
 | `MEETING_EXPIRED` | 409 | 모임 만료 |
 | `NICKNAME_DUPLICATED` | 409 | 닉네임 중복 |
 | `SETTLEMENT_ALREADY_EXISTS` ★ | 409 | 모임에 정산이 이미 존재 |
