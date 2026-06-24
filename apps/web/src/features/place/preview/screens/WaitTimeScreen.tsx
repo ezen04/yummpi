@@ -24,7 +24,8 @@ export function WaitTimeScreen({ onNext }: WaitTimeScreenProps) {
       : WAIT_OPTION_SECONDS[selected];
     if (!seconds || seconds <= 0) return;
     if (onNext) onNext(seconds);
-    else console.log('[optimal-preview] 대기시간 설정:', selected, seconds, '초');
+    else
+      console.log('[optimal-preview] 대기시간 설정:', selected, seconds, '초');
   };
 
   return (
