@@ -55,7 +55,9 @@ COPY --from=builder --chown=node:node /app/out ./
 EXPOSE 4000
 
 # 컨테이너 자체 liveness 체크 (Node 내장 fetch 사용 — curl 불필요)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+# start-period=15s: httpServer.listen()은 Redis ping 성공 후에야 실행되므로
+# Redis 연결 buffer 확보. ECS task 정의(startPeriod:15)와 동일하게 정렬.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||4000)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 USER node
