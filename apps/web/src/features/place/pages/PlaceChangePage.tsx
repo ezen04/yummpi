@@ -81,20 +81,23 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
 
   if (!meeting || !votesData) {
     return (
-      <div className="flex flex-col h-full bg-[var(--bg-normal)]">
-        <Header title="장소 변경" onBack={() => router.back()} />
-        <div className="flex-1 flex items-center justify-center px-5">
-          <p className="text-[13px] font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
-            모임 정보를 불러오는 중...
-          </p>
+      <div className="h-screen w-full bg-[var(--bg-alternative)] flex justify-center">
+        <div className="w-full max-w-[480px] h-full bg-[var(--bg-normal)] flex flex-col overflow-hidden transform-gpu">
+          <Header title="장소 변경" onBack={() => router.back()} />
+          <div className="flex-1 flex items-center justify-center px-5">
+            <p className="text-[13px] font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
+              모임 정보를 불러오는 중...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-normal)]">
-      <Header title="장소 변경" onBack={() => router.back()} />
+    <div className="h-screen w-full bg-[var(--bg-alternative)] flex justify-center">
+      <div className="w-full max-w-[480px] h-full bg-[var(--bg-normal)] flex flex-col overflow-hidden transform-gpu">
+        <Header title="장소 변경" onBack={() => router.back()} />
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 flex flex-col gap-6">
         {/* 1. 현재 확정된 장소 (기존 1위) */}
@@ -196,9 +199,10 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
         </Button>
       </div>
 
-      {confirmPlaceSheetOpen && (
-        <ConfirmPlaceSheet meetingId={meeting.id} votesData={votesData} />
-      )}
+        {confirmPlaceSheetOpen && (
+          <ConfirmPlaceSheet meetingId={meeting.id} votesData={votesData} />
+        )}
+      </div>
     </div>
   );
 }
