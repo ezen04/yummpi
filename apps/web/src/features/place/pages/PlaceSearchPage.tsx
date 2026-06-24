@@ -117,9 +117,9 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   };
 
   const trimmed = debouncedQuery.trim();
-  const isEmptyQuery = trimmed.length < 2;
+  const isEmptyQuery = trimmed.length < 1;
 
-  // 검색 결과 BottomSheet — 검색어가 유효(2자+)할 때만 노출 (카카오맵 앱 UX 모방)
+  // 검색 결과 BottomSheet — 검색어가 1자 이상일 때 노출 (카카오맵 앱 UX 모방)
   const showResultSheet = !isEmptyQuery;
 
   // 검색 결과 좌표를 지도 마커로 표시 (결과 카드와 매칭 시 시각 도움)
