@@ -25,6 +25,8 @@ lib/ocr/** , lib/s3/** , lib/settlement-engine/**
 | `features/vote/**`, `apps/server` | ③ |
 | `features/payment/**`, `api/.../payments/**`, `packages/schemas/**`, `.github/**` | ⑤ |
 
+> **예외**: `packages/schemas/` 정산 도메인 Zod(`settlement-*`·`receipt-*`)는 ④ 직접 작성 OK. ⑤은 공용 인프라(envelope·에러 코드)·CI만 (2026-06-24 ⑤ 협의).
+
 **정산↔송금 경계**: 정산 확정(`/confirm`)까지가 ④, PAYMENT 생성·송금 현황부터는 ⑤. 확정 시 SETTLEMENT_MEMBER까지만 만들고 Payment 로직은 건드리지 않는다.
 
 - ④ `/confirm` 완료 시 보장 데이터:
