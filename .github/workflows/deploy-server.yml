@@ -83,6 +83,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.taskdef.outputs.task-definition }}
-          service: yummpi-server # placeholder — vars.ECS_SERVICE
-          cluster: yummpi # placeholder — vars.ECS_CLUSTER
+          service: ${{ vars.ECS_SERVICE || 'yummpi-server' }} # repo variable로 override, 미설정 시 기본값
+          cluster: ${{ vars.ECS_CLUSTER || 'yummpi' }} # repo variable로 override, 미설정 시 기본값
           wait-for-service-stability: true

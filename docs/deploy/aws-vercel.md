@@ -4,6 +4,8 @@ yummpi를 **Vercel(`apps/web`)** 과 **AWS(`apps/server` · RDS · S3)** 에 배
 실제 계정 ID, secret, DB URL, bucket 실명, ARN, access key, private domain은 이 문서에 기록하지 않는다.
 계정별·개인 메모는 커밋하지 않는 `deployment-aws-vercel-plan.local.md`에 둔다.
 
+> **실행 순서**: 리소스 발급 후 실제 배포 순서는 [`runbook.md`](./runbook.md)(B-day 순서표)를 따른다. 이 문서는 각 단계의 근거·기준을 담고, 런북은 그 순서를 엮는다.
+
 ---
 
 ## 1. 목표
@@ -254,7 +256,7 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 - server Docker image 빌드 성공 · `/health` 응답 확인
 - server `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` 주입 확인 — **미설정 시 부팅 크래시**(webPush 초기화)
 - web `DATABASE_URL`(pooling) / server `DATABASE_URL`(직접) 분리 확인
-- web Prisma client에 Accelerate extension(`@prisma/extension-accelerate` · `.$extends(withAccelerate())`) 적용 확인 — `prisma://` 경로는 미적용 시 연결 실패
+- web Prisma client에 Accelerate extension(`@prisma/extension-accelerate` · `.$extends(withAccelerate())`) 적용 확인 — `prisma://` 경로는 미적용 시 연결 실패 ✅ **코드 적용 완료(#75)**: `apps/web/src/lib/prisma.ts` 런타임 확장(타입은 base 고정), env에 `prisma://`만 주입하면 됨
 - `REDIS_URL`(Upstash) web·server 양쪽 주입 + BullMQ enqueue→consume 1회 통과
 - 쿠키 domain `.yummpi.app`로 wss 핸드셰이크 인증(회원·게스트) 통과
 - `prisma migrate deploy` 실행(직접 연결)·순서·백업 — §10 절차 따름

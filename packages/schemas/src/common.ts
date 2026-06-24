@@ -6,7 +6,7 @@ export interface ApiEnvelope<T> {
   error?: { code: string; message: string };
 }
 
-export const idSchema = z.string().cuid();
+export const idSchema = z.string().uuid();
 
 export const titleSchema = z.string().min(1).max(100);
 

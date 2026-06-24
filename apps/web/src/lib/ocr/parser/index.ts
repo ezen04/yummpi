@@ -1,9 +1,4 @@
-import type {
-  OcrToken,
-  ParsedItem,
-  OcrValidation,
-  OcrParserOutput,
-} from '@yummpi/schemas';
+import type { OcrToken, ParsedItem, OcrParserOutput } from '@yummpi/schemas';
 
 // OCR 규칙 기반 파서 — P0 stub.
 // TDD RED 단계: 5함수 전부 동일하게 throw 하여 균일한 NOT_IMPLEMENTED 실패를 낸다.
@@ -87,29 +82,6 @@ export function parseItemLine(tokens: OcrToken[]): ParsedItem | null {
   return item(name, 1, null, total, confidence);
 }
 
-// 검산 — work-doc §4.4. 잔액 0 엄격(앵커=합계, 정상이면 residual=0).
-// 양·음 무관 SUM_MISMATCH(diff 부호 그대로) — 옛 '양수=거짓경보 방패' 폐기.
-// 이슈 누적 패턴은 P1 warn(품목 누락 의심) 확장 여지 유지.
-export function validate(input: {
-  items: ParsedItem[];
-  totalAmount: number | null;
-}): OcrValidation {
-  const itemSum = input.items.reduce((s, it) => s + it.totalPrice, 0);
-  const issues: OcrValidation['issues'] = [];
-
-  if (input.totalAmount === null) {
-    // diff 키 자체를 넣지 않는다(부재 — V1 단언).
-    issues.push({ code: 'NO_TOTAL', level: 'error' });
-  } else {
-    const residual = input.totalAmount - itemSum;
-    if (residual !== 0) {
-      issues.push({ code: 'SUM_MISMATCH', level: 'error', diff: residual });
-    }
-  }
-
-  return { ok: issues.every((i) => i.level !== 'error'), issues };
-}
-
 // 카드번호 마스킹 — work-doc §4.6.
 // 첫 패턴: 4-4-4-4 (구분자: `-` | ` ` | 없음).
 // 둘째 패턴: `1234-56**-****-7890` 부분 마스킹본도 완전 마스킹으로 덮어쓰기.
@@ -124,7 +96,7 @@ export function maskSensitive(text: string): string {
   return text.replace(CARD, '****-****-****-****');
 }
 
-// 영수증 조립 — work-doc §4.3 분류 + §4.4 검산 임베드 + §4.6 마스킹.
+// 영수증 조립 — work-doc §4.3 분류 + §4.6 마스킹.
 // 위치 무관 키워드 우선 분류. SUMMARY 줄은 폐기하되, TOTAL_KEYWORD에 해당하면 amount 추출 후
 // 우선순위 인덱스가 더 낮은(=합계 우선) 후보를 totalAmount로 유지. 합계 줄 통과 뒤(afterTotal)
 // 등장하는 푸터는 UNCLASSIFIED로 잡되 마스킹.
@@ -242,7 +214,6 @@ export function parseReceipt(tokens: OcrToken[]): OcrParserOutput {
   }
 
   const totalAmount = totalCandidate?.amount ?? null;
-  const validation = validate({ items, totalAmount });
 
-  return { totalAmount, items, unclassifiedLines, validation };
+  return { totalAmount, items, unclassifiedLines };
 }
