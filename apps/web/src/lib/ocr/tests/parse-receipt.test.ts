@@ -33,7 +33,6 @@ describe('parseReceipt (E)', () => {
         },
       ],
       unclassifiedLines: ['행복식당'],
-      validation: { ok: true, issues: [] },
     });
   });
 
@@ -83,7 +82,6 @@ describe('parseReceipt (E)', () => {
     ];
     const out = parseReceipt(tokens);
     expect(out.totalAmount).toBe(30000);
-    expect(out.validation).toEqual({ ok: true, issues: [] });
   });
 
   it('P5b: 합계 줄이 없으면 받을금액으로 폴백 (매출전표·간이영수증)', () => {
@@ -95,7 +93,6 @@ describe('parseReceipt (E)', () => {
     ];
     const out = parseReceipt(tokens);
     expect(out.totalAmount).toBe(30000);
-    expect(out.validation).toEqual({ ok: true, issues: [] });
   });
 
   it('P6: 분류 실패 줄만 unclassifiedLines (HEADER 키워드·SUMMARY 제외)', () => {
@@ -128,21 +125,7 @@ describe('parseReceipt (E)', () => {
     expect(out.unclassifiedLines).toContain('****-****-****-****');
   });
 
-  it('P8: 품목 누락으로 잔액≠0 → validation SUM_MISMATCH(diff 양수)', () => {
-    // §4.4 잔액0 엄격(앵커=합계) — 양·음 무관 SUM_MISMATCH, diff 부호 그대로.
-    // V4 단위 케이스의 통합 경로: parseReceipt가 validate를 임베드해 ok:false 노출.
-    const tokens = [
-      ...row(100, '삼겹살', '30000'),
-      ...row(200, '합계', '35000'), // ← itemSum(30000) < totalAmount → residual +5000
-    ];
-    const out = parseReceipt(tokens);
-    expect(out.validation).toEqual({
-      ok: false,
-      issues: [{ code: 'SUM_MISMATCH', level: 'error', diff: 5000 }],
-    });
-  });
-
-  it('P9: OCR이 "합 계"로 쪼갠 합계 토큰도 totalAmount로 인식 (실제 이마트 영수증)', () => {
+  it('P8: OCR이 "합 계"로 쪼갠 합계 토큰도 totalAmount로 인식 (실제 이마트 영수증)', () => {
     // 실측: CLOVA가 "합계"를 "합"(cx 19) + "계"(cx 105) 두 토큰으로 분리 → lineText "합 계".
     // TOTAL 키워드 매칭이 공백을 무시해야 총액 인식 + 합계행의 품목 오인을 막는다.
     const tokens = [
@@ -155,7 +138,7 @@ describe('parseReceipt (E)', () => {
     expect(out.items).toHaveLength(1);
   });
 
-  it('P10: "과세 합계"(소계)는 총액 아님 — 뒤의 "판매 합계"를 totalAmount로 (실제 다이소)', () => {
+  it('P9: "과세 합계"(소계)는 총액 아님 — 뒤의 "판매 합계"를 totalAmount로 (실제 다이소)', () => {
     // 실측: 다이소 영수증에 "합계"가 두 번. 위=과세 합계(세 전 소계=공급가액), 아래=판매 합계(진짜 총액).
     // TOTAL 키워드가 있어도 소계 한정어(과세/면세/공급)가 섞인 줄은 총액 후보에서 제외해야 한다.
     const tokens = [
@@ -167,10 +150,9 @@ describe('parseReceipt (E)', () => {
     ];
     const out = parseReceipt(tokens);
     expect(out.totalAmount).toBe(4000);
-    expect(out.validation).toEqual({ ok: true, issues: [] });
   });
 
-  it('P11: "주문번호" 메타 줄은 품목이 아님 (실제 카페 영수증)', () => {
+  it('P10: "주문번호" 메타 줄은 품목이 아님 (실제 카페 영수증)', () => {
     // 실측: "주문번호 - 0066" 끝의 0066을 금액으로 읽어 품목(66원)으로 오인. 메타 줄은 폐기.
     const tokens = [
       ...row(100, '주문번호', '0066'),

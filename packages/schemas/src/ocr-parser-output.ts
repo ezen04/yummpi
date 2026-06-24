@@ -7,19 +7,6 @@ import { z } from 'zod';
 // 출력 계약은 이 파일(④). import 방향은 ④ → leaf 단방향이며, P0 출력은 OcrToken 을
 // 직접 참조하지 않으므로 leaf import 가 없다(필요해질 때만 leaf 에서 가져온다).
 
-// 검산 결과(work-doc §4.4) — parseReceipt 가 내부 validate() 를 호출해 임베드.
-// 목적은 "세금 맞추기"가 아니라 "파서가 품목을 잘못 읽었나" 탐지.
-export const ocrValidationIssueSchema = z.object({
-  code: z.enum(['NO_TOTAL', 'SUM_MISMATCH']),
-  level: z.literal('error'), // P0 은 error 만. '품목 누락 의심'(warn)은 P1
-  diff: z.number().int().optional(), // 부호 있는 residual = total − Σitems (양수=품목 누락/저인식, 음수=과대인식)
-});
-
-export const ocrValidationSchema = z.object({
-  ok: z.boolean(),
-  issues: z.array(ocrValidationIssueSchema),
-});
-
 // 품목 — confidence(P0) = min(라인 토큰 inferConfidence) 원시값.
 // 파싱 모호 플래그(lowConfidence)는 파서 내부 신호로만 두고 출력에 넣지 않는다.
 // P1 에서 confidence 합성(work-doc §4.5)에 흡수.
@@ -38,10 +25,7 @@ export const ocrParserOutputSchema = z.object({
   totalAmount: z.number().int().nonnegative().nullable(),
   items: z.array(parsedItemSchema),
   unclassifiedLines: z.array(z.string()), // 검수 화면 수동 승격 대상
-  validation: ocrValidationSchema,
 });
 
-export type OcrValidationIssue = z.infer<typeof ocrValidationIssueSchema>;
-export type OcrValidation = z.infer<typeof ocrValidationSchema>;
 export type ParsedItem = z.infer<typeof parsedItemSchema>;
 export type OcrParserOutput = z.infer<typeof ocrParserOutputSchema>;
