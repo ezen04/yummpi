@@ -9,9 +9,9 @@ import { buildSettlementResponse, isSettlementCalculated } from './_utils';
 // GET /api/v1/meetings/:meetingId/settlement (단수, api-spec v2.2 §10)
 // - 회원·게스트 모두 모임 멤버면 조회 가능. 비멤버 403(requireMember).
 // - 정산 미생성 404. 정산은 POST /settlements 후에만 존재.
-// - 모임 자체 존재 여부는 별도로 체크하지 않음: MeetingMember는 Meeting에
-//   onDelete:Cascade FK이고 Meeting은 소프트 삭제만 하므로(CLAUDE.md), requireMember가
-//   멤버를 찾았다면 Meeting은 반드시 존재 — 둘 다 참인 분기는 도달 불가.
+// - requireMember 전에 모임 존재를 먼저 확인. 순서를 뒤집으면 모임 미존재 시
+//   requireMember가 멤버를 못 찾아 FORBIDDEN(403)으로 빠져 MEETING_NOT_FOUND(404)에
+//   도달 불가 → 응답이 의미와 어긋난다.
 // - 매핑 로직(splitMethod 분기·items 그룹핑·isMe·paymentStatus 폴백)은 `_utils`에서
 //   단위 테스트.
 
@@ -22,7 +22,26 @@ export const GET = handleRoute(
     _req: NextRequest,
     { params }: { params: Promise<{ meetingId: string }> }
   ) => {
-    const { meetingId } = paramsSchema.parse(await params);
+    // handleRoute는 ApiError만 envelope으로 변환 → Zod parse() 직접 호출은 500이 된다.
+    // params는 safeParse + 명시 VALIDATION_ERROR(400) throw로 정합 유지.
+    const paramsParsed = paramsSchema.safeParse(await params);
+    if (!paramsParsed.success) {
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        '잘못된 모임 식별자 형식입니다.',
+        paramsParsed.error.flatten()
+      );
+    }
+    const { meetingId } = paramsParsed.data;
+
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId },
+      select: { id: true },
+    });
+    if (!meeting) {
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    }
+
     const currentMember = await requireMember(meetingId);
 
     const settlement = await prisma.settlement.findUnique({
