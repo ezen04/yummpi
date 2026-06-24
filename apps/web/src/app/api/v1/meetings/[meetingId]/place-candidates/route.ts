@@ -1,7 +1,27 @@
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost, requireMember } from '@/lib/current-member';
+import { socketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
+
+async function emitVoteUpdated(meetingId: string, changedCandidateId: string) {
+  const [activeCandidates, votedMemberCount] = await Promise.all([
+    prisma.placeCandidate.findMany({
+      where: { meetingId, status: 'ACTIVE' },
+      select: { id: true, _count: { select: { votes: true } } },
+    }),
+    prisma.vote.count({ where: { meetingId } }),
+  ]);
+  const voteCounts = Object.fromEntries(
+    activeCandidates.map((c) => [c.id, c._count.votes])
+  );
+  socketEmitter.to(`meeting:${meetingId}`).emit('vote:updated', {
+    meetingId,
+    candidateId: changedCandidateId,
+    voteCounts,
+    votedMemberCount,
+  });
+}
 
 const MAX_CANDIDATES = 5;
 
@@ -167,6 +187,7 @@ export const POST = handleRoute(
           createdBy: { select: { id: true, nickname: true, role: true } },
         },
       });
+      await emitVoteUpdated(meetingId, promoted.id);
       return apiSuccess(
         {
           id: promoted.id,
@@ -215,6 +236,8 @@ export const POST = handleRoute(
         },
       },
     });
+
+    await emitVoteUpdated(meetingId, candidate.id);
 
     return apiSuccess(
       {
