@@ -1,17 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { Flame, Sparkles } from '@yummpi/ui';
+import { useRouter } from 'next/navigation';
+import { Flame, Sparkles, toast } from '@yummpi/ui';
 import { BottomSheet } from '@/components/common/BottomSheet';
 import { Button } from '@/components/common/Button';
-import { PlaceThumbnail } from '@/features/place/components/recommendation/PlaceThumbnail';
-import {
-  mapKakaoCategoryToThumbnail,
-  shortenKakaoCategory,
-} from '@/features/place/utils/categoryMap';
+import { shortenKakaoCategory } from '@/features/place/utils/categoryMap';
+import { usePlaceChangeStore } from '@/features/place/stores/usePlaceChangeStore';
 import { useConfirmPlace } from '../../hooks/useConfirmPlace';
 import { useVoteUiStore } from '../../stores/useVoteUiStore';
 import type { VotesData } from '@/hooks/useVote';
+import { ConfirmedPlaceCard } from './ConfirmedPlaceCard';
 
 interface ConfirmPlaceSheetProps {
   meetingId: string;
@@ -28,8 +27,14 @@ export function ConfirmPlaceSheet({
   votesData,
   flow3 = false,
 }: ConfirmPlaceSheetProps) {
+  const router = useRouter();
   const close = useVoteUiStore((s) => s.closeConfirmPlace);
   const selectedCandidateId = useVoteUiStore((s) => s.selectedCandidateId);
+  const selectedSearchPlace = useVoteUiStore((s) => s.selectedSearchPlace);
+
+  const clearPendingSearchPlace = usePlaceChangeStore(
+    (s) => s.clearPendingSearchPlace
+  );
 
   const { confirm, isConfirming, error } = useConfirmPlace(meetingId);
 
@@ -39,43 +44,85 @@ export function ConfirmPlaceSheet({
     [votesData.candidates, selectedCandidateId]
   );
 
+  const isSearchMode = !!selectedSearchPlace;
+
+  // 라벨/아이콘 분기
+  const badgeLabel = isSearchMode
+    ? '선택한 장소'
+    : flow3
+      ? '유일한 후보'
+      : '최다 득표 1위';
+
+  const badgeIcon =
+    isSearchMode || flow3 ? (
+      <Sparkles
+        size={16}
+        strokeWidth={0}
+        fill="var(--primary)"
+        color="var(--primary)"
+      />
+    ) : (
+      <Flame
+        size={16}
+        strokeWidth={0}
+        fill="var(--primary)"
+        color="var(--primary)"
+      />
+    );
+
+  // 카드 표시 데이터
+  const cardName = isSearchMode
+    ? selectedSearchPlace!.name
+    : (selectedCandidate?.name ?? '');
+  const cardCategoryName = isSearchMode
+    ? selectedSearchPlace!.categoryName
+    : (selectedCandidate?.categoryName ?? null);
+
+  const shortCategory = shortenKakaoCategory(cardCategoryName);
+
+  // 부제: 검색 모드/Flow 3는 "카테고리 · 거리", 일반은 "카테고리 · N표 중 M표"
+  const distanceLabel = isSearchMode
+    ? selectedSearchPlace!.distanceM != null
+      ? `${selectedSearchPlace!.distanceM}m`
+      : ''
+    : selectedCandidate?.distanceM != null
+      ? `${selectedCandidate.distanceM}m`
+      : '';
+
+  const cardSubline =
+    isSearchMode || flow3
+      ? [shortCategory, distanceLabel].filter(Boolean).join(' · ')
+      : selectedCandidate
+        ? `${shortCategory} · ${votesData.totalVoters}표 중 ${selectedCandidate.voteCount}표`
+        : '';
+
+  const hasSelection = isSearchMode || !!selectedCandidate;
+
+  const subtitle = flow3
+    ? '투표 없이 이 장소로 바로 확정돼요.'
+    : '1위 장소가 확정되며 예약 관리 단계로 넘어가요.';
+
   const handleSubmit = () => {
-    if (!selectedCandidate) return;
+    if (!hasSelection) return;
     confirm(
+      isSearchMode
+        ? { searchPlace: selectedSearchPlace! }
+        : {
+            candidateId: selectedCandidate!.id,
+            requiresVotingTransition: flow3,
+          },
       {
-        candidateId: selectedCandidate.id,
-        requiresVotingTransition: flow3,
-      },
-      {
-        onSuccess: () => close(),
+        onSuccess: () => {
+          close();
+          clearPendingSearchPlace();
+          toast.success('장소가 확정되었어요!');
+          router.push(`/meetings/${meetingId}`);
+        },
       }
     );
   };
 
   const errorMessage = error instanceof Error ? error.message : null;
-  const subtitle = flow3
-    ? '투표 없이 이 장소로 바로 확정돼요.'
-    : '1위 장소가 확정되며 예약 관리 단계로 넘어가요.';
-
-  // 강조 카드 부제
-  // - Flow 3 (투표 건너뜀): "카테고리 · 거리"
-  // - VOTING/동률 일반 확정: "카테고리 · 전체 N표 중 M표"
-  const shortCategory = selectedCandidate
-    ? shortenKakaoCategory(selectedCandidate.categoryName)
-    : '';
-  const distanceLabel =
-    selectedCandidate?.distanceM != null
-      ? `${selectedCandidate.distanceM}m`
-      : '';
-  const cardSubline = selectedCandidate
-    ? flow3
-      ? [shortCategory, distanceLabel].filter(Boolean).join(' · ')
-      : `${shortCategory} · ${votesData.totalVoters}표 중 ${selectedCandidate.voteCount}표`
-    : '';
-
-  const thumbnailCategory = selectedCandidate
-    ? mapKakaoCategoryToThumbnail(selectedCandidate.categoryName)
-    : 'korean';
 
   return (
     <BottomSheet open onClose={close} variant="background">
@@ -90,53 +137,16 @@ export function ConfirmPlaceSheet({
           </p>
         </div>
 
-        {/* 강조 카드 — 그라데이션 배경 + primary border + Flame 아이콘 */}
-        {selectedCandidate && (
-          <div
-            className="rounded-[16px] border border-[var(--primary)]/20 p-[19px] flex flex-col gap-3"
-            style={{
-              background:
-                'linear-gradient(134deg, var(--primary-tint) 0%, var(--bg-normal) 100%)',
-            }}
-          >
-            <div className="flex items-center gap-1.5">
-              {flow3 ? (
-                <Sparkles
-                  size={16}
-                  strokeWidth={0}
-                  fill="var(--primary)"
-                  color="var(--primary)"
-                />
-              ) : (
-                <Flame
-                  size={16}
-                  strokeWidth={0}
-                  fill="var(--primary)"
-                  color="var(--primary)"
-                />
-              )}
-              <span className="text-[13px] leading-[18px] font-semibold font-[var(--font-sans)] text-[var(--primary)]">
-                {flow3 ? '유일한 후보' : '최다 득표 1위'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-[14px]">
-              <PlaceThumbnail category={thumbnailCategory} size={60} />
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <p className="text-[17px] leading-6 font-semibold font-[var(--font-sans)] text-[var(--label-normal)] m-0 truncate">
-                  {selectedCandidate.name}
-                </p>
-                {cardSubline && (
-                  <p className="text-[13px] leading-[18px] font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 truncate">
-                    {cardSubline}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+        {hasSelection && (
+          <ConfirmedPlaceCard
+            name={cardName}
+            categoryName={cardCategoryName}
+            subline={cardSubline}
+            badgeLabel={badgeLabel}
+            badgeIcon={badgeIcon}
+          />
         )}
 
-        {/* 푸터 — 안내문 + 에러 + CTA */}
         <div className="flex flex-col gap-2">
           <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 text-center">
             확정하면 참여자에게 장소 확정 알림이 가요
@@ -152,7 +162,7 @@ export function ConfirmPlaceSheet({
             variant="basic"
             size="lg"
             onClick={handleSubmit}
-            disabled={!selectedCandidate || isConfirming}
+            disabled={!hasSelection || isConfirming}
             className="w-full"
           >
             {isConfirming ? '진행 중...' : '이 장소로 확정하기'}

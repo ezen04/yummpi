@@ -1,0 +1,35 @@
+{
+  "totalAmount": 4000,
+  "items": [
+    {
+      "name": "샷추가",
+      "quantity": 1,
+      "unitPrice": null,
+      "totalPrice": 500,
+      "confidence": 0.9963566
+    },
+    {
+      "name": "민트라떼 (ICE)",
+      "quantity": 1,
+      "unitPrice": null,
+      "totalPrice": 3500,
+      "confidence": 0.9947615
+    }
+  ],
+  "unclassifiedLines": [
+    "영수증",
+    "서울시 종로구 청계천로 73 1층",
+    "판매일시 : 2026-06-17 12:20",
+    "[품명] [수량] [금액]",
+    "363",
+    "카드번호: ****-****-****-****",
+    "거래종류: 신용구매",
+    "거래구분: 일시불",
+    "매입사명: 비씨카드",
+    "거래번호: 202606170066"
+  ],
+  "validation": {
+    "ok": true,
+    "issues": []
+  }
+}

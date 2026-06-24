@@ -10,7 +10,26 @@ import type { SocketData } from './middleware/auth.js';
 const PORT = process.env.PORT ?? 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? 'http://localhost:3000';
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+  if (
+    req.method === 'GET' &&
+    (req.url === '/health' || req.url === '/health/')
+  ) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+  // readiness — pub/sub Redis 연결이 모두 ready면 200, 아니면 503.
+  // 운영 중 Redis 순단 시 ioredis가 status를 자동 전환 → ECS readiness probe로 트래픽 격리.
+  if (req.method === 'GET' && (req.url === '/ready' || req.url === '/ready/')) {
+    const ready = pubClient.status === 'ready' && subClient.status === 'ready';
+    res.writeHead(ready ? 200 : 503, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ready }));
+    return;
+  }
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ ok: false }));
+});
 const io = new Server(httpServer, {
   cors: { origin: CLIENT_ORIGIN, credentials: true },
 });

@@ -75,3 +75,34 @@ export async function patchMeetingStatus(
     );
   }
 }
+
+export interface ConfirmBySearchPayload {
+  externalPlaceId: string;
+  name: string;
+  categoryName: string | null;
+  address: string | null;
+  roadAddress: string | null;
+  phone: string | null;
+  lat: string;
+  lng: string;
+  placeUrl: string | null;
+}
+
+export async function confirmBySearch(
+  meetingId: string,
+  payload: ConfirmBySearchPayload
+): Promise<void> {
+  const res = await fetch(
+    `/api/v1/meetings/${meetingId}/place-candidates/confirm-search`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '장소를 확정하지 못했습니다.')
+    );
+  }
+}

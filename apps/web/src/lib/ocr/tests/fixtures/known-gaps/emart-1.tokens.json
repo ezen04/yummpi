@@ -1,0 +1,662 @@
+[
+  {
+    "text": "E·MART",
+    "confidence": 0.77402025,
+    "cx": 71.5,
+    "cy": 21.5,
+    "width": 109,
+    "height": 29,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "대",
+    "confidence": 0.7674766,
+    "cx": 139.5,
+    "cy": 17,
+    "width": 15,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "한",
+    "confidence": 0.7674766,
+    "cx": 169.5,
+    "cy": 16.5,
+    "width": 17,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "민",
+    "confidence": 0.927371,
+    "cx": 200.5,
+    "cy": 17,
+    "width": 15,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "국",
+    "confidence": 0.927371,
+    "cx": 230.5,
+    "cy": 17.5,
+    "width": 15,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1등할",
+    "confidence": 0.72695434,
+    "cx": 160.5,
+    "cy": 32.5,
+    "width": 59,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "인",
+    "confidence": 0.99728394,
+    "cx": 205.5,
+    "cy": 32.5,
+    "width": 17,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "점",
+    "confidence": 0.99728394,
+    "cx": 229,
+    "cy": 33,
+    "width": 16,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "이마트",
+    "confidence": 0.9933314,
+    "cx": 26,
+    "cy": 59.5,
+    "width": 40,
+    "height": 25,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "탄현점",
+    "confidence": 0.9933314,
+    "cx": 64.5,
+    "cy": 60,
+    "width": 39,
+    "height": 26,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "128-85-48537",
+    "confidence": 0.99963844,
+    "cx": 119,
+    "cy": 59.5,
+    "width": 74,
+    "height": 25,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "대표:",
+    "confidence": 0.9506662,
+    "cx": 171.5,
+    "cy": 60.5,
+    "width": 35,
+    "height": 25,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "최병렬",
+    "confidence": 0.9506662,
+    "cx": 206,
+    "cy": 61,
+    "width": 40,
+    "height": 28,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "고양시",
+    "confidence": 0.99925464,
+    "cx": 26,
+    "cy": 76,
+    "width": 36,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "일산구",
+    "confidence": 0.9991425,
+    "cx": 64,
+    "cy": 77,
+    "width": 38,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "덕이동",
+    "confidence": 0.99678934,
+    "cx": 102.5,
+    "cy": 77,
+    "width": 37,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "203-1",
+    "confidence": 0.9998171,
+    "cx": 138,
+    "cy": 77.5,
+    "width": 34,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "(031)927-1234",
+    "confidence": 0.99885035,
+    "cx": 193,
+    "cy": 78.5,
+    "width": 78,
+    "height": 17,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "http://www.emartmall.com",
+    "confidence": 0.99864024,
+    "cx": 75,
+    "cy": 90.5,
+    "width": 138,
+    "height": 17,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "영수증을",
+    "confidence": 0.9984524,
+    "cx": 31,
+    "cy": 118.5,
+    "width": 46,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "지참하시면",
+    "confidence": 0.9984849,
+    "cx": 86,
+    "cy": 118.5,
+    "width": 58,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "교환/환불시",
+    "confidence": 0.999257,
+    "cx": 39,
+    "cy": 131.5,
+    "width": 64,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "더욱",
+    "confidence": 0.997182,
+    "cx": 86,
+    "cy": 132.5,
+    "width": 26,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "편리합니다.",
+    "confidence": 0.997182,
+    "cx": 132,
+    "cy": 131.5,
+    "width": 64,
+    "height": 17,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[등록]",
+    "confidence": 0.9623667,
+    "cx": 28,
+    "cy": 159.5,
+    "width": 42,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2010-03-24",
+    "confidence": 0.9998871,
+    "cx": 80,
+    "cy": 159.5,
+    "width": 62,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "21:17",
+    "confidence": 0.9994541,
+    "cx": 126.5,
+    "cy": 160,
+    "width": 33,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "POS",
+    "confidence": 0.97512645,
+    "cx": 159,
+    "cy": 160,
+    "width": 22,
+    "height": 14,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "번호:",
+    "confidence": 0.97512645,
+    "cx": 187.5,
+    "cy": 160.5,
+    "width": 31,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1016",
+    "confidence": 0.97512645,
+    "cx": 217.5,
+    "cy": 160.5,
+    "width": 27,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "상품코드",
+    "confidence": 0.9987778,
+    "cx": 40,
+    "cy": 186.5,
+    "width": 64,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "단가",
+    "confidence": 0.732196,
+    "cx": 129,
+    "cy": 187,
+    "width": 38,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "수량",
+    "confidence": 0.9905455,
+    "cx": 169,
+    "cy": 188,
+    "width": 38,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "금액",
+    "confidence": 0.9905455,
+    "cx": 210.5,
+    "cy": 188,
+    "width": 39,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "001",
+    "confidence": 0.89147955,
+    "cx": 17,
+    "cy": 213.5,
+    "width": 20,
+    "height": 13,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "A3리필속지(20매)",
+    "confidence": 0.89147955,
+    "cx": 84.5,
+    "cy": 214,
+    "width": 93,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "*8809074396277",
+    "confidence": 0.99398273,
+    "cx": 47.5,
+    "cy": 227,
+    "width": 81,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1,300",
+    "confidence": 0.99962676,
+    "cx": 131.5,
+    "cy": 228.5,
+    "width": 33,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2",
+    "confidence": 0.99962676,
+    "cx": 164,
+    "cy": 228,
+    "width": 12,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "002",
+    "confidence": 0.96791524,
+    "cx": 17,
+    "cy": 241,
+    "width": 20,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "합지D링3공바인다(70mm)",
+    "confidence": 0.96791524,
+    "cx": 100.5,
+    "cy": 241.5,
+    "width": 125,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "*8809074397502",
+    "confidence": 0.98178905,
+    "cx": 46.5,
+    "cy": 255,
+    "width": 79,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,500",
+    "confidence": 0.999236,
+    "cx": 130.5,
+    "cy": 256,
+    "width": 33,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "10",
+    "confidence": 0.999236,
+    "cx": 161,
+    "cy": 256,
+    "width": 16,
+    "height": 14,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,600",
+    "confidence": 0.999252,
+    "cx": 213,
+    "cy": 228.5,
+    "width": 34,
+    "height": 17,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "25,000",
+    "confidence": 0.9988223,
+    "cx": 210.5,
+    "cy": 256.5,
+    "width": 39,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "부가세",
+    "confidence": 0.9985549,
+    "cx": 24,
+    "cy": 281.5,
+    "width": 36,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "과세",
+    "confidence": 0.65604573,
+    "cx": 56.5,
+    "cy": 282,
+    "width": 27,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "물품가액",
+    "confidence": 0.65604573,
+    "cx": 95.5,
+    "cy": 282,
+    "width": 49,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "25,091",
+    "confidence": 0.99949133,
+    "cx": 209.5,
+    "cy": 282.5,
+    "width": 39,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "상품가격에",
+    "confidence": 0.9982287,
+    "cx": 35,
+    "cy": 295,
+    "width": 58,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "이미",
+    "confidence": 0.99566215,
+    "cx": 78,
+    "cy": 295.5,
+    "width": 26,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "포함된",
+    "confidence": 0.99566215,
+    "cx": 111.5,
+    "cy": 296,
+    "width": 39,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "부가세(",
+    "confidence": 0.9967667,
+    "cx": 153,
+    "cy": 296,
+    "width": 44,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,509)",
+    "confidence": 0.9985499,
+    "cx": 209,
+    "cy": 296,
+    "width": 40,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "합",
+    "confidence": 0.9932454,
+    "cx": 19.5,
+    "cy": 309,
+    "width": 21,
+    "height": 14,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "계",
+    "confidence": 0.99898404,
+    "cx": 105.5,
+    "cy": 309.5,
+    "width": 23,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "27,600",
+    "confidence": 0.9994912,
+    "cx": 192.5,
+    "cy": 310,
+    "width": 71,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "상품코드",
+    "confidence": 0.9986553,
+    "cx": 29,
+    "cy": 335,
+    "width": 44,
+    "height": 14,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "앞*표시가",
+    "confidence": 0.58244884,
+    "cx": 87,
+    "cy": 336.5,
+    "width": 64,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "되어",
+    "confidence": 0.99959165,
+    "cx": 132,
+    "cy": 336.5,
+    "width": 26,
+    "height": 17,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "있는",
+    "confidence": 0.99959165,
+    "cx": 160.5,
+    "cy": 337.5,
+    "width": 27,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "품목은",
+    "confidence": 0.998295,
+    "cx": 193.5,
+    "cy": 337.5,
+    "width": 37,
+    "height": 15,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "부가세",
+    "confidence": 0.99924326,
+    "cx": 24,
+    "cy": 350,
+    "width": 34,
+    "height": 14,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "과세",
+    "confidence": 0.8768719,
+    "cx": 55.5,
+    "cy": 350.5,
+    "width": 25,
+    "height": 15,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "품목입니다.",
+    "confidence": 0.8768719,
+    "cx": 102,
+    "cy": 350,
+    "width": 64,
+    "height": 16,
+    "lineBreak": true,
+    "type": "NORMAL"
+  }
+]

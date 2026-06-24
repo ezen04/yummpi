@@ -1,0 +1,532 @@
+[
+  {
+    "text": "영수증",
+    "confidence": 0.9995333,
+    "cx": 431,
+    "cy": 59,
+    "width": 202,
+    "height": 44,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "커피민트",
+    "confidence": 0.9975381,
+    "cx": 158.5,
+    "cy": 142,
+    "width": 145,
+    "height": 40,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "대표자:",
+    "confidence": 0.99517524,
+    "cx": 305.5,
+    "cy": 144,
+    "width": 125,
+    "height": 40,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "최두호",
+    "confidence": 0.9983309,
+    "cx": 417,
+    "cy": 142,
+    "width": 108,
+    "height": 40,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "서울시",
+    "confidence": 0.99916637,
+    "cx": 141.5,
+    "cy": 182.5,
+    "width": 111,
+    "height": 39,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "종로구",
+    "confidence": 0.9980003,
+    "cx": 265.5,
+    "cy": 184,
+    "width": 109,
+    "height": 40,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "청계천로",
+    "confidence": 0.9986872,
+    "cx": 402,
+    "cy": 184,
+    "width": 142,
+    "height": 40,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "73",
+    "confidence": 0.99614644,
+    "cx": 501.5,
+    "cy": 178,
+    "width": 43,
+    "height": 36,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1층",
+    "confidence": 0.99614644,
+    "cx": 560,
+    "cy": 176,
+    "width": 56,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "Tel:",
+    "confidence": 0.9990878,
+    "cx": 123.5,
+    "cy": 221,
+    "width": 75,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "010-9184-4933",
+    "confidence": 0.99979895,
+    "cx": 274.5,
+    "cy": 223.5,
+    "width": 237,
+    "height": 41,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "사업자No:",
+    "confidence": 0.9958112,
+    "cx": 478,
+    "cy": 223,
+    "width": 158,
+    "height": 42,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "5598502109",
+    "confidence": 0.9997843,
+    "cx": 639.5,
+    "cy": 212.5,
+    "width": 183,
+    "height": 41,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "판매일시",
+    "confidence": 0.99931455,
+    "cx": 161,
+    "cy": 265,
+    "width": 150,
+    "height": 38,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": ":",
+    "confidence": 0.9994204,
+    "cx": 259.5,
+    "cy": 265,
+    "width": 13,
+    "height": 22,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2026-06-17",
+    "confidence": 0.99993324,
+    "cx": 370.5,
+    "cy": 266,
+    "width": 179,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "12:20",
+    "confidence": 0.9999263,
+    "cx": 514,
+    "cy": 263.5,
+    "width": 92,
+    "height": 35,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "주문번호",
+    "confidence": 0.9991934,
+    "cx": 234.5,
+    "cy": 320.5,
+    "width": 287,
+    "height": 67,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "-",
+    "confidence": 0.9655457,
+    "cx": 424.5,
+    "cy": 322,
+    "width": 31,
+    "height": 16,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "0066",
+    "confidence": 0.9999548,
+    "cx": 542,
+    "cy": 319,
+    "width": 146,
+    "height": 64,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[품명]",
+    "confidence": 0.99906975,
+    "cx": 327,
+    "cy": 419,
+    "width": 108,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[수량]",
+    "confidence": 0.9985251,
+    "cx": 611,
+    "cy": 416,
+    "width": 104,
+    "height": 42,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[금액]",
+    "confidence": 0.9980301,
+    "cx": 763.5,
+    "cy": 407,
+    "width": 107,
+    "height": 42,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1",
+    "confidence": 0.9999229,
+    "cx": 655,
+    "cy": 493,
+    "width": 20,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "샷추가",
+    "confidence": 0.9963566,
+    "cx": 152,
+    "cy": 500,
+    "width": 114,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "민트라떼",
+    "confidence": 0.9947615,
+    "cx": 169,
+    "cy": 541,
+    "width": 148,
+    "height": 40,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "(ICE)",
+    "confidence": 0.9998766,
+    "cx": 304,
+    "cy": 540.5,
+    "width": 88,
+    "height": 39,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "500",
+    "confidence": 0.9999759,
+    "cx": 790.5,
+    "cy": 486.5,
+    "width": 63,
+    "height": 35,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "3500",
+    "confidence": 0.9998758,
+    "cx": 785,
+    "cy": 525.5,
+    "width": 80,
+    "height": 37,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1",
+    "confidence": 0.9999697,
+    "cx": 657,
+    "cy": 532,
+    "width": 18,
+    "height": 28,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "공급가액:",
+    "confidence": 0.99732554,
+    "cx": 182,
+    "cy": 668.5,
+    "width": 170,
+    "height": 45,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "부가세:",
+    "confidence": 0.99707365,
+    "cx": 183,
+    "cy": 710.5,
+    "width": 168,
+    "height": 45,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "합계금액:",
+    "confidence": 0.994768,
+    "cx": 258,
+    "cy": 625.5,
+    "width": 314,
+    "height": 43,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "4,000",
+    "confidence": 0.99985254,
+    "cx": 741,
+    "cy": 611.5,
+    "width": 182,
+    "height": 43,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "3,637",
+    "confidence": 0.9998609,
+    "cx": 785.5,
+    "cy": 649,
+    "width": 99,
+    "height": 40,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "363",
+    "confidence": 0.9999367,
+    "cx": 807,
+    "cy": 689.5,
+    "width": 66,
+    "height": 39,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "결제금액:",
+    "confidence": 0.99567527,
+    "cx": 262,
+    "cy": 794,
+    "width": 314,
+    "height": 54,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "4,000",
+    "confidence": 0.99986684,
+    "cx": 751,
+    "cy": 775.5,
+    "width": 184,
+    "height": 43,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "카드번호:",
+    "confidence": 0.9983942,
+    "cx": 183,
+    "cy": 841.5,
+    "width": 174,
+    "height": 51,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "448125**********",
+    "confidence": 0.9911642,
+    "cx": 422.5,
+    "cy": 829.5,
+    "width": 291,
+    "height": 55,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "거래종류:",
+    "confidence": 0.9977837,
+    "cx": 184,
+    "cy": 885.5,
+    "width": 172,
+    "height": 51,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "신용구매",
+    "confidence": 0.9991584,
+    "cx": 354.5,
+    "cy": 875.5,
+    "width": 147,
+    "height": 49,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "거래구분:",
+    "confidence": 0.99852306,
+    "cx": 184,
+    "cy": 927.5,
+    "width": 172,
+    "height": 51,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "일시불",
+    "confidence": 0.9994281,
+    "cx": 338.5,
+    "cy": 919,
+    "width": 115,
+    "height": 46,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "승인번호:",
+    "confidence": 0.99845314,
+    "cx": 185,
+    "cy": 971.5,
+    "width": 174,
+    "height": 53,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "60878932",
+    "confidence": 0.99980766,
+    "cx": 357,
+    "cy": 959.5,
+    "width": 154,
+    "height": 49,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "승인일시:",
+    "confidence": 0.99859935,
+    "cx": 185.5,
+    "cy": 1017,
+    "width": 173,
+    "height": 52,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2026-06-17",
+    "confidence": 0.9999254,
+    "cx": 375.5,
+    "cy": 1003.5,
+    "width": 191,
+    "height": 51,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "12:20:55",
+    "confidence": 0.99977404,
+    "cx": 553,
+    "cy": 996.5,
+    "width": 152,
+    "height": 49,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "매입사명:",
+    "confidence": 0.9979919,
+    "cx": 185.5,
+    "cy": 1061.5,
+    "width": 177,
+    "height": 53,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "비씨카드",
+    "confidence": 0.9985695,
+    "cx": 359.5,
+    "cy": 1048.5,
+    "width": 149,
+    "height": 49,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "거래번호:",
+    "confidence": 0.9959149,
+    "cx": 187.5,
+    "cy": 1154.5,
+    "width": 177,
+    "height": 57,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "202606170066",
+    "confidence": 0.99986744,
+    "cx": 379.5,
+    "cy": 1138,
+    "width": 231,
+    "height": 60,
+    "lineBreak": true,
+    "type": "NORMAL"
+  }
+]

@@ -17,8 +17,12 @@ interface PlaceRecommendationCardProps {
   address: string | null;
   reservable?: boolean;
   isCandidate?: boolean;
+  /** [+]/[✓] 아이콘 표시 여부 (mode=add용) */
   showAddAction?: boolean;
+  /** 카드 [+] 클릭 핸들러 (mode=add용) */
   onAddCandidate?: () => void;
+  /** 카드 전체 클릭 핸들러 (mode=confirm / select 등) */
+  onClick?: () => void;
   disabled?: boolean;
   className?: string;
 }
@@ -32,6 +36,7 @@ export function PlaceRecommendationCard({
   isCandidate = false,
   showAddAction = false,
   onAddCandidate,
+  onClick,
   disabled = false,
   className,
 }: PlaceRecommendationCardProps) {
@@ -39,7 +44,8 @@ export function PlaceRecommendationCard({
   const shortCategory = shortenKakaoCategory(categoryName);
   const distanceLabel = distanceM != null ? `${distanceM}m` : '';
 
-  const isClickable = showAddAction && !isCandidate && !disabled;
+  const cardOnClick = showAddAction ? onAddCandidate : onClick;
+  const isClickable = !disabled && !isCandidate && !!cardOnClick;
 
   const renderActionIndicator = () => {
     if (!showAddAction) return null;
@@ -119,7 +125,7 @@ export function PlaceRecommendationCard({
 
   if (isClickable) {
     return (
-      <button type="button" onClick={onAddCandidate} className={baseClass}>
+      <button type="button" onClick={cardOnClick} className={baseClass}>
         {cardContent}
       </button>
     );

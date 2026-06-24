@@ -4,9 +4,11 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Coins, Flame, Plus } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
+import { KakaoMap } from '@/components/common/KakaoMap';
 import { Tipbox } from '@/components/common/Tipbox';
 import { PlaceFilterChips } from '@/features/place/components/recommendation/PlaceFilterChips';
 import { PlaceRecommendationList } from '@/features/place/components/recommendation/PlaceRecommendationList';
+import { useOptimalPoint } from '@/features/place/hooks/useOptimalPoint';
 import { usePlaceCandidates } from '@/features/place/hooks/usePlaceCandidates';
 import { usePlaceRecommendations } from '@/features/place/hooks/usePlaceRecommendations';
 import type { RecommendationItem } from '@/features/place/api/placeApi';
@@ -40,8 +42,13 @@ export function RecruitingView({
   const router = useRouter();
   const isHost = viewerRole === 'HOST';
 
-  const lat = meeting.host?.startLatitude ?? null;
-  const lng = meeting.host?.startLongitude ?? null;
+  const {
+    data: optimal,
+    isLoading: optimalLoading,
+    isError: optimalError,
+  } = useOptimalPoint(meeting.id);
+  const lat = optimal?.lat ?? null;
+  const lng = optimal?.lng ?? null;
 
   const { data: recommendations, isLoading: recLoading } =
     usePlaceRecommendations(meeting.id, lat, lng);
@@ -122,7 +129,6 @@ export function RecruitingView({
     openConfirmPlace(single.id);
   };
 
-  const hasNoLocation = !lat || !lng;
   const candidateCount = votesData.candidates.length;
 
   return (
@@ -135,14 +141,22 @@ export function RecruitingView({
         </div>
       )}
 
-      <div className="shrink-0 px-5 pb-4">
-        {/* TODO(Step 11): KakaoMap 컴포넌트가 들어올 자리 (Figma 362x148) */}
-        <div className="w-full h-[148px] rounded-[var(--radius-12)] border border-dashed border-[var(--line-normal)] bg-[var(--fill-normal)] flex items-center justify-center">
-          <p className="text-[12px] font-normal font-[var(--font-sans)] text-[var(--label-assistive)] m-0">
-            지도 영역 (추후 추가)
-          </p>
+      {lat && lng && (
+        <div className="shrink-0 px-5 pb-4">
+          <div className="w-full h-[148px] rounded-[var(--radius-12)] overflow-hidden">
+            <KakaoMap
+              center={{ lat: Number(lat), lng: Number(lng) }}
+              markers={(recommendations ?? []).map((item) => ({
+                lat: Number(item.lat),
+                lng: Number(item.lng),
+                label: item.name,
+                id: item.externalPlaceId,
+              }))}
+              height="148px"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="shrink-0 px-5 pb-2 flex items-center justify-between">
         <h2 className="text-[16px] leading-6 font-semibold font-[var(--font-sans)] text-[var(--label-normal)] m-0">
@@ -167,9 +181,18 @@ export function RecruitingView({
       </p>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
-        {hasNoLocation ? (
+        {optimalLoading ? (
+          <PlaceRecommendationList
+            items={[]}
+            candidateExternalIds={candidateExternalIds}
+            showAddAction={isHost}
+            onAddCandidate={handleAddCandidate}
+            isLoading
+          />
+        ) : optimalError ? (
           <Tipbox variant="normal">
-            출발지를 입력하면 추천 장소를 받을 수 있어요.
+            아직 출발지를 입력한 멤버가 없어요. 멤버가 출발지를 입력하면 추천
+            장소를 받을 수 있어요.
           </Tipbox>
         ) : (
           <PlaceRecommendationList

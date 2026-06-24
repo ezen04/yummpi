@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { Toaster } from '@yummpi/ui';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { PWAInstallBanner } from '@/features/pwa/PWAInstallBanner';
@@ -39,6 +40,7 @@ export default function RootLayout({
           <QueryProvider>
             {children}
             <PWAInstallBanner />
+            <Toaster position="top-center" richColors />
           </QueryProvider>
         </SessionProvider>
       </body>

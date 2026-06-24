@@ -30,6 +30,33 @@ async function parseErrorMessage(res: Response, fallback: string) {
   return body?.error?.message ?? fallback;
 }
 
+export interface OptimalPoint {
+  lat: string;
+  lng: string;
+}
+
+export async function fetchOptimalPoint(
+  meetingId: string
+): Promise<OptimalPoint> {
+  const res = await fetch(
+    `/api/v1/meetings/${meetingId}/places/optimal-point`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'COORDINATE' }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '중간지점을 계산하지 못했습니다.')
+    );
+  }
+  const body = (await res.json()) as {
+    data: { latitude: number; longitude: number };
+  };
+  return { lat: String(body.data.latitude), lng: String(body.data.longitude) };
+}
+
 export async function fetchPlaceRecommendations(
   meetingId: string,
   lat: string,
@@ -60,4 +87,35 @@ export async function addPlaceCandidate(
       await parseErrorMessage(res, '후보로 추가하지 못했습니다.')
     );
   }
+}
+
+export interface SearchPlacesParams {
+  meetingId: string;
+  query: string;
+  x?: string;
+  y?: string;
+  radius?: number;
+  page?: number;
+}
+
+export async function searchPlaces(
+  params: SearchPlacesParams
+): Promise<RecommendationItem[]> {
+  const search = new URLSearchParams({
+    meetingId: params.meetingId,
+    query: params.query,
+  });
+  if (params.x) search.set('x', params.x);
+  if (params.y) search.set('y', params.y);
+  if (params.radius != null) search.set('radius', String(params.radius));
+  if (params.page != null) search.set('page', String(params.page));
+
+  const res = await fetch(`/api/v1/places/search?${search.toString()}`);
+  if (!res.ok) {
+    throw new Error(await parseErrorMessage(res, '장소 검색에 실패했습니다.'));
+  }
+  const body = (await res.json()) as {
+    data: { items: RecommendationItem[] };
+  };
+  return body.data.items;
 }
