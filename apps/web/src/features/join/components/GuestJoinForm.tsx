@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 import { Button } from '@yummpi/ui';
-import { Input } from '@/components/common/Input';
-import { useGuestJoin, useRandomNickname } from '../hooks';
+import { useGuestJoin, useRandomNicknames } from '../hooks';
 import { isJoinApiError, type InviteInfo } from '../api/joinApi';
 
 export function GuestJoinForm({
@@ -19,14 +19,27 @@ export function GuestJoinForm({
   const [error, setError] = useState<string | null>(null);
   const [joinedNickname, setJoinedNickname] = useState<string | null>(null);
 
-  const random = useRandomNickname(true);
+  const random = useRandomNicknames(3, true);
   const join = useGuestJoin();
 
-  // 사용자가 입력하기 전에는 랜덤 닉네임을 그대로 노출(effect 동기화 대신 파생값).
-  const effectiveNickname = touched ? nickname : (random.data?.nickname ?? '');
+  const suggestions = random.data ?? [];
+  // 사용자가 입력하기 전에는 첫 추천 닉네임을 그대로 노출(effect 동기화 대신 파생값).
+  const effectiveNickname = touched ? nickname : (suggestions[0] ?? '');
 
   const isFull =
     info.maxMembers !== null && info.memberCount >= info.maxMembers;
+
+  const pickSuggestion = (s: string) => {
+    setNickname(s);
+    setTouched(true);
+    if (error) setError(null);
+  };
+
+  const shuffle = () => {
+    setTouched(false);
+    setError(null);
+    random.refetch();
+  };
 
   const submit = () => {
     setError(null);
@@ -132,28 +145,93 @@ export function GuestJoinForm({
             인원이 마감된 모임이에요.
           </p>
         ) : (
-          <Input
-            label="닉네임"
-            value={effectiveNickname}
-            onChange={(e) => {
-              setTouched(true);
-              setNickname(e.target.value);
-              if (error) setError(null);
-            }}
-            maxLength={20}
-            placeholder="모임에서 보일 이름"
-            error={error ?? undefined}
-          />
+          <div className="flex flex-col gap-2">
+            <label className="px-1 text-[14px] font-medium text-[var(--label-normal)]">
+              모임방에서 쓸 닉네임
+            </label>
+
+            <div className="relative">
+              <input
+                value={effectiveNickname}
+                onChange={(e) => {
+                  setTouched(true);
+                  setNickname(e.target.value);
+                  if (error) setError(null);
+                }}
+                maxLength={20}
+                placeholder="모임에서 보일 이름"
+                className="w-full h-12 pl-4 pr-[68px] rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-[15px] text-[var(--label-normal)] outline-none focus:border-[var(--primary)]"
+              />
+              <button
+                type="button"
+                onClick={shuffle}
+                disabled={random.isFetching}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 px-3 rounded-full text-[13px] font-medium text-[var(--label-alternative)] bg-[var(--fill-normal)] border-none cursor-pointer transition-colors hover:bg-[var(--fill-strong)] disabled:opacity-60"
+              >
+                랜덤
+              </button>
+            </div>
+
+            {/* 추천 닉네임 칩 */}
+            {suggestions.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {suggestions.map((s) => {
+                  const active = effectiveNickname === s;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => pickSuggestion(s)}
+                      className="h-8 rounded-full border px-3 text-[13px] font-medium transition-colors"
+                      style={
+                        active
+                          ? {
+                              background: 'var(--primary-tint)',
+                              color: 'var(--primary)',
+                              borderColor: 'var(--primary)',
+                            }
+                          : {
+                              background: 'transparent',
+                              color: 'var(--label-alternative)',
+                              borderColor: 'var(--line-normal)',
+                            }
+                      }
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {error && (
+              <p className="px-1 text-[13px] text-[var(--status-negative)]">
+                {error}
+              </p>
+            )}
+          </div>
         )}
       </div>
 
-      <Button
-        className="w-full"
-        onClick={submit}
-        disabled={isFull || join.isPending}
-      >
-        {join.isPending ? '입장 중…' : '입장하기'}
-      </Button>
+      {/* 하단: 입장 + 회원 전환 유도 */}
+      <div className="flex w-full flex-col items-center gap-3">
+        <Button
+          className="w-full"
+          onClick={submit}
+          disabled={isFull || join.isPending}
+        >
+          {join.isPending ? '입장 중…' : '입장하기'}
+        </Button>
+        <button
+          type="button"
+          onClick={() =>
+            signIn('kakao', { callbackUrl: `/join/${inviteCode}` })
+          }
+          className="bg-transparent text-[13px] text-[var(--label-alternative)] underline-offset-2 hover:underline border-none cursor-pointer"
+        >
+          내 모임으로 저장하려면 카카오 로그인
+        </button>
+      </div>
     </main>
   );
 }
