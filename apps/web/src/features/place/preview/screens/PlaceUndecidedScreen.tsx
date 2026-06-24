@@ -43,7 +43,7 @@ export function PlaceUndecidedScreen() {
           onClick={() =>
             console.log('[optimal-preview] 장소 미정으로 모임 만들기')
           }
-          className="absolute bottom-0 left-0 right-0 z-10 bg-[var(--bg-normal)] px-5 py-4 flex items-center gap-3 border-t border-[var(--line-normal)] text-left"
+          className="absolute bottom-0 left-0 right-0 z-10 bg-[var(--bg-normal)] px-5 py-4 flex items-center justify-center gap-3 border-t border-[var(--line-normal)]"
         >
           <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[var(--primary-tint)] shrink-0">
             <MapPin size={18} className="text-[var(--primary)]" />
