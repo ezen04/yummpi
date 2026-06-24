@@ -78,6 +78,12 @@ export function KakaoMap({
 
   const initMap = () => {
     if (!containerRef.current) return;
+    // autoload=false + Next.js 16 Turbopack의 Script onLoad 타이밍 이슈 방어:
+    // window.kakao가 아직 set되지 않은 경우 다음 tick에 재시도
+    if (typeof window === 'undefined' || !window.kakao?.maps?.load) {
+      setTimeout(initMap, 100);
+      return;
+    }
     window.kakao.maps.load(() => {
       if (!containerRef.current) return;
       const map = new window.kakao.maps.Map(containerRef.current, {
@@ -132,15 +138,15 @@ export function KakaoMap({
 
   return (
     <>
-      {/* SDK가 아직 로드 안 됐을 때만 Script 렌더 */}
-      {typeof window === 'undefined' || !window.kakao?.maps ? (
-        <Script
-          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false`}
-          strategy="afterInteractive"
-          onLoad={initMap}
-          onError={() => setStatus('error')}
-        />
-      ) : null}
+      {/* Next.js next/script는 같은 id 기준으로 dedupe — 항상 렌더해도 한 번만 로드.
+          조건부 렌더 시 React 19 strict mode 이중 mount에서 누락될 수 있어 항상 렌더. */}
+      <Script
+        id="kakao-maps-sdk"
+        src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false`}
+        strategy="afterInteractive"
+        onReady={initMap}
+        onError={() => setStatus('error')}
+      />
 
       <div
         style={{ height }}
