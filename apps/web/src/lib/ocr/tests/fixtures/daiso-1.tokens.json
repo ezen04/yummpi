@@ -1,0 +1,792 @@
+[
+  {
+    "text": "*재발행",
+    "confidence": 0.98738074,
+    "cx": 428.5,
+    "cy": 50.5,
+    "width": 109,
+    "height": 39,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "전표*",
+    "confidence": 0.99801683,
+    "cx": 532,
+    "cy": 53,
+    "width": 78,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "\"국민가게,",
+    "confidence": 0.994653,
+    "cx": 422,
+    "cy": 93.5,
+    "width": 148,
+    "height": 41,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "다이소\"",
+    "confidence": 0.9973525,
+    "cx": 560.5,
+    "cy": 97,
+    "width": 105,
+    "height": 40,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "(주)아성다이소_오류동점",
+    "confidence": 0.84299576,
+    "cx": 299.5,
+    "cy": 135.5,
+    "width": 335,
+    "height": 43,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "매장:",
+    "confidence": 0.99462515,
+    "cx": 174.5,
+    "cy": 174.5,
+    "width": 73,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "서울특별시",
+    "confidence": 0.9991241,
+    "cx": 280.5,
+    "cy": 177.5,
+    "width": 145,
+    "height": 39,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "구로구",
+    "confidence": 0.99968195,
+    "cx": 409,
+    "cy": 179.5,
+    "width": 92,
+    "height": 37,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "경인로",
+    "confidence": 0.9988354,
+    "cx": 508,
+    "cy": 181,
+    "width": 90,
+    "height": 38,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "209",
+    "confidence": 0.998021,
+    "cx": 582.5,
+    "cy": 180.5,
+    "width": 51,
+    "height": 31,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "(오류동)",
+    "confidence": 0.998021,
+    "cx": 674,
+    "cy": 183,
+    "width": 118,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "대표:",
+    "confidence": 0.99737144,
+    "cx": 176,
+    "cy": 216,
+    "width": 74,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "김기호",
+    "confidence": 0.9965307,
+    "cx": 253.5,
+    "cy": 218,
+    "width": 89,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "213-81-52063",
+    "confidence": 0.9997142,
+    "cx": 392,
+    "cy": 218.5,
+    "width": 176,
+    "height": 33,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "본사:",
+    "confidence": 0.9982553,
+    "cx": 179,
+    "cy": 257,
+    "width": 72,
+    "height": 32,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "서울",
+    "confidence": 0.9991702,
+    "cx": 241.5,
+    "cy": 257.5,
+    "width": 59,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "강남구",
+    "confidence": 0.9991702,
+    "cx": 326,
+    "cy": 259,
+    "width": 88,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "남부순환로",
+    "confidence": 0.99904853,
+    "cx": 450,
+    "cy": 260.5,
+    "width": 142,
+    "height": 37,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2748",
+    "confidence": 0.9999281,
+    "cx": 559.5,
+    "cy": 260.5,
+    "width": 63,
+    "height": 29,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "(도곡동)",
+    "confidence": 0.99822205,
+    "cx": 656.5,
+    "cy": 263.5,
+    "width": 117,
+    "height": 33,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "소비자중심경영(CCM)",
+    "confidence": 0.9077054,
+    "cx": 414,
+    "cy": 331.5,
+    "width": 272,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "인증기업",
+    "confidence": 0.9976059,
+    "cx": 618,
+    "cy": 334,
+    "width": 114,
+    "height": 34,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "ISO",
+    "confidence": 0.5149632,
+    "cx": 272.5,
+    "cy": 366.5,
+    "width": 51,
+    "height": 29,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "9001",
+    "confidence": 0.5149632,
+    "cx": 333,
+    "cy": 367.5,
+    "width": 66,
+    "height": 31,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "품질경영시스템",
+    "confidence": 0.99585825,
+    "cx": 477,
+    "cy": 370,
+    "width": 202,
+    "height": 36,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "인증기업",
+    "confidence": 0.999064,
+    "cx": 645.5,
+    "cy": 371,
+    "width": 115,
+    "height": 34,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "교환/환불",
+    "confidence": 0.9995598,
+    "cx": 329.5,
+    "cy": 447.5,
+    "width": 133,
+    "height": 37,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "14일(03월24일)이내,",
+    "confidence": 0.9954478,
+    "cx": 539,
+    "cy": 449,
+    "width": 272,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "(전자)영수증,",
+    "confidence": 0.9001283,
+    "cx": 230.5,
+    "cy": 487,
+    "width": 189,
+    "height": 36,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "결제카드",
+    "confidence": 0.99784327,
+    "cx": 392.5,
+    "cy": 487.5,
+    "width": 117,
+    "height": 37,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "지참",
+    "confidence": 0.9987804,
+    "cx": 490,
+    "cy": 489,
+    "width": 62,
+    "height": 38,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "후",
+    "confidence": 0.9987804,
+    "cx": 545,
+    "cy": 489,
+    "width": 32,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "구입매장에서",
+    "confidence": 0.99863094,
+    "cx": 659,
+    "cy": 489,
+    "width": 178,
+    "height": 38,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "가능",
+    "confidence": 0.99863094,
+    "cx": 786.5,
+    "cy": 489,
+    "width": 63,
+    "height": 34,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "포장/가격",
+    "confidence": 0.99851984,
+    "cx": 302,
+    "cy": 527,
+    "width": 132,
+    "height": 36,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "택",
+    "confidence": 0.998002,
+    "cx": 392.5,
+    "cy": 527.5,
+    "width": 31,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "훼손시",
+    "confidence": 0.998002,
+    "cx": 461.5,
+    "cy": 528,
+    "width": 89,
+    "height": 36,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "교환/환불",
+    "confidence": 0.9983165,
+    "cx": 581,
+    "cy": 529,
+    "width": 134,
+    "height": 38,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "불가",
+    "confidence": 0.9983165,
+    "cx": 686.5,
+    "cy": 530,
+    "width": 63,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "체크카드",
+    "confidence": 0.99725807,
+    "cx": 323.5,
+    "cy": 566,
+    "width": 115,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "취소",
+    "confidence": 0.99066025,
+    "cx": 420,
+    "cy": 567.5,
+    "width": 60,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "시",
+    "confidence": 0.99066025,
+    "cx": 474.5,
+    "cy": 567.5,
+    "width": 31,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "최대",
+    "confidence": 0.99295527,
+    "cx": 530,
+    "cy": 567.5,
+    "width": 60,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "7일",
+    "confidence": 0.99295527,
+    "cx": 590,
+    "cy": 568.5,
+    "width": 50,
+    "height": 33,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "소요",
+    "confidence": 0.99295527,
+    "cx": 655.5,
+    "cy": 568.5,
+    "width": 61,
+    "height": 33,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[POS",
+    "confidence": 0.9987388,
+    "cx": 174,
+    "cy": 640.5,
+    "width": 62,
+    "height": 29,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1012104]",
+    "confidence": 0.9878533,
+    "cx": 267.5,
+    "cy": 641,
+    "width": 115,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2026.03.10",
+    "confidence": 0.9989613,
+    "cx": 611.5,
+    "cy": 644.5,
+    "width": 145,
+    "height": 27,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "11:42:15",
+    "confidence": 0.99844486,
+    "cx": 753,
+    "cy": 646.5,
+    "width": 116,
+    "height": 27,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1",
+    "confidence": 0.9998976,
+    "cx": 672.5,
+    "cy": 720.5,
+    "width": 15,
+    "height": 21,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "김서림방지안경닦이(15X1",
+    "confidence": 0.74963135,
+    "cx": 300.5,
+    "cy": 716,
+    "width": 325,
+    "height": 34,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[1032367]",
+    "confidence": 0.9995596,
+    "cx": 198,
+    "cy": 754,
+    "width": 130,
+    "height": 32,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "고무나무미니이젤(2000)",
+    "confidence": 0.94808805,
+    "cx": 288.5,
+    "cy": 793,
+    "width": 315,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "[92761]",
+    "confidence": 0.9996117,
+    "cx": 179.5,
+    "cy": 833,
+    "width": 103,
+    "height": 34,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,000",
+    "confidence": 0.9998161,
+    "cx": 589.5,
+    "cy": 720,
+    "width": 77,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,000",
+    "confidence": 0.99983966,
+    "cx": 590,
+    "cy": 798,
+    "width": 78,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,000",
+    "confidence": 0.9998276,
+    "cx": 770.5,
+    "cy": 723,
+    "width": 79,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "2,000",
+    "confidence": 0.9998752,
+    "cx": 774.5,
+    "cy": 800.5,
+    "width": 77,
+    "height": 31,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "1",
+    "confidence": 0.99990475,
+    "cx": 675.5,
+    "cy": 798,
+    "width": 15,
+    "height": 24,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "과세",
+    "confidence": 0.9987513,
+    "cx": 329,
+    "cy": 873,
+    "width": 62,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "합계",
+    "confidence": 0.9987513,
+    "cx": 415.5,
+    "cy": 874,
+    "width": 61,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "부가세",
+    "confidence": 0.99895346,
+    "cx": 371,
+    "cy": 913.5,
+    "width": 144,
+    "height": 35,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "판매",
+    "confidence": 0.99914,
+    "cx": 327.5,
+    "cy": 954,
+    "width": 61,
+    "height": 34,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "합계",
+    "confidence": 0.99914,
+    "cx": 414.5,
+    "cy": 956,
+    "width": 61,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "3,636",
+    "confidence": 0.99986196,
+    "cx": 776,
+    "cy": 881,
+    "width": 80,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "364",
+    "confidence": 0.9999211,
+    "cx": 791,
+    "cy": 921,
+    "width": 50,
+    "height": 30,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "4,000",
+    "confidence": 0.99991,
+    "cx": 778,
+    "cy": 964,
+    "width": 80,
+    "height": 32,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "현금",
+    "confidence": 0.999297,
+    "cx": 151.5,
+    "cy": 1039.5,
+    "width": 63,
+    "height": 37,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "받은돈",
+    "confidence": 0.9979159,
+    "cx": 164,
+    "cy": 1078.5,
+    "width": 92,
+    "height": 35,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "거스름돈",
+    "confidence": 0.9982665,
+    "cx": 177.5,
+    "cy": 1122,
+    "width": 125,
+    "height": 38,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "4,000",
+    "confidence": 0.99987435,
+    "cx": 780,
+    "cy": 1047,
+    "width": 82,
+    "height": 32,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "50,000",
+    "confidence": 0.99963546,
+    "cx": 773.5,
+    "cy": 1089.5,
+    "width": 99,
+    "height": 35,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "46,000",
+    "confidence": 0.99979895,
+    "cx": 775.5,
+    "cy": 1133,
+    "width": 99,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "현금(소득공제)(현금)",
+    "confidence": 0.81490743,
+    "cx": 260.5,
+    "cy": 1208.5,
+    "width": 303,
+    "height": 47,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "승인번호",
+    "confidence": 0.9994153,
+    "cx": 172,
+    "cy": 1250.5,
+    "width": 126,
+    "height": 35,
+    "lineBreak": false,
+    "type": "NORMAL"
+  },
+  {
+    "text": "H83885598(1)",
+    "confidence": 0.99258053,
+    "cx": 333,
+    "cy": 1247,
+    "width": 184,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "010****9094",
+    "confidence": 0.99903286,
+    "cx": 738.5,
+    "cy": 1213.5,
+    "width": 173,
+    "height": 31,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "승인금액",
+    "confidence": 0.9995049,
+    "cx": 671.5,
+    "cy": 1252,
+    "width": 121,
+    "height": 36,
+    "lineBreak": true,
+    "type": "NORMAL"
+  },
+  {
+    "text": "4,000",
+    "confidence": 0.9998523,
+    "cx": 780,
+    "cy": 1252.5,
+    "width": 82,
+    "height": 31,
+    "lineBreak": true,
+    "type": "NORMAL"
+  }
+]
