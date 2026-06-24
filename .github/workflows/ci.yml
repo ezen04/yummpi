@@ -74,3 +74,24 @@ jobs:
         run: pnpm --filter @yummpi/web test:e2e
         env:
           NEXTAUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
+  docker-build:
+    name: Server Image Build
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # apps/server 이미지 빌드 검증만 (push 없음). secret 불필요.
+      # GitHub Actions 캐시로 레이어 재사용 → 빌드 시간 방어.
+      - name: Build server image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: false
+          tags: yummpi-server:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

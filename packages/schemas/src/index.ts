@@ -4,3 +4,4 @@ export * from './ocr-parser-output';
 export * from './ocr-response';
 export * from './payment';
 export * from './pushSubscription';
+export * from './settlement-response';

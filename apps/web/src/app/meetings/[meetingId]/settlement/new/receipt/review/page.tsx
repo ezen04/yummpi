@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash, Pencil } from '@yummpi/ui';
+import { Trash, Pencil, Plus } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { Step } from '@/components/common/Step';
@@ -18,13 +18,17 @@ import {
   MOCK_SETTLEMENT_ID,
 } from '@/features/settlement/constants';
 
+// promotingLineIndex: 미분류 줄 승격 모드. !== null이면 저장 시
+// promoteUnclassifiedLine(해당 index)으로 분기. editingItem과 동시 활성화되지 않음.
 const SHEET_CLOSED: {
   open: boolean;
   editingItem: OcrItem | null;
+  promotingLineIndex: number | null;
   formData: { name: string; quantity: string; totalPrice: string };
 } = {
   open: false,
   editingItem: null,
+  promotingLineIndex: null,
   formData: { name: '', quantity: '', totalPrice: '' },
 };
 
@@ -44,6 +48,7 @@ export default function ReceiptReviewPage({
     updateOcrItem,
     deleteOcrItem,
     addOcrItem,
+    promoteUnclassifiedLine,
   } = useSettlementStore();
 
   const [sheet, setSheet] = useState(SHEET_CLOSED);
@@ -63,6 +68,14 @@ export default function ReceiptReviewPage({
     0
   );
 
+  // 공백만 있는 줄은 시각 노이즈 + 빈 row가 나오므로 렌더에서 제외.
+  // 원본 unclassifiedLines 인덱스(idx)는 promoteUnclassifiedLine 호출에 필요해 보존.
+  const visibleUnclassifiedLines = selectedReceipt
+    ? selectedReceipt.unclassifiedLines
+        .map((line, idx) => ({ line, idx }))
+        .filter(({ line }) => line.trim().length > 0)
+    : [];
+
   const canProceed =
     splitMethod !== null && receipts.some((r) => r.ocrItems.length > 0);
 
@@ -74,6 +87,7 @@ export default function ReceiptReviewPage({
     setSheet({
       open: true,
       editingItem: item ?? null,
+      promotingLineIndex: null,
       formData: item
         ? {
             name: item.name,
@@ -84,11 +98,26 @@ export default function ReceiptReviewPage({
     });
   };
 
+  // 미분류 줄 승격 진입점. 줄 텍스트는 name에 프리필(사용자가 다듬어 저장),
+  // 수량·금액은 빈칸(파서가 못 잡은 줄이라 사용자 입력 강제).
+  const handleOpenPromoteForm = (lineIndex: number, lineText: string) => {
+    setSheet({
+      open: true,
+      editingItem: null,
+      promotingLineIndex: lineIndex,
+      formData: { name: lineText, quantity: '', totalPrice: '' },
+    });
+  };
+
   const handleItemSave = () => {
-    const { editingItem, formData } = sheet;
+    const { editingItem, promotingLineIndex, formData } = sheet;
+    // 이름 정규화: 다중 공백 → 단일 공백 + 앞뒤 trim.
+    // OCR이 글자 사이를 흩뜨린 줄("합   계")은 압축하되, 정상 띄어쓰기("민트 라떼")는
+    // 보존. 빈 입력은 길이 검증으로 차단.
+    const trimmedName = formData.name.replace(/\s+/g, ' ').trim();
     if (
       !selectedReceiptId ||
-      !formData.name ||
+      !trimmedName ||
       !formData.quantity ||
       !formData.totalPrice
     )
@@ -96,13 +125,15 @@ export default function ReceiptReviewPage({
 
     const newItem: OcrItem = {
       id: editingItem?.id || `${selectedReceiptId}-${Date.now()}`,
-      name: formData.name,
+      name: trimmedName,
       quantity: parseInt(formData.quantity, 10),
       totalPrice: parseInt(formData.totalPrice, 10),
     };
 
     if (editingItem?.id) {
       updateOcrItem(selectedReceiptId, editingItem.id, newItem);
+    } else if (promotingLineIndex !== null) {
+      promoteUnclassifiedLine(selectedReceiptId, promotingLineIndex, newItem);
     } else {
       addOcrItem(selectedReceiptId, newItem);
     }
@@ -110,9 +141,9 @@ export default function ReceiptReviewPage({
     setSheet(SHEET_CLOSED);
   };
 
-  const handleItemDelete = (itemId: string) => {
-    if (!selectedReceiptId) return;
-    deleteOcrItem(selectedReceiptId, itemId);
+  const handleItemDelete = () => {
+    if (!selectedReceiptId || !sheet.editingItem) return;
+    deleteOcrItem(selectedReceiptId, sheet.editingItem.id);
     setSheet(SHEET_CLOSED);
   };
 
@@ -233,6 +264,42 @@ export default function ReceiptReviewPage({
                   >
                     + 항목 추가
                   </button>
+
+                  {/* 미분류 줄 — 파서가 품목/요약/헤더 어디에도 분류 못 한 줄.
+                      사용자가 직접 [+]로 품목 승격. HEADER/SUMMARY 매칭 줄은
+                      파서 단에서 이미 제외됨(노이즈 차단).
+                      visibleUnclassifiedLines: 빈 줄 skip + 원본 idx 보존. */}
+                  {visibleUnclassifiedLines.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: 'var(--label-assistive)' }}
+                      >
+                        인식 못 한 줄 ({visibleUnclassifiedLines.length}개)
+                      </p>
+                      {visibleUnclassifiedLines.map(({ line, idx }) => (
+                        <div
+                          key={`${idx}-${line}`}
+                          className="flex items-center justify-between gap-2 px-4 py-3 rounded-md border"
+                          style={{ borderColor: 'var(--line-normal)' }}
+                        >
+                          <p
+                            className="text-sm flex-1 min-w-0 break-words"
+                            style={{ color: 'var(--label-alternative)' }}
+                          >
+                            {line}
+                          </p>
+                          <IconButton
+                            size={32}
+                            shape="square"
+                            style={{ background: 'transparent' }}
+                            icon={<Plus size={16} />}
+                            onClick={() => handleOpenPromoteForm(idx, line)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -342,11 +409,17 @@ export default function ReceiptReviewPage({
         body="확정 후에는 이전 단계로 돌아갈 수 없어요."
       />
 
-      {/* 항목 추가/편집 바텀 시트 */}
+      {/* 항목 추가/편집/미분류 줄 승격 바텀 시트 (3-way) */}
       <BottomSheet
         open={sheet.open}
         onClose={() => setSheet(SHEET_CLOSED)}
-        title={sheet.editingItem ? '항목 편집' : '항목 추가'}
+        title={
+          sheet.editingItem
+            ? '항목 편집'
+            : sheet.promotingLineIndex !== null
+              ? '인식 못 한 줄 추가'
+              : '항목 추가'
+        }
       >
         <div className="space-y-4 pb-4">
           <Input
@@ -401,7 +474,7 @@ export default function ReceiptReviewPage({
                 shape="square"
                 style={{ background: 'transparent' }}
                 icon={<Trash size={18} color="var(--status-negative)" />}
-                onClick={() => handleItemDelete(sheet.editingItem!.id)}
+                onClick={handleItemDelete}
               />
             )}
             <Button

@@ -41,6 +41,11 @@ interface SettlementStore {
   updateOcrItem: (receiptId: string, itemId: string, item: OcrItem) => void;
   deleteOcrItem: (receiptId: string, itemId: string) => void;
   addOcrItem: (receiptId: string, item: OcrItem) => void;
+  promoteUnclassifiedLine: (
+    receiptId: string,
+    lineIndex: number,
+    item: OcrItem
+  ) => void;
 }
 
 export const useSettlementStore = create<SettlementStore>((set) => ({
@@ -139,6 +144,23 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
           ? {
               ...r,
               ocrItems: [...r.ocrItems, item],
+            }
+          : r
+      ),
+    })),
+
+  // 미분류 줄 → 품목 승격. ocrItems push + unclassifiedLines splice를 한 액션으로
+  // 묶어 중복 노출/race를 차단한다.
+  promoteUnclassifiedLine: (receiptId, lineIndex, item) =>
+    set((state) => ({
+      receipts: state.receipts.map((r) =>
+        r.receiptId === receiptId
+          ? {
+              ...r,
+              ocrItems: [...r.ocrItems, item],
+              unclassifiedLines: r.unclassifiedLines.filter(
+                (_, i) => i !== lineIndex
+              ),
             }
           : r
       ),
