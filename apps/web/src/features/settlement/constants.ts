@@ -38,26 +38,47 @@ export const MOCK_OTHER_SUBMITTED_MEMBER_IDS: string[] = MOCK_MEMBERS.filter(
   (m) => !m.isMe
 ).map((m) => m.memberId);
 
-// 영수증 mock 항목 세트 — 영수증 index별로 다른 세트 (다중 영수증 합산 검증용)
-export const MOCK_RECEIPT_SETS: Omit<OcrItem, 'id'>[][] = [
-  [
-    { name: '삼겹살', quantity: 2, unitPrice: 15000, totalPrice: 30000 },
-    { name: '냉면', quantity: 1, unitPrice: 12000, totalPrice: 12000 },
-    { name: '소주', quantity: 3, unitPrice: 5000, totalPrice: 15000 },
-  ],
-  [
-    { name: '계란찜', quantity: 1, unitPrice: 6000, totalPrice: 6000 },
-    { name: '맥주', quantity: 4, unitPrice: 5000, totalPrice: 20000 },
-    { name: '공기밥', quantity: 2, unitPrice: 1000, totalPrice: 2000 },
-  ],
-  [
-    { name: '치즈스틱', quantity: 1, unitPrice: 8000, totalPrice: 8000 },
-    { name: '하이볼', quantity: 2, unitPrice: 7000, totalPrice: 14000 },
-  ],
-  [
-    { name: '아이스크림', quantity: 3, unitPrice: 3000, totalPrice: 9000 },
-    { name: '아메리카노', quantity: 4, unitPrice: 4500, totalPrice: 18000 },
-  ],
+// 영수증 mock 세트 — index별 items + unclassifiedLines 페어.
+// unclassifiedLines는 파서가 품목/요약/헤더 어디에도 못 잡은 줄. 실측 영수증의
+// 카드정보·메뉴(가격 누락)·문구 등을 본떠 검수 UI #1(미분류 승격) 시연용으로 박음.
+export const MOCK_RECEIPT_SETS: {
+  items: Omit<OcrItem, 'id'>[];
+  unclassifiedLines: string[];
+}[] = [
+  {
+    items: [
+      { name: '삼겹살', quantity: 2, unitPrice: 15000, totalPrice: 30000 },
+      { name: '냉면', quantity: 1, unitPrice: 12000, totalPrice: 12000 },
+      { name: '소주', quantity: 3, unitPrice: 5000, totalPrice: 15000 },
+    ],
+    unclassifiedLines: [
+      '서비스 김치찌개',
+      '카드번호: ****-****-****-****',
+      '거래번호 202606240001',
+    ],
+  },
+  {
+    items: [
+      { name: '계란찜', quantity: 1, unitPrice: 6000, totalPrice: 6000 },
+      { name: '맥주', quantity: 4, unitPrice: 5000, totalPrice: 20000 },
+      { name: '공기밥', quantity: 2, unitPrice: 1000, totalPrice: 2000 },
+    ],
+    unclassifiedLines: ['콜라 1 4000', '오뎅탕 small'],
+  },
+  {
+    items: [
+      { name: '치즈스틱', quantity: 1, unitPrice: 8000, totalPrice: 8000 },
+      { name: '하이볼', quantity: 2, unitPrice: 7000, totalPrice: 14000 },
+    ],
+    unclassifiedLines: [],
+  },
+  {
+    items: [
+      { name: '아이스크림', quantity: 3, unitPrice: 3000, totalPrice: 9000 },
+      { name: '아메리카노', quantity: 4, unitPrice: 4500, totalPrice: 18000 },
+    ],
+    unclassifiedLines: ['샷추가', '카드번호: ****-****-****-****'],
+  },
 ];
 
 // 결정적 seed: 각 항목을 (선택한 나) + (index 순환 배정 타 멤버 1명)에게 배정.

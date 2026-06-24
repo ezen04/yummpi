@@ -42,10 +42,10 @@ export default function SettlementReceiptPage({
       updateOcrResult(id, [], 'FAILED');
       return;
     }
-    // Mock: 영수증 index별로 다른 항목 세트 (다중 영수증 합산 검증용)
+    // Mock: 영수증 index별로 다른 항목 세트 + 미분류 줄 (다중 영수증 합산 + 검수 UI #1)
     const set = MOCK_RECEIPT_SETS[receipts.length % MOCK_RECEIPT_SETS.length];
-    const items = set.map((it, i) => ({ ...it, id: `${id}-${i + 1}` }));
-    updateOcrResult(id, items, 'SUCCEEDED');
+    const items = set.items.map((it, i) => ({ ...it, id: `${id}-${i + 1}` }));
+    updateOcrResult(id, items, 'SUCCEEDED', set.unclassifiedLines);
   };
 
   const handleBack = () => {
