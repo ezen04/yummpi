@@ -3,9 +3,9 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/common/Header';
-import { useMeetingDetail } from '@/features/vote/hooks/useMeetingDetail';
 import { useVote } from '@/hooks/useVote';
 import type { RecommendationItem } from '../api/placeApi';
+import { useOptimalPoint } from '../hooks/useOptimalPoint';
 import { usePlaceCandidates } from '../hooks/usePlaceCandidates';
 import { usePlaceSearch } from '../hooks/usePlaceSearch';
 import { usePlaceChangeStore } from '../stores/usePlaceChangeStore';
@@ -41,11 +41,13 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   const [query, setQuery] = React.useState('');
   const debouncedQuery = useDebouncedValue(query, 300);
 
-  const { data: meeting } = useMeetingDetail(meetingId);
   const { votesData } = useVote(meetingId);
 
-  const lat = meeting?.host?.startLatitude ?? null;
-  const lng = meeting?.host?.startLongitude ?? null;
+  // 중간지점 좌표 — 멤버 출발지 0명이면 훅이 error 상태가 되어 lat/lng = null
+  // → 검색은 전국 단위로 fallback (UX (b)), 사용자에게는 input 아래 안내로 사유 노출
+  const { data: optimal, isError: optimalError } = useOptimalPoint(meetingId);
+  const lat = optimal?.lat ?? null;
+  const lng = optimal?.lng ?? null;
 
   const { data: results, isLoading } = usePlaceSearch(
     meetingId,
@@ -104,6 +106,11 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
 
       <div className="shrink-0 px-5 pt-4 pb-3">
         <PlaceSearchInput value={query} onChange={setQuery} />
+        {optimalError && (
+          <p className="mt-2 text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
+            출발지 정보가 없어 거리 정렬 없이 키워드만으로 검색해요.
+          </p>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
