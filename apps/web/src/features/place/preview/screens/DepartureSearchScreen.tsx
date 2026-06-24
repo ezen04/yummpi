@@ -26,7 +26,7 @@ export function DepartureSearchScreen() {
             markers={MARKERS}
             height="100%"
           />
-          <div className="absolute top-3 left-4 right-4">
+          <div className="absolute top-3 left-4 right-4 z-10">
             <div className="flex items-center gap-2 h-12 px-4 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] shadow-[var(--shadow-small)]">
               <MapPin
                 size={18}
