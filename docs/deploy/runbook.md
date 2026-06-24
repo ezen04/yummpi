@@ -57,10 +57,12 @@
 | 키 | 값 | 비고 |
 | --- | --- | --- |
 | `DEPLOY_ENABLED` | `true` | **이 값이 `true`가 되기 전까지 `deploy-server.yml` 두 job은 skip**(골격 안전장치) |
-| `AWS_REGION` | (예: `ap-northeast-2`) | 워크플로 `env` placeholder override (선택) |
-| `ECR_REPOSITORY` | (예: `yummpi-server`) | override (선택) |
-| `ECS_SERVICE` | (예: `yummpi-server`) | `deploy-ecs` job `service` (현재 하드코딩 placeholder) |
-| `ECS_CLUSTER` | (예: `yummpi`) | `deploy-ecs` job `cluster` (현재 하드코딩 placeholder) |
+| `AWS_REGION` | (예: `ap-northeast-2`) | 미설정 시 워크플로 `env` 기본값(`ap-northeast-2`) |
+| `ECR_REPOSITORY` | (예: `yummpi-server`) | 미설정 시 기본값(`yummpi-server`) |
+| `ECS_SERVICE` | (예: `yummpi-server`) | `deploy-ecs` job `service`. 미설정 시 기본값(`yummpi-server`) |
+| `ECS_CLUSTER` | (예: `yummpi`) | `deploy-ecs` job `cluster`. 미설정 시 기본값(`yummpi`) |
+
+> 위 4개 variable은 모두 `${{ vars.X || 기본값 }}` 패턴 — **등록하면 override, 미등록이면 기본값**으로 동작한다(클러스터/서비스 이름이 기본값과 같으면 등록 불필요).
 
 > 런타임 secret(DB·Redis·VAPID·SMTP·카카오·OCR)은 **GitHub에 넣지 않는다.** 각각 Vercel(web)·SSM(server)에 넣는다 — 2·5단계.
 
