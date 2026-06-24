@@ -2,6 +2,7 @@
 
 `apps/server`(Socket.io + BullMQ) 컨테이너를 AWS ECS Fargate에 올리기 위한 **골격**.
 실 배포 리소스 발급 전까지 비활성 상태다. 공개 계획서: `docs/deploy/aws-vercel.md`.
+전체 배포 실행 순서(B-day): `docs/deploy/runbook.md`.
 
 ## 구성
 

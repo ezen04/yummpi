@@ -4,6 +4,8 @@ yummpi를 **Vercel(`apps/web`)** 과 **AWS(`apps/server` · RDS · S3)** 에 배
 실제 계정 ID, secret, DB URL, bucket 실명, ARN, access key, private domain은 이 문서에 기록하지 않는다.
 계정별·개인 메모는 커밋하지 않는 `deployment-aws-vercel-plan.local.md`에 둔다.
 
+> **실행 순서**: 리소스 발급 후 실제 배포 순서는 [`runbook.md`](./runbook.md)(B-day 순서표)를 따른다. 이 문서는 각 단계의 근거·기준을 담고, 런북은 그 순서를 엮는다.
+
 ---
 
 ## 1. 목표
