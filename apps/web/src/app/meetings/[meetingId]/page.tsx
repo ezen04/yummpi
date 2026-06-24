@@ -5,6 +5,8 @@ import { Button } from '@yummpi/ui';
 import { prisma } from '@/lib/prisma';
 import { getCurrentMember } from '@/lib/current-member';
 import { StartRecruitingButton } from '@/features/meeting/components/StartRecruitingButton';
+import { StartMeetingButton } from '@/features/meeting/components/StartMeetingButton';
+import { ReservationPanel } from '@/features/reservation/components/ReservationPanel';
 
 /**
  * 입장 후 상태별 라우팅 허브 (결정#4, 2026-06-21).
@@ -67,13 +69,32 @@ export default async function MeetingHubPage({
 
   const meeting = await prisma.meeting.findUnique({
     where: { id: meetingId },
-    select: { title: true, status: true },
+    select: {
+      title: true,
+      status: true,
+      confirmedCandidate: {
+        select: { placeUrl: true, externalPlaceId: true, name: true },
+      },
+    },
   });
   if (!meeting) notFound();
 
   // 상위 layout이 멤버 가드를 통과시키므로 member는 보통 존재. 호스트 전용 액션 판별용.
   const member = await getCurrentMember(meetingId);
-  const isDraftHost = meeting.status === 'DRAFT' && member?.role === 'HOST';
+  const isHost = member?.role === 'HOST';
+  const isDraftHost = meeting.status === 'DRAFT' && isHost;
+
+  // 확정 장소 카카오맵 딥링크: place_url 우선, 없으면 externalPlaceId로 구성. 둘 다 없으면 숨김.
+  const cc = meeting.confirmedCandidate;
+  const placeUrl =
+    cc?.placeUrl ??
+    (cc?.externalPlaceId
+      ? `https://place.map.kakao.com/${cc.externalPlaceId}`
+      : null);
+
+  // 장소 확정 이후(PLACE_CONFIRMED·IN_PROGRESS) 예약 패널 노출.
+  const showReservation =
+    meeting.status === 'PLACE_CONFIRMED' || meeting.status === 'IN_PROGRESS';
 
   const stage = stageConfig(meetingId)[meeting.status];
   const desc = isDraftHost
@@ -104,11 +125,22 @@ export default async function MeetingHubPage({
           </h1>
           <p style={{ color: 'var(--label-alternative)' }}>{desc}</p>
         </div>
+
+        {showReservation && (
+          <ReservationPanel
+            meetingId={meetingId}
+            isHost={isHost}
+            placeUrl={placeUrl}
+            placeName={cc?.name ?? null}
+          />
+        )}
       </div>
 
       <div className="w-full">
         {isDraftHost ? (
           <StartRecruitingButton meetingId={meetingId} />
+        ) : meeting.status === 'PLACE_CONFIRMED' && isHost ? (
+          <StartMeetingButton meetingId={meetingId} />
         ) : stage.cta ? (
           <Link href={stage.cta.href} className="block w-full">
             <Button className="w-full">{stage.cta.label}</Button>
