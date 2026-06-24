@@ -441,9 +441,7 @@ describe('buildSettlementResponse — schema 정합', () => {
         }),
       ],
     });
-    const receipts: ReceiptRow[] = [
-      { id: IDs.receipt1, totalAmount: 30000 },
-    ];
+    const receipts: ReceiptRow[] = [{ id: IDs.receipt1, totalAmount: 30000 }];
 
     const result = buildSettlementResponse(settlement, receipts, IDs.memberA);
 
@@ -476,9 +474,7 @@ describe('buildSettlementResponse — schema 정합', () => {
         }),
       ],
     });
-    const receipts: ReceiptRow[] = [
-      { id: IDs.receipt1, totalAmount: 6000 },
-    ];
+    const receipts: ReceiptRow[] = [{ id: IDs.receipt1, totalAmount: 6000 }];
 
     const result = buildSettlementResponse(settlement, receipts, IDs.memberA);
 

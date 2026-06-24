@@ -62,7 +62,11 @@ export const GET = handleRoute(
       totalAmount: r.totalAmount as number,
     }));
 
-    const data = buildSettlementResponse(settlement, receipts, currentMember.id);
+    const data = buildSettlementResponse(
+      settlement,
+      receipts,
+      currentMember.id
+    );
 
     // 응답 직전 inner schema parse — Prisma 결과 ↔ 계약 drift 차단.
     const parsed = SettlementResponseSchema.parse(data);
