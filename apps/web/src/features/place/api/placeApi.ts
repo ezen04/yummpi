@@ -89,6 +89,61 @@ export async function addPlaceCandidate(
   }
 }
 
+export async function rejectPlaceCandidate(
+  meetingId: string,
+  candidateId: string
+): Promise<void> {
+  const res = await fetch(
+    `/api/v1/meetings/${meetingId}/place-candidates/${candidateId}/reject`,
+    { method: 'POST' }
+  );
+  if (!res.ok) {
+    throw new Error(await parseErrorMessage(res, '후보 제외에 실패했습니다.'));
+  }
+}
+
+export async function addPlaceSuggestion(
+  meetingId: string,
+  payload: AddCandidatePayload
+): Promise<void> {
+  const res = await fetch(`/api/v1/meetings/${meetingId}/place-suggestions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '장소 풀 추가에 실패했습니다.')
+    );
+  }
+}
+
+export interface SuggestionItem {
+  id: string;
+  externalPlaceId: string | null;
+  name: string;
+  categoryName: string | null;
+  address: string | null;
+  roadAddress: string | null;
+  phone: string | null;
+  lat: string;
+  lng: string;
+  placeUrl: string | null;
+}
+
+export async function fetchPlaceSuggestions(
+  meetingId: string
+): Promise<SuggestionItem[]> {
+  const res = await fetch(`/api/v1/meetings/${meetingId}/place-suggestions`);
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '장소 풀을 불러올 수 없습니다.')
+    );
+  }
+  const body = (await res.json()) as { data: { items: SuggestionItem[] } };
+  return body.data.items;
+}
+
 export interface SearchPlacesParams {
   meetingId: string;
   query: string;

@@ -1,8 +1,14 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@yummpi/ui';
 import { voteKeys, type VotesData, type VoteCandidate } from '@/hooks/useVote';
-import { addPlaceCandidate, type AddCandidatePayload } from '../api/placeApi';
+import { placeKeys } from '../api/placeKeys';
+import {
+  addPlaceCandidate,
+  rejectPlaceCandidate,
+  type AddCandidatePayload,
+} from '../api/placeApi';
 
 interface SnapshotContext {
   snapshot?: VotesData;
@@ -70,7 +76,46 @@ export function usePlaceCandidates(meetingId: string) {
 
       return { snapshot };
     },
-    onError: (_err, _payload, context) => {
+    onError: (err, _payload, context) => {
+      if (context?.snapshot !== undefined) {
+        queryClient.setQueryData(voteKeys.detail(meetingId), context.snapshot);
+      }
+      // BE가 던진 메시지(예: "후보는 최대 5개까지 추가할 수 있습니다.")를 그대로 노출
+      toast.error(
+        err instanceof Error ? err.message : '후보 추가에 실패했습니다.'
+      );
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: voteKeys.detail(meetingId),
+      });
+      // REJECTED → ACTIVE 승격 시 풀에서 빠지므로 suggestions 캐시도 무효화
+      void queryClient.invalidateQueries({
+        queryKey: placeKeys.suggestions(meetingId),
+      });
+    },
+  });
+
+  // ACTIVE → REJECTED 강등 (호스트가 후보 카드 재클릭 시)
+  // 낙관적 업데이트: candidates에서 즉시 제거, suggestions 캐시는 invalidate로 갱신
+  const rejectMutation = useMutation<void, Error, string, SnapshotContext>({
+    mutationFn: (candidateId) =>
+      rejectPlaceCandidate(meetingId, candidateId),
+    onMutate: async (candidateId) => {
+      await queryClient.cancelQueries({ queryKey: voteKeys.detail(meetingId) });
+      const snapshot = queryClient.getQueryData<VotesData>(
+        voteKeys.detail(meetingId)
+      );
+      queryClient.setQueryData<VotesData>(voteKeys.detail(meetingId), (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          candidates: old.candidates.filter((c) => c.id !== candidateId),
+        };
+      });
+      return { snapshot };
+    },
+    onError: (_err, _candidateId, context) => {
       if (context?.snapshot !== undefined) {
         queryClient.setQueryData(voteKeys.detail(meetingId), context.snapshot);
       }
@@ -78,6 +123,9 @@ export function usePlaceCandidates(meetingId: string) {
     onSettled: () => {
       void queryClient.invalidateQueries({
         queryKey: voteKeys.detail(meetingId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: placeKeys.suggestions(meetingId),
       });
     },
   });
@@ -87,5 +135,8 @@ export function usePlaceCandidates(meetingId: string) {
     addAsync: addMutation.mutateAsync,
     isAdding: addMutation.isPending,
     addError: addMutation.error,
+    reject: rejectMutation.mutate,
+    isRejecting: rejectMutation.isPending,
+    rejectError: rejectMutation.error,
   };
 }
