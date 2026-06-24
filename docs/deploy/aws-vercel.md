@@ -159,10 +159,13 @@ SMTP_PASS
 ## 9. Health Check
 
 ```
-GET /health  →  { "ok": true }
+GET /health  →  200 { "ok": true }                              # liveness
+GET /ready    →  200 { "ready": true } / 503 { "ready": false }  # readiness
 ```
 
-1차는 프로세스 liveness로 시작한다. DB/Redis 연결까지 보는 readiness가 필요하면 별도 path로 분리한다.
+- **liveness (`/health`)**: 프로세스가 살아있으면 의존성과 무관하게 항상 200. 도커 `HEALTHCHECK`·ECS 컨테이너 생존 판단용. **Redis 순단에도 200을 유지**해 불필요한 컨테이너 재시작을 막는다.
+- **readiness (`/ready`)**: `pubClient.status === 'ready' && subClient.status === 'ready'` 면 200, 아니면 503. ECS ALB target group health check용. Redis 순단 시 ioredis가 status를 자동 전환 → `/ready=503`으로 트래픽 격리, 자동 reconnect로 복구.
+- **구현 제약(③ 합의)**: `httpServer.listen`/`io.adapter` 순서는 그대로 둔다(listen 후 adapter swap 시 기본 namespace 누락 → multi-task cross-task emit silent 실패 위험). 초기 부팅 실패 시 `process.exit(1)` 유지(ECS `startPeriod`로 흡수). `/ready` 라우트만 추가하는 방식으로 분리했다.
 
 ---
 
