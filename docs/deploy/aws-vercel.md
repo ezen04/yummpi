@@ -4,6 +4,8 @@ yummpi를 **Vercel(`apps/web`)** 과 **AWS(`apps/server` · RDS · S3)** 에 배
 실제 계정 ID, secret, DB URL, bucket 실명, ARN, access key, private domain은 이 문서에 기록하지 않는다.
 계정별·개인 메모는 커밋하지 않는 `deployment-aws-vercel-plan.local.md`에 둔다.
 
+> **실행 순서**: 리소스 발급 후 실제 배포 순서는 [`runbook.md`](./runbook.md)(B-day 순서표)를 따른다. 이 문서는 각 단계의 근거·기준을 담고, 런북은 그 순서를 엮는다.
+
 ---
 
 ## 1. 목표
@@ -114,18 +116,35 @@ SMTP_PASS
 
 ## 6. Vercel 배포 기준 (`apps/web`)
 
-| 항목 | 값 |
-| --- | --- |
-| Root Directory | `apps/web` |
-| Install Command | `pnpm install --frozen-lockfile` |
-| Build Command | `pnpm build` (monorepo 필터 기반) |
-| Output | Next.js 기본값 |
+빌드 설정은 `apps/web/vercel.json`에 커밋되어 있다(버전 관리). 프로젝트 생성·Root Directory·환경변수는 Vercel UI/계정 작업(리소스 발급 후).
 
-필수 확인:
-- Vercel이 pnpm workspace를 정상 인식하는지.
-- `NEXT_PUBLIC_*`은 브라우저 노출 가능한 값만.
-- `DATABASE_URL`은 pooling 경로, `REDIS_URL`은 Upstash.
+| 항목 | 값 | 위치 |
+| --- | --- | --- |
+| Root Directory | `apps/web` | Vercel UI (프로젝트 생성 시) |
+| Framework | `nextjs` | `vercel.json` |
+| Install Command | `pnpm install --frozen-lockfile` | `vercel.json` |
+| Build Command | `pnpm build` → `next build --webpack` | `vercel.json` |
+| Output | Next.js 기본값(`.next`) | 자동 |
+
+### 6.1 빌드 — webpack 고정 (중요)
+
+- web의 `build` 스크립트는 `next build --webpack`이다. **Next 16 기본 빌드는 Turbopack이지만 의도적으로 webpack을 고정**한다(PWA `@serwist/next` 서비스워커 생성이 webpack 빌드에 의존). Vercel이 프레임워크 프리셋의 `next build`(Turbopack)로 덮어쓰지 않도록 `vercel.json`의 `buildCommand`로 `pnpm build`를 명시한다.
+- `vercel.json`의 install/build 값은 **첫 배포에서 검증할 시작값**이다. pnpm workspace 인식이나 lockfile 문제가 나면 그때 조정.
+
+### 6.2 Preview / Production
+
+- `develop` 푸시 → **Preview** 배포(검증용), `main`(또는 운영 브랜치) → **Production**. 브랜치-환경 매핑은 프로젝트 생성 시 설정.
+- 환경변수는 Preview/Production을 분리 주입한다(특히 `NEXTAUTH_URL`·`DATABASE_URL`·도메인 관련 값).
+
+### 6.3 필수 확인
+
+- Vercel이 pnpm workspace(`packages/*` 포함)를 정상 인식해 빌드하는지.
+- PWA(serwist) 서비스워커가 **production 빌드에서** 생성·등록되는지(dev에선 보통 비활성).
+- `NEXT_PUBLIC_*`은 브라우저 노출 가능한 값만(`NEXT_PUBLIC_KAKAO_MAP_KEY` 등).
+- `DATABASE_URL`은 pooling(Accelerate `prisma://`) 경로, `REDIS_URL`은 Upstash `rediss://`.
 - production 빌드 전 typecheck·lint 통과.
+
+> **① 의존**: NextAuth 세션 쿠키 `domain=.yummpi.app`(서브도메인 wss 인증용, §3.3) 설정은 **① Auth 영역**. Vercel 도메인 연결 후 ①과 확인 필요 — 이 문서/`vercel.json`에서는 다루지 않는다.
 
 ---
 
@@ -169,7 +188,50 @@ GET /ready    →  200 { "ready": true } / 503 { "ready": false }  # readiness
 
 ---
 
-## 10. 브랜치 범위
+## 10. DB 마이그레이션 운영
+
+> 결정 근거는 §3.2 참조. 여기서는 **언제·어디서·어떤 연결로** 실행하는지 운영 절차를 정한다.
+
+### 10.1 연결 — 항상 RDS 직접 연결
+
+- 마이그레이션은 **RDS 직접 연결**(`prisma migrate deploy`)로만 실행한다. **Accelerate(`prisma://`) 경로로 실행하지 않는다** — Accelerate는 web 런타임 쿼리 pooling 전용.
+- 실행 시 `DATABASE_URL`은 server용 직접 연결 문자열을 사용한다(web env와 분리). 스키마 위치: `apps/server/prisma/schema.prisma`.
+
+```bash
+# server 직접 연결 DATABASE_URL을 주입한 환경에서:
+pnpm --filter @yummpi/server exec npx prisma migrate deploy
+```
+
+### 10.2 실행 위치 — MVP는 수동 트리거
+
+| 방식 | 설명 | 채택 |
+| --- | --- | --- |
+| (a) 배포 워크플로 자동 step | 이미지 롤아웃 전 CI가 자동 실행 | ✗ MVP 과함. RDS 도달성(VPC/러너) 선결 필요 |
+| (b) **수동 1회 실행** | 담당자가 직접 연결로 `migrate deploy` | ✅ **MVP 채택** |
+| (c) ECS one-off task | 배포 task로 일회성 실행 | △ V2(자동화 시) |
+
+- **MVP 채택 = (b) 수동/CI 수동 트리거**. 근거: 초기 스키마 변경 빈도 낮음 + RDS는 VPC 내부라 자동 러너 도달성 구성이 선행돼야 함(B 리소스 발급 의존). 자동화는 운영 안정화 후 (c)로 승격.
+- 누가: 스키마 주도 담당 ①과 협의해 배포 담당이 실행. **운영 DB 대상 실행은 사전 공지 후.**
+
+### 10.3 순서 — migrate 먼저, 롤아웃 나중
+
+```
+1. 마이그레이션 호환성 확인 (기존 코드가 새 스키마에서 동작하는가)
+2. prisma migrate deploy  (RDS 직접)
+3. 성공 확인 후  server 이미지 롤아웃 / web 배포
+```
+
+- **파괴적 변경**(컬럼 삭제·rename 등)은 expand→contract 2단계로 나눠 무중단 보장. 단일 배포로 컬럼 drop 금지.
+- 실패 시: migrate가 실패하면 **롤아웃을 진행하지 않는다**. DB 롤백이 필요한 변경은 §13(롤백) 원칙에 따라 별도 계획.
+
+### 10.4 seed·백업
+
+- **운영 DB seed 금지** — seed는 로컬/스테이징 한정. 운영 초기 데이터가 필요하면 별도 idempotent 스크립트로 검토.
+- 마이그레이션 **전 스냅샷/백업**을 전제로 한다(RDS 자동 백업 또는 수동 스냅샷). 파괴적 변경 시 필수.
+
+---
+
+## 11. 브랜치 범위
 
 ### 1차: `chore/deploy-aws-vercel-plan`
 - 공개 배포 계획서(이 문서) + `.env.example` 정리
@@ -187,28 +249,28 @@ GET /ready    →  200 { "ready": true } / 503 { "ready": false }  # readiness
 
 ---
 
-## 11. 배포 전 체크리스트
+## 12. 배포 전 체크리스트
 
 - `pnpm --filter @yummpi/server typecheck` / `test`
 - `pnpm --filter @yummpi/web typecheck` / `lint`
 - server Docker image 빌드 성공 · `/health` 응답 확인
 - server `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` 주입 확인 — **미설정 시 부팅 크래시**(webPush 초기화)
 - web `DATABASE_URL`(pooling) / server `DATABASE_URL`(직접) 분리 확인
-- web Prisma client에 Accelerate extension(`@prisma/extension-accelerate` · `.$extends(withAccelerate())`) 적용 확인 — `prisma://` 경로는 미적용 시 연결 실패
+- web Prisma client에 Accelerate extension(`@prisma/extension-accelerate` · `.$extends(withAccelerate())`) 적용 확인 — `prisma://` 경로는 미적용 시 연결 실패 ✅ **코드 적용 완료(#75)**: `apps/web/src/lib/prisma.ts` 런타임 확장(타입은 base 고정), env에 `prisma://`만 주입하면 됨
 - `REDIS_URL`(Upstash) web·server 양쪽 주입 + BullMQ enqueue→consume 1회 통과
 - 쿠키 domain `.yummpi.app`로 wss 핸드셰이크 인증(회원·게스트) 통과
-- `prisma migrate deploy` 적용 순서·백업 정책 확인
+- `prisma migrate deploy` 실행(직접 연결)·순서·백업 — §10 절차 따름
 - Vercel / AWS server 환경변수 누락 없음
 
 ---
 
-## 12. 롤백
+## 13. 롤백
 
 - **Vercel**: 이전 production deployment로 rollback 후 server API/socket 호환성 확인.
-- **AWS**: ECS는 이전 task definition revision으로 복귀. ECR 이미지 태그는 고정 태그로 이력 추적. DB migration rollback이 필요한 변경은 별도 계획.
+- **AWS**: ECS는 이전 task definition revision으로 복귀. ECR 이미지 태그는 고정 태그로 이력 추적. DB migration rollback이 필요한 변경은 별도 계획(§10.3 파괴적 변경은 expand→contract로 회피 우선).
 
 ---
 
-## 13. 공개 문서 규칙
+## 14. 공개 문서 규칙
 
 다음은 이 문서에 기록하지 않는다: AWS account ID, IAM access key, secret access key, 실제 DB/Redis URL, private bucket name, production domain 소유권, certificate ARN, webhook secret. 계정별 메모는 `deployment-aws-vercel-plan.local.md`에 두고 커밋하지 않는다.
