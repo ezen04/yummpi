@@ -3,55 +3,38 @@
 import { useState } from 'react';
 import { KakaoMap, type Marker } from '@/components/common/KakaoMap';
 import { Header } from '@/components/common/Header';
-import {
-  MOCK_OPTIMAL_POINT,
-  MOCK_RECOMMENDATIONS,
-  type OptimalPointData,
-} from './optimalMock';
-import type { RecommendationItem } from '@/features/place/api/placeApi';
+import { Chip } from '@/components/common/Chip';
+import { Button } from '@/components/common/Button';
+import { MOCK_OPTIMAL_POINT, type OptimalPointData } from './optimalMock';
 
-// ── 유틸 ──────────────────────────────────────────────────────
+// ── DEV 시나리오 ──────────────────────────────────────────────
 
-function formatKm(distanceM: number): string {
-  if (distanceM < 1000) return `${distanceM}m`;
-  return `${Math.round((distanceM / 1000) * 10) / 10}km`;
-}
-
-// ── DEV 컨트롤 패널 ───────────────────────────────────────────
-
-type ScenarioKey = 'normal' | 'excluded' | 'no-places' | 'all-excluded';
+type ScenarioKey = 'normal' | 'partial' | 'none';
 
 const SCENARIOS: Record<
   ScenarioKey,
-  { label: string; midpoint: OptimalPointData; places: RecommendationItem[] }
+  { label: string; data: OptimalPointData }
 > = {
-  normal: {
-    label: '정상 (4명 · 추천 4곳)',
-    midpoint: MOCK_OPTIMAL_POINT,
-    places: MOCK_RECOMMENDATIONS,
-  },
-  excluded: {
-    label: '제외 1명 · 추천 2곳',
-    midpoint: MOCK_OPTIMAL_POINT,
-    places: MOCK_RECOMMENDATIONS.slice(0, 2),
-  },
-  'no-places': {
-    label: '추천 장소 없음',
-    midpoint: MOCK_OPTIMAL_POINT,
-    places: [],
-  },
-  'all-excluded': {
-    label: '전원 출발지 미입력',
-    midpoint: {
+  normal: { label: '정상 (4역)', data: MOCK_OPTIMAL_POINT },
+  partial: {
+    label: '일부 미입력 (2역)',
+    data: {
       ...MOCK_OPTIMAL_POINT,
-      excludedCount: 4,
-      memberDistances: MOCK_OPTIMAL_POINT.memberDistances.map((m) => ({
+      members: MOCK_OPTIMAL_POINT.members.map((m, i) =>
+        i >= 2 ? { ...m, station: null, excluded: true } : m
+      ),
+    },
+  },
+  none: {
+    label: '전원 미입력',
+    data: {
+      ...MOCK_OPTIMAL_POINT,
+      members: MOCK_OPTIMAL_POINT.members.map((m) => ({
         ...m,
-        distanceM: null,
+        station: null,
         excluded: true,
       })),
     },
-    places: [],
   },
 };
 
@@ -60,29 +43,28 @@ const SCENARIOS: Record<
 export default function OptimalPreviewPage() {
   const [scenario, setScenario] = useState<ScenarioKey>('normal');
 
-  const { midpoint, places } = SCENARIOS[scenario];
+  const data = SCENARIOS[scenario].data;
+  const included = data.members.filter((m) => !m.excluded);
+  const excludedCount = data.members.length - included.length;
+  const canCompute = included.length > 0;
 
-  const markers: Marker[] = [
-    {
-      lat: midpoint.latitude,
-      lng: midpoint.longitude,
-      label: '중간지점',
-      id: 'midpoint',
-    },
-    ...places.map((p) => ({
-      lat: Number(p.lat),
-      lng: Number(p.lng),
-      label: p.name,
-      id: p.externalPlaceId,
-    })),
-  ];
+  const markers: Marker[] = canCompute
+    ? [
+        {
+          lat: data.latitude,
+          lng: data.longitude,
+          label: data.placeLabel,
+          id: 'midpoint',
+        },
+      ]
+    : [];
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-alternative)]">
+    <div className="min-h-dvh bg-[var(--bg-normal)] flex flex-col">
       {/* DEV 배너 */}
       <div className="bg-[var(--bg-inverse)] text-[var(--static-white)] px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
         <span className="text-[12px] font-semibold">
-          DEV PREVIEW — 최적 장소 화면
+          DEV PREVIEW — 중간지점 화면
         </span>
         <div className="flex items-center gap-2 flex-wrap">
           {(Object.keys(SCENARIOS) as ScenarioKey[]).map((key) => (
@@ -101,93 +83,101 @@ export default function OptimalPreviewPage() {
         </div>
       </div>
 
-      {/* 실제 화면 */}
-      <Header title="최적 장소" onBack={() => {}} />
+      {/* 상단바: 뒤로 + 닫기 */}
+      <Header onBack={() => {}} onClose={() => {}} />
 
-      <main className="flex flex-col gap-4 p-4">
-        {/* 지도 */}
-        <KakaoMap
-          center={{ lat: midpoint.latitude, lng: midpoint.longitude }}
-          markers={markers}
-          height="40vh"
-        />
-
-        {/* 출발지 미입력 안내 */}
-        {midpoint.excludedCount > 0 && (
-          <p className="text-[13px] text-[var(--label-alternative)] bg-[var(--bg-normal)] rounded-[var(--radius-12)] px-4 py-3 border border-[var(--line-normal)]">
-            출발지를 입력하지 않은 멤버{' '}
-            <span className="font-semibold text-[var(--label-normal)]">
-              {midpoint.excludedCount}명
-            </span>
-            은 중간지점 계산에서 제외됐어요.
+      <main className="flex-1 flex flex-col gap-6 px-5 pb-6 pt-2">
+        {/* 타이틀 */}
+        <div className="flex flex-col items-center gap-2 text-center mt-2">
+          <h1 className="text-[22px] leading-[30px] font-bold text-[var(--label-normal)]">
+            중간지점을 찾았어요!
+          </h1>
+          <p className="text-[14px] text-[var(--label-alternative)]">
+            모든 출발역을 고려한 최적의 지점입니다
           </p>
-        )}
+        </div>
 
-        {/* 추천 장소 */}
-        <section className="flex flex-col gap-3">
-          <h2 className="text-[16px] font-semibold text-[var(--label-normal)]">
-            추천 장소
-          </h2>
+        {canCompute ? (
+          <>
+            {/* 지도 카드 + 중간지점 말풍선 */}
+            <div className="relative rounded-[var(--radius-12)] overflow-hidden border border-[var(--line-normal)]">
+              <KakaoMap
+                center={{ lat: data.latitude, lng: data.longitude }}
+                markers={markers}
+                height="200px"
+              />
+              <div className="absolute top-4 right-4 bg-[var(--bg-normal)] rounded-[var(--radius-10)] px-3 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.12)]">
+                <p className="text-[11px] text-[var(--label-alternative)]">
+                  중간지점
+                </p>
+                <p className="text-[14px] font-semibold text-[var(--label-normal)]">
+                  {data.placeLabel}
+                </p>
+              </div>
+            </div>
 
-          {places.length === 0 ? (
-            <p className="text-[13px] text-[var(--label-alternative)] py-4 text-center">
-              추천 장소가 없어요
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {places.map((p) => (
-                <li
-                  key={p.externalPlaceId}
-                  className="bg-[var(--bg-normal)] rounded-[var(--radius-12)] px-4 py-3 flex flex-col gap-1 border border-[var(--line-normal)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[15px] font-semibold text-[var(--label-normal)]">
-                      {p.name}
-                    </span>
-                    <span className="text-[12px] text-[var(--primary)] font-medium">
-                      {formatKm(p.distanceM)}
-                    </span>
-                  </div>
-                  <span className="text-[12px] text-[var(--label-alternative)]">
-                    {p.categoryName}
-                  </span>
-                  <span className="text-[12px] text-[var(--label-alternative)]">
-                    {p.roadAddress ?? p.address}
-                  </span>
+            {/* 참여한 역 */}
+            <section className="flex flex-col gap-3">
+              <h2 className="text-[14px] font-medium text-[var(--label-alternative)]">
+                참여한 역
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {included.map((m) => (
+                  <Chip key={m.memberId}>{m.station}</Chip>
+                ))}
+              </div>
+            </section>
+
+            {/* 계산 기준 */}
+            <section className="bg-[var(--bg-alternative)] rounded-[var(--radius-12)] px-4 py-4 flex flex-col gap-2">
+              <h2 className="text-[14px] font-semibold text-[var(--label-normal)]">
+                계산 기준
+              </h2>
+              <ul className="flex flex-col gap-1.5 text-[13px] text-[var(--label-alternative)]">
+                <li className="flex gap-2">
+                  <span aria-hidden>•</span>
+                  <span>총 이동 거리 최소화</span>
                 </li>
-              ))}
-            </ul>
-          )}
-        </section>
+                <li className="flex gap-2">
+                  <span aria-hidden>•</span>
+                  <span>입력한 {included.length}개 역 기준</span>
+                </li>
+              </ul>
+            </section>
 
-        {/* 멤버 거리 */}
-        <section className="flex flex-col gap-3">
-          <h2 className="text-[16px] font-semibold text-[var(--label-normal)]">
-            멤버별 거리
-          </h2>
-          <ul className="bg-[var(--bg-normal)] rounded-[var(--radius-12)] border border-[var(--line-normal)] divide-y divide-[var(--line-alternative)]">
-            {midpoint.memberDistances.map((m) => (
-              <li
-                key={m.memberId}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <span className="text-[14px] text-[var(--label-normal)]">
-                  {m.nickname}
-                </span>
-                <span
-                  className={`text-[13px] font-medium ${
-                    m.excluded
-                      ? 'text-[var(--label-assistive)]'
-                      : 'text-[var(--label-alternative)]'
-                  }`}
-                >
-                  {m.excluded ? '출발지 미입력' : formatKm(m.distanceM ?? 0)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+            {excludedCount > 0 && (
+              <p className="text-[12px] text-[var(--label-assistive)]">
+                출발역을 입력하지 않은 {excludedCount}명은 계산에서 제외됐어요.
+              </p>
+            )}
+          </>
+        ) : (
+          /* 전원 미입력 — 계산 불가 */
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <p className="text-[15px] font-medium text-[var(--label-normal)]">
+              중간지점을 계산할 수 없어요
+            </p>
+            <p className="text-[13px] text-[var(--label-alternative)]">
+              출발역을 입력한 멤버가 없어요.
+            </p>
+          </div>
+        )}
       </main>
+
+      {/* 하단 고정 CTA */}
+      <div className="sticky bottom-0 bg-[var(--bg-normal)] px-5 pt-3 pb-[max(env(safe-area-inset-bottom),16px)] border-t border-[var(--line-alternative)]">
+        <Button
+          variant="basic"
+          size="lg"
+          className="w-full"
+          disabled={!canCompute}
+          onClick={() =>
+            console.log('[optimal-preview] 다음: 음식점 추천 보기 클릭')
+          }
+        >
+          다음: 음식점 추천 보기
+        </Button>
+      </div>
     </div>
   );
 }
