@@ -25,10 +25,12 @@
 | `REPLACE_EXECUTION_ROLE_ARN` | ECS task 실행 role (ECR pull·로그·SSM 접근) |
 | `REPLACE_TASK_ROLE_ARN` | 컨테이너 런타임 role |
 | `REPLACE_IMAGE` | 배포 시 워크플로가 자동 주입 (수동 등록 시만 교체) |
-| `REPLACE_SSM_*` | 각 secret의 SSM Parameter Store / Secrets Manager ARN. 환경변수 키는 `docs/deploy/aws-vercel.md` §5 server 목록 기준 |
+| `REPLACE_SSM_*` | 각 secret의 SSM Parameter Store / Secrets Manager ARN (`secrets` 블록). 환경변수 키는 `docs/deploy/aws-vercel.md` §5 server 목록 기준 |
+| `REPLACE_CLIENT_ORIGIN` | 프론트 origin (예: `https://yummpi.app`). 비밀 아님 → `environment` 평문 |
+| `REPLACE_SMTP_PORT` | SMTP 포트 (예: `587`). 비밀 아님 → `environment` 평문 |
 | `REPLACE_AWS_REGION` | 로그 전송 리전 |
 
-> secret 실값은 task 정의에 **평문 금지** — SSM/Secrets Manager ARN(`valueFrom`)으로만 주입.
+> secret 실값(`secrets` 블록)은 task 정의에 **평문 금지** — SSM/Secrets Manager ARN(`valueFrom`)으로만 주입. `environment` 블록은 비밀 아닌 값만.
 
 ## health check
 
