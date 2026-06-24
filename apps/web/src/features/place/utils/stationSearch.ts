@@ -1,5 +1,6 @@
 import { SUBWAY_STATIONS, type SubwayStation } from '../data/subwayStations';
 import { LINE_INFO } from '../data/subwayLines';
+import { calcDistance, type Coord } from '@/lib/haversine';
 
 /** 검색 결과 한 줄 — (역 × 호선) 단위. UI 배지 1개에 대응. */
 export interface StationLineRow {
@@ -69,4 +70,53 @@ export function searchStationLineRows(
   limit = 20
 ): StationLineRow[] {
   return searchStations(query, limit).flatMap(toLineRows);
+}
+
+/** 최적 역 계산 결과. */
+export interface OptimalStationResult {
+  /** 선택된 최적 역 */
+  station: SubwayStation;
+  /** 그 역에서 가장 먼 멤버까지의 거리(m) — 이 값(최댓값)을 최소화한 결과 */
+  maxDistanceM: number;
+}
+
+/**
+ * 멤버 출발 좌표들을 받아, 모두에게 공평한 최적의 역을 찾는다.
+ *
+ * 기준 = "최댓값 최소"(공평): 후보 역마다 "가장 먼 멤버까지의 Haversine 거리"를
+ * 점수로 매기고, 그 점수가 가장 작은 역을 고른다. (= 가장 먼 사람도 제일 안 먼 역)
+ *
+ * 추상적 중간점(평균 좌표)을 거치지 않고 전체 역을 직접 후보로 평가하므로,
+ * "중간점이 빗나가 엉뚱한 역이 뽑히는" 2단계 오차가 없다.
+ *
+ * @param members 유효한 출발 좌표 목록 (미입력자는 호출 전에 제외)
+ * @returns 최적 역 + 최댓값 거리. 좌표가 0개면 null.
+ */
+export function findOptimalStation(
+  members: Coord[]
+): OptimalStationResult | null {
+  if (members.length === 0) return null;
+
+  let best: SubwayStation | null = null;
+  let bestMax = Infinity;
+
+  for (const station of SUBWAY_STATIONS) {
+    const here: Coord = { lat: station.lat, lng: station.lng };
+
+    // 이 역에서 '가장 먼 멤버까지의 거리'(최댓값) = 이 역의 점수
+    let maxDist = 0;
+    for (const m of members) {
+      const d = calcDistance(m, here);
+      if (d > maxDist) maxDist = d;
+    }
+
+    // 점수(최댓값)가 더 작은 역이면 갱신
+    if (maxDist < bestMax) {
+      bestMax = maxDist;
+      best = station;
+    }
+  }
+
+  if (!best) return null;
+  return { station: best, maxDistanceM: Math.round(bestMax) };
 }
