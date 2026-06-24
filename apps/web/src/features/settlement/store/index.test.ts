@@ -50,14 +50,12 @@ describe('useSettlementStore.promoteUnclassifiedLine', () => {
   it('P2: 중간 인덱스 승격 → 앞뒤 줄은 보존', () => {
     seed('r1', [], ['a', 'b', 'c']);
 
-    useSettlementStore
-      .getState()
-      .promoteUnclassifiedLine('r1', 1, {
-        id: 'x',
-        name: 'b',
-        quantity: 1,
-        totalPrice: 100,
-      });
+    useSettlementStore.getState().promoteUnclassifiedLine('r1', 1, {
+      id: 'x',
+      name: 'b',
+      quantity: 1,
+      totalPrice: 100,
+    });
 
     const r1 = findReceipt('r1')!;
     expect(r1.unclassifiedLines).toEqual(['a', 'c']);
@@ -73,14 +71,12 @@ describe('useSettlementStore.promoteUnclassifiedLine', () => {
       ['z']
     );
 
-    useSettlementStore
-      .getState()
-      .promoteUnclassifiedLine('r1', 0, {
-        id: 'p',
-        name: 'x',
-        quantity: 1,
-        totalPrice: 500,
-      });
+    useSettlementStore.getState().promoteUnclassifiedLine('r1', 0, {
+      id: 'p',
+      name: 'x',
+      quantity: 1,
+      totalPrice: 500,
+    });
 
     const r2 = findReceipt('r2')!;
     expect(r2.ocrItems).toEqual([
@@ -92,14 +88,12 @@ describe('useSettlementStore.promoteUnclassifiedLine', () => {
   it('P4: 같은 줄 텍스트가 여러 개 있어도 인덱스 기준으로 정확히 1개만 제거', () => {
     seed('r1', [], ['dup', 'dup', 'dup']);
 
-    useSettlementStore
-      .getState()
-      .promoteUnclassifiedLine('r1', 1, {
-        id: 'p',
-        name: 'dup',
-        quantity: 1,
-        totalPrice: 100,
-      });
+    useSettlementStore.getState().promoteUnclassifiedLine('r1', 1, {
+      id: 'p',
+      name: 'dup',
+      quantity: 1,
+      totalPrice: 100,
+    });
 
     const r1 = findReceipt('r1')!;
     expect(r1.unclassifiedLines).toEqual(['dup', 'dup']);
