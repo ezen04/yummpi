@@ -42,6 +42,7 @@ export function OptimalResultPage({ meetingId }: { meetingId: string }) {
         latitude: Number(data.lat),
         longitude: Number(data.lng),
         placeLabel: data.name,
+        stations: data.stations,
         maxDistanceM: data.maxDistanceM,
         excludedCount: data.excludedCount,
       }}

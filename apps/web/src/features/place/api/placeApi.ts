@@ -71,6 +71,8 @@ export interface OptimalStation {
   maxDistanceM: number;
   /** 출발지 미입력으로 계산에서 제외된 인원 수 */
   excludedCount: number;
+  /** 참여한 역 목록 (입력한 역명 우선, 없으면 최근접역) */
+  stations: string[];
 }
 
 /**
@@ -104,6 +106,7 @@ export async function fetchOptimalStation(
       };
       maxDistanceM: number;
       excludedCount: number;
+      participantStations?: string[];
     };
   };
   const s = body.data.nearestStation;
@@ -115,6 +118,7 @@ export async function fetchOptimalStation(
     lines: s.lines,
     maxDistanceM: body.data.maxDistanceM,
     excludedCount: body.data.excludedCount,
+    stations: body.data.participantStations ?? [],
   };
 }
 
