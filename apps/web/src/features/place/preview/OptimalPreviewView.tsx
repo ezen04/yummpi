@@ -97,7 +97,7 @@ function PreviewContent({
     case 'all-done':
       return <AllInputDoneScreen />;
     case 'midpoint':
-      return <MidpointResultScreen />;
+      return <MidpointResultScreen onBack={() => {}} />;
     default:
       return null;
   }

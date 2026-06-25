@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { transitionMeetingStatus } from '@/lib/meeting-status';
-import { socketEmitter } from '@/lib/socket-emitter';
+import { getSocketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
 
 const ALLOWED_STATUSES: MeetingStatus[] = ['VOTING', 'PLACE_CONFIRMED'];
@@ -142,17 +142,19 @@ export const POST = handleRoute(
       placeUrl: candidate.placeUrl,
     };
 
-    socketEmitter.to(`meeting:${meetingId}`).emit('place:confirmed', {
+    getSocketEmitter().to(`meeting:${meetingId}`).emit('place:confirmed', {
       meetingId,
       candidateId: candidate.id,
       candidate: candidatePayload,
     });
 
     if (confirmedStatus === 'PLACE_CONFIRMED' && meeting.status === 'VOTING') {
-      socketEmitter.to(`meeting:${meetingId}`).emit('meeting:status-changed', {
-        meetingId,
-        status: 'PLACE_CONFIRMED',
-      });
+      getSocketEmitter()
+        .to(`meeting:${meetingId}`)
+        .emit('meeting:status-changed', {
+          meetingId,
+          status: 'PLACE_CONFIRMED',
+        });
     }
 
     return apiSuccess(

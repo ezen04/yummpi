@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost, requireMember } from '@/lib/current-member';
-import { socketEmitter } from '@/lib/socket-emitter';
+import { getSocketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
 
 async function emitVoteUpdated(
@@ -20,7 +20,7 @@ async function emitVoteUpdated(
   const voteCounts = Object.fromEntries(
     activeCandidates.map((c) => [c.id, c._count.votes])
   );
-  socketEmitter.to(`meeting:${meetingId}`).emit('vote:updated', {
+  getSocketEmitter().to(`meeting:${meetingId}`).emit('vote:updated', {
     meetingId,
     candidateId: changedCandidateId,
     voteCounts,
