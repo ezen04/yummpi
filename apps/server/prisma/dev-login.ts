@@ -26,6 +26,12 @@
 
 import { PrismaClient } from '@prisma/client';
 import { createHash, randomUUID } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// bare `tsx` 실행은 .env를 자동 로드하지 않으므로(seed는 `prisma db seed`가 로드) 직접 읽는다.
+loadEnv();
 
 const prisma = new PrismaClient();
 
@@ -56,7 +62,9 @@ async function main() {
     // userId 직접 지정 → 기존 회원(예: seed 더미)으로 로그인. 생성하지 않음.
     const found = await prisma.user.findUnique({ where: { id: identity } });
     if (!found) {
-      console.error(`❌ userId='${identity}' 회원 없음. seed 먼저 실행했는지 확인.`);
+      console.error(
+        `❌ userId='${identity}' 회원 없음. seed 먼저 실행했는지 확인.`
+      );
       process.exit(1);
     }
     userId = found.id;
@@ -90,7 +98,9 @@ async function main() {
       select: { id: true, title: true, status: true },
     });
     if (!meeting) {
-      console.warn(`⚠️  inviteCode='${inviteCode}' 모임 없음 — 멤버 연결 생략.`);
+      console.warn(
+        `⚠️  inviteCode='${inviteCode}' 모임 없음 — 멤버 연결 생략.`
+      );
     } else {
       const existing = await prisma.meetingMember.findFirst({
         where: { meetingId: meeting.id, userId },
@@ -133,6 +143,32 @@ async function main() {
 
 function shortHash(s: string): string {
   return createHash('sha256').update(s).digest('hex').slice(0, 8);
+}
+
+/**
+ * 루트 .env(.env.local 우선)를 직접 로드한다. CWD 무관하게 스크립트 위치 기준으로 찾고,
+ * `${VAR}` 치환을 지원하며(.env.example의 DATABASE_URL 형식), 이미 설정된 env는 덮어쓰지 않는다.
+ */
+function loadEnv(): void {
+  const here = dirname(fileURLToPath(import.meta.url)); // apps/server/prisma
+  const root = resolve(here, '../../..'); // → 레포 루트
+  for (const name of ['.env', '.env.local']) {
+    const file = resolve(root, name);
+    if (!existsSync(file)) continue;
+    for (const raw of readFileSync(file, 'utf8').split('\n')) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      const eq = line.indexOf('=');
+      if (eq === -1) continue;
+      const key = line.slice(0, eq).trim();
+      const val = line
+        .slice(eq + 1)
+        .trim()
+        .replace(/^["']|["']$/g, '')
+        .replace(/\$\{([^}]+)\}/g, (_, k) => process.env[k] ?? '');
+      if (process.env[key] === undefined) process.env[key] = val;
+    }
+  }
 }
 
 /** prod 가드: 로그인 바이패스 스크립트이므로 운영/원격 DB 실행을 차단한다. */
