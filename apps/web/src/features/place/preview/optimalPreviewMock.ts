@@ -111,16 +111,19 @@ export interface MidpointData {
   optimizationType: string;
   latitude: number;
   longitude: number;
-  /** 지도 말풍선에 표시할 인근 지명 */
+  /** 지도 말풍선에 표시할 선택된 역 이름 */
   placeLabel: string;
+  /** 가장 먼 참여자까지의 거리(m) — 이 값(최댓값)을 최소화한 결과 */
+  maxDistanceM: number;
   /** 계산에 포함된 출발역 목록 */
   stations: string[];
 }
 
 export const MOCK_MIDPOINT: MidpointData = {
-  optimizationType: 'MIN_TOTAL_DISTANCE',
+  optimizationType: 'MIN_MAX_DISTANCE',
   latitude: 37.5045,
   longitude: 127.0492,
-  placeLabel: '선릉역 부근',
+  placeLabel: '선릉역',
+  maxDistanceM: 3200,
   stations: ['강남역', '신논현역', '교대역', '방배역'],
 };
