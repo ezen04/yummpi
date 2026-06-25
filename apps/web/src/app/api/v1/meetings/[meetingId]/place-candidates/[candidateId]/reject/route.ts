@@ -22,7 +22,7 @@ export const POST = handleRoute(
     }
   ) => {
     const { meetingId, candidateId } = await params;
-    await assertHost(meetingId);
+    const member = await assertHost(meetingId);
 
     await prisma.$transaction(async (tx) => {
       const meeting = await tx.meeting.findUnique({
@@ -40,7 +40,7 @@ export const POST = handleRoute(
       }
       if (meeting.confirmedCandidateId === candidateId) {
         throw new ApiError(
-          'VALIDATION_ERROR',
+          'ALREADY_CONFIRMED_PLACE',
           '확정된 장소는 제외할 수 없습니다.'
         );
       }
@@ -79,6 +79,7 @@ export const POST = handleRoute(
       candidateId,
       voteCounts,
       votedMemberCount,
+      updatedBy: member.id,
     });
 
     return apiSuccess({ id: candidateId, status: 'REJECTED' });
