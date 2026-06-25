@@ -36,6 +36,8 @@ yummpi를 **Vercel(`apps/web`)** 과 **AWS(`apps/server` · RDS · S3)** 에 배
 
 ## 3. 확정 결정사항
 
+> **도메인 확정 (2026-06-25)**: 실제 구매 도메인은 **`yummpi.com`** (등록·DNS = Cloudflare). 기존 문서/CLAUDE.md의 `yummpi.app` 표기는 **`yummpi.com`으로 정정**한다. 초대 링크는 `NEXTAUTH_URL` env 기준 생성(커밋 `0cb514c`)이라 env만 `https://yummpi.com`으로 두면 자동 반영. CLAUDE.md 본문 표기 정정은 팀 비준 필요(현재 ⑤가 배포 문서·runbook만 정정).
+
 ### 3.1 Redis = Upstash
 
 - web·server가 **단일 Upstash 인스턴스를 공유**한다. web이 `Queue.add` / socket emit으로 쓰고, server worker / adapter가 읽는다.
@@ -52,9 +54,9 @@ yummpi를 **Vercel(`apps/web`)** 과 **AWS(`apps/server` · RDS · S3)** 에 배
 
 ### 3.3 Socket 인증 = 서브도메인 쿠키 공유
 
-- Socket 서버는 `ws.yummpi.app`(= `yummpi.app` 서브도메인)으로 노출한다.
+- Socket 서버는 `ws.yummpi.com`(= `yummpi.com` 서브도메인)으로 노출한다.
 - 인증은 현행 쿠키 기반을 유지한다: NextAuth 세션 쿠키(회원, DB세션 조회) + 게스트 쿠키.
-- 쿠키가 서브도메인까지 전달되도록 NextAuth 쿠키 `domain=.yummpi.app` + `secure` + `sameSite=lax`로 설정한다. 게스트 쿠키도 동일 도메인으로 발급한다.
+- 쿠키가 서브도메인까지 전달되도록 NextAuth 쿠키 `domain=.yummpi.com` + `secure` + `sameSite=lax`로 설정한다. 게스트 쿠키도 동일 도메인으로 발급한다.
 - 쿠키 공유가 불가한 환경 대비 **토큰 핸드셰이크 방식**(web 단기 서명 토큰 → `socket.handshake.auth`)을 fallback으로 둔다.
 
 ---
@@ -82,7 +84,7 @@ NEXTAUTH_URL
 NEXTAUTH_SECRET
 DATABASE_URL                 # Accelerate(pooling) 경로
 REDIS_URL                    # Upstash rediss://
-NEXT_PUBLIC_SOCKET_URL       # https://ws.yummpi.app
+NEXT_PUBLIC_SOCKET_URL       # https://ws.yummpi.com
 GUEST_TOKEN_SECRET
 KAKAO_CLIENT_ID
 KAKAO_CLIENT_SECRET
@@ -148,7 +150,7 @@ AWS_REGION=ap-northeast-2    # S3·로그 리전
 - `DATABASE_URL`은 pooling(Accelerate `prisma://`) 경로, `REDIS_URL`은 Upstash `rediss://`.
 - production 빌드 전 typecheck·lint 통과.
 
-> **① 의존**: NextAuth 세션 쿠키 `domain=.yummpi.app`(서브도메인 wss 인증용, §3.3) 설정은 **① Auth 영역**. Vercel 도메인 연결 후 ①과 확인 필요 — 이 문서/`vercel.json`에서는 다루지 않는다.
+> **① 의존**: NextAuth 세션 쿠키 `domain=.yummpi.com`(서브도메인 wss 인증용, §3.3) 설정은 **① Auth 영역**. Vercel 도메인 연결 후 ①과 확인 필요 — 이 문서/`vercel.json`에서는 다루지 않는다.
 
 ---
 
@@ -172,10 +174,10 @@ AWS_REGION=ap-northeast-2    # S3·로그 리전
 
 ## 8. 네트워크
 
-- Web(Vercel)·Server(`ws.yummpi.app`)는 public.
+- Web(Vercel)·Server(`ws.yummpi.com`)는 public.
 - RDS 접근: server는 같은 VPC 내부에서, web은 pooling 경로(Accelerate)로 접근한다. **MVP는 RDS를 퍼블릭 접근으로 두고**(Accelerate·로컬 마이그레이션 도달용) **보안 그룹 + 강한 자격증명 + `rds.force_ssl=1` + 앱 전용 최소권한 role**로 방어한다. 무료 Accelerate는 static IP가 없어 인바운드를 IP로 좁힐 수 없으므로 자격증명·TLS·최소권한이 1차 방어선이다. **운영 강화 트리거**: Prisma 유료 플랜의 static IP로 SG 잠금, 또는 RDS private 회귀 + VPC 내 프록시(코드 변경 없이 web `DATABASE_URL`만 교체). 결정 근거는 배포 결정 로그.
 - Upstash Redis는 web·server 양쪽에서 TLS로 접근한다.
-- 쿠키 인증을 위해 web과 server는 동일 apex(`yummpi.app`)를 공유한다.
+- 쿠키 인증을 위해 web과 server는 동일 apex(`yummpi.com`)를 공유한다.
 - **MVP Fargate 토폴로지**: task는 **퍼블릭 서브넷 + 공인 IP**로 배치하고 NAT 게이트웨이를 두지 않는다(비용 절감). 컨테이너 포트(4000) 인바운드는 보안 그룹에서 **ALB 보안 그룹으로부터만** 허용해 외부 직접 접근을 차단한다. 공인 IP는 ECR pull·Upstash·SMTP 등 아웃바운드 용도. 운영 안정화 시 프라이빗 서브넷 + NAT로 승격(서비스 네트워킹만 교체, 코드 변경 없음).
 
 ---
@@ -263,7 +265,7 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 - web `DATABASE_URL`(pooling) / server `DATABASE_URL`(직접) 분리 확인
 - web Prisma client에 Accelerate extension(`@prisma/extension-accelerate` · `.$extends(withAccelerate())`) 적용 확인 — `prisma://` 경로는 미적용 시 연결 실패 ✅ **코드 적용 완료(#75)**: `apps/web/src/lib/prisma.ts` 런타임 확장(타입은 base 고정), env에 `prisma://`만 주입하면 됨
 - `REDIS_URL`(Upstash) web·server 양쪽 주입 + BullMQ enqueue→consume 1회 통과
-- 쿠키 domain `.yummpi.app`로 wss 핸드셰이크 인증(회원·게스트) 통과
+- 쿠키 domain `.yummpi.com`로 wss 핸드셰이크 인증(회원·게스트) 통과
 - `prisma migrate deploy` 실행(직접 연결)·순서·백업 — §10 절차 따름
 - Vercel / AWS server 환경변수 누락 없음
 
@@ -308,7 +310,7 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
   {
     "AllowedHeaders": ["*"],
     "AllowedMethods": ["PUT"],
-    "AllowedOrigins": ["https://yummpi.app", "http://localhost:3000"],
+    "AllowedOrigins": ["https://yummpi.com", "http://localhost:3000"],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3000
   }
