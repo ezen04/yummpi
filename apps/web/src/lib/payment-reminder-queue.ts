@@ -34,7 +34,9 @@ export async function enqueuePaymentReminder(
   data: ReminderJobData
 ): Promise<void> {
   await getQueue().add('remind', data, {
-    jobId: `remind:${data.paymentId}`,
+    // BullMQ는 custom jobId에 ':'를 허용하지 않는다(잡 키가 bull:{queue}:{jobId}).
+    // ':'를 쓰면 add()가 "Custom Id cannot contain :"로 throw → 독촉 API 500.
+    jobId: `remind-${data.paymentId}`,
     removeOnComplete: true,
     removeOnFail: { count: 5 },
     attempts: 3,
