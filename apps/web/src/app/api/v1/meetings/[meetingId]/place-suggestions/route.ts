@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
+import { socketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
 
 const ALLOWED_STATUSES: MeetingStatus[] = ['RECRUITING', 'VOTING'];
@@ -121,6 +122,25 @@ export const POST = handleRoute(
         }
         throw err;
       });
+
+    // 풀(REJECTED) 추가도 RecruitingView의 통합 리스트에 영향 → 클라이언트 invalidate 트리거
+    const [activeCandidates, votedMemberCount] = await Promise.all([
+      prisma.placeCandidate.findMany({
+        where: { meetingId, status: 'ACTIVE' },
+        select: { id: true, _count: { select: { votes: true } } },
+      }),
+      prisma.vote.count({ where: { meetingId } }),
+    ]);
+    const voteCounts = Object.fromEntries(
+      activeCandidates.map((c) => [c.id, c._count.votes])
+    );
+    socketEmitter.to(`meeting:${meetingId}`).emit('vote:updated', {
+      meetingId,
+      candidateId: suggestion.id,
+      voteCounts,
+      votedMemberCount,
+      updatedBy: member.id,
+    });
 
     return apiSuccess(
       {
