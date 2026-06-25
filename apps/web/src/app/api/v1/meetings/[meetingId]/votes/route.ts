@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
-import { socketEmitter } from '@/lib/socket-emitter';
+import { getSocketEmitter } from '@/lib/socket-emitter';
 
 interface PutBody {
   candidateId: string;
@@ -104,7 +104,7 @@ export const PUT = handleRoute(
       updatedCandidates.map((c) => [c.id, c._count.votes])
     );
 
-    socketEmitter.to(`meeting:${meetingId}`).emit('vote:updated', {
+    getSocketEmitter().to(`meeting:${meetingId}`).emit('vote:updated', {
       meetingId,
       candidateId: body.candidateId,
       voteCounts,
