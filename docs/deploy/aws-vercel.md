@@ -347,3 +347,53 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 - [ ] Vercel 배포 origin → CORS `AllowedOrigins` 추가 (도메인 2단계)
 - [ ] api-spec.md L270 `image/*` → `image/jpeg`·`image/png`로 정정 (④, HEIC 제외 결정 반영)
 - [ ] ④ presigned URL API 구현(2차) — 업로드 성공/실패 검증
+
+---
+
+## 16. wss 2단계 — 도메인 + ALB + 실시간 연결 (⑤ 콘솔 작업)
+
+> 목적: 현재 Fargate는 ALB 없이 공인 IP `http://<IP>:4000`로만 노출 → https 페이지(Vercel)에서 mixed-content 차단 + `NEXT_PUBLIC_SOCKET_URL` 미주입(`localhost:4000` fallback)이라 prod 실시간이 죽어 있음. 그 앞에 **ALB(HTTPS/WSS 종단)**를 달고 `ws.yummpi.com`을 연결해 실시간을 살린다. 도메인 = `yummpi.com`, DNS = Cloudflare.
+>
+> 코드 기준: 소켓 서버 `apps/server/src/index.ts` — 포트 `4000`, 헬스 경로 `/health`(200)·`/ready`(503 시 격리), `cors.credentials: true`(origin `*` 불가, `CLIENT_ORIGIN` env로 제어).
+
+### 16.1 전제
+- `yummpi.com` 구매 완료, Cloudflare에서 DNS 관리.
+- 서브도메인: 소켓 = `ws.yummpi.com`, web(apex) = `yummpi.com`.
+- 쿠키 인증(§3.3)을 위해 web과 소켓은 **동일 등록도메인(`yummpi.com`)**을 공유해야 함 → web도 Vercel에서 `yummpi.com`(apex)에 연결.
+
+### 16.2 절차
+1. **ACM 인증서** (리전 `ap-northeast-2`, ALB와 동일 리전)
+   - 퍼블릭 인증서 요청: `*.yummpi.com`(apex web + ws 한 장 커버 권장) 또는 `ws.yummpi.com`+`yummpi.com`.
+   - DNS 검증 → ACM 검증용 CNAME을 **Cloudflare에 추가, 프록시 OFF(회색 구름)**. (프록시 ON이면 검증 실패)
+   - `Issued` 대기.
+2. **Target Group**
+   - 타입 **IP**(Fargate awsvpc 필수), 프로토콜 HTTP, 포트 **4000**, VPC = Fargate와 동일(default VPC).
+   - 헬스체크 경로 **`/health`**, 성공코드 200.
+3. **ALB** (Internet-facing, 퍼블릭 서브넷 2 AZ)
+   - 새 SG `yummpi-alb-sg`: 인바운드 **443 from 0.0.0.0/0**.
+   - 리스너 **HTTPS:443** → 위 타깃그룹 forward + ACM 인증서 연결. (선택: HTTP:80 → 443 리다이렉트)
+4. **Fargate 서비스 ↔ ALB 연결**
+   - `yummpi-server-sg` 수정: 인바운드 **4000을 `yummpi-alb-sg`에서만** 허용(기존 0.0.0.0/0 4000 제거 → 직접 접근 차단).
+   - 서비스에 타깃그룹 부착:
+     ```bash
+     aws ecs update-service --cluster yummpi --service yummpi-server \
+       --load-balancers targetGroupArn=<TG_ARN>,containerName=yummpi-server,containerPort=4000
+     ```
+   - ⚠️ LB 없이 생성된 서비스라 update가 거부되면 **서비스를 LB 포함 재생성**(task def 동일, 짧은 다운타임). 타깃이 `healthy`로 등록되는지 확인.
+5. **Cloudflare DNS**
+   - CNAME `ws` → ALB DNS 이름(`...elb.amazonaws.com`), **프록시 OFF(DNS only)**.
+   - web apex `yummpi.com`은 Vercel 도메인 연결 가이드대로 추가.
+6. **server CORS origin**
+   - SSM `/yummpi/prod/server/CLIENT_ORIGIN` = `https://yummpi.com` → force new deployment로 반영.
+7. **Vercel env + 재배포**
+   - `NEXT_PUBLIC_SOCKET_URL` = `https://ws.yummpi.com`, `NEXTAUTH_URL` = `https://yummpi.com`.
+   - ⚠️ `NEXT_PUBLIC_*`는 **빌드타임 주입** → env만 넣지 말고 **반드시 재배포(rebuild)**.
+8. **검증**
+   - `curl https://ws.yummpi.com/health` → `{"ok":true}`.
+   - 브라우저: 소켓 connect 성공·mixed-content 없음·2탭 투표 `vote:updated` 실시간 동기화.
+
+### 16.3 ⚠️ ① Auth 의존 — 쿠키 도메인
+- 소켓은 `withCredentials: true`로 쿠키를 보내고 서버 auth 미들웨어가 그 쿠키(NextAuth 세션 + 게스트 토큰)를 읽는다(§3.3).
+- web(`yummpi.com`) ↔ 소켓(`ws.yummpi.com`)은 같은 등록도메인이라야 쿠키가 닿음 → NextAuth·게스트 쿠키를 **`domain=.yummpi.com` + `Secure` + `SameSite=Lax`**로 발급해야 함.
+- 이 쿠키 설정은 **① Auth 영역** — 도메인 연결 후 ①과 확인. ⑤은 이 문서/`vercel.json`에서 코드 수정하지 않음(§6.3).
+- 실패 시 fallback: web 단기 서명 토큰 → `socket.handshake.auth`(§3.3).
