@@ -13,5 +13,5 @@ export default async function Page({
   const member = await getCurrentMember(meetingId);
   if (!member) notFound();
 
-  return <WaitingView meetingId={meetingId} />;
+  return <WaitingView meetingId={meetingId} isHost={member.role === 'HOST'} />;
 }

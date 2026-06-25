@@ -17,7 +17,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
  * 멤버 입력 현황(재진입 시 갱신) + 마감시각 기반 카운트다운.
  * 전원 입력 or 마감 도달 → 결과(optimal)로 자동 이동. 수동 "결과 보기"도 제공.
  */
-export function WaitingView({ meetingId }: { meetingId: string }) {
+export function WaitingView({
+  meetingId,
+  isHost,
+}: {
+  meetingId: string;
+  isHost: boolean;
+}) {
   const router = useRouter();
   const { data: status } = useDepartureStatus(meetingId);
   const { data: deadlineIso } = useWaitDeadline(meetingId);
@@ -104,16 +110,19 @@ export function WaitingView({ meetingId }: { meetingId: string }) {
         </p>
       </div>
 
-      <div className="px-5 pt-3 pb-5 border-t border-[var(--line-alternative)]">
-        <Button
-          variant="basic"
-          size="lg"
-          className="w-full"
-          onClick={() => router.push(`/meetings/${meetingId}/place/optimal`)}
-        >
-          지금 결과 보기
-        </Button>
-      </div>
+      {/* "지금 결과 보기"는 호스트 전용 — 게스트는 자동 전환(전원 입력/마감)만 대기 */}
+      {isHost && (
+        <div className="px-5 pt-3 pb-5 border-t border-[var(--line-alternative)]">
+          <Button
+            variant="basic"
+            size="lg"
+            className="w-full"
+            onClick={() => router.push(`/meetings/${meetingId}/place/optimal`)}
+          >
+            지금 결과 보기
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
