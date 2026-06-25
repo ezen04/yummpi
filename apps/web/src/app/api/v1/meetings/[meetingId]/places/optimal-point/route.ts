@@ -1,7 +1,10 @@
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
 import { calcDistance, calcMidpoint, type Coord } from '@/lib/haversine';
-import { findOptimalStation } from '@/features/place/utils/stationSearch';
+import {
+  findNearestStation,
+  findOptimalStation,
+} from '@/features/place/utils/stationSearch';
 import { prisma } from '@/lib/prisma';
 
 /**
@@ -33,6 +36,7 @@ export const POST = handleRoute(async (req: Request, ctx: Ctx) => {
       nickname: true,
       startLatitude: true,
       startLongitude: true,
+      startStation: true,
     },
   });
 
@@ -58,6 +62,25 @@ export const POST = handleRoute(async (req: Request, ctx: Ctx) => {
       throw new ApiError('VALIDATION_ERROR', '최적 역을 계산할 수 없습니다.');
     }
     const { station, maxDistanceM } = optimal;
+
+    // 참여한 역 목록 — 입력한 역명 우선, 없으면 좌표 기준 최근접역. (중복 제거)
+    const participantStations = Array.from(
+      new Set(
+        members
+          .map((m) => {
+            if (m.startLatitude == null || m.startLongitude == null)
+              return null;
+            if (m.startStation) return m.startStation;
+            const near = findNearestStation({
+              lat: Number(m.startLatitude),
+              lng: Number(m.startLongitude),
+            });
+            return near ? `${near.name}역` : null;
+          })
+          .filter((s): s is string => s !== null)
+      )
+    );
+
     return apiSuccess({
       optimizationType: 'MIN_MAX_DISTANCE',
       latitude: station.lat,
@@ -71,6 +94,7 @@ export const POST = handleRoute(async (req: Request, ctx: Ctx) => {
       },
       maxDistanceM,
       excludedCount,
+      participantStations,
     });
   }
 
