@@ -139,6 +139,7 @@ export const POST = handleRoute(
       candidateId: suggestion.id,
       voteCounts,
       votedMemberCount,
+      updatedBy: member.id,
     });
 
     return apiSuccess(
