@@ -284,6 +284,8 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 
 ## 15. S3 영수증 버킷 프로비저닝 (⑤ 콘솔 작업)
 
+> ⚠️ **전제 미확정**: 아래 §15.6은 presigned가 Fargate(`apps/server`)에서 도는 경우의 task-role 자격증명을 가정한다. 실제 라우트는 `apps/web`(Vercel)에 있어 task role이 닿지 않을 수 있다 — [`open-question-s3-presigned-credentials.md`](./open-question-s3-presigned-credentials.md) 결정 후 §15.6 정정.
+
 > 영수증 이미지 저장소. **버킷·CORS·lifecycle·IAM은 ⑤가 콘솔에서 생성**하고, presigned URL 구현은 **④ 2차**(§11)다. 자격증명은 **Fargate task role(`yummpi-ecs-task`)에 S3 정책을 부착**하는 방식 — 정적 access key를 만들지 않는다. 실 버킷명(`<RECEIPTS_BUCKET>`)·account ID는 §14에 따라 local 문서에 둔다.
 
 ### 15.1 결정 요약 (④ 확정 2026-06-25)
