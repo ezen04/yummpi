@@ -59,9 +59,11 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   );
 
   // mode=add는 풀(REJECTED)에 추가 (누구나). 호스트의 ACTIVE 승격은 RecruitingView 카드 클릭 시.
-  const { suggestions, add: addToPool, isAdding } = usePlaceSuggestions(
-    meetingId
-  );
+  const {
+    suggestions,
+    add: addToPool,
+    isAdding,
+  } = usePlaceSuggestions(meetingId);
   const setPendingSearchPlace = usePlaceChangeStore(
     (s) => s.setPendingSearchPlace
   );

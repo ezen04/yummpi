@@ -99,8 +99,7 @@ export function usePlaceCandidates(meetingId: string) {
   // ACTIVE → REJECTED 강등 (호스트가 후보 카드 재클릭 시)
   // 낙관적 업데이트: candidates에서 즉시 제거, suggestions 캐시는 invalidate로 갱신
   const rejectMutation = useMutation<void, Error, string, SnapshotContext>({
-    mutationFn: (candidateId) =>
-      rejectPlaceCandidate(meetingId, candidateId),
+    mutationFn: (candidateId) => rejectPlaceCandidate(meetingId, candidateId),
     onMutate: async (candidateId) => {
       await queryClient.cancelQueries({ queryKey: voteKeys.detail(meetingId) });
       const snapshot = queryClient.getQueryData<VotesData>(

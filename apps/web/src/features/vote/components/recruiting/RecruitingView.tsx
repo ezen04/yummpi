@@ -97,8 +97,7 @@ export function RecruitingView({
   // - ACTIVE/REJECTED 캐시 race(invalidate timing 차이) 일시 중복 방지를 위해
   //   REJECTED 리스트에서 ACTIVE externalId를 강력 dedupe
   const mergedItems = React.useMemo(() => {
-    const midpoint =
-      lat && lng ? { lat: Number(lat), lng: Number(lng) } : null;
+    const midpoint = lat && lng ? { lat: Number(lat), lng: Number(lng) } : null;
     const distFrom = (latStr: string | null, lngStr: string | null) => {
       if (!midpoint || !latStr || !lngStr) return 0;
       return Math.round(
@@ -109,8 +108,7 @@ export function RecruitingView({
       a.distanceM - b.distanceM;
     const active: RecommendationItem[] = votesData.candidates
       .filter(
-        (c): c is typeof c & { externalPlaceId: string } =>
-          !!c.externalPlaceId
+        (c): c is typeof c & { externalPlaceId: string } => !!c.externalPlaceId
       )
       .map((c) => ({
         externalPlaceId: c.externalPlaceId,
