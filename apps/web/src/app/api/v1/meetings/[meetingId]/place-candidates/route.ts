@@ -1,10 +1,15 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost, requireMember } from '@/lib/current-member';
 import { socketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
 
-async function emitVoteUpdated(meetingId: string, changedCandidateId: string) {
+async function emitVoteUpdated(
+  meetingId: string,
+  changedCandidateId: string,
+  updatedBy: string
+) {
   const [activeCandidates, votedMemberCount] = await Promise.all([
     prisma.placeCandidate.findMany({
       where: { meetingId, status: 'ACTIVE' },
@@ -20,6 +25,7 @@ async function emitVoteUpdated(meetingId: string, changedCandidateId: string) {
     candidateId: changedCandidateId,
     voteCounts,
     votedMemberCount,
+    updatedBy,
   });
 }
 
@@ -187,7 +193,7 @@ export const POST = handleRoute(
           createdBy: { select: { id: true, nickname: true, role: true } },
         },
       });
-      await emitVoteUpdated(meetingId, promoted.id);
+      await emitVoteUpdated(meetingId, promoted.id, member.id);
       return apiSuccess(
         {
           id: promoted.id,
@@ -216,28 +222,44 @@ export const POST = handleRoute(
       );
     }
 
-    const candidate = await prisma.placeCandidate.create({
-      data: {
-        meetingId,
-        createdByMemberId: member.id,
-        externalPlaceId,
-        name: body.name.trim(),
-        categoryName: body.categoryName ?? null,
-        address: body.address ?? null,
-        roadAddress: body.roadAddress ?? null,
-        phone: body.phone ?? null,
-        latitude: body.lat,
-        longitude: body.lng,
-        placeUrl: body.placeUrl ?? null,
-      },
-      include: {
-        createdBy: {
-          select: { id: true, nickname: true, role: true },
+    // 동시성 가드: findFirst → create 사이 TOCTOU로 다른 요청이 같은
+    // externalPlaceId를 먼저 만들면 P2002. CANDIDATE_ALREADY_EXISTS로 변환해
+    // INTERNAL_ERROR 누출 차단.
+    const candidate = await prisma.placeCandidate
+      .create({
+        data: {
+          meetingId,
+          createdByMemberId: member.id,
+          externalPlaceId,
+          name: body.name.trim(),
+          categoryName: body.categoryName ?? null,
+          address: body.address ?? null,
+          roadAddress: body.roadAddress ?? null,
+          phone: body.phone ?? null,
+          latitude: body.lat,
+          longitude: body.lng,
+          placeUrl: body.placeUrl ?? null,
         },
-      },
-    });
+        include: {
+          createdBy: {
+            select: { id: true, nickname: true, role: true },
+          },
+        },
+      })
+      .catch((err: unknown) => {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          throw new ApiError(
+            'CANDIDATE_ALREADY_EXISTS',
+            '이미 추가된 장소입니다.'
+          );
+        }
+        throw err;
+      });
 
-    await emitVoteUpdated(meetingId, candidate.id);
+    await emitVoteUpdated(meetingId, candidate.id, member.id);
 
     return apiSuccess(
       {
