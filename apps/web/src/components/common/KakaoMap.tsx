@@ -72,16 +72,26 @@ export function KakaoMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoMapInstance | null>(null);
   const markerRefs = useRef<KakaoMarker[]>([]);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollAttemptsRef = useRef(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
     'loading'
   );
+
+  // 최대 5초(50회 × 100ms) polling 후 실패 처리 — 무한 재시도 방지
+  const MAX_POLL_ATTEMPTS = 50;
 
   const initMap = () => {
     if (!containerRef.current) return;
     // autoload=false + Next.js 16 Turbopack의 Script onLoad 타이밍 이슈 방어:
     // window.kakao가 아직 set되지 않은 경우 다음 tick에 재시도
     if (typeof window === 'undefined' || !window.kakao?.maps?.load) {
-      setTimeout(initMap, 100);
+      if (pollAttemptsRef.current >= MAX_POLL_ATTEMPTS) {
+        setStatus('error');
+        return;
+      }
+      pollAttemptsRef.current += 1;
+      pollTimerRef.current = setTimeout(initMap, 100);
       return;
     }
     window.kakao.maps.load(() => {
@@ -100,6 +110,13 @@ export function KakaoMap({
     if (typeof window !== 'undefined' && window.kakao?.maps) {
       initMap();
     }
+    return () => {
+      // 언마운트 시 polling 정리 — leak 방지
+      if (pollTimerRef.current) {
+        clearTimeout(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
