@@ -138,7 +138,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
           onCompleteMeeting={async () => {
             await completePayments.mutateAsync();
           }}
-          onCompleted={() => router.push(`/meetings/${meetingId}/payments/complete`)}
+          onCompleted={() =>
+            router.push(`/meetings/${meetingId}/payments/complete`)
+          }
           isCompleting={completePayments.isPending}
           completeErrorMessage={completeErrorMessage}
         />
