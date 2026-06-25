@@ -139,7 +139,10 @@ export function MeetingsListView() {
                         color: 'var(--primary)',
                         boxShadow: 'var(--shadow-small)',
                       }
-                    : { background: 'transparent', color: 'var(--label-alternative)' }
+                    : {
+                        background: 'transparent',
+                        color: 'var(--label-alternative)',
+                      }
                 }
               >
                 {seg.label} {seg.count}
@@ -190,10 +193,17 @@ export function MeetingsListView() {
               borderRadius: 'var(--radius-12)',
             }}
           >
-            <p className="text-sm" style={{ color: 'var(--label-alternative)' }}>
+            <p
+              className="text-sm"
+              style={{ color: 'var(--label-alternative)' }}
+            >
               모임을 불러오지 못했어요.
             </p>
-            <Button variant="outline" size="sm" onClick={() => meetings.refetch()}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => meetings.refetch()}
+            >
               다시 시도
             </Button>
           </div>
