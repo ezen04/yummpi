@@ -164,7 +164,10 @@ export const POST = handleRoute(
       throw e;
     }
 
-    const data = buildCreationResponse(created.settlement, created.meetingStatus);
+    const data = buildCreationResponse(
+      created.settlement,
+      created.meetingStatus
+    );
     // 응답 직전 inner schema parse — Prisma 결과 ↔ 계약 drift 차단.
     const parsed = SettlementCreateResponseSchema.parse(data);
     return apiSuccess(parsed, '정산이 생성되었습니다.', 201);

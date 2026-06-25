@@ -129,8 +129,18 @@ describe('buildEqualEngineInput', () => {
 describe('buildSettlementMemberRows', () => {
   it('엔진 출력 멤버를 createMany 행으로 매핑', () => {
     const members: SettlementMemberOutput[] = [
-      { memberId: IDs.host, itemAmount: 0, adjustmentAmount: 10000, finalAmount: 10000 },
-      { memberId: IDs.memberA, itemAmount: 0, adjustmentAmount: 10000, finalAmount: 10000 },
+      {
+        memberId: IDs.host,
+        itemAmount: 0,
+        adjustmentAmount: 10000,
+        finalAmount: 10000,
+      },
+      {
+        memberId: IDs.memberA,
+        itemAmount: 0,
+        adjustmentAmount: 10000,
+        finalAmount: 10000,
+      },
     ];
     const rows = buildSettlementMemberRows(IDs.settlement, members);
     expect(rows).toEqual([
@@ -155,15 +165,30 @@ describe('buildSettlementMemberRows', () => {
 describe('assertEngineTotal', () => {
   it('Σ finalAmount == totalAmount면 통과(throw 없음)', () => {
     const members: SettlementMemberOutput[] = [
-      { memberId: IDs.host, itemAmount: 0, adjustmentAmount: 10000, finalAmount: 10000 },
-      { memberId: IDs.memberA, itemAmount: 0, adjustmentAmount: 20000, finalAmount: 20000 },
+      {
+        memberId: IDs.host,
+        itemAmount: 0,
+        adjustmentAmount: 10000,
+        finalAmount: 10000,
+      },
+      {
+        memberId: IDs.memberA,
+        itemAmount: 0,
+        adjustmentAmount: 20000,
+        finalAmount: 20000,
+      },
     ];
     expect(() => assertEngineTotal(30000, members)).not.toThrow();
   });
 
   it('Σ finalAmount != totalAmount면 INTERNAL_ERROR(부패 정산 영속 차단)', () => {
     const members: SettlementMemberOutput[] = [
-      { memberId: IDs.host, itemAmount: 0, adjustmentAmount: 10000, finalAmount: 10000 },
+      {
+        memberId: IDs.host,
+        itemAmount: 0,
+        adjustmentAmount: 10000,
+        finalAmount: 10000,
+      },
     ];
     expect(() => assertEngineTotal(30000, members)).toThrow(
       apiError('INTERNAL_ERROR')
