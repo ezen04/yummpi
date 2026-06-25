@@ -78,14 +78,22 @@ export function VotingView({
     vote(candidateId);
   };
 
+  // B-2: 호스트가 동률 상태에서 "확정" 누르면 ConfirmPlaceSheet 거치지 않고
+  // 바로 TieBreakSelectPanel로 전환. 마감 전이라도 호스트 의도가 있으면 활성.
+  const [forceTieBreak, setForceTieBreak] = React.useState(false);
+
   const handleConfirm = () => {
-    // 동률이 아니면 1위 후보 자동 선택, 동률이면 TieBreak 화면에서 처리하므로 여기 진입 안 함
+    if (isTied) {
+      // 동률 → 호스트 수동 선택 화면으로 전환 (ConfirmPlaceSheet 안 띄움)
+      setForceTieBreak(true);
+      return;
+    }
     if (!topCandidate) return;
     openConfirmPlace(topCandidate.id);
   };
 
-  // 마감 + 동률 + 호스트만 TieBreak 화면 — 멤버는 일반 VOTING 화면(disabled footer)
-  if (isClosed && isTied && viewerRole === 'HOST') {
+  // 동률 + 호스트가 마감했거나(isClosed) 직접 트리거(forceTieBreak)한 경우 TieBreak 화면
+  if (isTied && viewerRole === 'HOST' && (isClosed || forceTieBreak)) {
     return (
       <>
         <TieBreakSelectPanel

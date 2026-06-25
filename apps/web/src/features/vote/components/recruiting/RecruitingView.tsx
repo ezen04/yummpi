@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Flame, Plus } from '@yummpi/ui';
+import { MapPin, Flame, Plus, toast } from '@yummpi/ui';
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
 import { KakaoMap } from '@/components/common/KakaoMap';
@@ -179,12 +179,19 @@ export function RecruitingView({
   // 호스트 카드 클릭 토글:
   //  - ACTIVE 카드(이미 후보) → reject (강등, ACTIVE → REJECTED 풀)
   //  - 그 외(카카오 추천 / REJECTED 풀) → add (POST /place-candidates, REJECTED면 upsert로 승격)
+  const ACTIVE_LIMIT = 5;
   const handleHostCardClick = (item: RecommendationItem) => {
     if (isAdding || isRejecting) return;
     if (activeExternalIds.has(item.externalPlaceId)) {
       const candidateId = activeIdByExternal.get(item.externalPlaceId);
       if (!candidateId) return;
       rejectCandidate(candidateId);
+      return;
+    }
+    // B-1: 5개 초과 사전 검증 — 낙관적 추가 막아 카드 깜빡임 제거.
+    // BE도 400으로 막지만, 사전 검증으로 onMutate 자체 호출 안 함.
+    if (votesData.candidates.length >= ACTIVE_LIMIT) {
+      toast.error('후보는 최대 5개까지 추가할 수 있어요.');
       return;
     }
     addCandidate({
