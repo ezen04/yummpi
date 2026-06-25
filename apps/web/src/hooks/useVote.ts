@@ -83,23 +83,53 @@ export function useVote(meetingId: string) {
     queryFn: () => fetchVotes(meetingId),
   });
 
+  // A-1: 모임 상태 변경(예: RECRUITING→VOTING / VOTING→PLACE_CONFIRMED) 수신 시
+  // candidates·meeting 캐시를 모두 invalidate해 다른 멤버 화면이 stale 상태로
+  // 다음 단계에 진입하지 않도록.
+  useSocketEvent('meeting:status-changed', () => {
+    void queryClient.invalidateQueries({
+      queryKey: voteKeys.detail(meetingId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ['meeting', meetingId] as const,
+    });
+  });
+
   useSocketEvent('vote:updated', (data: VoteUpdatedPayload) => {
     if (mutatingCountRef.current > 0) return;
+
+    // candidates 추가(풀 → ACTIVE 승격, 신규 add)/제거(reject)된 경우
+    // setQueryData는 voteCount만 갱신해 새 카드를 못 잡으므로
+    // invalidate로 백그라운드 refetch 트리거. suggestions 캐시도 함께 동기화.
+    void queryClient.invalidateQueries({
+      queryKey: voteKeys.detail(meetingId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ['place', 'suggestions', meetingId] as const,
+    });
 
     queryClient.setQueryData(
       voteKeys.detail(meetingId),
       (old: VotesData | undefined) => {
         if (!old) return old;
+        const updated = old.candidates.map((c) => {
+          const nextVoteCount = data.voteCounts[c.id] ?? c.voteCount;
+          return {
+            ...c,
+            voteCount: nextVoteCount,
+            voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
+          };
+        });
+        // 정렬 재실행 — BE GET /votes와 동일 기준:
+        //   1순위 voteCount desc, 2순위 id asc (tiebreaker)
+        //   → 모든 클라이언트가 동일한 정렬을 보게 보장. 1위 배지·카드 순서가
+        //   실시간으로 재배치됨.
+        updated.sort(
+          (a, b) => b.voteCount - a.voteCount || a.id.localeCompare(b.id)
+        );
         return {
           ...old,
-          candidates: old.candidates.map((c) => {
-            const nextVoteCount = data.voteCounts[c.id] ?? c.voteCount;
-            return {
-              ...c,
-              voteCount: nextVoteCount,
-              voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
-            };
-          }),
+          candidates: updated,
           votedMemberCount: data.votedMemberCount,
         };
       }
@@ -121,28 +151,32 @@ export function useVote(meetingId: string) {
         (old: VotesData | undefined) => {
           if (!old) return old;
           const prevCandidateId = old.myCandidateId;
+          const updated = old.candidates.map((c) => {
+            if (c.id === candidateId) {
+              const nextVoteCount = c.voteCount + 1;
+              return {
+                ...c,
+                voteCount: nextVoteCount,
+                voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
+              };
+            }
+            if (c.id === prevCandidateId) {
+              const nextVoteCount = c.voteCount - 1;
+              return {
+                ...c,
+                voteCount: nextVoteCount,
+                voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
+              };
+            }
+            return c;
+          });
+          updated.sort(
+            (a, b) => b.voteCount - a.voteCount || a.id.localeCompare(b.id)
+          );
           return {
             ...old,
             myCandidateId: candidateId,
-            candidates: old.candidates.map((c) => {
-              if (c.id === candidateId) {
-                const nextVoteCount = c.voteCount + 1;
-                return {
-                  ...c,
-                  voteCount: nextVoteCount,
-                  voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
-                };
-              }
-              if (c.id === prevCandidateId) {
-                const nextVoteCount = c.voteCount - 1;
-                return {
-                  ...c,
-                  voteCount: nextVoteCount,
-                  voteRate: computeVoteRate(nextVoteCount, old.totalVoters),
-                };
-              }
-              return c;
-            }),
+            candidates: updated,
           };
         }
       );

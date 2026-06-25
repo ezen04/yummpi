@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { useSocket } from '@/hooks/useSocket';
+import { toast } from '@yummpi/ui';
+import { useSocket, useSocketEvent } from '@/hooks/useSocket';
 import { useVote } from '@/hooks/useVote';
 import { useMeetingDetail } from '../hooks/useMeetingDetail';
 import { VoteLoadingSkeleton } from '../components/shell/VoteLoadingSkeleton';
@@ -35,6 +36,14 @@ export function VotePage({
   const { votesData, isLoading: votesLoading } = useVote(meetingId);
 
   useSocket(meetingId);
+
+  // A-4: 다른 멤버(주로 게스트) 화면에서 호스트의 장소 확정을 실시간 안내.
+  // 호스트 본인은 ConfirmPlaceSheet에서 이미 toast+push를 처리하고 unmount 되므로
+  // 이 핸들러가 호출되기 전에 화면을 벗어남 → 중복 toast 없음.
+  useSocketEvent('place:confirmed', () => {
+    toast.success('장소가 확정되었어요!');
+    router.replace(`/meetings/${meetingId}`);
+  });
 
   const handleBack = () => router.back();
 

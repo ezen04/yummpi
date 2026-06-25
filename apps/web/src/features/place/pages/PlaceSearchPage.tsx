@@ -6,6 +6,7 @@ import { toast } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { KakaoMap } from '@/components/common/KakaoMap';
 import { useVote } from '@/hooks/useVote';
+import { calcDistance } from '@/lib/haversine';
 import type { RecommendationItem } from '../api/placeApi';
 import { useOptimalPoint } from '../hooks/useOptimalPoint';
 import { usePlaceSearch } from '../hooks/usePlaceSearch';
@@ -124,10 +125,36 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   // 검색 결과 BottomSheet — 검색어가 1자 이상일 때 노출 (카카오맵 앱 UX 모방)
   const showResultSheet = !isEmptyQuery;
 
+  // 검색 결과를 중간지점 기준 거리순으로 재정렬 (옵션 c 하이브리드).
+  // BE는 카카오 accuracy 정렬 결과를 그대로 받아옴 → 클라이언트가 거리 계산 후 재배열.
+  // 좌표가 없으면 카카오 정확도 정렬 그대로 유지 (fallback).
+  const sortedResults = React.useMemo<RecommendationItem[]>(() => {
+    if (!results) return [];
+    const midpoint = lat && lng ? { lat: Number(lat), lng: Number(lng) } : null;
+    const withDist = results.map((r) => {
+      if (!midpoint || !r.lat || !r.lng) {
+        return { ...r, distanceM: r.distanceM ?? 0 };
+      }
+      return {
+        ...r,
+        distanceM: Math.round(
+          calcDistance(midpoint, {
+            lat: Number(r.lat),
+            lng: Number(r.lng),
+          })
+        ),
+      };
+    });
+    if (midpoint) {
+      withDist.sort((a, b) => a.distanceM - b.distanceM);
+    }
+    return withDist;
+  }, [results, lat, lng]);
+
   // 검색 결과 좌표를 지도 마커로 표시 (결과 카드와 매칭 시 시각 도움)
   const markers = React.useMemo(
     () =>
-      (results ?? [])
+      sortedResults
         .filter((r) => r.lat && r.lng)
         .map((r) => ({
           lat: Number(r.lat),
@@ -135,7 +162,7 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
           label: r.name,
           id: r.externalPlaceId,
         })),
-    [results]
+    [sortedResults]
   );
 
   return (
@@ -187,7 +214,7 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-4">
               <PlaceSearchResultList
-                items={results ?? []}
+                items={sortedResults}
                 mode={mode}
                 activeExternalIds={activeExternalIds}
                 rejectedExternalIds={rejectedExternalIds}
