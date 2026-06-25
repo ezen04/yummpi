@@ -101,8 +101,7 @@ export function VotingClosesAtSheet({
 
   const chipBase =
     'flex-1 h-9 px-3 rounded-[var(--radius-8)] text-[14px] leading-5 font-medium font-[var(--font-sans)] cursor-pointer transition-colors';
-  const chipActive =
-    'bg-[var(--primary)] text-[var(--static-white)]';
+  const chipActive = 'bg-[var(--primary)] text-[var(--static-white)]';
   const chipInactive =
     'bg-[var(--fill-normal)] text-[var(--label-normal)] hover:bg-[var(--fill-strong)]';
 
@@ -124,7 +123,10 @@ export function VotingClosesAtSheet({
           <button
             type="button"
             onClick={() => setExpanded('date')}
-            className={cn(chipBase, expanded === 'date' ? chipActive : chipInactive)}
+            className={cn(
+              chipBase,
+              expanded === 'date' ? chipActive : chipInactive
+            )}
             aria-pressed={expanded === 'date'}
           >
             {selectedDate ? formatDateChip(selectedDate) : '날짜 선택'}

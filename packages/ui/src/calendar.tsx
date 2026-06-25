@@ -19,7 +19,11 @@ import { cn } from './utils';
  */
 export type DatePickerProps = React.ComponentProps<typeof DayPicker>;
 
-function CustomMonthCaption({ calendarMonth }: { calendarMonth: CalendarMonth }) {
+function CustomMonthCaption({
+  calendarMonth,
+}: {
+  calendarMonth: CalendarMonth;
+}) {
   const { previousMonth, nextMonth, goToMonth } = useDayPicker();
   return (
     <div className="flex items-center justify-between pb-2">
