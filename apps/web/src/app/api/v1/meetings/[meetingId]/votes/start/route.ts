@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { transitionMeetingStatus } from '@/lib/meeting-status';
-import { socketEmitter } from '@/lib/socket-emitter';
+import { getSocketEmitter } from '@/lib/socket-emitter';
 
 type Ctx = { params: Promise<{ meetingId: string }> };
 
@@ -90,7 +90,7 @@ export const POST = handleRoute(async (req: Request, { params }: Ctx) => {
     });
   });
 
-  socketEmitter
+  getSocketEmitter()
     .to(`meeting:${meetingId}`)
     .emit('meeting:status-changed', { meetingId, status: 'VOTING' });
 
