@@ -61,3 +61,5 @@ ec2/
 *.pem
 *.key
 id_rsa*
+.vercel
+.env*

@@ -47,9 +47,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
       myPayment.status === 'TRANSFER_REPORTED';
 
     if (shouldRedirect) {
-      router.replace('./transfer');
+      router.replace(`/meetings/${meetingId}/payments/transfer`);
     }
-  }, [data, router]);
+  }, [data, router, meetingId]);
 
   async function handleHostAction(paymentId: string, action: PaymentAction) {
     setActionErrorMessage(null);
@@ -138,7 +138,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
           onCompleteMeeting={async () => {
             await completePayments.mutateAsync();
           }}
-          onCompleted={() => router.push('./complete')}
+          onCompleted={() =>
+            router.push(`/meetings/${meetingId}/payments/complete`)
+          }
           isCompleting={completePayments.isPending}
           completeErrorMessage={completeErrorMessage}
         />
