@@ -54,13 +54,22 @@ export function VotingView({
 
   const isClosed = useIsVotingClosed(votesData.votingClosesAt);
 
-  // 1위 동률 감지
+  // 1위 동률 감지 + 동률 1위 ID 집합 — 모든 동률 1위 카드에 배지 표시.
+  // candidates는 useVote가 voteCount desc + id asc로 정렬해두므로 [0]이 최상위.
   const topCandidate = votesData.candidates[0];
   const topCount = topCandidate?.voteCount ?? 0;
-  const tiedCount = votesData.candidates.filter(
-    (c) => c.voteCount === topCount && topCount > 0
-  ).length;
-  const isTied = tiedCount > 1;
+  const topCandidateIds = React.useMemo(
+    () =>
+      new Set(
+        topCount > 0
+          ? votesData.candidates
+              .filter((c) => c.voteCount === topCount)
+              .map((c) => c.id)
+          : []
+      ),
+    [votesData.candidates, topCount]
+  );
+  const isTied = topCandidateIds.size > 1;
 
   const hasMyVote = !!votesData.myCandidateId;
 
@@ -123,9 +132,9 @@ export function VotingView({
         <VoteCandidateList
           candidates={votesData.candidates}
           myCandidateId={votesData.myCandidateId}
-          topCandidateId={topCandidate?.id ?? null}
+          topCandidateIds={topCandidateIds}
           onVote={handleVote}
-          disabled={isVoting}
+          disabled={isVoting || isClosed}
         />
       </div>
 

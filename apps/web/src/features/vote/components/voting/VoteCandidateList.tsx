@@ -8,7 +8,8 @@ import { VoteCandidateCard } from './VoteCandidateCard';
 interface VoteCandidateListProps {
   candidates: VoteCandidate[];
   myCandidateId: string | null;
-  topCandidateId: string | null;
+  /** 1위 후보 ID 집합 — 동률이면 여러 개 (모두 1위 배지) */
+  topCandidateIds: Set<string>;
   onVote: (candidateId: string) => void;
   disabled?: boolean;
   className?: string;
@@ -17,7 +18,7 @@ interface VoteCandidateListProps {
 export function VoteCandidateList({
   candidates,
   myCandidateId,
-  topCandidateId,
+  topCandidateIds,
   onVote,
   disabled = false,
   className,
@@ -43,7 +44,7 @@ export function VoteCandidateList({
           key={candidate.id}
           candidate={candidate}
           isMyVote={candidate.id === myCandidateId}
-          isTopVote={candidate.id === topCandidateId}
+          isTopVote={topCandidateIds.has(candidate.id)}
           onClick={() => onVote(candidate.id)}
           disabled={disabled}
         />

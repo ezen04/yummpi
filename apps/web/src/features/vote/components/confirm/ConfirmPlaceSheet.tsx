@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Flame, Sparkles, toast } from '@yummpi/ui';
+import { Flame, Sparkles } from '@yummpi/ui';
 import { BottomSheet } from '@/components/common/BottomSheet';
 import { Button } from '@/components/common/Button';
 import { shortenKakaoCategory } from '@/features/place/utils/categoryMap';
@@ -115,7 +115,9 @@ export function ConfirmPlaceSheet({
         onSuccess: () => {
           close();
           clearPendingSearchPlace();
-          toast.success('장소가 확정되었어요!');
+          // toast + redirect는 socket place:confirmed 이벤트(VotePage에서 처리)로 통일 —
+          // 호스트 본인 탭에서도 echo로 수신해 토스트 1번만 표시.
+          // push는 echo 도착 지연 대비 즉시 호출 (replace보다 우선되지 않으므로 중복 안전).
           router.push(`/meetings/${meetingId}`);
         },
       }
