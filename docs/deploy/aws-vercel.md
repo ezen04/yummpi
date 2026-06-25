@@ -110,7 +110,11 @@ SMTP_HOST
 SMTP_PORT=587
 SMTP_USER
 SMTP_PASS
+AWS_S3_BUCKET                # 영수증 버킷 (실값은 local 문서) — task role 접근, access key 미사용
+AWS_REGION=ap-northeast-2    # S3·로그 리전
 ```
+
+> S3 자격증명은 **Fargate task role**(`yummpi-ecs-task`)에 정책을 부착하는 방식이라 `AWS_ACCESS_KEY_ID`/`SECRET`을 server env에 넣지 않는다. 상세 §15.
 
 ---
 
@@ -275,3 +279,69 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 ## 14. 공개 문서 규칙
 
 다음은 이 문서에 기록하지 않는다: AWS account ID, IAM access key, secret access key, 실제 DB/Redis URL, private bucket name, production domain 소유권, certificate ARN, webhook secret. 계정별 메모는 `deployment-aws-vercel-plan.local.md`에 두고 커밋하지 않는다.
+
+---
+
+## 15. S3 영수증 버킷 프로비저닝 (⑤ 콘솔 작업)
+
+> 영수증 이미지 저장소. **버킷·CORS·lifecycle·IAM은 ⑤가 콘솔에서 생성**하고, presigned URL 구현은 **④ 2차**(§11)다. 자격증명은 **Fargate task role(`yummpi-ecs-task`)에 S3 정책을 부착**하는 방식 — 정적 access key를 만들지 않는다. 실 버킷명(`<RECEIPTS_BUCKET>`)·account ID는 §14에 따라 local 문서에 둔다.
+
+### 15.1 결정 요약 (④ 확정 2026-06-25)
+
+| 항목 | 값 | 근거 |
+| --- | --- | --- |
+| 버킷명 | `<RECEIPTS_BUCKET>` (local 문서) | ④ 확정 |
+| 리전 | `ap-northeast-2` | RDS·ECS·ECR과 동일 |
+| 객체 경로 | `meetings/{meetingId}/receipts/{receiptId}.jpg` | api-spec.md §9 (L286) |
+| lifecycle | 객체 **생성 90일 후 만료(삭제)** | 기획 "종료 후 90일"의 S3 헤지 (a안) |
+| 파일 제약 | 모임당 4장 · 장당 10MB · `image/jpeg`·`image/png` | api-spec.md L270 + HEIC 제외 확정 |
+| 마스킹 | OCR 단계(④)에서 처리, **S3엔 원본 그대로** | api-spec.md L276 |
+
+> HEIC는 **제외 확정**(서버 변환 공수 > 이득, V2 백로그). presigned content-type 검증은 ④ 코드 스코프라 버킷 설정엔 영향 없음.
+
+### 15.2 버킷 설정
+- 퍼블릭 액세스 **전체 차단** · 기본 암호화 **SSE-S3(AES256)** · 버저닝 off
+
+### 15.3 CORS (presigned PUT — 브라우저가 S3로 직접 업로드)
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["PUT"],
+    "AllowedOrigins": ["https://yummpi.app", "http://localhost:3000"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+> Vercel 배포 origin이 정해지면 `AllowedOrigins`에 추가해야 업로드가 통과한다(도메인 2단계 때 같이).
+
+### 15.4 Lifecycle (생성 후 90일 만료)
+```json
+{ "Filter": { "Prefix": "meetings/" }, "Expiration": { "Days": 90 } }
+```
+
+### 15.5 IAM — task role 인라인 정책 (정적 키 없음)
+`yummpi-ecs-task` 역할에 부착. 키를 직접 지정하는 presigned 방식이라 `ListBucket` 불필요(최소권한).
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReceiptsRW",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::<RECEIPTS_BUCKET>/meetings/*"
+    }
+  ]
+}
+```
+
+### 15.6 server env
+- `AWS_S3_BUCKET`·`AWS_REGION`을 task def `environment`에 **평문**으로 추가(secret 아님). task role 방식이라 access key env는 넣지 않는다.
+- ④ presigned 구현 시 클라이언트는 `new S3Client({ region })` — 키 미주입, 자격증명 체인이 task role을 자동 해석.
+
+### 15.7 후속 잔업
+- [ ] Vercel 배포 origin → CORS `AllowedOrigins` 추가 (도메인 2단계)
+- [ ] api-spec.md L270 `image/*` → `image/jpeg`·`image/png`로 정정 (④, HEIC 제외 결정 반영)
+- [ ] ④ presigned URL API 구현(2차) — 업로드 성공/실패 검증
