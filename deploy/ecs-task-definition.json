@@ -1,0 +1,77 @@
+{
+  "family": "yummpi-server",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::535659317833:role/yummpi-ecs-execution",
+  "taskRoleArn": "arn:aws:iam::535659317833:role/yummpi-ecs-task",
+  "containerDefinitions": [
+    {
+      "name": "yummpi-server",
+      "image": "535659317833.dkr.ecr.ap-northeast-2.amazonaws.com/yummpi-server:latest",
+      "essential": true,
+      "portMappings": [{ "containerPort": 4000, "protocol": "tcp" }],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "4000" },
+        { "name": "CLIENT_ORIGIN", "value": "https://yummpi.app" },
+        { "name": "SMTP_PORT", "value": "587" },
+        { "name": "AWS_REGION", "value": "ap-northeast-2" },
+        { "name": "AWS_S3_BUCKET", "value": "yummpi-receipts-prod" }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/DATABASE_URL"
+        },
+        {
+          "name": "REDIS_URL",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/REDIS_URL"
+        },
+        {
+          "name": "VAPID_PUBLIC_KEY",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/VAPID_PUBLIC_KEY"
+        },
+        {
+          "name": "VAPID_PRIVATE_KEY",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/VAPID_PRIVATE_KEY"
+        },
+        {
+          "name": "SMTP_HOST",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/SMTP_HOST"
+        },
+        {
+          "name": "SMTP_USER",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/SMTP_USER"
+        },
+        {
+          "name": "SMTP_PASS",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/SMTP_PASS"
+        },
+        {
+          "name": "MAIL_FROM",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:535659317833:parameter/yummpi/prod/server/MAIL_FROM"
+        }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/yummpi-server",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "totalAmount": 27600,
+  "items": [
+    {
+      "name": "A3리필속지(20매)",
+      "quantity": 2,
+      "unitPrice": 1300,
+      "totalPrice": 2600,
+      "confidence": 0.8914
+    },
+    {
+      "name": "합지D링3공바인다(70mm)",
+      "quantity": 10,
+      "unitPrice": 2500,
+      "totalPrice": 25000,
+      "confidence": 0.9679
+    }
+  ],
+  "unclassifiedLines": [
+    "E·MART 대 한 민 국",
+    "1등할 인 점",
+    "이마트 탄현점 128-85-48537 대표: 최병렬",
+    "고양시 일산구 덕이동 203-1 (031)927-1234",
+    "http://www.emartmall.com",
+    "영수증을 지참하시면",
+    "교환/환불시 더욱 편리합니다.",
+    "[등록] 2010-03-24 21:17 POS 번호: 1016",
+    "상품코드 단가 수량 금액",
+    "상품코드 앞*표시가 되어 있는 품목은"
+  ],
+  "validation": { "ok": true, "issues": [] }
+}
