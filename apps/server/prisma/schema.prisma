@@ -190,6 +190,7 @@ model Meeting {
 
   scheduledAt        DateTime? @map("scheduled_at")
   votingClosesAt     DateTime? @map("voting_closes_at") // 투표 마감 시각(nullable)
+  departureInputClosesAt DateTime? @map("departure_input_closes_at") // 출발역 입력 대기 마감 시각(② 타이머 재입장-정확용, nullable)
   maxMembers         Int?      @map("max_members")
   budgetPerPerson    Int?      @map("budget_per_person")
   foodTypes          String[]  @map("food_types")
