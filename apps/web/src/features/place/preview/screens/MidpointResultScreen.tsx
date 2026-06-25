@@ -41,7 +41,7 @@ export function MidpointResultScreen() {
             markers={markers}
             height="200px"
           />
-          <div className="absolute top-4 right-4 bg-[var(--bg-normal)] rounded-[var(--radius-10)] px-3 py-2 shadow-[var(--shadow-small)]">
+          <div className="absolute top-4 right-4 z-10 bg-[var(--bg-normal)] rounded-[var(--radius-10)] px-3 py-2 shadow-[var(--shadow-small)]">
             <p className="text-[11px] text-[var(--label-alternative)]">
               중간지점
             </p>

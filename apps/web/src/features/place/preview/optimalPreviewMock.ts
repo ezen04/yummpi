@@ -79,9 +79,6 @@ export const MOCK_MEMBERS: PreviewMember[] = [
   },
 ];
 
-/** 입력 마감까지 남은 시간 (시:분:초) — 정적 표시 */
-export const MOCK_REMAINING = { h: 0, m: 46, s: 12 };
-
 // ── 대기시간 설정 옵션 ────────────────────────────────────────
 
 export const WAIT_OPTIONS = [
@@ -91,6 +88,17 @@ export const WAIT_OPTIONS = [
   '3시간',
   '직접설정',
 ] as const;
+
+/** 프리셋 옵션 → 초. '직접설정'은 분 입력값을 별도로 환산. */
+export const WAIT_OPTION_SECONDS: Record<string, number> = {
+  '30분': 30 * 60,
+  '1시간': 60 * 60,
+  '2시간': 2 * 60 * 60,
+  '3시간': 3 * 60 * 60,
+};
+
+/** ④를 거치지 않고 ⑤로 직접 진입했을 때의 기본 대기시간 (1시간) */
+export const DEFAULT_WAIT_SECONDS = 60 * 60;
 
 // ── 출발역 검색 결과 (지하철 노선 배지 포함) ──────────────────
 

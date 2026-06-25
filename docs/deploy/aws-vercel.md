@@ -161,7 +161,7 @@ SMTP_PASS
 1. server Docker image 빌드 → ECR push.
 2. ECS task / EC2 runtime에서 실행.
 3. `/health` 로 health check 연결.
-4. RDS는 server에서 private(VPC) 접근, Redis(Upstash)는 `rediss://`.
+4. RDS는 server에서 VPC 내부 경로로 직접 접근(RDS 자체는 퍼블릭+SG·자격증명 방어, §8), Redis(Upstash)는 `rediss://`.
 5. `CLIENT_ORIGIN`을 Vercel 도메인으로 설정(CORS).
 
 ---
@@ -169,9 +169,10 @@ SMTP_PASS
 ## 8. 네트워크
 
 - Web(Vercel)·Server(`ws.yummpi.app`)는 public.
-- RDS는 server에서 VPC 내부로 접근하고, web은 pooling 경로(Accelerate)로 접근한다.
+- RDS 접근: server는 같은 VPC 내부에서, web은 pooling 경로(Accelerate)로 접근한다. **MVP는 RDS를 퍼블릭 접근으로 두고**(Accelerate·로컬 마이그레이션 도달용) **보안 그룹 + 강한 자격증명 + `rds.force_ssl=1` + 앱 전용 최소권한 role**로 방어한다. 무료 Accelerate는 static IP가 없어 인바운드를 IP로 좁힐 수 없으므로 자격증명·TLS·최소권한이 1차 방어선이다. **운영 강화 트리거**: Prisma 유료 플랜의 static IP로 SG 잠금, 또는 RDS private 회귀 + VPC 내 프록시(코드 변경 없이 web `DATABASE_URL`만 교체). 결정 근거는 배포 결정 로그.
 - Upstash Redis는 web·server 양쪽에서 TLS로 접근한다.
 - 쿠키 인증을 위해 web과 server는 동일 apex(`yummpi.app`)를 공유한다.
+- **MVP Fargate 토폴로지**: task는 **퍼블릭 서브넷 + 공인 IP**로 배치하고 NAT 게이트웨이를 두지 않는다(비용 절감). 컨테이너 포트(4000) 인바운드는 보안 그룹에서 **ALB 보안 그룹으로부터만** 허용해 외부 직접 접근을 차단한다. 공인 IP는 ECR pull·Upstash·SMTP 등 아웃바운드 용도. 운영 안정화 시 프라이빗 서브넷 + NAT로 승격(서비스 네트워킹만 교체, 코드 변경 없음).
 
 ---
 
@@ -206,11 +207,11 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 
 | 방식 | 설명 | 채택 |
 | --- | --- | --- |
-| (a) 배포 워크플로 자동 step | 이미지 롤아웃 전 CI가 자동 실행 | ✗ MVP 과함. RDS 도달성(VPC/러너) 선결 필요 |
+| (a) 배포 워크플로 자동 step | 이미지 롤아웃 전 CI가 자동 실행 | ✗ MVP 과함(초기 스키마 변경 빈도 낮음) |
 | (b) **수동 1회 실행** | 담당자가 직접 연결로 `migrate deploy` | ✅ **MVP 채택** |
 | (c) ECS one-off task | 배포 task로 일회성 실행 | △ V2(자동화 시) |
 
-- **MVP 채택 = (b) 수동/CI 수동 트리거**. 근거: 초기 스키마 변경 빈도 낮음 + RDS는 VPC 내부라 자동 러너 도달성 구성이 선행돼야 함(B 리소스 발급 의존). 자동화는 운영 안정화 후 (c)로 승격.
+- **MVP 채택 = (b) 수동/CI 수동 트리거**. 근거: 초기 스키마 변경 빈도 낮음. MVP는 RDS가 퍼블릭 접근(§8)이라 **로컬에서 직접** `migrate deploy`가 닿는다(VPC 내 실행기 불필요). RDS를 private로 회귀하면 그때만 VPC 내 실행기(bastion)가 필요. 자동화는 운영 안정화 후 (c)로 승격.
 - 누가: 스키마 주도 담당 ①과 협의해 배포 담당이 실행. **운영 DB 대상 실행은 사전 공지 후.**
 
 ### 10.3 순서 — migrate 먼저, 롤아웃 나중
