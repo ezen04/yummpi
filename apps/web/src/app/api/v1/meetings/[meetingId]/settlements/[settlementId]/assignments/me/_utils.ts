@@ -74,10 +74,7 @@ export function buildItemBasedEngineInput({
     .filter((a) => a.memberIds.length > 0);
 
   if (itemAssignments.length === 0) {
-    throw new ApiError(
-      'VALIDATION_ERROR',
-      '선택된 소비 항목이 없습니다.'
-    );
+    throw new ApiError('VALIDATION_ERROR', '선택된 소비 항목이 없습니다.');
   }
 
   return {

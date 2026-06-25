@@ -78,7 +78,9 @@ export const PUT = handleRoute(
         bodyParsed.error.flatten()
       );
     }
-    const uniqueReceiptItemIds = Array.from(new Set(bodyParsed.data.receiptItemIds));
+    const uniqueReceiptItemIds = Array.from(
+      new Set(bodyParsed.data.receiptItemIds)
+    );
 
     // 5. 정산 상태 확인
     const settlement = await prisma.settlement.findUnique({
@@ -87,11 +89,17 @@ export const PUT = handleRoute(
     if (!settlement || settlement.meetingId !== meetingId) {
       throw new ApiError('SETTLEMENT_NOT_FOUND', '정산을 찾을 수 없습니다.');
     }
-    if (settlement.status === 'CONFIRMED' || settlement.status === 'COMPLETED') {
+    if (
+      settlement.status === 'CONFIRMED' ||
+      settlement.status === 'COMPLETED'
+    ) {
       throw new ApiError('FORBIDDEN', '이미 확정된 정산은 수정할 수 없습니다.');
     }
     if (settlement.splitMethod !== 'ITEM_BASED') {
-      throw new ApiError('VALIDATION_ERROR', '항목 기반(ITEM_BASED) 정산이 아닙니다.');
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        '항목 기반(ITEM_BASED) 정산이 아닙니다.'
+      );
     }
 
     // 6. 선택한 품목이 실제로 이 모임의 영수증에 속하는지 DB로 검증
@@ -169,7 +177,9 @@ export const PUT = handleRoute(
 
       for (const m of derivedMembers) {
         await tx.settlementMember.upsert({
-          where: { settlementId_memberId: { settlementId, memberId: m.memberId } },
+          where: {
+            settlementId_memberId: { settlementId, memberId: m.memberId },
+          },
           update: {
             itemAmount: m.itemAmount,
             adjustmentAmount: m.adjustmentAmount,
@@ -208,6 +218,10 @@ export const PUT = handleRoute(
       receiptItemIds: uniqueReceiptItemIds,
     });
 
-    return apiSuccess(responseData, '소비 항목이 성공적으로 저장되었습니다.', 200);
+    return apiSuccess(
+      responseData,
+      '소비 항목이 성공적으로 저장되었습니다.',
+      200
+    );
   }
 );
