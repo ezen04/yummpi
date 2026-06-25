@@ -325,7 +325,7 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 - `ocrStatus = SUCCEEDED`로 저장 — 의미는 §1.4 참조
 - OCR 실패 영수증 항목 수정은 `PATCH .../receipts/:receiptId` 사용
 - `items` 최소 1개, `totalAmount` 1원 이상, `quantity` 1 이상, `unitPrice`/`totalPrice` 0원 이상. 위반 시 `400 VALIDATION_ERROR`
-- 모임당 4장 제한에 포함 (`400 RECEIPT_LIMIT_EXCEEDED`)
+- 모임당 4장 제한에 포함 (`422 RECEIPT_LIMIT_EXCEEDED`)
 - 소비 선택 시작 후 → `409 RECEIPT_LOCKED`
 ### `DELETE .../receipts/:receiptId` — 삭제 (호스트) ★ v2.2
 
