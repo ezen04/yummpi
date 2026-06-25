@@ -71,7 +71,7 @@ export function MidpointResultScreen() {
           <ul className="flex flex-col gap-1.5 text-[13px] text-[var(--label-alternative)]">
             <li className="flex gap-2">
               <span aria-hidden>•</span>
-              <span>총 이동 거리 최소화</span>
+              <span>가장 먼 참여자 기준으로 모두에게 공평하게 계산</span>
             </li>
             <li className="flex gap-2">
               <span aria-hidden>•</span>
