@@ -81,7 +81,7 @@ export function Header({
           <button onClick={onBack} className={cn(ICON_BTN, 'shrink-0')}>
             <ChevronLeft size={24} strokeWidth={1.5} />
           </button>
-        ) : (
+        ) : isDashboard ? null : (
           <div
             className={cn(
               ICON_BTN,
