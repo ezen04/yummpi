@@ -100,21 +100,20 @@ export function MidpointResultScreen({
               <span aria-hidden>•</span>
               <span>가장 먼 참여자 기준으로 모두에게 공평하게 계산</span>
             </li>
-            {hasStations ? (
+            {hasStations && (
               <li className="flex gap-2">
                 <span aria-hidden>•</span>
                 <span>입력한 {data.stations!.length}개 역 기준</span>
               </li>
-            ) : (
-              data.maxDistanceM != null && (
-                <li className="flex gap-2">
-                  <span aria-hidden>•</span>
-                  <span>
-                    가장 먼 참여자까지 약{' '}
-                    {(data.maxDistanceM / 1000).toFixed(1)}km
-                  </span>
-                </li>
-              )
+            )}
+            {data.maxDistanceM != null && (
+              <li className="flex gap-2">
+                <span aria-hidden>•</span>
+                <span>
+                  가장 먼 참여자까지 약 {(data.maxDistanceM / 1000).toFixed(1)}
+                  km
+                </span>
+              </li>
             )}
             {data.excludedCount != null && data.excludedCount > 0 && (
               <li className="flex gap-2">
