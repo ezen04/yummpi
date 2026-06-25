@@ -20,6 +20,7 @@ import { useVoteUiStore } from '../../stores/useVoteUiStore';
 import { ConfirmPlaceSheet } from '../confirm/ConfirmPlaceSheet';
 import { VotingClosesAtSheet } from '../confirm/VotingClosesAtSheet';
 import { RecruitingHostActions } from './RecruitingHostActions';
+import { RecruitingViewSkeleton } from './RecruitingViewSkeleton';
 
 export interface RecruitingViewProps {
   meeting: MeetingDetail;
@@ -57,7 +58,9 @@ export function RecruitingView({
   } = usePlaceCandidates(meeting.id);
 
   // 풀(REJECTED) 후보 — 모든 멤버가 검색에서 추가한 항목
-  const { suggestions } = usePlaceSuggestions(meeting.id);
+  const { suggestions, isLoading: suggestionsLoading } = usePlaceSuggestions(
+    meeting.id
+  );
 
   // ACTIVE externalPlaceId → 카카오 추천에서 dedupe + ACTIVE 카드 강조용
   const activeExternalIds = React.useMemo(
@@ -230,6 +233,13 @@ export function RecruitingView({
   };
 
   const candidateCount = votesData.candidates.length;
+
+  // 자체 데이터 로딩 시 스켈레톤 — useOptimalPoint·usePlaceRecommendations·
+  // usePlaceSuggestions 중 하나라도 isLoading이면 실제 화면 레이아웃과
+  // 동일한 회색 박스 스켈레톤으로 표시 (옵션 c — 각 View가 자기 데이터 책임).
+  if (optimalLoading || recLoading || suggestionsLoading) {
+    return <RecruitingViewSkeleton onBack={onBack} />;
+  }
 
   // 출발지 부재 빈 상태 — 헤더 외 다른 레이아웃(chips, 지도, 추천 영역, 호스트 footer)을 모두 숨김.
   // 피그마 빈 상태 디자인(아이콘 + 안내 + CTA만)에 맞춤.
