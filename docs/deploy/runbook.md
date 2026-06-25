@@ -32,7 +32,10 @@
 - [ ] AWS 계정 · IAM · VPC
 - [ ] RDS PostgreSQL 17 (server 직접 연결용)
 - [ ] Upstash Redis (web·server 공유 `rediss://`)
-- [ ] S3 버킷 (④ 영역)
+- [ ] S3 버킷 — **콘솔 작업 ⑤**(계정 1개 공유), **내용 결정 ④**
+      - ④ 확정 대기: 버킷명 · lifecycle · 객체 경로(`receipts/{meetingId}/{receiptId}`) · 파일 제약(타입·용량) · 마스킹 원본 여부
+      - ⚠️ lifecycle 갭: 기획 "종료 후 90일" vs S3 "업로드 후 N일"(종료 시점 미감지) → (a)업로드후90일 / (b)앱 직접삭제+긴 lifecycle 중 ④ 택1
+      - ⑤ 후속: 확정 후 버킷 생성 + CORS(`yummpi.app`) + 퍼블릭차단 + IAM 최소권한 + access key → SSM secret 주입
 - [ ] Prisma Accelerate 연결 (web `prisma://`) — §3.2
 - [ ] ECR 레지스트리
 - [ ] 도메인 `yummpi.app` + `ws.yummpi.app` DNS · TLS

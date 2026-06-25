@@ -20,7 +20,7 @@ export function usePlaceSearch(
         x: lng ?? undefined,
         y: lat ?? undefined,
       }),
-    enabled: trimmed.length >= 2,
+    enabled: trimmed.length >= 1,
     staleTime: 30_000,
   });
 }

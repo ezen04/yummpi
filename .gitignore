@@ -30,6 +30,10 @@ playwright-report/
 .env.local
 .env.*.local
 
+# local-only seed (검증·실험용, 커밋 금지)
+seed.local.ts
+**/seed.local.ts
+
 # logs
 *.log
 npm-debug.log*
@@ -51,3 +55,9 @@ CLAUDE.local.md
 phase11.md
 *.local.md
 *.local.json
+
+# secrets / ssh keys (절대 커밋 금지)
+ec2/
+*.pem
+*.key
+id_rsa*
