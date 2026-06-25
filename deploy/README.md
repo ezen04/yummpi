@@ -16,10 +16,12 @@
 1. AWS OIDC role / ECR repo / ECS cluster·service 생성
 2. **repo secret**: `AWS_DEPLOY_ROLE_ARN`
 3. **repo variable**: `DEPLOY_ENABLED=true` (필요 시 `AWS_REGION`·`ECR_REPOSITORY`·`ECS_SERVICE`·`ECS_CLUSTER` override)
-4. `deploy/ecs-task-definition.json`의 `REPLACE_*` 채우기 (아래)
+4. ~~`deploy/ecs-task-definition.json`의 `REPLACE_*` 채우기 (아래)~~ → **완료(2026-06-25)**: 실값으로 채움(account `535659317833`, region `ap-northeast-2`, role `yummpi-ecs-execution`/`yummpi-ecs-task`, SSM `/yummpi/prod/server/*` 8종). `image`만 배포 시 워크플로가 SHA 태그로 주입.
 5. 자동 배포 원하면 `deploy-server.yml`의 `on:`에 `push`(main)/tag 트리거 추가
 
-## task 정의에서 채울 값 (`REPLACE_*`)
+## task 정의 값 (참고 — 2026-06-25 실값으로 채움 완료)
+
+> 아래는 각 자리의 의미. 현재 파일엔 실값이 들어가 있고, `secrets`는 `MAIL_FROM` 포함 8종(SSM ARN)이다.
 
 | 키 | 설명 |
 | --- | --- |

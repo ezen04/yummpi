@@ -26,7 +26,7 @@ export async function sendPaymentReminderEmail(opts: {
 }): Promise<void> {
   const html = renderPaymentReminderHtml(opts);
   const info = await transporter.sendMail({
-    from: '"얌피" <noreply@yummpi.app>',
+    from: process.env.MAIL_FROM ?? '"얌피" <noreply@yummpi.app>',
     to: opts.to,
     subject: `[얌피] 송금 독촉 알림 — ${opts.meetingTitle}`,
     html,
