@@ -73,7 +73,7 @@ secret은 각 플랫폼 secret store에서 관리한다. Vercel = Project Enviro
 
 ## 5. 환경변수 (이름만, 실값 제외)
 
-> 키 이름은 코드(`process.env.*`) 기준으로 확정했다. S3 키는 2차 구현 전이라 CLAUDE.md 컨벤션(`AWS_S3_BUCKET`)을 따른다.
+> 키 이름은 코드(`process.env.*`) 기준으로 확정했다. **S3 키(A안 확정, 2026-06-25)**: presigned 발급 라우트가 `apps/web`(Vercel)이라 Fargate task role을 못 쓴다 → web용 IAM 유저(`yummpi-receipts-rw` 인라인 정책)의 access key를 Vercel env `AWS_ACCESS_KEY_ID`/`SECRET`에 주입한다(발급·주입 완료). 배경: [`open-question-s3-presigned-credentials.md`](./open-question-s3-presigned-credentials.md).
 
 ### Vercel (`apps/web`)
 
@@ -284,7 +284,7 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 
 ## 15. S3 영수증 버킷 프로비저닝 (⑤ 콘솔 작업)
 
-> ⚠️ **전제 미확정**: 아래 §15.6은 presigned가 Fargate(`apps/server`)에서 도는 경우의 task-role 자격증명을 가정한다. 실제 라우트는 `apps/web`(Vercel)에 있어 task role이 닿지 않을 수 있다 — [`open-question-s3-presigned-credentials.md`](./open-question-s3-presigned-credentials.md) 결정 후 §15.6 정정.
+> ✅ **A안 확정(2026-06-25)**: presigned 라우트는 `apps/web`(Vercel)이라 task role이 안 닿는다 → web은 정적 키, server는 task role로 **분리**(§15.5·§15.6 반영 완료). 배경: [`open-question-s3-presigned-credentials.md`](./open-question-s3-presigned-credentials.md).
 
 > 영수증 이미지 저장소. **버킷·CORS·lifecycle·IAM은 ⑤가 콘솔에서 생성**하고, presigned URL 구현은 **④ 2차**(§11)다. 자격증명은 **Fargate task role(`yummpi-ecs-task`)에 S3 정책을 부착**하는 방식 — 정적 access key를 만들지 않는다. 실 버킷명(`<RECEIPTS_BUCKET>`)·account ID는 §14에 따라 local 문서에 둔다.
 
@@ -323,8 +323,10 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 { "Filter": { "Prefix": "meetings/" }, "Expiration": { "Days": 90 } }
 ```
 
-### 15.5 IAM — task role 인라인 정책 (정적 키 없음)
-`yummpi-ecs-task` 역할에 부착. 키를 직접 지정하는 presigned 방식이라 `ListBucket` 불필요(최소권한).
+### 15.5 IAM — 인라인 정책 (`meetings/*` 최소권한)
+동일 정책 JSON을 **두 주체**에 부착한다(A안). 키를 직접 지정하는 presigned 방식이라 `ListBucket` 불필요(최소권한).
+- **web용 IAM 유저** (`yummpi-receipts-rw`, 인라인 정책) → access key 발급 → **Vercel env 주입**. presigned 라우트가 `apps/web`(Vercel)이라 정적 키가 필수.
+- **server용 task role** (`yummpi-ecs-task`) → BullMQ worker 등 server에서 S3 접근 시 자동 해석(정적 키 없음).
 ```json
 {
   "Version": "2012-10-17",
@@ -339,9 +341,10 @@ pnpm --filter @yummpi/server exec npx prisma migrate deploy
 }
 ```
 
-### 15.6 server env
-- `AWS_S3_BUCKET`·`AWS_REGION`을 task def `environment`에 **평문**으로 추가(secret 아님). task role 방식이라 access key env는 넣지 않는다.
-- ④ presigned 구현 시 클라이언트는 `new S3Client({ region })` — 키 미주입, 자격증명 체인이 task role을 자동 해석.
+### 15.6 자격증명 — 실행 위치별 분리 (A안 확정 2026-06-25)
+- **web (`apps/web` = Vercel)**: presigned 발급 라우트(`POST .../receipts/upload-urls`)가 여기서 돈다. Vercel은 Fargate task role을 못 쓰므로 **정적 access key를 Vercel env(`AWS_ACCESS_KEY_ID`/`SECRET`/`AWS_S3_BUCKET`/`AWS_REGION`)에 주입**. 코드는 `new S3Client({ region })` — SDK가 env 키를 자동 해석.
+- **server (`apps/server` = Fargate)**: `AWS_S3_BUCKET`·`AWS_REGION`만 task def `environment`에 평문 추가(secret 아님). access key 미주입 — 자격증명 체인이 **task role**을 자동 해석.
+- 배경·검증·대안(B server 이전): [`open-question-s3-presigned-credentials.md`](./open-question-s3-presigned-credentials.md).
 
 ### 15.7 후속 잔업
 - [ ] Vercel 배포 origin → CORS `AllowedOrigins` 추가 (도메인 2단계)
