@@ -13,7 +13,7 @@ export function WaitSetupView({ meetingId }: { meetingId: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending, error } = useMutation({
     mutationFn: (seconds: number) =>
       setWaitDeadline(
         meetingId,
@@ -28,10 +28,17 @@ export function WaitSetupView({ meetingId }: { meetingId: string }) {
   });
 
   return (
-    <WaitTimeScreen
-      onNext={(seconds) => {
-        if (!isPending) mutate(seconds);
-      }}
-    />
+    <div className="relative h-full">
+      <WaitTimeScreen
+        onNext={(seconds) => {
+          if (!isPending) mutate(seconds);
+        }}
+      />
+      {error && (
+        <div className="absolute bottom-24 left-5 right-5 rounded-[var(--radius-12)] bg-[var(--status-negative)] px-4 py-3 text-[13px] text-white shadow-[var(--shadow-medium)]">
+          저장 실패: {error instanceof Error ? error.message : '알 수 없는 오류'}
+        </div>
+      )}
+    </div>
   );
 }
