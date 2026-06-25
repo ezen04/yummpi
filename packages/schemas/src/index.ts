@@ -5,5 +5,6 @@ export * from './ocr-response';
 export * from './payment';
 export * from './pushSubscription';
 export * from './receipt-manual';
+export * from './settlement-assignments';
 export * from './settlement-create';
 export * from './settlement-response';
