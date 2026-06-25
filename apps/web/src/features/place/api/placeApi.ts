@@ -118,6 +118,28 @@ export async function fetchOptimalStation(
   };
 }
 
+/** 현재 멤버의 출발역(좌표 + 역이름)을 저장한다. (① members PATCH 계약 사용) */
+export async function setMemberDeparture(
+  meetingId: string,
+  memberId: string,
+  payload: { lat: number; lng: number; stationName: string }
+): Promise<void> {
+  const res = await fetch(`/api/v1/meetings/${meetingId}/members/${memberId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      startLatitude: payload.lat,
+      startLongitude: payload.lng,
+      startStation: payload.stationName,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '출발역 저장에 실패했습니다.')
+    );
+  }
+}
+
 export async function fetchPlaceRecommendations(
   meetingId: string,
   lat: string,
