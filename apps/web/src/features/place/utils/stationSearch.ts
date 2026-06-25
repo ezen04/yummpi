@@ -120,3 +120,17 @@ export function findOptimalStation(
   if (!best) return null;
   return { station: best, maxDistanceM: Math.round(bestMax) };
 }
+
+/** 좌표에서 가장 가까운 역을 찾는다. (출발좌표 → "참여한 역" 표시용) */
+export function findNearestStation(coord: Coord): SubwayStation | null {
+  let best: SubwayStation | null = null;
+  let bestDist = Infinity;
+  for (const station of SUBWAY_STATIONS) {
+    const d = calcDistance(coord, { lat: station.lat, lng: station.lng });
+    if (d < bestDist) {
+      bestDist = d;
+      best = station;
+    }
+  }
+  return best;
+}

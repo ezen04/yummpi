@@ -22,4 +22,6 @@ export const prisma =
   globalForPrisma.prisma ??
   (prismaClientSingleton() as unknown as PrismaClient);
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// serverless 재사용 + 빌드 collect-page-data의 라우트 번들별 중복 생성 방지를 위해
+// prod에서도 globalThis 캐시를 유지한다 (③ socket-emitter·⑤ remind-redis 패턴과 정렬).
+globalForPrisma.prisma = prisma;

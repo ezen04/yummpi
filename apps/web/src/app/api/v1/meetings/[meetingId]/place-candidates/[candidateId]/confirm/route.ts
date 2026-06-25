@@ -5,7 +5,7 @@ import {
   assertTransition,
   transitionMeetingStatus,
 } from '@/lib/meeting-status';
-import { socketEmitter } from '@/lib/socket-emitter';
+import { getSocketEmitter } from '@/lib/socket-emitter';
 import type { MeetingStatus } from '@prisma/client';
 
 type Ctx = { params: Promise<{ meetingId: string; candidateId: string }> };
@@ -94,17 +94,19 @@ export const POST = handleRoute(async (_req: Request, { params }: Ctx) => {
     placeUrl: candidate.placeUrl,
   };
 
-  socketEmitter.to(`meeting:${meetingId}`).emit('place:confirmed', {
+  getSocketEmitter().to(`meeting:${meetingId}`).emit('place:confirmed', {
     meetingId,
     candidateId,
     candidate: candidatePayload,
   });
 
   if (confirmedStatus === 'PLACE_CONFIRMED' && meeting.status === 'VOTING') {
-    socketEmitter.to(`meeting:${meetingId}`).emit('meeting:status-changed', {
-      meetingId,
-      status: 'PLACE_CONFIRMED',
-    });
+    getSocketEmitter()
+      .to(`meeting:${meetingId}`)
+      .emit('meeting:status-changed', {
+        meetingId,
+        status: 'PLACE_CONFIRMED',
+      });
   }
 
   return apiSuccess(

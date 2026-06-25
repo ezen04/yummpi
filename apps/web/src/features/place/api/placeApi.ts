@@ -71,6 +71,8 @@ export interface OptimalStation {
   maxDistanceM: number;
   /** 출발지 미입력으로 계산에서 제외된 인원 수 */
   excludedCount: number;
+  /** 참여한 역 목록 (입력한 역명 우선, 없으면 최근접역) */
+  stations: string[];
 }
 
 /**
@@ -104,6 +106,7 @@ export async function fetchOptimalStation(
       };
       maxDistanceM: number;
       excludedCount: number;
+      participantStations?: string[];
     };
   };
   const s = body.data.nearestStation;
@@ -115,7 +118,30 @@ export async function fetchOptimalStation(
     lines: s.lines,
     maxDistanceM: body.data.maxDistanceM,
     excludedCount: body.data.excludedCount,
+    stations: body.data.participantStations ?? [],
   };
+}
+
+/** 현재 멤버의 출발역(좌표 + 역이름)을 저장한다. (① members PATCH 계약 사용) */
+export async function setMemberDeparture(
+  meetingId: string,
+  memberId: string,
+  payload: { lat: number; lng: number; stationName: string }
+): Promise<void> {
+  const res = await fetch(`/api/v1/meetings/${meetingId}/members/${memberId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      startLatitude: payload.lat,
+      startLongitude: payload.lng,
+      startStation: payload.stationName,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '출발역 저장에 실패했습니다.')
+    );
+  }
 }
 
 export async function fetchPlaceRecommendations(

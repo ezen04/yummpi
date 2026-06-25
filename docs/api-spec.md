@@ -267,7 +267,7 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ```
 응답: `{ "uploads": [ { "objectKey", "uploadUrl", "expiresIn": 300 } ] }`
 - 촬영/갤러리 혼합 일괄 접수. 장당 RECEIPT 생성 (`ocr_status: PENDING`)
-- 제한: 모임당 최대 4장(`422 RECEIPT_LIMIT_EXCEEDED`), 장당 10MB, `image/*`만
+- 제한: 모임당 최대 4장(`422 RECEIPT_LIMIT_EXCEEDED`), 장당 10MB, `image/jpeg + image/png`만
 
 ### `POST .../receipts/:receiptId/ocr` — OCR 분석 (영수증별 독립) ★ v2.1
 - 응답: `receiptId·ocrStatus·total·items[]`(name·quantity·unitPrice?·totalPrice·confidence)

@@ -16,6 +16,7 @@ import {
 } from '@yummpi/ui';
 import { YAvatar } from '@/components/common/YAvatar';
 import { TodoCard, WaitingCard } from '@/components/common/GroupDetailCard';
+import { MEETING_STATUS_META, dday } from '@/lib/meeting-display';
 import { ReservationPanel } from '@/features/reservation/components/ReservationPanel';
 import { StartRecruitingButton } from './StartRecruitingButton';
 import { StartMeetingButton } from './StartMeetingButton';
@@ -43,18 +44,6 @@ interface Props {
   isHost: boolean;
 }
 
-// 상태별 라벨 + pill 톤(색 토큰)
-const STATUS_META: Record<MeetingStatus, { label: string; tone: string }> = {
-  DRAFT: { label: '모임 준비 중', tone: 'var(--label-alternative)' },
-  RECRUITING: { label: '후보 모으는 중', tone: 'var(--primary)' },
-  VOTING: { label: '장소 투표 중', tone: 'var(--primary)' },
-  PLACE_CONFIRMED: { label: '장소 확정', tone: 'var(--status-positive)' },
-  IN_PROGRESS: { label: '모임 진행 중', tone: 'var(--status-positive)' },
-  SETTLING: { label: '정산 중', tone: 'var(--status-cautionary)' },
-  COMPLETED: { label: '종료된 모임', tone: 'var(--label-alternative)' },
-  CANCELLED: { label: '취소된 모임', tone: 'var(--label-alternative)' },
-};
-
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
 
 function formatSchedule(iso: string | null): string | null {
@@ -66,19 +55,6 @@ function formatSchedule(iso: string | null): string | null {
   const h12 = h % 12 === 0 ? 12 : h % 12;
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WD[d.getDay()]}) ${ampm} ${h12}:${mm}`;
-}
-
-function dday(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(d);
-  target.setHours(0, 0, 0, 0);
-  const diff = Math.round((target.getTime() - today.getTime()) / 86_400_000);
-  if (diff === 0) return 'D-DAY';
-  return diff > 0 ? `D-${diff}` : `D+${-diff}`;
 }
 
 type MenuItem = {
@@ -101,7 +77,7 @@ export function MeetingHubView({
   isHost,
 }: Props) {
   const router = useRouter();
-  const meta = STATUS_META[status];
+  const meta = MEETING_STATUS_META[status];
   const schedule = formatSchedule(scheduledAt);
   const dd = dday(scheduledAt);
   const showReservation =
