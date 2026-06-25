@@ -89,7 +89,9 @@ export async function fetchOptimalStation(
     }
   );
   if (!res.ok) {
-    throw new Error(await parseErrorMessage(res, '최적 역을 계산하지 못했습니다.'));
+    throw new Error(
+      await parseErrorMessage(res, '최적 역을 계산하지 못했습니다.')
+    );
   }
   const body = (await res.json()) as {
     data: {
