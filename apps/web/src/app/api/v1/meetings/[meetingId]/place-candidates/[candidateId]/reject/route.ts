@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
-import { socketEmitter } from '@/lib/socket-emitter';
+import { getSocketEmitter } from '@/lib/socket-emitter';
 
 /**
  * POST /api/v1/meetings/[meetingId]/place-candidates/[candidateId]/reject
@@ -74,7 +74,7 @@ export const POST = handleRoute(
       activeCandidates.map((c) => [c.id, c._count.votes])
     );
 
-    socketEmitter.to(`meeting:${meetingId}`).emit('vote:updated', {
+    getSocketEmitter().to(`meeting:${meetingId}`).emit('vote:updated', {
       meetingId,
       candidateId,
       voteCounts,
