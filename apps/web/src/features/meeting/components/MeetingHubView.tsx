@@ -6,6 +6,7 @@ import type { MeetingStatus } from '@prisma/client';
 import {
   ChevronLeft,
   Share,
+  Pencil,
   MapPin,
   Users,
   Clock,
@@ -181,6 +182,15 @@ export function MeetingHubView({
             {meta.label}
           </p>
         </div>
+        {isHost && status !== 'COMPLETED' && status !== 'CANCELLED' && (
+          <button
+            onClick={() => router.push(`${base}/edit`)}
+            aria-label="모임 정보 수정"
+            className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
+          >
+            <Pencil size={20} strokeWidth={1.5} />
+          </button>
+        )}
         <button
           onClick={share}
           aria-label="공유"

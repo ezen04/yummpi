@@ -7,7 +7,7 @@ import { Button, Check } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Input } from '@/components/common/Input';
 import { ScheduleField } from './ScheduleField';
-import { useCreateMeeting } from '../hooks';
+import { useCreateMeeting, useUpdateMeeting } from '../hooks';
 import {
   isMeetingApiError,
   type CreateMeetingInput,
@@ -31,18 +31,40 @@ function parsePositiveInt(value: string): number | undefined {
   return n;
 }
 
-export function CreateMeetingForm() {
+export interface MeetingFormInitial {
+  title: string;
+  description: string;
+  scheduledAt: string | null; // ISO 문자열
+  maxMembers: string;
+}
+
+interface CreateMeetingFormProps {
+  mode?: 'create' | 'edit';
+  meetingId?: string;
+  initial?: MeetingFormInitial;
+}
+
+export function CreateMeetingForm({
+  mode = 'create',
+  meetingId,
+  initial,
+}: CreateMeetingFormProps = {}) {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
-  const [maxMembers, setMaxMembers] = useState('');
+  const isEdit = mode === 'edit';
+
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [scheduledAt, setScheduledAt] = useState<Date | null>(
+    initial?.scheduledAt ? new Date(initial.scheduledAt) : null
+  );
+  const [maxMembers, setMaxMembers] = useState(initial?.maxMembers ?? '');
 
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<CreateMeetingResult | null>(null);
   const [copied, setCopied] = useState(false);
 
   const create = useCreateMeeting();
+  const update = useUpdateMeeting(meetingId ?? '');
 
   const submit = () => {
     setError(null);
@@ -61,6 +83,32 @@ export function CreateMeetingForm() {
     const max = parsePositiveInt(maxMembers);
     if (Number.isNaN(max)) {
       setError('정원은 1 이상의 정수로 입력해 주세요.');
+      return;
+    }
+
+    // 수정 모드: PATCH → 성공 시 허브 복귀(+서버 컴포넌트 갱신).
+    if (isEdit && meetingId) {
+      update.mutate(
+        {
+          title: trimmedTitle,
+          description: description.trim(), // 빈 문자열 → 소개 삭제 허용
+          scheduledAt: scheduledAt.toISOString(),
+          ...(max ? { maxMembers: max } : {}),
+        },
+        {
+          onSuccess: () => {
+            router.push(`/meetings/${meetingId}`);
+            router.refresh();
+          },
+          onError: (err) => {
+            setError(
+              isMeetingApiError(err)
+                ? err.message
+                : '모임 수정에 실패했어요. 잠시 후 다시 시도해 주세요.'
+            );
+          },
+        }
+      );
       return;
     }
 
@@ -213,7 +261,14 @@ export function CreateMeetingForm() {
       className="min-h-screen flex flex-col"
       style={{ background: 'var(--bg-alternative)' }}
     >
-      <Header onBack={() => router.back()} title="새 모임 만들기" />
+      <Header
+        onBack={() =>
+          isEdit && meetingId
+            ? router.push(`/meetings/${meetingId}`)
+            : router.back()
+        }
+        title={isEdit ? '모임 수정' : '새 모임 만들기'}
+      />
 
       <main className="flex-1 w-full max-w-[390px] mx-auto px-5 flex flex-col justify-between pb-8">
         <div className="flex flex-col gap-5 pt-2">
@@ -287,9 +342,15 @@ export function CreateMeetingForm() {
         <Button
           className="w-full mt-8"
           onClick={submit}
-          disabled={create.isPending}
+          disabled={isEdit ? update.isPending : create.isPending}
         >
-          {create.isPending ? '만드는 중…' : '모임 만들기'}
+          {isEdit
+            ? update.isPending
+              ? '저장 중…'
+              : '수정 완료'
+            : create.isPending
+              ? '만드는 중…'
+              : '모임 만들기'}
         </Button>
       </main>
     </div>
