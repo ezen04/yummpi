@@ -117,7 +117,7 @@ export const PUT = handleRoute(
     //    settlement 행에 FOR UPDATE 락을 걸어, 마지막 두 명이 거의 동시에 제출하는 경쟁
     //    조건에서도 "전원 제출 판정 → 엔진 실행 → 결과 반영"이 직렬화되게 한다.
     await prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SELECT id FROM settlements WHERE id = ${settlementId} FOR UPDATE`;
+      await tx.$executeRaw`SELECT id FROM settlements WHERE id = ${settlementId}::uuid FOR UPDATE`;
 
       // 내 기존 할당 지우고 새 선택으로 교체 (재제출은 전량 재산출 — api-spec §10 L364)
       await tx.itemAssignment.deleteMany({
