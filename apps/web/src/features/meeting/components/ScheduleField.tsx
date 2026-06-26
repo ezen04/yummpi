@@ -108,7 +108,7 @@ export function ScheduleField({
         onClick={openSheet}
         className="h-12 w-full rounded-[var(--radius-12)] px-4 text-left text-[16px] outline-none box-border cursor-pointer"
         style={{
-          background: 'var(--bg-alternative)',
+          background: 'var(--bg-normal)',
           border: error
             ? '1px solid var(--status-negative-border)'
             : '1px solid var(--line-normal)',
