@@ -1,12 +1,14 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MeetingStatus } from '@prisma/client';
 import {
   ChevronLeft,
   Share,
   Pencil,
+  MoreVertical,
+  Trash,
   MapPin,
   Users,
   Clock,
@@ -14,13 +16,18 @@ import {
   CreditCard,
   Send,
   Sparkles,
+  toast,
 } from '@yummpi/ui';
 import { YAvatar } from '@/components/common/YAvatar';
 import { TodoCard, WaitingCard } from '@/components/common/GroupDetailCard';
+import { BottomSheet } from '@/components/common/BottomSheet';
+import { Confirmbox } from '@/components/common/Confirmbox';
 import { MEETING_STATUS_META, dday } from '@/lib/meeting-display';
 import { ReservationPanel } from '@/features/reservation/components/ReservationPanel';
 import { StartRecruitingButton } from './StartRecruitingButton';
 import { StartMeetingButton } from './StartMeetingButton';
+import { useDeleteMeeting } from '../hooks';
+import { isMeetingApiError } from '../api/meetingApi';
 
 export interface HubMember {
   nickname: string;
@@ -87,6 +94,19 @@ export function MeetingHubView({
   const placeUrl = confirmedPlace?.placeUrl ?? null;
   const locationText = confirmedPlace?.name ?? null;
 
+  // 더보기(…) 액션시트 + 삭제 확인 상태
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const del = useDeleteMeeting(meetingId);
+
+  // 수정 = 호스트 + 종료/취소 제외. 삭제 = 호스트 + SETTLING 이전(API가 그 이후 409).
+  const editable = isHost && status !== 'COMPLETED' && status !== 'CANCELLED';
+  const deletable =
+    isHost &&
+    status !== 'SETTLING' &&
+    status !== 'COMPLETED' &&
+    status !== 'CANCELLED';
+
   const share = async () => {
     const url = `${window.location.origin}/meetings/${meetingId}`;
     try {
@@ -98,6 +118,18 @@ export function MeetingHubView({
     } catch {
       /* 사용자가 취소했거나 미지원 — 무시 */
     }
+  };
+
+  const handleDelete = () => {
+    del.mutate(undefined, {
+      onSuccess: () => router.push('/dashboard'),
+      onError: (err) => {
+        setConfirmOpen(false);
+        toast.error(
+          isMeetingApiError(err) ? err.message : '모임 삭제에 실패했어요.'
+        );
+      },
+    });
   };
 
   const base = `/meetings/${meetingId}`;
@@ -182,21 +214,12 @@ export function MeetingHubView({
             {meta.label}
           </p>
         </div>
-        {isHost && status !== 'COMPLETED' && status !== 'CANCELLED' && (
-          <button
-            onClick={() => router.push(`${base}/edit`)}
-            aria-label="모임 정보 수정"
-            className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
-          >
-            <Pencil size={20} strokeWidth={1.5} />
-          </button>
-        )}
         <button
-          onClick={share}
-          aria-label="공유"
+          onClick={() => setMenuOpen(true)}
+          aria-label="더보기"
           className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
         >
-          <Share size={20} strokeWidth={1.5} />
+          <MoreVertical size={20} strokeWidth={1.5} />
         </button>
       </header>
 
@@ -336,6 +359,66 @@ export function MeetingHubView({
           </div>
         </section>
       </div>
+
+      {/* 더보기 액션시트 — 공유(전원) / 수정(호스트) / 삭제(호스트·SETTLING 이전) */}
+      {menuOpen && (
+        <BottomSheet
+          open
+          onClose={() => setMenuOpen(false)}
+          variant="background"
+        >
+          <div className="flex flex-col px-2 pb-2">
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                void share();
+              }}
+              className="flex items-center gap-3 rounded-[var(--radius-12)] border-none bg-transparent px-4 py-3.5 text-left text-[16px] text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
+            >
+              <Share size={20} strokeWidth={1.5} />
+              공유하기
+            </button>
+            {editable && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push(`${base}/edit`);
+                }}
+                className="flex items-center gap-3 rounded-[var(--radius-12)] border-none bg-transparent px-4 py-3.5 text-left text-[16px] text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
+              >
+                <Pencil size={20} strokeWidth={1.5} />
+                모임 정보 수정
+              </button>
+            )}
+            {deletable && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setConfirmOpen(true);
+                }}
+                className="flex items-center gap-3 rounded-[var(--radius-12)] border-none bg-transparent px-4 py-3.5 text-left text-[16px] text-[var(--status-negative)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
+              >
+                <Trash size={20} strokeWidth={1.5} />
+                모임 삭제
+              </button>
+            )}
+          </div>
+        </BottomSheet>
+      )}
+
+      {confirmOpen && (
+        <Confirmbox
+          open
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={handleDelete}
+          title="모임을 삭제할까요?"
+          body="삭제하면 되돌릴 수 없어요."
+          confirmLabel={del.isPending ? '삭제 중…' : '삭제'}
+        />
+      )}
     </div>
   );
 

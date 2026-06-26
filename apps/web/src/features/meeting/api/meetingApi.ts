@@ -96,3 +96,8 @@ export function updateMeeting(
     body: JSON.stringify(input),
   });
 }
+
+// DELETE /api/v1/meetings/:id (호스트, 소프트 삭제 → CANCELLED). SETTLING 이후 409.
+export function deleteMeeting(meetingId: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/meetings/${meetingId}`, { method: 'DELETE' });
+}
