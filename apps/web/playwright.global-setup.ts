@@ -31,7 +31,7 @@ export default async function globalSetup(config: FullConfig) {
         },
       });
 
-      const fixture: Record<string, string> = {};
+      const fixture: Record<string, string> = { __dbReady: 'true' };
       for (const m of meetings) {
         if (!m.inviteCode) continue;
         fixture[m.inviteCode] = m.id;
