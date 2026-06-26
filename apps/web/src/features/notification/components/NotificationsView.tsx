@@ -47,6 +47,7 @@ export function NotificationsView() {
     data,
     isLoading,
     isError,
+    error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -59,9 +60,10 @@ export function NotificationsView() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // 리스트 하단 sentinel이 스크롤 영역에 들어오면 다음 page를 이어 로드.
+  // error가 있으면 자동 fetch를 멈춘다(실패 시 무한 재요청 루프 방지) → 아래 인라인 "다시 시도"로만 재개.
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasNextPage) return;
+    if (!sentinel || !hasNextPage || error) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isFetchingNextPage) {
@@ -72,7 +74,7 @@ export function NotificationsView() {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, error]);
 
   function handleClick(item: NotificationResponse) {
     if (!item.readAt) markRead.mutate(item.id); // 읽음 처리(멱등) — 백그라운드
@@ -86,11 +88,15 @@ export function NotificationsView() {
         <div className="rounded-2xl overflow-hidden bg-[var(--bg-normal)]">
           {isLoading ? (
             <p className={MESSAGE_CLASS}>불러오는 중…</p>
-          ) : isError ? (
-            <p className={MESSAGE_CLASS}>알림을 불러오지 못했어요.</p>
           ) : items.length === 0 ? (
-            <p className={MESSAGE_CLASS}>아직 받은 알림이 없어요.</p>
+            // 초기 상태(로드된 항목 없음)에서만 전체 영역 메시지
+            isError ? (
+              <p className={MESSAGE_CLASS}>알림을 불러오지 못했어요.</p>
+            ) : (
+              <p className={MESSAGE_CLASS}>아직 받은 알림이 없어요.</p>
+            )
           ) : (
+            // 이미 로드된 항목이 있으면 항상 목록 유지. 다음 페이지 실패는 인라인 처리.
             <>
               {items.map((n) => (
                 <Notification
@@ -105,10 +111,22 @@ export function NotificationsView() {
                   }
                 />
               ))}
-              {/* 무한스크롤 트리거 + 다음 페이지 로딩 표시 */}
-              <div ref={sentinelRef} />
-              {isFetchingNextPage && (
-                <p className={MESSAGE_CLASS}>더 불러오는 중…</p>
+              {error ? (
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  className={`${MESSAGE_CLASS} w-full underline`}
+                >
+                  더 불러오지 못했어요. 다시 시도
+                </button>
+              ) : (
+                <>
+                  {/* 무한스크롤 트리거 + 다음 페이지 로딩 표시 */}
+                  <div ref={sentinelRef} />
+                  {isFetchingNextPage && (
+                    <p className={MESSAGE_CLASS}>더 불러오는 중…</p>
+                  )}
+                </>
               )}
             </>
           )}
