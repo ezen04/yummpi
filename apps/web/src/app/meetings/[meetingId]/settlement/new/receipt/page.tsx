@@ -161,14 +161,13 @@ export default function SettlementReceiptPage({
 
                   {r.ocrStatus === 'PROCESSING' && (
                     <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-                      style={{ background: 'rgba(0,0,0,0.4)' }}
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40"
+                      style={{ background: '' }}
                     >
                       <Refresh
                         size={24}
                         strokeWidth={1.5}
                         className="animate-spin text-[var(--static-white)]"
-                        style={{ color: '' }}
                       />
                       <span className="text-xs text-[var(--static-white)]">
                         OCR 처리 중
