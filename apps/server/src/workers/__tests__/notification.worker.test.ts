@@ -17,8 +17,9 @@ import { processNotificationJob } from '../notification.worker.js';
 import { prisma } from '../../lib/prisma.js';
 import { sendNotificationToUser } from '../../lib/notifications/sendNotification.js';
 
-function makeJob(overrides: Record<string, unknown> = {}) {
+function makeJob(overrides: Record<string, unknown> = {}, id?: string) {
   return {
+    ...(id ? { id } : {}),
     data: {
       userId: 'user-1',
       category: 'SETTLEMENT' as const,
@@ -56,7 +57,7 @@ describe('processNotificationJob — 적재(보관) + 발송(전달) 분리', ()
     expect(sendNotificationToUser).toHaveBeenCalledOnce();
   });
 
-  it('dedupeKey 없으면 create로 적재 + 발송 위임', async () => {
+  it('dedupeKey·job.id 둘 다 없으면 create로 적재 (예외 경로)', async () => {
     await processNotificationJob(makeJob() as never);
 
     expect(prisma.notification.create).toHaveBeenCalledWith(
@@ -70,6 +71,19 @@ describe('processNotificationJob — 적재(보관) + 발송(전달) 분리', ()
     );
     expect(prisma.notification.upsert).not.toHaveBeenCalled();
     expect(sendNotificationToUser).toHaveBeenCalledOnce();
+  });
+
+  it('dedupeKey 없어도 job.id를 fallback 멱등 키로 upsert (재시도 중복 방지)', async () => {
+    await processNotificationJob(makeJob({}, 'bull-7') as never);
+
+    expect(prisma.notification.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { dedupeKey: 'job-bull-7' },
+        create: expect.objectContaining({ dedupeKey: 'job-bull-7' }),
+        update: {},
+      })
+    );
+    expect(prisma.notification.create).not.toHaveBeenCalled();
   });
 
   it('적재는 발송과 분리 — 전달 실패해도 적재는 이미 수행', async () => {
