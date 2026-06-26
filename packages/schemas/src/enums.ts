@@ -53,3 +53,4 @@ export const notificationCategorySchema = z.enum([
   'VOTE',
   'MEETING',
 ]);
+export type NotificationCategory = z.infer<typeof notificationCategorySchema>;
