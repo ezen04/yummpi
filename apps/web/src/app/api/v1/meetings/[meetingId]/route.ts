@@ -84,6 +84,10 @@ export const PATCH = handleRoute(async (req: Request, ctx: Ctx) => {
     anonymousVoting,
     placeSearchRadiusM: optInt(body.placeSearchRadiusM, 'placeSearchRadiusM'),
     votingClosesAt: optDate(body.votingClosesAt, 'votingClosesAt'),
+    departureInputClosesAt: optDate(
+      body.departureInputClosesAt,
+      'departureInputClosesAt'
+    ),
     expiresAt: optDate(body.expiresAt, 'expiresAt'),
   };
 

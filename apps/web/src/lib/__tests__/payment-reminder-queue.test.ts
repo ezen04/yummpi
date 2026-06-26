@@ -20,7 +20,7 @@ describe('enqueuePaymentReminder — jobId 패턴', () => {
     mockAdd.mockClear();
   });
 
-  it('jobId는 remind:{paymentId} 형식이다', async () => {
+  it('jobId는 remind-{paymentId} 형식이다', async () => {
     await enqueuePaymentReminder({
       meetingId: 'meeting-1',
       paymentId: 'payment-abc',
@@ -30,8 +30,19 @@ describe('enqueuePaymentReminder — jobId 패턴', () => {
     expect(mockAdd).toHaveBeenCalledWith(
       'remind',
       expect.objectContaining({ paymentId: 'payment-abc' }),
-      expect.objectContaining({ jobId: 'remind:payment-abc' })
+      expect.objectContaining({ jobId: 'remind-payment-abc' })
     );
+  });
+
+  it("jobId에 ':'가 포함되지 않는다 (BullMQ가 거부 → 독촉 500 회귀 방지)", async () => {
+    await enqueuePaymentReminder({
+      meetingId: 'meeting-1',
+      paymentId: 'payment-abc',
+      targetUserId: 'user-1',
+    });
+
+    const jobId = mockAdd.mock.calls[0][2].jobId as string;
+    expect(jobId).not.toContain(':');
   });
 
   it('같은 paymentId로 두 번 호출해도 jobId가 동일하다 (BullMQ 레벨 중복 방지 보장)', async () => {
@@ -46,10 +57,10 @@ describe('enqueuePaymentReminder — jobId 패턴', () => {
 
     expect(mockAdd).toHaveBeenCalledTimes(2);
     expect(mockAdd.mock.calls[0][2]).toMatchObject({
-      jobId: 'remind:payment-abc',
+      jobId: 'remind-payment-abc',
     });
     expect(mockAdd.mock.calls[1][2]).toMatchObject({
-      jobId: 'remind:payment-abc',
+      jobId: 'remind-payment-abc',
     });
   });
 

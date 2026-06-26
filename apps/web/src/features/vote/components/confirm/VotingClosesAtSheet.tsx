@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { Calendar } from '@yummpi/ui';
+import { DatePicker, WheelTimePicker } from '@yummpi/ui';
 import { BottomSheet } from '@/components/common/BottomSheet';
 import { Button } from '@/components/common/Button';
+import { cn } from '@/lib/utils';
 import { useStartVoting } from '../../hooks/useStartVoting';
 import { useVoteUiStore } from '../../stores/useVoteUiStore';
 
@@ -12,56 +13,102 @@ interface VotingClosesAtSheetProps {
   meetingScheduledAt: string | null;
 }
 
-/**
- * `<input type="datetime-local">`이 요구하는 로컬 ISO 포맷 변환 (YYYY-MM-DDTHH:mm).
- * 사용자 기기 타임존 기준 값을 유지한 채 input value로 사용.
- */
-function toLocalDateTimeInputValue(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return (
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
-  );
+function combineDateTime(date: Date, hour: number, minute: number): Date {
+  const d = new Date(date);
+  d.setHours(hour, minute, 0, 0);
+  return d;
 }
+
+/**
+ * 5분 단위 반올림 — 초기값을 분 단위에 맞춰 보정.
+ * 예: 14:23 → 14:25, 14:28 → 14:30.
+ */
+function roundUpTo5Min(date: Date): { hour: number; minute: number } {
+  const minute = date.getMinutes();
+  const rounded = Math.ceil(minute / 5) * 5;
+  if (rounded >= 60) {
+    const next = new Date(date);
+    next.setHours(date.getHours() + 1, 0, 0, 0);
+    return { hour: next.getHours(), minute: 0 };
+  }
+  return { hour: date.getHours(), minute: rounded };
+}
+
+const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토'];
+
+function formatDateChip(date: Date): string {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const w = WEEKDAY_KO[date.getDay()];
+  return `${y}년 ${m}월 ${d}일 (${w})`;
+}
+
+function formatTimeChip(hour: number, minute: number): string {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+type ExpandedField = 'date' | 'time';
 
 export function VotingClosesAtSheet({
   meetingId,
   meetingScheduledAt,
 }: VotingClosesAtSheetProps) {
   const close = useVoteUiStore((s) => s.closeVotingClosesAt);
-
   const { startVoting, isStarting, error } = useStartVoting(meetingId);
 
-  const [value, setValue] = React.useState<string>('');
+  // 초기 기본값 — 현재 시각 + 1시간을 5분 단위로 반올림.
+  const [initialDefault] = React.useState(() => {
+    const now = new Date(Date.now() + 60 * 60 * 1000);
+    const { hour, minute } = roundUpTo5Min(now);
+    return { date: now, hour, minute };
+  });
 
-  const [minDateTime] = React.useState(() =>
-    toLocalDateTimeInputValue(new Date(Date.now() + 60_000))
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
+    initialDefault.date
   );
+  const [time, setTime] = React.useState<{ hour: number; minute: number }>({
+    hour: initialDefault.hour,
+    minute: initialDefault.minute,
+  });
 
-  const [maxDateTime] = React.useState<string | undefined>(() =>
-    meetingScheduledAt
-      ? toLocalDateTimeInputValue(new Date(meetingScheduledAt))
-      : undefined
+  // 어떤 chip이 활성화되어 펼쳐져 있는지 — 초기는 date.
+  // 두 chip 중 하나만 활성. 활성 chip에 해당하는 picker만 표시.
+  const [expanded, setExpanded] = React.useState<ExpandedField>('date');
+
+  // BE 검증: now < votingClosesAt ≤ meeting.scheduledAt
+  const minDate = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const maxDate = React.useMemo(
+    () => (meetingScheduledAt ? new Date(meetingScheduledAt) : undefined),
+    [meetingScheduledAt]
   );
 
   const handleSubmit = () => {
-    if (!value) return;
-    const isoString = new Date(value).toISOString();
+    if (!selectedDate) return;
+    const combined = combineDateTime(selectedDate, time.hour, time.minute);
     startVoting(
-      { votingClosesAt: isoString },
-      {
-        onSuccess: () => close(),
-      }
+      { votingClosesAt: combined.toISOString() },
+      { onSuccess: () => close() }
     );
   };
 
   const errorMessage = error instanceof Error ? error.message : null;
-  const isDisabled = !value || isStarting;
+  const isDisabled = !selectedDate || isStarting;
+
+  const chipBase =
+    'flex-1 h-9 px-3 rounded-[var(--radius-8)] text-[14px] leading-5 font-medium font-[var(--font-sans)] cursor-pointer transition-colors';
+  const chipActive = 'bg-[var(--primary)] text-[var(--static-white)]';
+  const chipInactive =
+    'bg-[var(--fill-normal)] text-[var(--label-normal)] hover:bg-[var(--fill-strong)]';
 
   return (
     <BottomSheet open onClose={close} variant="background">
-      <div className="px-[17px] pb-2 flex flex-col gap-[26px]">
-        {/* 헤더 — 가운데 정렬 */}
+      <div className="px-[17px] pb-2 flex flex-col gap-5">
+        {/* 헤더 */}
         <div className="flex flex-col items-center gap-[5px]">
           <h3 className="text-[18px] leading-6 font-semibold font-[var(--font-sans)] text-[var(--label-normal)] m-0">
             투표 마감 시간 설정
@@ -71,26 +118,54 @@ export function VotingClosesAtSheet({
           </p>
         </div>
 
-        {/* 날짜 카드 (높이 50px) — input이 전체 영역 차지 → 빈 공간 클릭도 picker 트리거 */}
-        <div className="relative h-[50px] rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)]">
-          <Calendar
-            size={19}
-            strokeWidth={1.5}
-            color="var(--label-normal)"
-            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-          />
-          <input
-            type="datetime-local"
-            value={value}
-            min={minDateTime}
-            max={maxDateTime}
-            onChange={(e) => setValue(e.target.value)}
-            aria-label="투표 마감 시각 선택"
-            className="absolute inset-0 w-full h-full pl-[51px] pr-4 bg-transparent border-none outline-none rounded-[var(--radius-12)] text-[15px] leading-[22px] font-[var(--font-sans)] text-[var(--label-normal)] cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-          />
+        {/* 날짜·시간 chip 행 — 클릭한 쪽이 활성화되며 아래에 해당 picker 표시 */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setExpanded('date')}
+            className={cn(
+              chipBase,
+              expanded === 'date' ? chipActive : chipInactive
+            )}
+            aria-pressed={expanded === 'date'}
+          >
+            {selectedDate ? formatDateChip(selectedDate) : '날짜 선택'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setExpanded('time')}
+            className={cn(
+              chipBase,
+              'flex-none w-20 text-center',
+              expanded === 'time' ? chipActive : chipInactive
+            )}
+            aria-pressed={expanded === 'time'}
+          >
+            {formatTimeChip(time.hour, time.minute)}
+          </button>
         </div>
 
-        {/* 푸터 — 안내문 + 버튼 (8px gap) */}
+        {/* 활성 chip에 따른 picker — 영역 높이 고정(min-h)으로 chip 전환 시 BottomSheet 높이 유지 */}
+        <div className="min-h-[336px] flex flex-col justify-center">
+          {expanded === 'date' ? (
+            <div className="flex justify-center rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)]">
+              <DatePicker
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                disabled={(date) => {
+                  if (date < minDate) return true;
+                  if (maxDate && date > maxDate) return true;
+                  return false;
+                }}
+              />
+            </div>
+          ) : (
+            <WheelTimePicker value={time} onChange={setTime} minuteStep={5} />
+          )}
+        </div>
+
+        {/* 푸터 */}
         <div className="flex flex-col gap-2">
           <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 text-center">
             마감 후 주최자가 최종 장소를 확정해요

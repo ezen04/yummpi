@@ -25,6 +25,9 @@ playwright-report/
 # turbo
 .turbo
 
+# vercel
+.vercel
+
 # env
 .env
 .env.local

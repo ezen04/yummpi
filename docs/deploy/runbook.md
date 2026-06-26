@@ -35,7 +35,7 @@
 - [ ] S3 영수증 버킷 — ⑤ 콘솔 작업(버킷·CORS·lifecycle·task role 정책). 절차·결정값 §15. 자격증명은 task role(정적 키 없음)
 - [ ] Prisma Accelerate 연결 (web `prisma://`) — §3.2
 - [ ] ECR 레지스트리
-- [ ] 도메인 `yummpi.app` + `ws.yummpi.app` DNS · TLS
+- [ ] 도메인 `yummpi.com` + `ws.yummpi.com` DNS · TLS
 
 > DB 접근은 **2경로**다: web = Accelerate(`prisma://`), server = RDS 직접(VPC), migration = RDS 직접. 섞지 말 것(§3.2 · §5 · §10.1).
 
@@ -117,11 +117,11 @@ server 컨테이너가 읽을 환경변수를 등록한다. 상세 키 목록은
 - [ ] Vercel 프로젝트 생성 → **Root Directory = `apps/web`**(§6 표)
 - [ ] 환경변수 주입(§5 Vercel 목록) — **Preview / Production 분리**(§6.2)
   - `DATABASE_URL` = Accelerate `prisma://`(pooling) · `REDIS_URL` = Upstash `rediss://`
-  - `NEXT_PUBLIC_SOCKET_URL` = `https://ws.yummpi.app` · `NEXTAUTH_URL` = 운영 도메인
+  - `NEXT_PUBLIC_SOCKET_URL` = `https://ws.yummpi.com` · `NEXTAUTH_URL` = 운영 도메인
   - `NEXT_PUBLIC_*`은 브라우저 노출 가능 값만
 - [x] web Prisma client에 Accelerate extension 적용 — ✅ **코드 적용 완료(#75)**(`apps/web/src/lib/prisma.ts`). 발급된 `prisma://`만 주입하면 됨 — §12
 - [ ] PWA(serwist) 서비스워커가 **production 빌드**에서 생성·등록되는지 확인(§6.3)
-- [ ] ⚠️ **NextAuth 쿠키 `domain=.yummpi.app`(§3.3)는 ① Auth 영역** — 도메인 연결 후 ①과 확인. ⑤이 코드 수정하지 않음(§6.3 노트)
+- [ ] ⚠️ **NextAuth 쿠키 `domain=.yummpi.com`(§3.3)는 ① Auth 영역** — 도메인 연결 후 ①과 확인. ⑤이 코드 수정하지 않음(§6.3 노트)
 
 ---
 
@@ -130,7 +130,7 @@ server 컨테이너가 읽을 환경변수를 등록한다. 상세 키 목록은
 리소스가 실제로 서로 닿는지 1회씩 통과시킨다.
 
 - [ ] server CORS: `CLIENT_ORIGIN` = Vercel 운영 도메인으로 web→server 요청 통과
-- [ ] **wss 쿠키 핸드셰이크**: 회원·게스트 둘 다 `ws.yummpi.app` 소켓 연결 인증 통과(§3.3). 실패 시 토큰 핸드셰이크 fallback
+- [ ] **wss 쿠키 핸드셰이크**: 회원·게스트 둘 다 `ws.yummpi.com` 소켓 연결 인증 통과(§3.3). 실패 시 토큰 핸드셰이크 fallback
 - [ ] **BullMQ enqueue(web)→consume(server) 1회**: 송금 독촉 Job이 web에서 큐 적재 → server worker가 소비
 - [ ] 도달성: web→Upstash, server→RDS(VPC), server→Upstash
 

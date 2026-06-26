@@ -132,7 +132,9 @@ export function MeetingHubView({
       key: 'settlement',
       label: '정산',
       icon: <CreditCard size={20} strokeWidth={1.5} />,
-      enabled: ['SETTLING', 'COMPLETED'],
+      // 정산 완료(COMPLETED) 후엔 정산 생성 페이지로 가면 안 됨(이미 정산 끝).
+      // SETTLING(정산 진행 중)에만 활성. 완료 후 흐름은 "송금 현황 보기" CTA로.
+      enabled: ['SETTLING'],
       href: `${base}/settlement/new`,
     },
     {
