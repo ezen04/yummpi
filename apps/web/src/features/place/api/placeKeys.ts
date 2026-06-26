@@ -7,6 +7,10 @@ export const placeKeys = {
     ['place', 'optimal-point', meetingId] as const,
   optimalStation: (meetingId: string) =>
     ['place', 'optimal-station', meetingId] as const,
+  departureStatus: (meetingId: string) =>
+    ['place', 'departure-status', meetingId] as const,
+  waitDeadline: (meetingId: string) =>
+    ['place', 'wait-deadline', meetingId] as const,
   suggestions: (meetingId: string) =>
     ['place', 'suggestions', meetingId] as const,
 };
