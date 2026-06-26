@@ -60,9 +60,9 @@ export async function getRemindState(paymentId: string): Promise<RemindState> {
 export async function recordRemind(paymentId: string): Promise<RemindState> {
   const redis = getRedis();
   const count = await redis.incr(countKey(paymentId));
-  if (count === 1) {
-    await redis.expire(countKey(paymentId), secondsUntilKstMidnight());
-  }
+  // 매 호출 NX expire — 첫 회만 TTL이 박히고 이후엔 no-op. INCR 직후 크래시로
+  // TTL이 유실돼도 다음 호출이 복구하므로 카운트가 영구 잠기지 않는다.
+  await redis.expire(countKey(paymentId), secondsUntilKstMidnight(), 'NX');
   const cooldownUntil = new Date(
     Date.now() + INTERVAL_SECONDS * 1000
   ).toISOString();
