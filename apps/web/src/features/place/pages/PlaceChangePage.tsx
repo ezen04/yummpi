@@ -14,6 +14,7 @@ import { useVote } from '@/hooks/useVote';
 import { shortenKakaoCategory } from '../utils/categoryMap';
 import { usePlaceChangeStore } from '../stores/usePlaceChangeStore';
 import { PlaceChangeCandidateCard } from '../components/change/PlaceChangeCandidateCard';
+import { PlaceChangePageSkeleton } from './PlaceChangePageSkeleton';
 
 export interface PlaceChangePageProps {
   meetingId: string;
@@ -80,18 +81,7 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
   const hasSelection = !!selection;
 
   if (!meeting || !votesData) {
-    return (
-      <div className="h-screen w-full bg-[var(--bg-alternative)] flex justify-center">
-        <div className="w-full max-w-[480px] h-full bg-[var(--bg-normal)] flex flex-col overflow-hidden transform-gpu">
-          <Header title="장소 변경" onBack={() => router.back()} />
-          <div className="flex-1 flex items-center justify-center px-5">
-            <p className="text-[13px] font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
-              모임 정보를 불러오는 중...
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <PlaceChangePageSkeleton onBack={() => router.back()} />;
   }
 
   return (

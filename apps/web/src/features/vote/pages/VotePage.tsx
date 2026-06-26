@@ -11,18 +11,27 @@ import { VoteErrorState } from '../components/shell/VoteErrorState';
 import { NotInVoteFlowView } from '../components/shell/NotInVoteFlowView';
 import { VoteScreenContainer } from '../components/shell/VoteScreenContainer';
 import { RecruitingView } from '../components/recruiting/RecruitingView';
+import { RecruitingViewSkeleton } from '../components/recruiting/RecruitingViewSkeleton';
 import { VotingView } from '../components/voting/VotingView';
+import { VotingViewSkeleton } from '../components/voting/VotingViewSkeleton';
+import type { MeetingStatus } from '../hooks/useMeetingDetail';
 
 export interface VotePageProps {
   meetingId: string;
   viewerRole: 'HOST' | 'MEMBER';
   viewerMemberId: string;
+  /**
+   * 서버에서 prefetch한 meeting.status. client 첫 mount 시점에
+   * meeting 데이터 fetch 완료 전에도 status별 스켈레톤 분기 가능.
+   */
+  initialStatus?: MeetingStatus;
 }
 
 export function VotePage({
   meetingId,
   viewerRole,
   viewerMemberId,
+  initialStatus,
 }: VotePageProps) {
   const router = useRouter();
 
@@ -55,9 +64,25 @@ export function VotePage({
     }
   }, [meeting?.status, meetingId, router]);
 
+  // status별 스켈레톤 분기 — 서버 prefetch한 initialStatus 우선, 없으면 client meeting
+  const effectiveStatus: MeetingStatus | undefined =
+    meeting?.status ?? initialStatus;
+
+  const renderStatusSkeleton = () => {
+    if (effectiveStatus === 'RECRUITING') {
+      return <RecruitingViewSkeleton onBack={handleBack} />;
+    }
+    if (effectiveStatus === 'VOTING') {
+      return <VotingViewSkeleton onBack={handleBack} />;
+    }
+    return <VoteLoadingSkeleton />;
+  };
+
   const renderContent = () => {
+    // meeting 또는 votes 로딩 중 — initialStatus(서버 prefetch) 활용해
+    // 첫 mount부터 바로 status별 스켈레톤 표시 (generic 단계 거치지 않음)
     if (meetingLoading || votesLoading) {
-      return <VoteLoadingSkeleton />;
+      return renderStatusSkeleton();
     }
 
     if (meetingError || !meeting || !votesData) {
