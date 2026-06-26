@@ -194,7 +194,7 @@ export function RecruitingView({
     // B-1: 5개 초과 사전 검증 — 낙관적 추가 막아 카드 깜빡임 제거.
     // BE도 400으로 막지만, 사전 검증으로 onMutate 자체 호출 안 함.
     if (votesData.candidates.length >= ACTIVE_LIMIT) {
-      toast.error('후보는 최대 5개까지 추가할 수 있어요.');
+      toast('후보는 최대 5개까지 추가할 수 있어요.');
       return;
     }
     addCandidate({
