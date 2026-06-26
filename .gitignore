@@ -21,6 +21,7 @@ tsconfig.tsbuildinfo
 # playwright
 test-results/
 playwright-report/
+apps/web/playwright/
 
 # turbo
 .turbo

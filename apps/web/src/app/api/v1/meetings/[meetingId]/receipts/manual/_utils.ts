@@ -3,35 +3,32 @@ import type {
   ManualReceiptRequest,
   ManualReceiptResponse,
 } from '@yummpi/schemas';
+import { buildReceiptCreateInput } from '../_receipt-input';
 
 export type ReceiptWithItems = Receipt & { items: ReceiptItem[] };
 
 // Prisma create input — manual receipt 고정값: objectKey/imageUrl=null,
-// ocrStatus='SUCCEEDED' (api-spec §9 L323-325). currency·rawOcrJson은 컬럼 default
-// 사용을 위해 명시하지 않는다.
+// ocrStatus='SUCCEEDED' (api-spec §9 L323-325). totalAmount는 요청값을 그대로
+// 신뢰한다(폼에서 사람이 입력한 값 — OCR과 달리 기계 추출값이 아니라 별도
+// 검산 불필요). receipt+items Prisma 입력 모양은 공용 ReceiptService
+// (`buildReceiptCreateInput`, `../_receipt-input.ts`)에 위임 — OCR 라우트
+// (`receipts/route.ts`)와 동일한 두 테이블(receipts·receipt_items)에 쓰므로
+// 모양을 공유한다.
 export function buildManualReceiptInput(
   meetingId: string,
   uploadedByMemberId: string,
   body: ManualReceiptRequest
 ): Prisma.ReceiptCreateInput {
-  return {
-    meeting: { connect: { id: meetingId } },
-    uploadedBy: { connect: { id: uploadedByMemberId } },
+  return buildReceiptCreateInput({
+    meetingId,
+    uploadedByMemberId,
+    ocrStatus: 'SUCCEEDED',
     objectKey: null,
     imageUrl: null,
-    ocrStatus: 'SUCCEEDED',
+    rawOcrJson: null,
     totalAmount: body.totalAmount,
-    items: {
-      create: body.items.map((item, idx) => ({
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        totalPrice: item.totalPrice,
-        ocrConfidence: null,
-        sortOrder: idx,
-      })),
-    },
-  };
+    items: body.items,
+  });
 }
 
 // Prisma row → 응답 DTO. manual receipt는 totalAmount가 항상 채워져 있으나

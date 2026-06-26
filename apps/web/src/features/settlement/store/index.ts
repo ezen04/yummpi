@@ -25,6 +25,7 @@ interface SettlementStore {
   mySelectedItemIds: string[]; // ITEM_BASED /assign에서만 채움. 그 외 []
 
   addReceipt: (receiptId: string) => void;
+  setOcrProcessing: (receiptId: string) => void;
   updateOcrResult: (
     receiptId: string,
     items: OcrItem[],
@@ -72,6 +73,13 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
         selectedReceiptId: state.selectedReceiptId || receiptId,
       };
     }),
+
+  setOcrProcessing: (receiptId) =>
+    set((state) => ({
+      receipts: state.receipts.map((r) =>
+        r.receiptId === receiptId ? { ...r, ocrStatus: 'PROCESSING' } : r
+      ),
+    })),
 
   updateOcrResult: (receiptId, items, status, unclassifiedLines = []) =>
     set((state) => ({

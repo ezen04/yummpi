@@ -577,6 +577,7 @@ io(SOCKET_URL, {
 | `SETTLEMENT_ALREADY_EXISTS` ★ | 409 | 모임에 정산이 이미 존재 |
 | `VOTING_SETTING_LOCKED` ★ | 409 | 투표 시작 후 익명 설정 변경 |
 | `RECEIPT_LOCKED` ★ | 409 | 소비 선택 시작 후 영수증 추가/삭제 시도 |
+| `RECEIPT_ALREADY_EXISTS` ★ | 409 | 동일 receiptId 재요청·더블서밋 (PK 충돌, 2026-06-26 추가) |
 | `SETTLEMENT_CALCULATION_PENDING` ★ | 409 | 계산 미완료 상태에서 확정 시도 |
 | `RECEIPT_ALREADY_OCR_SUCCEEDED` ★ | 409 | OCR 성공한 영수증에 수동 입력 시도 |
 | `REMIND_COOLDOWN` ★ | 409 | 독촉 알림 쿨다운 중 (24h, details: { remindCooldownUntil: ISO8601 }) |

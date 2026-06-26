@@ -7,10 +7,10 @@ import {
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
+import { assertReceiptAddable } from '../_receipt-guards';
 import { buildManualReceiptInput, buildManualReceiptResponse } from './_utils';
 
 const paramsSchema = z.object({ meetingId: z.string().uuid() });
-const RECEIPT_LIMIT = 4;
 
 // `POST /api/v1/meetings/:meetingId/receipts/manual` — 이미지·OCR 없이 영수증 직접 입력
 // api-spec §9 L297-329 · 호스트 전용(L257). LOCK(settlement 행 존재)·LIMIT(4장) 가드 후
@@ -56,30 +56,15 @@ export const POST = handleRoute(
       );
     }
 
-    // LOCK: settlements 행 존재 시 영수증 추가 금지 (api-spec §9 L259).
-    const settlement = await prisma.settlement.findUnique({
-      where: { meetingId },
-      select: { id: true },
-    });
-    if (settlement) {
-      throw new ApiError(
-        'RECEIPT_LOCKED',
-        '정산이 시작되어 영수증을 추가할 수 없습니다.'
-      );
-    }
-
-    // LIMIT: 모임당 4장 (api-spec §9 L270·L328). 5장째는 422.
-    const receiptCount = await prisma.receipt.count({ where: { meetingId } });
-    if (receiptCount >= RECEIPT_LIMIT) {
-      throw new ApiError(
-        'RECEIPT_LIMIT_EXCEEDED',
-        `영수증은 모임당 최대 ${RECEIPT_LIMIT}장까지 등록할 수 있습니다.`
-      );
-    }
-
-    const created = await prisma.receipt.create({
-      data: buildManualReceiptInput(meetingId, currentMember.id, parsed.data),
-      include: { items: { orderBy: { sortOrder: 'asc' } } },
+    // LOCK·LIMIT 가드 + create를 같은 트랜잭션으로 원자화 — manual+OCR 또는
+    // manual+manual 병렬 제출 시 4장 제한이 깨지는 TOCTOU를 OCR 라우트와 동일하게
+    // 좁힌다. manual은 무거운 I/O가 없어 트랜잭션 비용이 거의 없다.
+    const created = await prisma.$transaction(async (tx) => {
+      await assertReceiptAddable(meetingId, tx);
+      return tx.receipt.create({
+        data: buildManualReceiptInput(meetingId, currentMember.id, parsed.data),
+        include: { items: { orderBy: { sortOrder: 'asc' } } },
+      });
     });
 
     const response = ManualReceiptResponseSchema.parse(
