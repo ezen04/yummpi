@@ -1,5 +1,6 @@
 import './workers/payment-reminder.worker.js';
 import './workers/meeting-expire.worker.js';
+import './workers/notification.worker.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
