@@ -2,7 +2,7 @@
 
 import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera, Close, Refresh } from '@yummpi/ui';
+import { Camera, Close, Refresh, toast } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { Step } from '@/components/common/Step';
@@ -13,11 +13,16 @@ import {
   type ReceiptUploadEntry,
 } from '@/features/settlement/hooks/useOcrProcessor';
 import { IconButton } from '@/components/common/IconButton';
-import { FLOW_STEPS } from '@/features/settlement/constants';
+import {
+  FLOW_STEPS,
+  MAX_RECEIPT_IMAGE_BYTES,
+} from '@/features/settlement/constants';
 
 const MAX = 4;
 
-// TODO: 호스트 전용
+// TODO: 호스트 전용 — 실제 session/member API 연동 전까지는 클라이언트
+// 가드를 걸 수 없다(MOCK_MEMBERS 기반, constants.ts 참조). 비호스트가 들어와도
+// 업로드 시 서버(assertHost)가 403으로 막으므로 데이터는 안전하다.
 export default function SettlementReceiptPage({
   params,
 }: {
@@ -27,7 +32,7 @@ export default function SettlementReceiptPage({
   const router = useRouter();
   const { receipts, addReceipt, clearReceipts, deleteReceipt } =
     useSettlementStore();
-  const { processReceipts } = useOcrProcessor();
+  const { processReceipts } = useOcrProcessor(meetingId);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // OCR 호출은 "다음" 클릭 시 일괄 처리 — 추가 시점엔 PENDING 카드만 띄우고
@@ -56,10 +61,19 @@ export default function SettlementReceiptPage({
     const files = Array.from(e.target.files ?? []);
     e.target.value = '';
     const remaining = MAX - receipts.length;
-    const picked = files.slice(0, remaining);
 
-    const newEntries: ReceiptUploadEntry[] = picked.map((file, i) => ({
-      receiptId: `receipt-${Date.now()}-${i}`,
+    // base64로 인코딩(fileToBase64)한 뒤 서버에서 거부당하면 사용자가 변환·업로드
+    // 대기를 다 거치고서야 실패를 알게 된다 — 선택 시점에 미리 걸러낸다.
+    const oversized = files.filter((f) => f.size > MAX_RECEIPT_IMAGE_BYTES);
+    if (oversized.length > 0) {
+      toast.error('10MB 이하 사진만 업로드할 수 있어요.');
+    }
+    const picked = files
+      .filter((f) => f.size <= MAX_RECEIPT_IMAGE_BYTES)
+      .slice(0, remaining);
+
+    const newEntries: ReceiptUploadEntry[] = picked.map((file) => ({
+      receiptId: crypto.randomUUID(),
       file,
     }));
     newEntries.forEach((entry) => addReceipt(entry.receiptId));
@@ -124,13 +138,7 @@ export default function SettlementReceiptPage({
             const previewUrl = previewUrls[r.receiptId];
             return (
               <div key={r.receiptId} className="relative">
-                <div
-                  className="aspect-square rounded-[var(--radius-10)] relative flex flex-col items-center justify-center gap-1 overflow-hidden"
-                  style={{
-                    background: 'var(--bg-alternative)',
-                    border: '1px solid var(--line-alternative)',
-                  }}
-                >
+                <div className="aspect-square border border-[var(--line-alternative)] rounded-[var(--radius-10)] relative flex flex-col items-center justify-center gap-1 overflow-hidden bg-[var(--bg-alternative)] cursor-pointer">
                   {previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element -- blob: URL, next/image 최적화 대상 아님
                     <img
@@ -143,12 +151,9 @@ export default function SettlementReceiptPage({
                       <Camera
                         size={24}
                         strokeWidth={1.5}
-                        style={{ color: 'var(--label-assistive)' }}
+                        className="text-[var(--label-assistive)]"
                       />
-                      <span
-                        className="text-xs"
-                        style={{ color: 'var(--label-alternative)' }}
-                      >
+                      <span className="text-xs text-[var(--label-alternative)]">
                         영수증 {i + 1}
                       </span>
                     </>
@@ -162,13 +167,10 @@ export default function SettlementReceiptPage({
                       <Refresh
                         size={24}
                         strokeWidth={1.5}
-                        className="animate-spin"
-                        style={{ color: 'var(--static-white)' }}
+                        className="animate-spin text-[var(--static-white)]"
+                        style={{ color: '' }}
                       />
-                      <span
-                        className="text-xs"
-                        style={{ color: 'var(--static-white)' }}
-                      >
+                      <span className="text-xs text-[var(--static-white)]">
                         OCR 처리 중
                       </span>
                     </div>
@@ -190,29 +192,25 @@ export default function SettlementReceiptPage({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isProcessing}
-              className="aspect-square rounded-[var(--radius-10)] flex flex-col items-center justify-center gap-2 bg-transparent cursor-pointer disabled:cursor-default disabled:opacity-50"
-              style={{ border: '1.5px dashed var(--line-normal)' }}
+              className="aspect-square rounded-[var(--radius-10)] flex flex-col items-center justify-center gap-2 bg-transparent cursor-pointer disabled:cursor-default disabled:opacity-50 border-dashed border-1.5 border-[var(--line-normal)]"
             >
               <Camera
                 size={24}
                 strokeWidth={1.5}
-                style={{ color: 'var(--label-assistive)' }}
+                className="text-[var(--label-assistive)]"
               />
-              <span
-                className="text-xs"
-                style={{ color: 'var(--label-alternative)' }}
-              >
+              <span className="text-xs text-[var(--label-alternative)]">
                 추가 ({receipts.length}/{MAX})
+              </span>
+              <span className="text-xs text-[var(--label-alternative)]">
+                png, jpg 10MB 이하
               </span>
             </button>
           )}
         </div>
 
         {receipts.length >= MAX && (
-          <p
-            className="text-xs text-center mt-3"
-            style={{ color: 'var(--label-assistive)' }}
-          >
+          <p className="text-xs text-center mt-3 text-[var(--label-assistive)]">
             최대 {MAX}장까지 추가할 수 있습니다
           </p>
         )}

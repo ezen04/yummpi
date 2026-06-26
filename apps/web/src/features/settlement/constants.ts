@@ -1,4 +1,4 @@
-import type { OcrItem } from './store';
+// import type { OcrItem } from './store'; // BE-2b로 MOCK_RECEIPT_SETS 폐기 — 되돌릴 때만 복원
 import type { SettlementItemInput } from '@/lib/settlement-engine';
 
 export const FLOW_STEPS: Record<'receipt' | 'manual', string[]> = {
@@ -6,11 +6,17 @@ export const FLOW_STEPS: Record<'receipt' | 'manual', string[]> = {
   manual: ['직접 입력', '항목 선택', '정산'],
 };
 
+// 클라이언트 사전 체크용 원본 파일 크기 한도 — api-spec.md L270 / aws-vercel.md
+// L297(④ 확정 2026-06-25) "장당 10MB"와 동일. presigned URL 전환 후 base64
+// 경로(lib/ocr의 MAX_BASE64_BYTES) 자체가 없어질 예정이라 그쪽 6MB 캡과는
+// 별개로, 여기는 스펙의 10MB를 그대로 따른다.
+export const MAX_RECEIPT_IMAGE_BYTES = 10 * 1024 * 1024;
+
 // TODO: 정산 생성 API(POST /api/v1/settlements) 응답의 settlement.id로 교체
 export const MOCK_SETTLEMENT_ID = 'mock-id';
 
-// TODO: Mock OCR — 실제 CLOVA 연동 시 제거. 0~1로 FAILED 비율 조정 (1: 항상 실패, 0: 항상 성공).
-export const MOCK_OCR_FAILED_RATE = 0;
+// BE-2b(`POST .../receipts` 실호출)로 대체돼 더 이상 안 씀. 되돌릴 일 생기면 주석만 해제.
+// export const MOCK_OCR_FAILED_RATE = 0;
 
 // TODO: 실제 GET /meetings/:id/members(참석=true) + session으로 교체
 export interface MockMember {
@@ -38,48 +44,48 @@ export const MOCK_OTHER_SUBMITTED_MEMBER_IDS: string[] = MOCK_MEMBERS.filter(
   (m) => !m.isMe
 ).map((m) => m.memberId);
 
-// 영수증 mock 세트 — index별 items + unclassifiedLines 페어.
-// unclassifiedLines는 파서가 품목/요약/헤더 어디에도 못 잡은 줄. 실측 영수증의
-// 카드정보·메뉴(가격 누락)·문구 등을 본떠 검수 UI #1(미분류 승격) 시연용으로 박음.
-export const MOCK_RECEIPT_SETS: {
-  items: Omit<OcrItem, 'id'>[];
-  unclassifiedLines: string[];
-}[] = [
-  {
-    items: [
-      { name: '삼겹살', quantity: 2, unitPrice: 15000, totalPrice: 30000 },
-      { name: '냉면', quantity: 1, unitPrice: 12000, totalPrice: 12000 },
-      { name: '소주', quantity: 3, unitPrice: 5000, totalPrice: 15000 },
-    ],
-    unclassifiedLines: [
-      '서비스 김치찌개',
-      '카드번호: ****-****-****-****',
-      '거래번호 202606240001',
-    ],
-  },
-  {
-    items: [
-      { name: '계란찜', quantity: 1, unitPrice: 6000, totalPrice: 6000 },
-      { name: '맥주', quantity: 4, unitPrice: 5000, totalPrice: 20000 },
-      { name: '공기밥', quantity: 2, unitPrice: 1000, totalPrice: 2000 },
-    ],
-    unclassifiedLines: ['콜라 1 4000', '오뎅탕 small'],
-  },
-  {
-    items: [
-      { name: '치즈스틱', quantity: 1, unitPrice: 8000, totalPrice: 8000 },
-      { name: '하이볼', quantity: 2, unitPrice: 7000, totalPrice: 14000 },
-    ],
-    unclassifiedLines: [],
-  },
-  {
-    items: [
-      { name: '아이스크림', quantity: 3, unitPrice: 3000, totalPrice: 9000 },
-      { name: '아메리카노', quantity: 4, unitPrice: 4500, totalPrice: 18000 },
-    ],
-    unclassifiedLines: ['샷추가', '카드번호: ****-****-****-****'],
-  },
-];
+// 영수증 mock 세트 — BE-2b(`POST .../receipts` 실호출)로 대체돼 더 이상 안 씀.
+// 되돌릴 일 생기면 주석만 해제(위 `OcrItem` import도 함께).
+//
+// export const MOCK_RECEIPT_SETS: {
+//   items: Omit<OcrItem, 'id'>[];
+//   unclassifiedLines: string[];
+// }[] = [
+//   {
+//     items: [
+//       { name: '삼겹살', quantity: 2, unitPrice: 15000, totalPrice: 30000 },
+//       { name: '냉면', quantity: 1, unitPrice: 12000, totalPrice: 12000 },
+//       { name: '소주', quantity: 3, unitPrice: 5000, totalPrice: 15000 },
+//     ],
+//     unclassifiedLines: [
+//       '서비스 김치찌개',
+//       '카드번호: ****-****-****-****',
+//       '거래번호 202606240001',
+//     ],
+//   },
+//   {
+//     items: [
+//       { name: '계란찜', quantity: 1, unitPrice: 6000, totalPrice: 6000 },
+//       { name: '맥주', quantity: 4, unitPrice: 5000, totalPrice: 20000 },
+//       { name: '공기밥', quantity: 2, unitPrice: 1000, totalPrice: 2000 },
+//     ],
+//     unclassifiedLines: ['콜라 1 4000', '오뎅탕 small'],
+//   },
+//   {
+//     items: [
+//       { name: '치즈스틱', quantity: 1, unitPrice: 8000, totalPrice: 8000 },
+//       { name: '하이볼', quantity: 2, unitPrice: 7000, totalPrice: 14000 },
+//     ],
+//     unclassifiedLines: [],
+//   },
+//   {
+//     items: [
+//       { name: '아이스크림', quantity: 3, unitPrice: 3000, totalPrice: 9000 },
+//       { name: '아메리카노', quantity: 4, unitPrice: 4500, totalPrice: 18000 },
+//     ],
+//     unclassifiedLines: ['샷추가', '카드번호: ****-****-****-****'],
+//   },
+// ];
 
 // 결정적 seed: 각 항목을 (선택한 나) + (index 순환 배정 타 멤버 1명)에게 배정.
 // 모든 항목 denom>=1 보장. 내가 고른 항목은 공유(나+타1)로 반올림·host 흡수 시연.
