@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   createMeeting,
   updateMeeting,
+  deleteMeeting,
   type CreateMeetingInput,
   type CreateMeetingResult,
   type UpdateMeetingInput,
@@ -21,5 +22,12 @@ export function useCreateMeeting() {
 export function useUpdateMeeting(meetingId: string) {
   return useMutation<UpdateMeetingResult, unknown, UpdateMeetingInput>({
     mutationFn: (input) => updateMeeting(meetingId, input),
+  });
+}
+
+// 모임 삭제(호스트, 소프트 삭제). 성공 시 대시보드로.
+export function useDeleteMeeting(meetingId: string) {
+  return useMutation<void, unknown, void>({
+    mutationFn: () => deleteMeeting(meetingId),
   });
 }
