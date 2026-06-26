@@ -4,6 +4,7 @@ vi.mock('../../lib/prisma.js', () => ({
   prisma: {
     payment: { findUnique: vi.fn() },
     meeting: { findUnique: vi.fn() },
+    notification: { upsert: vi.fn() },
   },
 }));
 vi.mock('../../lib/notifications/sendNotification.js', () => ({
@@ -42,9 +43,14 @@ function makePayment(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function makeJob(targetUserId = 'user-1') {
+function makeJob(targetUserId = 'user-1', sequence = 1) {
   return {
-    data: { meetingId: 'meeting-1', paymentId: 'payment-1', targetUserId },
+    data: {
+      meetingId: 'meeting-1',
+      paymentId: 'payment-1',
+      targetUserId,
+      sequence,
+    },
   };
 }
 
@@ -135,5 +141,64 @@ describe('processReminderJob — 헬퍼 위임', () => {
         body: '테스트 모임 — 23,000원 미송금 상태입니다.',
       })
     );
+  });
+});
+
+describe('processReminderJob — 인앱 알림함 적재 (발송과 분리·멱등)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.meeting.findUnique).mockResolvedValue({
+      title: '테스트 모임',
+    } as never);
+  });
+
+  it('회차(sequence)별 dedupeKey로 notifications row를 upsert 적재한다', async () => {
+    vi.mocked(prisma.payment.findUnique).mockResolvedValue(
+      makePayment() as never
+    );
+
+    await processReminderJob(makeJob('user-1', 2));
+
+    expect(prisma.notification.upsert).toHaveBeenCalledOnce();
+    expect(prisma.notification.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { dedupeKey: 'remind-payment-1-2' },
+        create: expect.objectContaining({
+          userId: 'user-1',
+          category: 'PAYMENT',
+          url: '/meetings/meeting-1/payments',
+          meetingId: 'meeting-1',
+          dedupeKey: 'remind-payment-1-2',
+        }),
+        update: {},
+      })
+    );
+  });
+
+  it('적재는 발송 전에·발송 결과와 무관하게 실행된다 (전달 실패해도 적재됨)', async () => {
+    vi.mocked(prisma.payment.findUnique).mockResolvedValue(
+      makePayment() as never
+    );
+    // 전달 실패(예: 구독 없음/푸시 OFF) 시뮬레이션
+    vi.mocked(sendNotificationToUser).mockResolvedValue({
+      ok: false,
+      reason: 'no_channel',
+    });
+
+    await processReminderJob(makeJob());
+
+    expect(prisma.notification.upsert).toHaveBeenCalledOnce();
+    expect(sendNotificationToUser).toHaveBeenCalledOnce();
+  });
+
+  it('게이트(paymentReminderEnabled off)에 막히면 적재도 안 한다', async () => {
+    const payment = makePayment();
+    payment.settlementMember.member.user.paymentReminderEnabled = false;
+    vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
+
+    await processReminderJob(makeJob());
+
+    expect(prisma.notification.upsert).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
   });
 });
