@@ -86,7 +86,7 @@ export const PATCH = handleRoute(
         targetUserId: targetMember.userId,
       });
       // enqueue 성공 후 쿨다운 설정 실패 시에도 클라이언트에 성공을 반환한다.
-      // Job ID 중복(remind:paymentId)으로 BullMQ가 재enqueue를 차단함.
+      // Job ID 중복(remind-{paymentId})으로 BullMQ가 재enqueue를 차단함.
       let cooldownUntil: string;
       try {
         cooldownUntil = await setRemindCooldown(paymentId);
