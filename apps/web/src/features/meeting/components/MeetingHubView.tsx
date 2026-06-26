@@ -100,13 +100,19 @@ export function MeetingHubView({
   };
 
   const base = `/meetings/${meetingId}`;
+  // 장소 메뉴: 추천 단계(RECRUITING·VOTING)는 추천 화면(/vote),
+  // 확정 이후(PLACE_CONFIRMED·IN_PROGRESS)는 장소 변경(/place/change)으로.
+  const placeHref =
+    status === 'PLACE_CONFIRMED' || status === 'IN_PROGRESS'
+      ? `${base}/place/change`
+      : `${base}/vote`;
   const MENU: MenuItem[] = [
     {
       key: 'place',
       label: '장소',
       icon: <MapPin size={20} strokeWidth={1.5} />,
       enabled: ['RECRUITING', 'VOTING', 'PLACE_CONFIRMED', 'IN_PROGRESS'],
-      href: `${base}/place/search`,
+      href: placeHref,
     },
     {
       key: 'vote',
@@ -343,8 +349,8 @@ export function MeetingHubView({
             desc="후보 장소를 추천하고 모아주세요."
           >
             <HubCta
-              label="장소 추천하기"
-              onClick={() => router.push(`${base}/place/search`)}
+              label="장소 추천받기"
+              onClick={() => router.push(`${base}/vote`)}
             />
           </NextCard>
         );
