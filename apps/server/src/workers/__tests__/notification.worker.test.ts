@@ -1,8 +1,9 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { Prisma } from '@prisma/client';
 
 vi.mock('../../lib/prisma.js', () => ({
   prisma: {
-    notification: { upsert: vi.fn(), create: vi.fn() },
+    notification: { create: vi.fn() },
   },
 }));
 vi.mock('../../lib/notifications/sendNotification.js', () => ({
@@ -16,6 +17,11 @@ vi.mock('bullmq', () => ({ Worker: vi.fn() }));
 import { processNotificationJob } from '../notification.worker.js';
 import { prisma } from '../../lib/prisma.js';
 import { sendNotificationToUser } from '../../lib/notifications/sendNotification.js';
+
+const P2002 = new Prisma.PrismaClientKnownRequestError(
+  'Unique constraint failed',
+  { code: 'P2002', clientVersion: '6.19.0' }
+);
 
 function makeJob(overrides: Record<string, unknown> = {}, id?: string) {
   return {
@@ -32,61 +38,79 @@ function makeJob(overrides: Record<string, unknown> = {}, id?: string) {
   };
 }
 
-describe('processNotificationJob — 적재(보관) + 발송(전달) 분리', () => {
-  beforeEach(() => vi.clearAllMocks());
+describe('processNotificationJob — 멱등 적재 + 최초 1회 발송', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.notification.create).mockResolvedValue({} as never);
+    vi.mocked(sendNotificationToUser).mockResolvedValue({
+      ok: true,
+      channel: 'push',
+    });
+  });
 
-  it('dedupeKey 있으면 upsert로 멱등 적재 + 발송 위임', async () => {
+  it('dedupeKey로 1회 create 적재 + 발송', async () => {
     await processNotificationJob(
       makeJob({ dedupeKey: 'vote-confirmed-m1' }) as never
     );
-
-    expect(prisma.notification.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { dedupeKey: 'vote-confirmed-m1' },
-        create: expect.objectContaining({
-          userId: 'user-1',
-          category: 'SETTLEMENT',
-          url: '/meetings/m1/settlement',
-          meetingId: 'm1',
-          dedupeKey: 'vote-confirmed-m1',
-        }),
-        update: {},
-      })
-    );
-    expect(prisma.notification.create).not.toHaveBeenCalled();
-    expect(sendNotificationToUser).toHaveBeenCalledOnce();
-  });
-
-  it('dedupeKey·job.id 둘 다 없으면 create로 적재 (예외 경로)', async () => {
-    await processNotificationJob(makeJob() as never);
 
     expect(prisma.notification.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           userId: 'user-1',
           category: 'SETTLEMENT',
+          url: '/meetings/m1/settlement',
           meetingId: 'm1',
+          dedupeKey: 'vote-confirmed-m1',
         }),
       })
     );
-    expect(prisma.notification.upsert).not.toHaveBeenCalled();
     expect(sendNotificationToUser).toHaveBeenCalledOnce();
   });
 
-  it('dedupeKey 없어도 job.id를 fallback 멱등 키로 upsert (재시도 중복 방지)', async () => {
+  it('dedupeKey 없으면 job.id를 fallback 멱등 키로 사용', async () => {
     await processNotificationJob(makeJob({}, 'bull-7') as never);
 
-    expect(prisma.notification.upsert).toHaveBeenCalledWith(
+    expect(prisma.notification.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { dedupeKey: 'job-bull-7' },
-        create: expect.objectContaining({ dedupeKey: 'job-bull-7' }),
-        update: {},
+        data: expect.objectContaining({ dedupeKey: 'job-bull-7' }),
       })
     );
-    expect(prisma.notification.create).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).toHaveBeenCalledOnce();
   });
 
-  it('적재는 발송과 분리 — 전달 실패해도 적재는 이미 수행', async () => {
+  it('dedupeKey·job.id 둘 다 없으면 dedupeKey=null로 create (예외 경로)', async () => {
+    await processNotificationJob(makeJob() as never);
+
+    expect(prisma.notification.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ dedupeKey: null }),
+      })
+    );
+    expect(sendNotificationToUser).toHaveBeenCalledOnce();
+  });
+
+  it('이미 존재(P2002)면 발송 skip — 중복 푸시/메일 방지', async () => {
+    vi.mocked(prisma.notification.create).mockRejectedValueOnce(P2002);
+
+    await processNotificationJob(
+      makeJob({ dedupeKey: 'vote-confirmed-m1' }) as never
+    );
+
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
+  });
+
+  it('P2002 외 DB 에러는 rethrow (잡 실패 → 재시도)', async () => {
+    vi.mocked(prisma.notification.create).mockRejectedValueOnce(
+      new Error('db down')
+    );
+
+    await expect(
+      processNotificationJob(makeJob({ dedupeKey: 'k' }) as never)
+    ).rejects.toThrow('db down');
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
+  });
+
+  it('최초 생성이면 전달 결과와 무관하게 적재는 수행', async () => {
     vi.mocked(sendNotificationToUser).mockResolvedValue({
       ok: false,
       reason: 'opted_out', // push OFF
@@ -98,7 +122,7 @@ describe('processNotificationJob — 적재(보관) + 발송(전달) 분리', ()
     expect(sendNotificationToUser).toHaveBeenCalledOnce();
   });
 
-  it('null 옵션(url·meetingId 없음)도 적재된다', async () => {
+  it('url·meetingId 없으면 null로 적재', async () => {
     await processNotificationJob(
       makeJob({
         url: undefined,

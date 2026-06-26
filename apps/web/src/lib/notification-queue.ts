@@ -29,7 +29,10 @@ function getQueue(): Queue<EnqueueNotificationInput> {
  * 범용 알림 적재+발송 요청. 모든 도메인(③④①…)은 이 함수만 호출하고
  * 발송/적재 메커니즘은 모른다. 적재는 중앙 worker(`notification.send`)가 수행.
  *
- * - `dedupeKey`를 주면 jobId로 재사용 → 같은 키 재요청은 BullMQ가 중복 제거(재시도 안전).
+ * - `dedupeKey`를 주면 jobId로 재사용 → **in-flight 중복 잡**만 BullMQ가 제거.
+ *   완료 잡은 removeOnComplete로 사라지므로 그 후 재enqueue는 막지 못한다 →
+ *   **중복/재시도 시 중복 적재·발송 방지는 worker의 dedupeKey 멱등 처리가 담당**
+ *   (notification.worker: create+P2002 → 이미 존재하면 적재·발송 모두 skip).
  *   값에 ':'를 넣지 말 것(BullMQ custom jobId 제약).
  * - 도메인 정책(쿨다운/횟수/상태 재확인)·게스트(userId 없음) 필터는 호출부 책임.
  */
