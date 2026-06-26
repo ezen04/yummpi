@@ -1,8 +1,7 @@
 import { Worker } from 'bullmq';
 import { createBullmqConnection } from '../lib/bullmq.js';
 import { prisma } from '../lib/prisma.js';
-import { sendWebPush } from '../lib/notifications/webPush.js';
-import { sendPaymentReminderEmail } from '../lib/notifications/email.js';
+import { sendNotificationToUser } from '../lib/notifications/sendNotification.js';
 
 interface ReminderJobData {
   meetingId: string;
@@ -21,11 +20,7 @@ export async function processReminderJob(job: ReminderJob): Promise<void> {
       settlementMember: {
         include: {
           settlement: true,
-          member: {
-            include: {
-              user: { include: { pushSubscriptions: true } },
-            },
-          },
+          member: { include: { user: true } },
         },
       },
     },
@@ -36,6 +31,7 @@ export async function processReminderJob(job: ReminderJob): Promise<void> {
     return;
   }
 
+  // 발송 전 상태 재확인 — 이미 PAID면 skip (도메인 상태 가드는 트리거 책임)
   if (payment.status !== 'PENDING') {
     console.log(
       `[reminder] skip — status=${payment.status} payment=${paymentId}`
@@ -61,48 +57,28 @@ export async function processReminderJob(job: ReminderJob): Promise<void> {
     return;
   }
 
-  if (!user.pushEnabled || !user.paymentReminderEnabled) {
-    console.log(`[reminder] skip — notifications disabled user=${user.id}`);
+  // 독촉 카테고리 토글. 마스터 토글(pushEnabled)은 sendNotificationToUser가 가드.
+  if (!user.paymentReminderEnabled) {
+    console.log(`[reminder] skip — payment reminder disabled user=${user.id}`);
     return;
   }
 
+  const meetingId = payment.settlementMember.settlement.meetingId;
   const meeting = await prisma.meeting.findUnique({
-    where: { id: payment.settlementMember.settlement.meetingId },
+    where: { id: meetingId },
     select: { title: true },
   });
   const meetingTitle = meeting?.title ?? '모임';
 
-  let pushSucceeded = false;
-  if (user.pushSubscriptions.length > 0) {
-    for (const sub of user.pushSubscriptions) {
-      try {
-        await sendWebPush(
-          {
-            endpoint: sub.endpoint,
-            p256dhKey: sub.p256dhKey,
-            authKey: sub.authKey,
-          },
-          {
-            title: '송금 독촉 알림',
-            body: `${meetingTitle} — ${payment.amount.toLocaleString('ko-KR')}원 미송금 상태입니다.`,
-            url: `/meetings/${payment.settlementMember.settlement.meetingId}/payments`,
-          }
-        );
-        pushSucceeded = true;
-      } catch (err) {
-        console.error(`[reminder] webpush failed sub=${sub.id}`, err);
-      }
-    }
-  }
-
-  if (!pushSucceeded && user.email) {
-    await sendPaymentReminderEmail({
-      to: user.email,
-      nickname: member.nickname,
-      meetingTitle,
-      amount: payment.amount,
-    });
-  }
+  // 송금 독촉만 메일 fallback 허용 (emailFallback: true).
+  await sendNotificationToUser(targetUserId, {
+    category: 'PAYMENT',
+    title: '송금 독촉 알림',
+    body: `${meetingTitle} — ${payment.amount.toLocaleString('ko-KR')}원 미송금 상태입니다.`,
+    url: `/meetings/${meetingId}/payments`,
+    meetingId,
+    emailFallback: true,
+  });
 }
 
 // 테스트 환경에서는 Worker를 기동하지 않는다 (Redis 연결 불필요)

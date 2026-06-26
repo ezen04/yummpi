@@ -6,11 +6,8 @@ vi.mock('../../lib/prisma.js', () => ({
     meeting: { findUnique: vi.fn() },
   },
 }));
-vi.mock('../../lib/notifications/webPush.js', () => ({
-  sendWebPush: vi.fn(),
-}));
-vi.mock('../../lib/notifications/email.js', () => ({
-  sendPaymentReminderEmail: vi.fn(),
+vi.mock('../../lib/notifications/sendNotification.js', () => ({
+  sendNotificationToUser: vi.fn(),
 }));
 vi.mock('../../lib/bullmq.js', () => ({
   createBullmqConnection: vi.fn(() => ({})),
@@ -19,10 +16,11 @@ vi.mock('bullmq', () => ({ Worker: vi.fn() }));
 
 import { processReminderJob } from '../payment-reminder.worker.js';
 import { prisma } from '../../lib/prisma.js';
-import { sendWebPush } from '../../lib/notifications/webPush.js';
-import { sendPaymentReminderEmail } from '../../lib/notifications/email.js';
+import { sendNotificationToUser } from '../../lib/notifications/sendNotification.js';
 
-// 기본 payment 픽스처 — 각 테스트에서 필요한 필드만 덮어쓴다
+// 기본 payment 픽스처 — 각 테스트에서 필요한 필드만 덮어쓴다.
+// 푸시/메일 분기는 sendNotificationToUser(헬퍼) 테스트가 담당하므로
+// worker 테스트는 "위임 여부 + 도메인 skip 분기"만 본다.
 function makePayment(overrides: Record<string, unknown> = {}) {
   return {
     id: 'payment-1',
@@ -36,15 +34,7 @@ function makePayment(overrides: Record<string, unknown> = {}) {
         nickname: '테스터',
         user: {
           id: 'user-1',
-          email: 'tester@example.com',
-          pushEnabled: true,
           paymentReminderEnabled: true,
-          pushSubscriptions: [] as {
-            id: string;
-            endpoint: string;
-            p256dhKey: string;
-            authKey: string;
-          }[],
         },
       },
       ...((overrides.settlementMember as Record<string, unknown>) ?? {}),
@@ -58,7 +48,7 @@ function makeJob(targetUserId = 'user-1') {
   };
 }
 
-describe('processReminderJob — skip 분기', () => {
+describe('processReminderJob — skip 분기 (발송 위임 안 함)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(prisma.meeting.findUnique).mockResolvedValue({
@@ -66,72 +56,46 @@ describe('processReminderJob — skip 분기', () => {
     } as never);
   });
 
-  it('payment 없으면 알림을 보내지 않는다', async () => {
+  it('payment 없으면 skip', async () => {
     vi.mocked(prisma.payment.findUnique).mockResolvedValue(null);
-
     await processReminderJob(makeJob());
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
   });
 
   it('status가 PENDING이 아니면 skip', async () => {
     vi.mocked(prisma.payment.findUnique).mockResolvedValue(
       makePayment({ status: 'PAID' }) as never
     );
-
     await processReminderJob(makeJob());
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
   });
 
   it('게스트(userId === null)이면 skip', async () => {
     const payment = makePayment();
     payment.settlementMember.member.userId = null as never;
     vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
-
     await processReminderJob(makeJob());
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
   });
 
   it('targetUserId 불일치이면 skip', async () => {
     vi.mocked(prisma.payment.findUnique).mockResolvedValue(
       makePayment() as never
     );
-
     await processReminderJob(makeJob('other-user'));
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
   });
 
-  it('pushEnabled false이면 skip', async () => {
-    const payment = makePayment();
-    payment.settlementMember.member.user.pushEnabled = false;
-    vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
-
-    await processReminderJob(makeJob());
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
-  });
-
-  it('paymentReminderEnabled false이면 skip', async () => {
+  it('paymentReminderEnabled false이면 skip (카테고리 토글)', async () => {
     const payment = makePayment();
     payment.settlementMember.member.user.paymentReminderEnabled = false;
     vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
-
     await processReminderJob(makeJob());
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).not.toHaveBeenCalled();
   });
 });
 
-describe('processReminderJob — 알림 발송', () => {
+describe('processReminderJob — 헬퍼 위임', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(prisma.meeting.findUnique).mockResolvedValue({
@@ -139,66 +103,37 @@ describe('processReminderJob — 알림 발송', () => {
     } as never);
   });
 
-  it('구독 없고 이메일 있으면 이메일 발송', async () => {
+  it('PENDING 본인 회원이면 sendNotificationToUser에 PAYMENT 알림을 위임한다', async () => {
     vi.mocked(prisma.payment.findUnique).mockResolvedValue(
       makePayment() as never
     );
 
     await processReminderJob(makeJob());
 
-    expect(sendPaymentReminderEmail).toHaveBeenCalledOnce();
-    expect(sendPaymentReminderEmail).toHaveBeenCalledWith(
-      expect.objectContaining({ to: 'tester@example.com', amount: 10000 })
+    expect(sendNotificationToUser).toHaveBeenCalledOnce();
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({
+        category: 'PAYMENT',
+        emailFallback: true,
+        url: '/meetings/meeting-1/payments',
+        meetingId: 'meeting-1',
+      })
     );
-    expect(sendWebPush).not.toHaveBeenCalled();
   });
 
-  it('웹푸시 성공 시 이메일 미발송', async () => {
-    const payment = makePayment();
-    payment.settlementMember.member.user.pushSubscriptions = [
-      {
-        id: 'sub-1',
-        endpoint: 'https://push.example.com',
-        p256dhKey: 'p256dh',
-        authKey: 'auth',
-      },
-    ];
-    vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
-    vi.mocked(sendWebPush).mockResolvedValue(undefined);
+  it('금액·모임명이 본문에 반영된다', async () => {
+    vi.mocked(prisma.payment.findUnique).mockResolvedValue(
+      makePayment({ amount: 23000 }) as never
+    );
 
     await processReminderJob(makeJob());
 
-    expect(sendWebPush).toHaveBeenCalledOnce();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
-  });
-
-  it('웹푸시 전부 실패 시 이메일 fallback', async () => {
-    const payment = makePayment();
-    payment.settlementMember.member.user.pushSubscriptions = [
-      {
-        id: 'sub-1',
-        endpoint: 'https://push.example.com',
-        p256dhKey: 'p256dh',
-        authKey: 'auth',
-      },
-    ];
-    vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
-    vi.mocked(sendWebPush).mockRejectedValue(new Error('push failed'));
-
-    await processReminderJob(makeJob());
-
-    expect(sendWebPush).toHaveBeenCalledOnce();
-    expect(sendPaymentReminderEmail).toHaveBeenCalledOnce();
-  });
-
-  it('이메일도 없으면 아무것도 보내지 않는다', async () => {
-    const payment = makePayment();
-    payment.settlementMember.member.user.email = null as never;
-    vi.mocked(prisma.payment.findUnique).mockResolvedValue(payment as never);
-
-    await processReminderJob(makeJob());
-
-    expect(sendWebPush).not.toHaveBeenCalled();
-    expect(sendPaymentReminderEmail).not.toHaveBeenCalled();
+    expect(sendNotificationToUser).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({
+        body: '테스트 모임 — 23,000원 미송금 상태입니다.',
+      })
+    );
   });
 });

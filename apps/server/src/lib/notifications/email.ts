@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import { renderPaymentReminderHtml } from './templates/paymentReminder.js';
 import { renderNotificationHtml } from './templates/notification.js';
 
 function createTransporter() {
@@ -19,28 +18,7 @@ function createTransporter() {
 
 const transporter = createTransporter();
 
-export async function sendPaymentReminderEmail(opts: {
-  to: string;
-  nickname: string;
-  meetingTitle: string;
-  amount: number;
-}): Promise<void> {
-  const html = renderPaymentReminderHtml(opts);
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM ?? '"얌피" <noreply@yummpi.app>',
-    to: opts.to,
-    subject: `[얌피] 송금 독촉 알림 — ${opts.meetingTitle}`,
-    html,
-  });
-  if (!process.env.SMTP_HOST) {
-    console.log(
-      '[email:mock]',
-      (info as unknown as { message: string }).message
-    );
-  }
-}
-
-/** 범용 알림 이메일 (송금 독촉 외 카테고리도 재사용). 상대경로 url은 절대경로로 보정. */
+/** 범용 알림 이메일 (모든 카테고리 공용). 상대경로 url은 절대경로로 보정. */
 export async function sendNotificationEmail(opts: {
   to: string;
   title: string;
