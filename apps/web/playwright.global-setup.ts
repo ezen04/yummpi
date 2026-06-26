@@ -17,39 +17,49 @@ export default async function globalSetup(config: FullConfig) {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
 
   // 1. Prisma로 seed 모임·정산 ID 조회 → seed-meetings.json에 기록.
-  //    테스트 워커에서 파일로 읽어 사용한다(globalSetup은 별도 프로세스라
-  //    process.env 변경이 워커에 전달되지 않는다).
-  const prisma = new PrismaClient();
-  try {
-    const meetings = await prisma.meeting.findMany({
-      where: { inviteCode: { in: [...SEED_CODES] } },
-      select: {
-        id: true,
-        inviteCode: true,
-        settlement: { select: { id: true } },
-      },
-    });
+  //    DATABASE_URL 미설정(CI·smoke-only 실행)이면 빈 픽스처로 대체.
+  //    seed guard(test.skip(!seed[...]))가 있는 테스트는 자동으로 건너뜀.
+  if (process.env.DATABASE_URL) {
+    const prisma = new PrismaClient();
+    try {
+      const meetings = await prisma.meeting.findMany({
+        where: { inviteCode: { in: [...SEED_CODES] } },
+        select: {
+          id: true,
+          inviteCode: true,
+          settlement: { select: { id: true } },
+        },
+      });
 
-    const fixture: Record<string, string> = {};
-    for (const m of meetings) {
-      if (!m.inviteCode) continue;
-      fixture[m.inviteCode] = m.id;
-      // SEEDPAY4 정산 ID (PUT /assignments/me 경로에 필요)
-      if (m.inviteCode === 'SEEDPAY4' && m.settlement) {
-        fixture['SEEDPAY4_SETTLEMENT'] = m.settlement.id;
+      const fixture: Record<string, string> = {};
+      for (const m of meetings) {
+        if (!m.inviteCode) continue;
+        fixture[m.inviteCode] = m.id;
+        // SEEDPAY4 정산 ID (PUT /assignments/me 경로에 필요)
+        if (m.inviteCode === 'SEEDPAY4' && m.settlement) {
+          fixture['SEEDPAY4_SETTLEMENT'] = m.settlement.id;
+        }
       }
-    }
 
-    fs.writeFileSync(SEED_FILE, JSON.stringify(fixture, null, 2));
-    console.log('[e2e setup] seed fixture:', fixture);
+      fs.writeFileSync(SEED_FILE, JSON.stringify(fixture, null, 2));
+      console.log('[e2e setup] seed fixture:', fixture);
 
-    if (SEED_CODES.some((c) => !fixture[c])) {
-      console.warn(
-        '[e2e setup] ⚠️  일부 seed 모임이 없습니다. pnpm db seed 를 먼저 실행하세요.'
-      );
+      if (SEED_CODES.some((c) => !fixture[c])) {
+        console.warn(
+          '[e2e setup] ⚠️  일부 seed 모임이 없습니다. pnpm db seed 를 먼저 실행하세요.'
+        );
+      }
+    } finally {
+      await prisma.$disconnect();
     }
-  } finally {
-    await prisma.$disconnect();
+  } else {
+    // DB 없이 실행 — 빈 픽스처. seed 의존 테스트는 test.skip으로 건너뜀.
+    if (!fs.existsSync(SEED_FILE)) {
+      fs.writeFileSync(SEED_FILE, JSON.stringify({}, null, 2));
+    }
+    console.log(
+      '[e2e setup] DATABASE_URL 미설정 — seed 픽스처 없이 실행 (DB 불필요 테스트만 동작)'
+    );
   }
 
   // 2. 세션 파일이 이미 있으면 재사용.
@@ -58,7 +68,20 @@ export default async function globalSetup(config: FullConfig) {
     return;
   }
 
-  // 3. 없으면 headed 브라우저를 열어 카카오 로그인 후 storageState 저장.
+  // 3. CI 환경: 대화형 카카오 로그인 불가 → 빈 storageState로 대체.
+  //    실제 인증이 필요한 테스트는 403을 받거나 seed guard로 건너뜀.
+  if (process.env.CI) {
+    fs.writeFileSync(
+      AUTH_FILE,
+      JSON.stringify({ cookies: [], origins: [] }, null, 2)
+    );
+    console.log(
+      '[e2e setup] CI 환경 — 카카오 로그인 불가. 빈 세션으로 실행 (인증 필요 테스트는 403 또는 skip).'
+    );
+    return;
+  }
+
+  // 4. 로컬: headed 브라우저를 열어 카카오 로그인 후 storageState 저장.
   const baseURL =
     config.projects.find((p) => p.name === 'authenticated')?.use.baseURL ??
     'http://localhost:3000';
