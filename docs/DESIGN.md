@@ -45,8 +45,8 @@ CSS 변수(시맨틱 토큰)를 사용한다. 하드코딩된 Hex/RGB 값 사용
 
 | 토큰 | Hex | 용도 |
 |:---|:---|:---|
-| `--bg-normal` | `#FFFFFF` | 앱 기본 배경 |
-| `--bg-alternative` | `#F7F7F8` | 그룹·섹션 서브 배경, 입력 필드 배경 |
+| `--bg-normal` | `#FFFFFF` | 앱 기본 배경, **입력 필드 배경(흰색 통일)** |
+| `--bg-alternative` | `#F7F7F8` | 그룹·섹션 서브 배경 |
 | `--bg-elevated` | `#FFFFFF` | 카드, 시트 |
 | `--bg-inverse` | `#1B1C1E` | 다크 인버스 (토스트, 칩 활성) |
 
@@ -466,14 +466,14 @@ font-family: var(--font-sans);
 
 ### 5-10. 입력 필드
 
-높이 `48px` · 패딩 `0 16px` · 반지름 `var(--radius-12)` · 배경 `--bg-alternative`
+높이 `48px` · 패딩 `0 16px` · 반지름 `var(--radius-12)` · 배경 `--bg-normal`(흰색, 전 화면 통일)
 
 ```tsx
 <input style={{
   height: 48, padding: '0 16px',
   borderRadius: 'var(--radius-12)',
   border: '1px solid var(--line-neutral)',
-  background: 'var(--bg-alternative)',
+  background: 'var(--bg-normal)',
   font: '400 16px var(--font-sans)',
   color: 'var(--label-normal)',
   outline: 'none', width: '100%',

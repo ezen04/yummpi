@@ -52,7 +52,7 @@ export function Input({
           </span>
         )}
         <input
-          className="placeholder:text-[var(--label-assistive)] h-12 w-full rounded-[var(--radius-12)] bg-[var(--bg-alternative)] text-[16px] font-normal font-[var(--font-sans)] text-[var(--label-normal)] outline-none box-border"
+          className="placeholder:text-[var(--label-assistive)] h-12 w-full rounded-[var(--radius-12)] bg-[var(--bg-normal)] text-[16px] font-normal font-[var(--font-sans)] text-[var(--label-normal)] outline-none box-border"
           style={{
             border,
             paddingLeft: paddingLeft,
