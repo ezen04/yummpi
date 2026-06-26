@@ -95,6 +95,15 @@ enum PaymentStatus {
   @@map("payment_status")
 }
 
+enum NotificationCategory {
+  PAYMENT
+  SETTLEMENT
+  VOTE
+  MEETING
+
+  @@map("notification_category")
+}
+
 // ── 인증 · 플랫폼 (NextAuth 예외 영역) ────────────────────────
 
 model User {
@@ -117,6 +126,7 @@ model User {
   pushSubscriptions PushSubscription[]
   hostedMeetings    Meeting[]          @relation("MeetingHost")
   meetingMembers    MeetingMember[]
+  notifications     Notification[]
 
   @@map("users")
 }
@@ -176,6 +186,28 @@ model PushSubscription {
   @@map("push_subscriptions")
 }
 
+// 인앱 알림함 — 적재/조회 API는 ⑤, 스키마는 ①(ERD 주도). 카테고리별 알림 1건 = 1행.
+model Notification {
+  id        String               @id @default(uuid()) @db.Uuid
+  userId    String               @map("user_id") @db.Uuid
+  category  NotificationCategory
+  title     String
+  body      String
+  url       String? // 클릭 목적지(예: /meetings/{id}/payments). null이면 FE가 category+meetingId로 파생
+  meetingId String?              @map("meeting_id") @db.Uuid // 모임 범위 알림(현재 전 카테고리). V2 비모임 알림 대비 nullable
+  readAt    DateTime?            @map("read_at") // null = 안 읽음
+  dedupeKey String?              @unique @map("dedupe_key") // 적재 멱등 키(⑤ worker 재시도 중복 방지). null 다수 허용(Postgres)
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  // 탈퇴 익명화 보존 규칙(User 소프트 삭제)을 따라가도록 user FK는 cascade 미지정.
+  // 모임 정리 시 알림 row는 보존하고 링크만 끊김(meeting_id nullable + SetNull).
+  user    User     @relation(fields: [userId], references: [id])
+  meeting Meeting? @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt]) // 내 알림 최신순 조회
+  @@map("notifications")
+}
+
 // ── 모임 라이프사이클 (①) ─────────────────────────────────────
 
 model Meeting {
@@ -215,6 +247,7 @@ model Meeting {
   reservation        Reservation?
   receipts           Receipt[]
   settlement         Settlement?
+  notifications      Notification[]
 
   @@map("meetings")
 }
