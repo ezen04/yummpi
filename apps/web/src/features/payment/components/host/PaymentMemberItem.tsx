@@ -166,6 +166,13 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                 item.status === 'PENDING' &&
                 !item.isGuest && (
                   <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap [font-variant-numeric:tabular-nums]">
+                      {isRemindLimitReached
+                        ? '내일 다시 가능'
+                        : isCooldown && cooldownUntilMs !== null
+                          ? `${formatCountdown(cooldownUntilMs - now)}`
+                          : `오늘 ${remindRemaining}회 남음`}
+                    </span>
                     <Button
                       variant="basic"
                       size="sm"
@@ -173,13 +180,6 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                       disabled={isCooldown || isRemindLimitReached}
                       className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap gap-1.5"
                     >
-                      <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap [font-variant-numeric:tabular-nums]">
-                        {isRemindLimitReached
-                          ? '내일 다시 가능'
-                          : isCooldown && cooldownUntilMs !== null
-                            ? `${formatCountdown(cooldownUntilMs - now)}`
-                            : `오늘 ${remindRemaining}회 남음`}
-                      </span>
                       독촉
                     </Button>
                   </div>
