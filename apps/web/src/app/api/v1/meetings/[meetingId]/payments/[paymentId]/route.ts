@@ -3,12 +3,17 @@ import { z } from 'zod';
 import {
   UpdatePaymentRequestSchema,
   type PaymentAction,
+  REMIND_DAILY_LIMIT,
 } from '@yummpi/schemas';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
 import { buildPaymentListItem, buildSummary } from '../_utils';
-import { getRemindCooldown, setRemindCooldown } from '@/lib/remind-redis';
+import {
+  getRemindState,
+  recordRemind,
+  type RemindState,
+} from '@/lib/remind-redis';
 import { enqueuePaymentReminder } from '@/lib/payment-reminder-queue';
 import type { PaymentStatus } from '@prisma/client';
 
@@ -74,33 +79,43 @@ export const PATCH = handleRoute(
           'PENDING 상태에서만 독촉 알림을 보낼 수 있습니다.'
         );
       }
-      const cooldown = await getRemindCooldown(paymentId);
-      if (cooldown) {
-        throw new ApiError('REMIND_COOLDOWN', '쿨다운 중입니다.', {
-          remindCooldownUntil: cooldown,
+      const state = await getRemindState(paymentId);
+      // 하루(KST 자정 리셋) 한도 소진 → 내일까지 차단
+      if (state.count >= REMIND_DAILY_LIMIT) {
+        throw new ApiError(
+          'REMIND_LIMIT_EXCEEDED',
+          '오늘 독촉 가능 횟수를 모두 사용했습니다.',
+          { remindCount: state.count }
+        );
+      }
+      // 회당 최소 1시간 텀 미경과 → 다음 가능 시각 안내
+      if (state.cooldownUntil && new Date(state.cooldownUntil) > new Date()) {
+        throw new ApiError('REMIND_COOLDOWN', '아직 독촉할 수 없습니다.', {
+          remindCooldownUntil: state.cooldownUntil,
         });
       }
       await enqueuePaymentReminder({
         meetingId,
         paymentId,
         targetUserId: targetMember.userId,
+        sequence: state.count + 1, // jobId 회차별 유니크화 (같은 날 2·3회차 중복 차단 방지)
       });
-      // enqueue 성공 후 쿨다운 설정 실패 시에도 클라이언트에 성공을 반환한다.
-      // Job ID 중복(remind-{paymentId})으로 BullMQ가 재enqueue를 차단함.
-      let cooldownUntil: string;
+      // enqueue 성공 후 상태 기록 실패 시에도 클라이언트에 성공을 반환한다.
+      let recorded: RemindState;
       try {
-        cooldownUntil = await setRemindCooldown(paymentId);
+        recorded = await recordRemind(paymentId);
       } catch (err) {
-        console.error('[remind] cooldown 설정 실패 (enqueue는 성공)', err);
-        cooldownUntil = new Date(
-          Date.now() + 24 * 60 * 60 * 1000
-        ).toISOString();
+        console.error('[remind] 상태 기록 실패 (enqueue는 성공)', err);
+        recorded = {
+          count: state.count + 1,
+          cooldownUntil: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        };
       }
-      const cooldownMap = new Map([[paymentId, cooldownUntil]]);
+      const remindStateMap = new Map([[paymentId, recorded]]);
       const item = buildPaymentListItem(
         { ...payment.settlementMember, payment },
         currentMember,
-        cooldownMap
+        remindStateMap
       );
       if (!item) {
         throw new ApiError('INTERNAL_ERROR', '결제 항목을 생성할 수 없습니다.');

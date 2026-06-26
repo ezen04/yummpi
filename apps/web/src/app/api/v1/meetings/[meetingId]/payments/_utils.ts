@@ -9,6 +9,7 @@ import type {
   PaymentListResponse,
   PaymentSummary,
 } from '@yummpi/schemas';
+import type { RemindState } from '@/lib/remind-redis';
 
 type SettlementWithMembers = Settlement & {
   settlementMembers: (SettlementMember & {
@@ -47,7 +48,7 @@ export function buildSummary(payments: Payment[]): PaymentSummary {
 export function buildPaymentListItem(
   sm: SettlementMember & { member: MeetingMember; payment: Payment | null },
   currentMember: MeetingMember | null,
-  cooldownMap?: Map<string, string>
+  remindStateMap?: Map<string, RemindState>
 ): PaymentListItem | null {
   if (!sm.payment) return null;
 
@@ -66,7 +67,8 @@ export function buildPaymentListItem(
     paidAt: p.paidAt?.toISOString() ?? null,
     isMine: isMe,
     isGuest: sm.member.userId === null,
-    remindCooldownUntil: cooldownMap?.get(p.id) ?? null,
+    remindCooldownUntil: remindStateMap?.get(p.id)?.cooldownUntil ?? null,
+    remindCount: remindStateMap?.get(p.id)?.count ?? 0,
     canReportTransfer: !isHostSelf && isMe && p.status === 'PENDING',
     canCancelTransfer: !isHostSelf && isMe && p.status === 'TRANSFER_REPORTED',
     canMarkPaid: !isHostSelf && isHost && p.status === 'TRANSFER_REPORTED',
@@ -83,10 +85,10 @@ export function buildPaymentListResponse(
   meetingId: string,
   settlement: SettlementWithMembers,
   currentMember: MeetingMember | null,
-  cooldownMap?: Map<string, string>
+  remindStateMap?: Map<string, RemindState>
 ): PaymentListResponse {
   const items = settlement.settlementMembers
-    .map((sm) => buildPaymentListItem(sm, currentMember, cooldownMap))
+    .map((sm) => buildPaymentListItem(sm, currentMember, remindStateMap))
     .filter((item): item is PaymentListItem => item !== null);
 
   const payments = settlement.settlementMembers

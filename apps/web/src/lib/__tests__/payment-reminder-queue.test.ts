@@ -20,17 +20,18 @@ describe('enqueuePaymentReminder — jobId 패턴', () => {
     mockAdd.mockClear();
   });
 
-  it('jobId는 remind-{paymentId} 형식이다', async () => {
+  it('jobId는 remind-{paymentId}-{sequence} 형식이다', async () => {
     await enqueuePaymentReminder({
       meetingId: 'meeting-1',
       paymentId: 'payment-abc',
       targetUserId: 'user-1',
+      sequence: 1,
     });
 
     expect(mockAdd).toHaveBeenCalledWith(
       'remind',
       expect.objectContaining({ paymentId: 'payment-abc' }),
-      expect.objectContaining({ jobId: 'remind-payment-abc' })
+      expect.objectContaining({ jobId: 'remind-payment-abc-1' })
     );
   });
 
@@ -39,36 +40,38 @@ describe('enqueuePaymentReminder — jobId 패턴', () => {
       meetingId: 'meeting-1',
       paymentId: 'payment-abc',
       targetUserId: 'user-1',
+      sequence: 1,
     });
 
     const jobId = mockAdd.mock.calls[0][2].jobId as string;
     expect(jobId).not.toContain(':');
   });
 
-  it('같은 paymentId로 두 번 호출해도 jobId가 동일하다 (BullMQ 레벨 중복 방지 보장)', async () => {
-    const data = {
+  it('회차(sequence)가 다르면 jobId가 달라 같은 날 재독촉이 BullMQ 중복 제거에 막히지 않는다', async () => {
+    const base = {
       meetingId: 'meeting-1',
       paymentId: 'payment-abc',
       targetUserId: 'user-1',
     };
 
-    await enqueuePaymentReminder(data);
-    await enqueuePaymentReminder(data);
+    await enqueuePaymentReminder({ ...base, sequence: 1 });
+    await enqueuePaymentReminder({ ...base, sequence: 2 });
 
     expect(mockAdd).toHaveBeenCalledTimes(2);
     expect(mockAdd.mock.calls[0][2]).toMatchObject({
-      jobId: 'remind-payment-abc',
+      jobId: 'remind-payment-abc-1',
     });
     expect(mockAdd.mock.calls[1][2]).toMatchObject({
-      jobId: 'remind-payment-abc',
+      jobId: 'remind-payment-abc-2',
     });
   });
 
-  it('job에 meetingId, paymentId, targetUserId가 모두 포함된다', async () => {
+  it('job에 meetingId, paymentId, targetUserId, sequence가 모두 포함된다', async () => {
     await enqueuePaymentReminder({
       meetingId: 'meeting-xyz',
       paymentId: 'payment-xyz',
       targetUserId: 'user-xyz',
+      sequence: 3,
     });
 
     expect(mockAdd).toHaveBeenCalledWith(
@@ -77,6 +80,7 @@ describe('enqueuePaymentReminder — jobId 패턴', () => {
         meetingId: 'meeting-xyz',
         paymentId: 'payment-xyz',
         targetUserId: 'user-xyz',
+        sequence: 3,
       },
       expect.any(Object)
     );
