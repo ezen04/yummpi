@@ -14,6 +14,9 @@ export const PaymentActionSchema = z.enum([
   'REMIND',
 ]);
 
+// 독촉 정책: 하루(KST 자정 리셋) 최대 N회 + 회당 최소 1시간 텀. BE·FE 공용 단일 진실.
+export const REMIND_DAILY_LIMIT = 3;
+
 // 목업 송금 표시 데이터. 계좌번호·은행명·예금주·결제 토큰·실제 송금 식별자 포함 금지.
 export const TransferMockDataSchema = z.object({
   recipientLabel: z.string().min(1).max(50),
@@ -45,6 +48,7 @@ export const PaymentListItemSchema = z.object({
   isMine: z.boolean(),
   isGuest: z.boolean(),
   remindCooldownUntil: z.string().datetime().nullable(),
+  remindCount: z.number().int().nonnegative(), // 오늘(KST) 보낸 독촉 횟수
   canReportTransfer: z.boolean(),
   canCancelTransfer: z.boolean(),
   canMarkPaid: z.boolean(),

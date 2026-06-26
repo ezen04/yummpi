@@ -1,11 +1,23 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/common/Button';
-import { formatAmount, formatCooldownUntil } from '../../utils/transferMock';
+import { formatAmount } from '../../utils/transferMock';
 import { PaymentConfirmbox } from '../shell/PaymentConfirmbox';
 import '../payment-montage.css';
+import { REMIND_DAILY_LIMIT } from '@yummpi/schemas';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
+
+/** 남은 ms → 카운트다운 표기 (mm:ss, 1시간 이상이면 h:mm:ss) */
+function formatCountdown(ms: number): string {
+  const totalSec = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const mm = String(m).padStart(2, '0');
+  const ss = String(s).padStart(2, '0');
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
 
 type Props = {
   item: PaymentListItem;
@@ -36,13 +48,31 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const badge = STATUS_BADGE[item.status] ?? null;
   const isHost = viewerRole === 'HOST';
   const isHostSelf = item.isMine && isHost;
-  const isCooldown = useSyncExternalStore(
-    () => () => {},
-    () =>
-      item.remindCooldownUntil !== null &&
-      new Date(item.remindCooldownUntil) > new Date(),
-    () => false
-  );
+  // 쿨다운: 마운트 후에만 시각 비교(SSR 불일치 방지). 1초마다 갱신해
+  // 라이브 카운트다운을 그리고, 만료되면 폴링/새로고침 없이 버튼이 자동으로 풀린다.
+  const [now, setNow] = useState(() => Date.now());
+  const cooldownUntilMs = item.remindCooldownUntil
+    ? new Date(item.remindCooldownUntil).getTime()
+    : null;
+  const isCooldown = cooldownUntilMs !== null && cooldownUntilMs > now;
+  const remindRemaining = Math.max(0, REMIND_DAILY_LIMIT - item.remindCount);
+  const isRemindLimitReached = remindRemaining === 0;
+
+  useEffect(() => {
+    if (cooldownUntilMs === null || cooldownUntilMs <= Date.now()) return;
+    // 쿨다운 활성화 시점에 now를 즉시 동기화(effect 본문 직접 setState 회피 → rAF).
+    const raf = requestAnimationFrame(() => setNow(Date.now()));
+    // 1초마다 갱신 → mm:ss 라이브 카운트다운 + 만료 시 자동 해제.
+    const timer = setInterval(() => {
+      const t = Date.now();
+      setNow(t);
+      if (t >= cooldownUntilMs) clearInterval(timer);
+    }, 1000);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(timer);
+    };
+  }, [cooldownUntilMs]);
 
   return (
     <>
@@ -135,22 +165,23 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                 !isHostSelf &&
                 item.status === 'PENDING' &&
                 !item.isGuest && (
-                  <div className="flex flex-col items-end gap-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap [font-variant-numeric:tabular-nums]">
+                      {isRemindLimitReached
+                        ? '내일 다시 가능'
+                        : isCooldown && cooldownUntilMs !== null
+                          ? `${formatCountdown(cooldownUntilMs - now)}`
+                          : `오늘 ${remindRemaining}회 남음`}
+                    </span>
                     <Button
                       variant="basic"
                       size="sm"
                       onClick={() => onAction(item.paymentId, 'REMIND')}
-                      disabled={isCooldown}
-                      className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
+                      disabled={isCooldown || isRemindLimitReached}
+                      className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap gap-1.5"
                     >
                       독촉
                     </Button>
-                    {isCooldown && item.remindCooldownUntil && (
-                      <span className="text-[11px] text-[var(--label-alternative)] whitespace-nowrap">
-                        {formatCooldownUntil(item.remindCooldownUntil)} 이후
-                        가능
-                      </span>
-                    )}
                   </div>
                 )}
 
