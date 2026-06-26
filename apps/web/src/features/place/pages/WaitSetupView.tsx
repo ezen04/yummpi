@@ -36,7 +36,8 @@ export function WaitSetupView({ meetingId }: { meetingId: string }) {
       />
       {error && (
         <div className="absolute bottom-24 left-5 right-5 rounded-[var(--radius-12)] bg-[var(--status-negative)] px-4 py-3 text-[13px] text-white shadow-[var(--shadow-medium)]">
-          저장 실패: {error instanceof Error ? error.message : '알 수 없는 오류'}
+          저장 실패:{' '}
+          {error instanceof Error ? error.message : '알 수 없는 오류'}
         </div>
       )}
     </div>
