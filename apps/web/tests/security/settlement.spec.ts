@@ -94,7 +94,10 @@ test.describe('존재하지 않는 모임 — 404', () => {
   test('BE-1 GET /settlement — 없는 meetingId → 404 MEETING_NOT_FOUND', async ({
     request,
   }) => {
-    test.skip(!seed['__dbReady'], 'DB 없이 실행 — 404 검증 불가 (DB 연결 필요)');
+    test.skip(
+      !seed['__dbReady'],
+      'DB 없이 실행 — 404 검증 불가 (DB 연결 필요)'
+    );
     const res = await request.get(`${BASE}/meetings/${GHOST_UUID}/settlement`);
     expect(res.status()).toBe(404);
     expect((await res.json()).error.code).toBe('MEETING_NOT_FOUND');
@@ -103,7 +106,10 @@ test.describe('존재하지 않는 모임 — 404', () => {
   test('BE-3 POST /settlements — 없는 meetingId → 404 MEETING_NOT_FOUND', async ({
     request,
   }) => {
-    test.skip(!seed['__dbReady'], 'DB 없이 실행 — 404 검증 불가 (DB 연결 필요)');
+    test.skip(
+      !seed['__dbReady'],
+      'DB 없이 실행 — 404 검증 불가 (DB 연결 필요)'
+    );
     const res = await request.post(
       `${BASE}/meetings/${GHOST_UUID}/settlements`,
       { data: { splitMethod: 'EQUAL' } }
