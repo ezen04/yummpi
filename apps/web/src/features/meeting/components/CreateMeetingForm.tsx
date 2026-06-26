@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Check } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Input } from '@/components/common/Input';
-import { Toggle } from '@/components/common/Toggle';
+import { ScheduleField } from './ScheduleField';
 import { useCreateMeeting } from '../hooks';
 import {
   isMeetingApiError,
@@ -16,11 +16,9 @@ import {
 
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
 
-// datetime-local 입력값 → "6.13 (금) 19:00"
-function formatSchedule(local: string): string | null {
-  if (!local) return null;
-  const d = new Date(local);
-  if (Number.isNaN(d.getTime())) return null;
+// 모임 일시 Date → "6.13 (금) 19:00"
+function formatSchedule(d: Date | null): string | null {
+  if (!d) return null;
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${d.getMonth() + 1}.${d.getDate()} (${WD[d.getDay()]}) ${d.getHours()}:${mm}`;
 }
@@ -37,10 +35,8 @@ export function CreateMeetingForm() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [scheduledAt, setScheduledAt] = useState('');
+  const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
   const [maxMembers, setMaxMembers] = useState('');
-  const [budgetPerPerson, setBudgetPerPerson] = useState('');
-  const [anonymousVoting, setAnonymousVoting] = useState(true);
 
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<CreateMeetingResult | null>(null);
@@ -57,26 +53,24 @@ export function CreateMeetingForm() {
       return;
     }
 
+    if (!scheduledAt) {
+      setError('일시를 선택해 주세요.');
+      return;
+    }
+
     const max = parsePositiveInt(maxMembers);
     if (Number.isNaN(max)) {
       setError('정원은 1 이상의 정수로 입력해 주세요.');
       return;
     }
-    const budget = parsePositiveInt(budgetPerPerson);
-    if (Number.isNaN(budget)) {
-      setError('1인 예산은 1 이상의 정수로 입력해 주세요.');
-      return;
-    }
 
     const input: CreateMeetingInput = {
       title: trimmedTitle,
-      anonymousVoting,
+      // MVP는 투표를 익명으로만 운영 — 기본값 익명 고정(추후 확장 대비 필드 유지).
+      anonymousVoting: true,
+      scheduledAt: scheduledAt.toISOString(),
       ...(description.trim() ? { description: description.trim() } : {}),
-      ...(scheduledAt
-        ? { scheduledAt: new Date(scheduledAt).toISOString() }
-        : {}),
       ...(max ? { maxMembers: max } : {}),
-      ...(budget ? { budgetPerPerson: budget } : {}),
     };
 
     create.mutate(input, {
@@ -259,11 +253,15 @@ export function CreateMeetingForm() {
             />
           </div>
 
-          <Input
+          <ScheduleField
             label="일시"
-            type="datetime-local"
+            required
             value={scheduledAt}
-            onChange={(e) => setScheduledAt(e.target.value)}
+            onChange={(d) => {
+              setScheduledAt(d);
+              if (error) setError(null);
+            }}
+            error={!!error && !scheduledAt}
           />
 
           <Input
@@ -278,37 +276,6 @@ export function CreateMeetingForm() {
             }}
             placeholder="예: 6 (선택)"
           />
-
-          <Input
-            label="1인 예산 (원)"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={budgetPerPerson}
-            onChange={(e) => {
-              setBudgetPerPerson(e.target.value);
-              if (error) setError(null);
-            }}
-            placeholder="예: 20000 (선택)"
-          />
-
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-0.5">
-              <span
-                className="text-[15px] font-medium"
-                style={{ color: 'var(--label-normal)' }}
-              >
-                익명 투표
-              </span>
-              <span
-                className="text-[13px]"
-                style={{ color: 'var(--label-alternative)' }}
-              >
-                누가 어디에 투표했는지 숨겨요
-              </span>
-            </div>
-            <Toggle checked={anonymousVoting} onChange={setAnonymousVoting} />
-          </div>
 
           {error && (
             <p className="text-sm" style={{ color: 'var(--status-negative)' }}>
