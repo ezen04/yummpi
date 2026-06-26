@@ -25,7 +25,8 @@ export const GET = handleRoute(async (req: NextRequest) => {
   const [rows, unreadCount] = await Promise.all([
     prisma.notification.findMany({
       where: { userId: user.id },
-      orderBy: { createdAt: 'desc' }, // @@index([userId, createdAt]) 활용
+      // 동일 ms 타이브레이크로 페이지 경계 중복/누락 방지
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       skip: (page - 1) * limit,
       take: limit + 1, // hasMore 판별용 1건 더 조회
     }),
