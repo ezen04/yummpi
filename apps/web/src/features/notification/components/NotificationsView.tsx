@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { NotificationResponse } from '@yummpi/schemas';
 import { Footer } from '@/components/common/Footer';
@@ -42,10 +43,36 @@ const MESSAGE_CLASS =
 
 export function NotificationsView() {
   const router = useRouter();
-  const { data, isLoading, isError } = useNotifications();
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useNotifications();
   const markRead = useMarkNotificationRead();
 
-  const items = data?.items ?? [];
+  const items = data?.pages.flatMap((page) => page.items) ?? [];
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // 리스트 하단 sentinel이 스크롤 영역에 들어오면 다음 page를 이어 로드.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { root: scrollRef.current, rootMargin: '160px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   function handleClick(item: NotificationResponse) {
     if (!item.readAt) markRead.mutate(item.id); // 읽음 처리(멱등) — 백그라운드
@@ -55,7 +82,7 @@ export function NotificationsView() {
   return (
     <div className="h-full flex flex-col bg-[var(--bg-alternative)]">
       <Header title="알림" />
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
         <div className="rounded-2xl overflow-hidden bg-[var(--bg-normal)]">
           {isLoading ? (
             <p className={MESSAGE_CLASS}>불러오는 중…</p>
@@ -64,17 +91,26 @@ export function NotificationsView() {
           ) : items.length === 0 ? (
             <p className={MESSAGE_CLASS}>아직 받은 알림이 없어요.</p>
           ) : (
-            items.map((n) => (
-              <Notification
-                key={n.id}
-                variant={n.readAt ? 'read' : 'unread'}
-                title={n.title}
-                body={n.body}
-                iconStyle="filled"
-                onClick={() => handleClick(n)}
-                className={n.readAt ? 'bg-[var(--bg-alternative)]' : undefined}
-              />
-            ))
+            <>
+              {items.map((n) => (
+                <Notification
+                  key={n.id}
+                  variant={n.readAt ? 'read' : 'unread'}
+                  title={n.title}
+                  body={n.body}
+                  iconStyle="filled"
+                  onClick={() => handleClick(n)}
+                  className={
+                    n.readAt ? 'bg-[var(--bg-alternative)]' : undefined
+                  }
+                />
+              ))}
+              {/* 무한스크롤 트리거 + 다음 페이지 로딩 표시 */}
+              <div ref={sentinelRef} />
+              {isFetchingNextPage && (
+                <p className={MESSAGE_CLASS}>더 불러오는 중…</p>
+              )}
+            </>
           )}
         </div>
       </div>
