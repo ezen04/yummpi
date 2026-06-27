@@ -27,7 +27,7 @@ export default function SettlementEqualPage({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async () => {
-    const amount = Number(totalAmount);
+    const amount = parseInt(totalAmount, 10);
     if (amount <= 0) return;
     setSubmitting(true);
     try {
@@ -76,7 +76,7 @@ export default function SettlementEqualPage({
       <Footer
         variant="button"
         label={submitting ? '처리 중...' : '정산 결과로'}
-        disabled={!totalAmount || Number(totalAmount) <= 0 || submitting}
+        disabled={!totalAmount || parseInt(totalAmount) <= 0 || submitting}
         onClick={handleSubmit}
       />
     </>

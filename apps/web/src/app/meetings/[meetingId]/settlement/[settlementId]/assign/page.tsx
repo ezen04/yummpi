@@ -33,24 +33,28 @@ export default function SettlementAssignPage({
 
   const isHost = myRole === 'HOST';
 
-  // useEffect(() => {
-  //   if (myRole !== null) {
-  //     setRoleLoading(false);
-  //     return;
-  //   }
-  //   fetch(
-  //     `/api/v1/meetings/${meetingId}/settlements/${settlementId}/assignments/me`
-  //   )
-  //     .then((r) => r.json().catch(() => null))
-  //     .then((body) => {
-  //       if (body?.success && body.data?.role) {
-  //         setMyRole(body.data.role as 'HOST' | 'MEMBER');
-  //         if (body.data.nickname) setNickname(body.data.nickname as string);
-  //       }
-  //     })
-  //     .catch(() => {})
-  //     .finally(() => setRoleLoading(false));
-  // }, [meetingId, settlementId, myRole, setMyRole]);
+  useEffect(() => {
+    if (myRole !== null) return;
+
+    const loadRole = async () => {
+      try {
+        const res = await fetch(
+          `/api/v1/meetings/${meetingId}/settlements/${settlementId}/assignments/me`
+        );
+        const body = await res.json().catch(() => null);
+        if (body?.success && body.data?.role) {
+          setMyRole(body.data.role as 'HOST' | 'MEMBER');
+          if (body.data.nickname) setNickname(body.data.nickname as string);
+        }
+      } catch {
+        setSubmitError('역할 정보를 불러오지 못했습니다. 새로고침 해주세요.');
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+
+    loadRole();
+  }, [meetingId, settlementId, myRole, setMyRole]);
 
   const toggle = (id: string) =>
     setSelectedIds((prev) => {
@@ -152,7 +156,9 @@ export default function SettlementAssignPage({
       <Footer
         variant="button"
         label={submitting ? '저장 중...' : '저장'}
-        disabled={roleLoading || selectedIds.size === 0 || submitting}
+        disabled={
+          roleLoading || myRole === null || selectedIds.size === 0 || submitting
+        }
         onClick={() => setConfirmOpen(true)}
       />
 

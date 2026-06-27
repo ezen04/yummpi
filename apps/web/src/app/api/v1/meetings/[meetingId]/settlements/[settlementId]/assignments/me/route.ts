@@ -13,6 +13,7 @@ import {
   deriveFinalAmounts,
   isSubmissionComplete,
 } from './_utils';
+import { assertEngineTotal } from '../../../_utils';
 
 // GET /api/v1/meetings/:meetingId/settlements/:settlementId/assignments/me
 // 현재 멤버의 role 조회 — assign 페이지가 HOST/MEMBER 분기에 사용.
@@ -226,6 +227,7 @@ export const PUT = handleRoute(
         settlement.totalAmount,
         engineInput.hostMemberId
       );
+      assertEngineTotal(settlement.totalAmount, derivedMembers);
 
       for (const m of derivedMembers) {
         await tx.settlementMember.upsert({

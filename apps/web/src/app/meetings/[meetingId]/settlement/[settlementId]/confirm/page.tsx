@@ -48,10 +48,7 @@ export default function SettlementConfirmPage({
         const res = await fetch(`/api/v1/meetings/${meetingId}/settlement`);
         const body = await res.json().catch(() => null);
 
-        if (
-          res.status === 409 &&
-          body?.error?.code === 'SETTLEMENT_CALCULATION_PENDING'
-        ) {
+        if (body?.error?.code === 'SETTLEMENT_CALCULATION_PENDING') {
           setState({ phase: 'pending' });
           return;
         }
@@ -87,7 +84,7 @@ export default function SettlementConfirmPage({
     };
     fetchRef.current = doFetch;
     doFetch();
-  }, [meetingId]);
+  }, [meetingId, settlementId]);
 
   // 대기 중일 때 5초 폴링 — fetchRef.current 호출이라 use* 의존성 없음
   useEffect(() => {
