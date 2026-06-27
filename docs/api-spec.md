@@ -260,18 +260,26 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 > 정산 생성 이후에는 `EQUAL`은 금액이 확정되고, `ITEM_BASED`는 소비 선택 대상 품목이 확정되므로 영수증을 변경할 수 없다.
 > 잠금 해제/정산 재오픈은 MVP 제외.
 
-### `POST /api/v1/meetings/:meetingId/receipts/upload-urls` — presigned URL **다건** 발급 ★ v2.1 (호스트)
+### `POST /api/v1/meetings/:meetingId/receipts` — presigned PUT URL 발급 + Receipt stub 생성 ★ v2.2 (호스트)
+> ★ v2.2 변경: 기존 `/receipts/upload-urls`(배치) 폐기 → `/receipts` 단건으로 통합. CLOVA API 제약이 아니라 "1장 실패해도 나머지 진행" 정책상 파일마다 독립 호출하므로 배치 불필요.
+
 요청:
 ```json
-{ "files": [ { "fileName": "r1.jpg", "contentType": "image/jpeg", "fileSize": 1048576 } ] }
+{ "receiptId": "uuid", "fileName": "r1.jpg", "contentType": "image/jpeg", "fileSize": 1048576 }
 ```
-응답: `{ "uploads": [ { "objectKey", "uploadUrl", "expiresIn": 300 } ] }`
-- 촬영/갤러리 혼합 일괄 접수. 장당 RECEIPT 생성 (`ocr_status: PENDING`)
+응답:
+```json
+{ "receiptId": "uuid", "objectKey": "meetings/m_xxx/receipts/r_xxx.jpg", "uploadUrl": "https://s3...", "expiresIn": 300 }
+```
+- Receipt 생성 (`ocr_status: PENDING`). `receiptId`는 FE가 `crypto.randomUUID()`로 발급해 PK로 사용
+- FE는 응답의 `uploadUrl`로 S3에 직접 PUT 후 `POST .../receipts/:receiptId/ocr` 호출
 - 제한: 모임당 최대 4장(`422 RECEIPT_LIMIT_EXCEEDED`), 장당 10MB, `image/jpeg + image/png`만
 
 ### `POST .../receipts/:receiptId/ocr` — OCR 분석 (영수증별 독립) ★ v2.1
-- 응답: `receiptId·ocrStatus·total·items[]`(name·quantity·unitPrice?·totalPrice·confidence)
+- 요청 바디 없음. CLOVA가 presigned GET URL(120s)로 S3 오브젝트를 직접 fetch
+- 응답: `receiptId·objectKey·ocrStatus·totalAmount·items[]`(name·quantity·unitPrice·totalPrice)`·unclassifiedLines[]`
 - **1장 실패해도 나머지 진행** — 실패 영수증만 `ocrStatus: FAILED` + 수동 입력 fallback
+- SUCCEEDED 영수증에 재호출 시 `409 RECEIPT_ALREADY_OCR_SUCCEEDED`. FAILED는 재시도 허용
 - ★ v2.2(④ 확정): 응답에 `unclassifiedLines: string[]` 노출 — **마스킹된 라인 텍스트만** 반환(토큰·좌표·분류 kind는 서버 내부 보관). 검수 화면에서 품목 승격용. → ⑤ Zod 계약(`@yummpi/schemas`) 반영
 - ★ v2.2(④ 확정): 원본은 `receipts.raw_ocr_json`에 **카드번호 마스킹 후 저장**(파서 `maskSensitive`와 동일 규칙). 마스킹·미분류 라인 추출 모두 **OCR 파서 단계 스코프에 포함**
 
