@@ -35,3 +35,22 @@ export const NotificationListResponseSchema = z.object({
 export type NotificationListResponse = z.infer<
   typeof NotificationListResponseSchema
 >;
+
+/**
+ * 알림 큐(`notification.send`) 적재 입력 — 도메인(③④①…) → enqueueNotification → 중앙 worker.
+ * worker가 `dedupeKey` 있으면 멱등 UPSERT, 없으면 create로 적재한 뒤 push/메일 전달.
+ * 도메인 정책(쿨다운/횟수)·게스트 필터는 호출부(트리거) 책임.
+ */
+export const EnqueueNotificationSchema = z.object({
+  userId: z.string().uuid(),
+  category: notificationCategorySchema,
+  title: z.string().min(1),
+  body: z.string().min(1),
+  url: z.string().optional(), // 클릭 목적지(SW notificationclick + 알림함 row)
+  meetingId: z.string().uuid().optional(),
+  dedupeKey: z.string().optional(), // 적재 멱등 키. ':' 금지(BullMQ jobId 제약)
+  emailFallback: z.boolean().optional(), // 기본 false — 송금 독촉만 true
+});
+export type EnqueueNotificationInput = z.infer<
+  typeof EnqueueNotificationSchema
+>;
