@@ -1,10 +1,12 @@
 'use client';
 
+import type { PaymentListResponse } from '@yummpi/schemas';
 import { Button } from '@/components/common/Button';
 import { PaymentHeaderWrapper } from './PaymentHeaderWrapper';
 
 type Props = {
   viewerRole: 'HOST' | 'MEMBER';
+  settlementStatus: PaymentListResponse['settlementStatus'];
   onInitialize: () => void;
   isInitializing?: boolean;
   errorMessage?: string;
@@ -12,11 +14,13 @@ type Props = {
 
 export function PaymentNotInitializedState({
   viewerRole,
+  settlementStatus,
   onInitialize,
   isInitializing = false,
   errorMessage,
 }: Props) {
   const isHost = viewerRole === 'HOST';
+  const isSettlementConfirmed = settlementStatus === 'CONFIRMED';
 
   const message = isHost
     ? '아직 멤버들에게 송금을 요청하지 않았어요'
@@ -40,11 +44,15 @@ export function PaymentNotInitializedState({
             variant="basic"
             size="lg"
             onClick={onInitialize}
-            disabled={isInitializing}
+            disabled={isInitializing || !isSettlementConfirmed}
             className="mt-2 w-full max-w-[240px] text-sm"
           >
             {isInitializing ? '송금 준비 중' : '송금 시작하기'}
           </Button>
+        )}
+
+        {isHost && !isSettlementConfirmed && (
+          <p className="text-sm text-gray-400">정산을 먼저 확정해 주세요</p>
         )}
 
         {errorMessage && (
