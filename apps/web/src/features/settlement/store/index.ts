@@ -23,6 +23,7 @@ interface SettlementStore {
   flowType: 'receipt' | 'manual' | null;
   equalAmount: number | null; // EQUAL(영수증 없는 /equal)만 사용. 그 외 null
   mySelectedItemIds: string[]; // ITEM_BASED /assign에서만 채움. 그 외 []
+  myRole: 'HOST' | 'MEMBER' | null; // 정산 플로우 진입 시 GET /members에서 채움
 
   addReceipt: (receiptId: string) => void;
   setOcrProcessing: (receiptId: string) => void;
@@ -39,6 +40,7 @@ interface SettlementStore {
   setFlowType: (flow: 'receipt' | 'manual') => void;
   setEqualAmount: (amount: number | null) => void;
   setMySelectedItemIds: (ids: string[]) => void;
+  setMyRole: (role: 'HOST' | 'MEMBER') => void;
   updateOcrItem: (receiptId: string, itemId: string, item: OcrItem) => void;
   deleteOcrItem: (receiptId: string, itemId: string) => void;
   addOcrItem: (receiptId: string, item: OcrItem) => void;
@@ -56,6 +58,7 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
   flowType: null,
   equalAmount: null,
   mySelectedItemIds: [],
+  myRole: null,
 
   addReceipt: (receiptId) =>
     set((state) => {
@@ -98,6 +101,7 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
       flowType: null,
       equalAmount: null,
       mySelectedItemIds: [],
+      myRole: null,
     }),
 
   deleteReceipt: (receiptId) =>
@@ -120,6 +124,7 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
   setFlowType: (flow) => set({ flowType: flow }),
   setEqualAmount: (amount) => set({ equalAmount: amount }),
   setMySelectedItemIds: (ids) => set({ mySelectedItemIds: ids }),
+  setMyRole: (role) => set({ myRole: role }),
 
   updateOcrItem: (receiptId, itemId, item) =>
     set((state) => ({

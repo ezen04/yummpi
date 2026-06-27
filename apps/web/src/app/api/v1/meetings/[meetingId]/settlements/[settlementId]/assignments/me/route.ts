@@ -14,6 +14,42 @@ import {
   isSubmissionComplete,
 } from './_utils';
 
+// GET /api/v1/meetings/:meetingId/settlements/:settlementId/assignments/me
+// 현재 멤버의 role 조회 — assign 페이지가 HOST/MEMBER 분기에 사용.
+// settlement 계산 완료 전에도 호출 가능하도록 settlement 상태 체크를 생략.
+
+export const GET = handleRoute(
+  async (
+    _req: NextRequest,
+    { params }: { params: Promise<{ meetingId: string; settlementId: string }> }
+  ) => {
+    const paramsParsed = paramsSchema.safeParse(await params);
+    if (!paramsParsed.success) {
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        '잘못된 경로 파라미터입니다.',
+        paramsParsed.error.flatten()
+      );
+    }
+    const { meetingId } = paramsParsed.data;
+
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId },
+      select: { id: true },
+    });
+    if (!meeting) {
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    }
+
+    const member = await requireMember(meetingId);
+    return apiSuccess({
+      role: member.role,
+      memberId: member.id,
+      nickname: member.nickname,
+    });
+  }
+);
+
 // PUT /api/v1/meetings/:meetingId/settlements/:settlementId/assignments/me
 // (본인 소비 항목 선택 + ITEM_BASED 자동 계산 트리거, api-spec §10 L362~375)
 //
@@ -118,6 +154,22 @@ export const PUT = handleRoute(
     //    조건에서도 "전원 제출 판정 → 엔진 실행 → 결과 반영"이 직렬화되게 한다.
     await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT id FROM settlements WHERE id = ${settlementId}::uuid FOR UPDATE`;
+
+      // 락 획득 후 status 재확인 — 외부 가드(5번)와 트랜잭션 사이에 POST /confirm이
+      // 커밋됐을 경우를 차단한다(TOCTOU).
+      const lockedSettlement = await tx.settlement.findUnique({
+        where: { id: settlementId },
+        select: { status: true },
+      });
+      if (
+        lockedSettlement?.status === 'CONFIRMED' ||
+        lockedSettlement?.status === 'COMPLETED'
+      ) {
+        throw new ApiError(
+          'FORBIDDEN',
+          '이미 확정된 정산은 수정할 수 없습니다.'
+        );
+      }
 
       // 내 기존 할당 지우고 새 선택으로 교체 (재제출은 전량 재산출 — api-spec §10 L364)
       await tx.itemAssignment.deleteMany({
