@@ -396,7 +396,7 @@ VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY
 - 진행 현황: `work.md` (루트)
 - 완료 이력: `history.md` (루트)
 - 아키텍처 상세: `docs/ARCHITECTURE.md`
-- 도메인: `yummpi.app` (초대 링크: `https://yummpi.app/join/{inviteCode}`)
+- 도메인: `yummpi.com` (구매·DNS=Cloudflare, 2026-06-25 확정 — 기존 `yummpi.app` 표기 정정). 초대 링크: `https://yummpi.com/join/{inviteCode}` (실제 URL은 `NEXTAUTH_URL` env 기준 생성). wss 소켓 = `ws.yummpi.com` (`docs/deploy/aws-vercel.md §16`)
 
 ### MVP 포함/제외 범위
 

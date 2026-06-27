@@ -71,3 +71,33 @@ export function createMeeting(
     body: JSON.stringify(input),
   });
 }
+
+// PATCH /api/v1/meetings/:id 입력 (호스트). 부분 수정 — 보낸 필드만 갱신.
+export interface UpdateMeetingInput {
+  title?: string;
+  description?: string;
+  scheduledAt?: string; // ISO 문자열
+  maxMembers?: number;
+}
+
+// PATCH 응답 (수정된 모임). 화면에서는 성공 여부만 사용.
+export interface UpdateMeetingResult {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export function updateMeeting(
+  meetingId: string,
+  input: UpdateMeetingInput
+): Promise<UpdateMeetingResult> {
+  return apiFetch<UpdateMeetingResult>(`/api/v1/meetings/${meetingId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+}
+
+// DELETE /api/v1/meetings/:id (호스트, 소프트 삭제 → CANCELLED). SETTLING 이후 409.
+export function deleteMeeting(meetingId: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/meetings/${meetingId}`, { method: 'DELETE' });
+}

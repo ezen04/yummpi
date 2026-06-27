@@ -30,7 +30,9 @@ export const POST = handleRoute(async (req: Request) => {
       authKey: auth,
       userAgent,
     },
-    update: { p256dhKey: p256dh, authKey: auth, userAgent },
+    // endpoint(=기기)는 전역 unique. 같은 기기에서 다른 계정이 재등록하면
+    // 소유권을 현재 사용자로 재할당해야 이전 사용자 알림이 이 기기로 새지 않는다.
+    update: { userId: user.id, p256dhKey: p256dh, authKey: auth, userAgent },
   });
 
   return apiSuccess(

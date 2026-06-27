@@ -45,3 +45,12 @@ export const paymentStatusSchema = z.enum([
   'PAID',
   'EXEMPT',
 ]);
+
+// 인앱 알림 카테고리 (Prisma NotificationCategory 일치, #117)
+export const notificationCategorySchema = z.enum([
+  'PAYMENT',
+  'SETTLEMENT',
+  'VOTE',
+  'MEETING',
+]);
+export type NotificationCategory = z.infer<typeof notificationCategorySchema>;

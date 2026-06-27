@@ -84,6 +84,9 @@ export async function setGuestCookie(
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
+    // prod에서 서브도메인(ws.yummpi.com) 소켓이 게스트 쿠키를 읽도록 상위 도메인 발급.
+    // COOKIE_DOMAIN은 Production에만 '.yummpi.com' — 로컬/Preview는 비워 host-only.
+    domain: process.env.COOKIE_DOMAIN || undefined,
     path: '/',
     maxAge: MAX_AGE_SEC,
   });
@@ -100,5 +103,10 @@ export async function readGuestCookie(
 /** 게스트 쿠키 제거. */
 export async function clearGuestCookie(meetingId: string): Promise<void> {
   const store = await cookies();
-  store.delete(guestCookieName(meetingId));
+  // 도메인 쿠키로 발급됐다면 삭제 시에도 같은 domain을 명시해야 제거된다.
+  store.delete({
+    name: guestCookieName(meetingId),
+    domain: process.env.COOKIE_DOMAIN || undefined,
+    path: '/',
+  });
 }

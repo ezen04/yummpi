@@ -1,7 +1,13 @@
+import { loadEnvConfig } from '@next/env';
 import { defineConfig, devices } from '@playwright/test';
+
+// Next.js .env.local 을 로드해 DATABASE_URL 등을 워커 프로세스에 전파한다.
+// (global-setup 과 test 파일에서 PrismaClient 를 직접 사용할 때 필요)
+loadEnvConfig(process.cwd());
 
 export default defineConfig({
   testDir: 'tests',
+  globalSetup: './playwright.global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -12,8 +18,19 @@ export default defineConfig({
   },
   projects: [
     {
+      // smoke + 다른 security 파일 (인증 불필요)
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: ['**/security/settlement.spec.ts'],
+    },
+    {
+      // settlement E2E — storageState 로 카카오 세션 주입
+      name: 'authenticated',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
+      },
+      testMatch: ['**/security/settlement.spec.ts'],
     },
   ],
   webServer: {

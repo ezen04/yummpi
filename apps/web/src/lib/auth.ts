@@ -6,11 +6,34 @@ import { prisma } from '@/lib/prisma';
 // 게스트는 NextAuth를 사용하지 않는다(ERD v2.2 b안).
 // 모임 범위 서명 토큰 → 쿠키, 해시는 meeting_members.guest_token_hash.
 // CredentialsProvider는 DB 세션 전략과 호환 불가하여 제거.
+
+// 서브도메인(ws.yummpi.com) 소켓 핸드셰이크가 세션 쿠키를 읽으려면
+// prod에서 쿠키를 상위 도메인(.yummpi.com)으로 발급해야 한다(aws-vercel.md §3.3/§16.3).
+// COOKIE_DOMAIN은 Vercel Production에만 '.yummpi.com'으로 설정 — 로컬/Preview는 비운다(host-only).
+// session-token만 오버라이드한다(csrf 등 __Host- 쿠키는 Domain 속성 금지 → 기본값 유지,
+// 소켓 인증엔 session-token만 필요).
+const cookieDomain = process.env.COOKIE_DOMAIN;
+const sessionCookieOverride: NextAuthOptions['cookies'] = cookieDomain
+  ? {
+      sessionToken: {
+        name: '__Secure-next-auth.session-token',
+        options: {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          secure: true,
+          domain: cookieDomain,
+        },
+      },
+    }
+  : undefined;
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'database',
   },
+  ...(sessionCookieOverride ? { cookies: sessionCookieOverride } : {}),
   pages: {
     // OAuth 실패·취소 시 NextAuth 기본 화면 대신 커스텀 안내로.
     error: '/login/error',

@@ -5,6 +5,7 @@ interface ReminderJobData {
   meetingId: string;
   paymentId: string;
   targetUserId: string;
+  sequence: number; // 오늘 몇 번째 독촉인지 (jobId 유니크화용)
 }
 
 const globalForQueue = globalThis as unknown as {
@@ -34,7 +35,10 @@ export async function enqueuePaymentReminder(
   data: ReminderJobData
 ): Promise<void> {
   await getQueue().add('remind', data, {
-    jobId: `remind:${data.paymentId}`,
+    // BullMQ는 custom jobId에 ':'를 허용하지 않는다(잡 키가 bull:{queue}:{jobId}).
+    // ':'를 쓰면 add()가 "Custom Id cannot contain :"로 throw → 독촉 API 500.
+    // 회차(sequence)를 붙여 하루 2·3회차가 중복 제거에 막히지 않게 한다.
+    jobId: `remind-${data.paymentId}-${data.sequence}`,
     removeOnComplete: true,
     removeOnFail: { count: 5 },
     attempts: 3,

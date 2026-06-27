@@ -144,6 +144,72 @@ export async function setMemberDeparture(
   }
 }
 
+// ── 입력 대기 (출발역 입력 현황 + 마감시각) ──────────────────
+
+export interface DepartureStatusMember {
+  memberId: string;
+  nickname: string;
+  isGuest: boolean;
+  hasInput: boolean;
+  station: string | null;
+}
+
+export interface DepartureStatus {
+  members: DepartureStatusMember[];
+  inputCount: number;
+  total: number;
+  allInput: boolean;
+}
+
+/** 멤버별 출발역 입력 현황 조회 (② places 엔드포인트). */
+export async function fetchDepartureStatus(
+  meetingId: string
+): Promise<DepartureStatus> {
+  const res = await fetch(
+    `/api/v1/meetings/${meetingId}/places/departure-status`
+  );
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '입력 현황을 불러오지 못했습니다.')
+    );
+  }
+  const body = (await res.json()) as { data: DepartureStatus };
+  return body.data;
+}
+
+/** 출발역 입력 마감시각 저장 (호스트 전용, ① meeting PATCH 계약). closesAtIso = ISO 문자열. */
+export async function setWaitDeadline(
+  meetingId: string,
+  closesAtIso: string
+): Promise<void> {
+  const res = await fetch(`/api/v1/meetings/${meetingId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ departureInputClosesAt: closesAtIso }),
+  });
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '대기시간 설정에 실패했습니다.')
+    );
+  }
+}
+
+/** 출발역 입력 마감시각 조회 (① meeting GET). 미설정 시 null. */
+export async function fetchWaitDeadline(
+  meetingId: string
+): Promise<string | null> {
+  const res = await fetch(`/api/v1/meetings/${meetingId}`);
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, '모임 정보를 불러오지 못했습니다.')
+    );
+  }
+  const body = (await res.json()) as {
+    data: { departureInputClosesAt: string | null };
+  };
+  return body.data.departureInputClosesAt ?? null;
+}
+
 export async function fetchPlaceRecommendations(
   meetingId: string,
   lat: string,

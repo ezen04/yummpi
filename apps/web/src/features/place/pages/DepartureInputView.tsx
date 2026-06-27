@@ -32,7 +32,7 @@ export function DepartureInputView({
       { lat: row.lat, lng: row.lng, stationName: row.stationName },
       {
         onSuccess: () => {
-          router.push(`/meetings/${meetingId}/place/optimal`);
+          router.push(`/meetings/${meetingId}/place/waiting`);
         },
       }
     );
