@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { Input } from '@/components/common/Input';
+import { toast } from '@yummpi/ui';
+import { SettlementCreateResponseSchema } from '@yummpi/schemas';
 import { useSettlementStore } from '@/features/settlement/store';
-import { MOCK_SETTLEMENT_ID } from '@/features/settlement/constants';
 
 // TODO: 호스트 전용
 export default function SettlementEqualPage({
@@ -17,11 +18,40 @@ export default function SettlementEqualPage({
   const { meetingId } = use(params);
   const router = useRouter();
   const [totalAmount, setTotalAmount] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { setSplitMethod, setEqualAmount } = useSettlementStore();
 
+  // setSplitMethod는 Zustand stable ref — 의존성 배열 불필요
   useEffect(() => {
     setSplitMethod('EQUAL');
-  }, [setSplitMethod]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSubmit = async () => {
+    const amount = Number(totalAmount);
+    if (amount <= 0) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/v1/meetings/${meetingId}/settlements`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ splitMethod: 'EQUAL', totalAmount: amount }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.success) {
+        toast.error(body?.error?.message ?? '정산 생성에 실패했습니다.');
+        return;
+      }
+      const parsed = SettlementCreateResponseSchema.safeParse(body.data);
+      if (!parsed.success) {
+        toast.error('정산 응답 형식 오류가 발생했습니다.');
+        return;
+      }
+      setEqualAmount(amount);
+      router.push(`/meetings/${meetingId}/settlement/${parsed.data.id}/result`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -45,15 +75,9 @@ export default function SettlementEqualPage({
       </main>
       <Footer
         variant="button"
-        label="정산 결과로"
-        disabled={!totalAmount || Number(totalAmount) <= 0}
-        onClick={() => {
-          // TODO: POST /settlements { splitMethod:'EQUAL', totalAmount } → 응답 settlementId로 교체
-          setEqualAmount(Number(totalAmount));
-          router.push(
-            `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/result`
-          );
-        }}
+        label={submitting ? '처리 중...' : '정산 결과로'}
+        disabled={!totalAmount || Number(totalAmount) <= 0 || submitting}
+        onClick={handleSubmit}
       />
     </>
   );
