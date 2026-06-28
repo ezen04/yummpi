@@ -1,12 +1,7 @@
+import type { NotificationCategory } from '@prisma/client';
 import { prisma } from '../prisma.js';
 import { sendWebPush } from './webPush.js';
 import { sendNotificationEmail } from './email.js';
-
-export type NotificationCategory =
-  | 'PAYMENT'
-  | 'SETTLEMENT'
-  | 'VOTE'
-  | 'MEETING';
 
 export type NotificationPayload = {
   title: string;
