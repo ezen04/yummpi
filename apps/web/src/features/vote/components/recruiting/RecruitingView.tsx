@@ -293,10 +293,20 @@ export function RecruitingView({
           <Button
             variant="basic"
             size="lg"
-            onClick={() => router.push(`/meetings/${meeting.id}`)}
+            onClick={() => {
+              // 호스트: 대기시간 미설정이면 wait-setup, 설정 완료면 본인 입력 위해 departure.
+              // 비호스트는 wait-setup 권한 없음 → 항상 departure.
+              const target =
+                isHost && meeting.departureInputClosesAt == null
+                  ? `/meetings/${meeting.id}/place/wait-setup`
+                  : `/meetings/${meeting.id}/place/departure`;
+              router.push(target);
+            }}
             className="w-full"
           >
-            모임 상세 페이지로 돌아가기
+            {isHost && meeting.departureInputClosesAt == null
+              ? '대기 시간 설정하러 가기'
+              : '출발역 입력하러 가기'}
           </Button>
         </div>
       </div>
