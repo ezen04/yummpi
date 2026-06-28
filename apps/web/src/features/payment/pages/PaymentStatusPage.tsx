@@ -109,6 +109,7 @@ export function PaymentStatusPage({ meetingId }: Props) {
       return (
         <PaymentNotInitializedState
           viewerRole={data.viewerRole}
+          settlementStatus={data.settlementStatus}
           onInitialize={() => initializePayments.mutate()}
           isInitializing={initializePayments.isPending}
           errorMessage={initializeErrorMessage}
