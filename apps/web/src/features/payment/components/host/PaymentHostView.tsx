@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PaymentMemberList } from './PaymentMemberList';
 import { PaymentHostBottomBar } from './PaymentHostBottomBar';
 import { MeetingCompleteModal } from './MeetingCompleteModal';
+import { HostAccountSection } from './HostAccountSection';
 import type {
   PaymentListItem,
   PaymentAction,
@@ -48,6 +49,7 @@ export function PaymentHostView({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 min-h-0 overflow-y-auto">
+        {viewerRole === 'HOST' && <HostAccountSection />}
         {actionErrorMessage && (
           <div
             role="alert"
