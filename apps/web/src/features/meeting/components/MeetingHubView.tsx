@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import type { MeetingStatus } from '@prisma/client';
+import type { MeetingStatus, SettlementStatus } from '@prisma/client';
 import {
   Share,
   Pencil,
@@ -51,6 +51,8 @@ interface Props {
   members: HubMember[];
   confirmedPlace: HubPlace | null;
   isHost: boolean;
+  settlementStatus: SettlementStatus | null;
+  paymentsInitialized: boolean;
 }
 
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
@@ -84,6 +86,8 @@ export function MeetingHubView({
   members,
   confirmedPlace,
   isHost,
+  settlementStatus,
+  paymentsInitialized,
 }: Props) {
   const router = useRouter();
   const meta = MEETING_STATUS_META[status];
@@ -459,13 +463,39 @@ export function MeetingHubView({
           />
         );
       case 'SETTLING':
-        return isHost ? (
+        if (!isHost) return <WaitingCard type="adjustment" />;
+        // SETTLING은 정산 단계와 송금 단계를 모두 포함한다(COMPLETED는 전원 송금 후).
+        // 정산 확정(CONFIRMED·방어적으로 COMPLETED 포함) 후엔 다음 할 일이 송금.
+        // Payment 초기화 전이면 "송금 시작", 이미 초기화됐으면 "송금 현황"으로 분기.
+        if (
+          settlementStatus === 'CONFIRMED' ||
+          settlementStatus === 'COMPLETED'
+        ) {
+          return (
+            <NextCard
+              title={
+                paymentsInitialized
+                  ? '송금이 진행 중이에요'
+                  : '정산이 확정됐어요'
+              }
+              desc={
+                paymentsInitialized
+                  ? '송금 현황을 확인하고 관리해 보세요.'
+                  : '이제 멤버들에게 송금을 요청할 수 있어요.'
+              }
+            >
+              <HubCta
+                label={paymentsInitialized ? '송금 현황 보기' : '송금 시작하기'}
+                onClick={() => router.push(`${base}/payments`)}
+              />
+            </NextCard>
+          );
+        }
+        return (
           <TodoCard
             type="adjustment"
             onAction={() => router.push(`${base}/settlement/new`)}
           />
-        ) : (
-          <WaitingCard type="adjustment" />
         );
       case 'COMPLETED':
         return (
