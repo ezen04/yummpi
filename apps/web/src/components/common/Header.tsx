@@ -64,22 +64,19 @@ export function Header({
   const ICON_BTN =
     'flex items-center justify-center w-10 h-10 bg-transparent border-none cursor-pointer text-[var(--label-normal)] rounded-[var(--radius-full)] transition-colors hover:bg-[var(--fill-normal)] active:bg-[var(--fill-strong)]';
 
-  // mypage: 중앙 타이틀 + 오른쪽 설정 아이콘
+  // mypage: 좌측 타이틀 + 오른쪽 설정 아이콘 (다른 헤더와 좌측 정렬 통일)
   if (isMypage) {
     return (
       <header
         className={cn(
           HEADER_BASE,
-          'flex items-center justify-center px-5 relative',
+          'flex items-center justify-between px-5',
           className
         )}
       >
         <span className={TITLE_CLS}>{title ?? '마이페이지'}</span>
         {onSettings && (
-          <button
-            onClick={onSettings}
-            className={cn(ICON_BTN, 'absolute right-[10px]')}
-          >
+          <button onClick={onSettings} className={cn(ICON_BTN, '-mr-2')}>
             <Settings size={22} strokeWidth={1.5} />
           </button>
         )}
