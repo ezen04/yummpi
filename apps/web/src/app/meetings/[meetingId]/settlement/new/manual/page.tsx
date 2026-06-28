@@ -12,11 +12,10 @@ import { IconButton } from '@/components/common/IconButton';
 import { Tipbox } from '@/components/common/Tipbox';
 import { Button } from '@/components/common/Button';
 import { Confirmbox } from '@/components/common/Confirmbox';
+import { toast } from '@yummpi/ui';
+import { SettlementCreateResponseSchema } from '@yummpi/schemas';
 import { useSettlementStore, OcrItem } from '@/features/settlement/store';
-import {
-  FLOW_STEPS,
-  MOCK_SETTLEMENT_ID,
-} from '@/features/settlement/constants';
+import { FLOW_STEPS } from '@/features/settlement/constants';
 
 const MANUAL_RECEIPT_ID = 'manual-receipt';
 
@@ -49,6 +48,7 @@ export default function SettlementManualPage({
 
   const [sheet, setSheet] = useState(SHEET_CLOSED);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const state = useSettlementStore.getState();
@@ -122,20 +122,13 @@ export default function SettlementManualPage({
           {(manualReceipt?.ocrItems ?? []).map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between px-4 py-3 rounded-md border"
-              style={{ borderColor: 'var(--line-normal)' }}
+              className="flex items-center justify-between px-4 py-3 rounded-md border border-[var(--line-normal)]"
             >
               <div className="flex-1">
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--label-normal)' }}
-                >
+                <p className="text-sm font-medium text-[var(--label-normal)]">
                   {item.name}
                 </p>
-                <p
-                  className="text-xs"
-                  style={{ color: 'var(--label-assistive)' }}
-                >
+                <p className="text-xs text-[var(--label-assistive)]">
                   {item.quantity}개 ×{' '}
                   {item.unitPrice ??
                     (item.quantity > 0
@@ -148,7 +141,7 @@ export default function SettlementManualPage({
                 <IconButton
                   size={32}
                   shape="square"
-                  style={{ background: 'transparent' }}
+                  className="bg-transparent"
                   icon={<Pencil size={16} />}
                   onClick={() => handleOpenForm(item)}
                 />
@@ -158,32 +151,16 @@ export default function SettlementManualPage({
 
           <button
             onClick={() => handleOpenForm()}
-            className="w-full py-3 rounded-md text-sm font-medium"
-            style={{
-              border: '1.5px dashed var(--line-normal)',
-              color: 'var(--label-alternative)',
-              background: 'transparent',
-            }}
+            className="w-full py-3 rounded-md text-sm font-medium text-[var(--label-alternative)] border border-dashed border-[var(--line-normal)] bg-transparent"
           >
             + 항목 추가
           </button>
         </div>
 
         {(manualReceipt?.ocrItems.length ?? 0) > 0 && (
-          <div
-            className="p-4 rounded-md"
-            style={{ background: 'var(--bg-alternative)' }}
-          >
-            <p
-              className="text-xs mb-1"
-              style={{ color: 'var(--label-assistive)' }}
-            >
-              소계
-            </p>
-            <p
-              className="text-xl font-bold"
-              style={{ color: 'var(--label-normal)' }}
-            >
+          <div className="p-4 rounded-md bg-[var(--bg-alternative)]">
+            <p className="text-xs mb-1 text-[var(--label-assistive)]">소계</p>
+            <p className="text-xl font-bold text-[var(--label-normal)]">
               {totalAmount.toLocaleString()}원
             </p>
           </div>
@@ -192,12 +169,9 @@ export default function SettlementManualPage({
         <hr className="border-[var(--line-normal)]" />
 
         <div className="space-y-3">
-          <p
-            className="text-sm font-medium"
-            style={{ color: 'var(--label-normal)' }}
-          >
+          <p className="text-sm font-medium text-[var(--label-normal)]">
             정산 방식 선택{' '}
-            <span style={{ color: 'var(--status-negative)' }}>*</span>
+            <span className="text-[var(--status-negative)]">*</span>
           </p>
           <div className="space-y-2">
             {(
@@ -225,24 +199,79 @@ export default function SettlementManualPage({
 
       <Footer
         variant="button"
-        label={splitMethod === 'EQUAL' ? '정산 결과로' : '항목 선택으로'}
-        disabled={!canProceed}
+        label={
+          submitting
+            ? '처리 중...'
+            : splitMethod === 'EQUAL'
+              ? '정산 결과로'
+              : '항목 선택으로'
+        }
+        disabled={!canProceed || submitting}
         onClick={() => setConfirmOpen(true)}
       />
 
       <Confirmbox
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setConfirmOpen(false);
-          if (splitMethod === 'EQUAL') {
-            router.push(
-              `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/result`
+          if (!splitMethod || !manualReceipt) return;
+          setSubmitting(true);
+          try {
+            // 1. 직접 입력 영수증 생성
+            const items = manualReceipt.ocrItems.map((it) => ({
+              name: it.name,
+              quantity: it.quantity,
+              unitPrice:
+                it.unitPrice ?? Math.floor(it.totalPrice / it.quantity),
+              totalPrice: it.totalPrice,
+            }));
+            const receiptRes = await fetch(
+              `/api/v1/meetings/${meetingId}/receipts/manual`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ totalAmount, items }),
+              }
             );
-          } else {
-            router.push(
-              `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/assign`
+            const receiptBody = await receiptRes.json().catch(() => null);
+            if (!receiptRes.ok || !receiptBody?.success) {
+              toast.error(
+                receiptBody?.error?.message ?? '영수증 저장에 실패했습니다.'
+              );
+              return;
+            }
+            // 2. 정산 생성 (영수증 존재하므로 totalAmount 서버 산출)
+            const settlementRes = await fetch(
+              `/api/v1/meetings/${meetingId}/settlements`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ splitMethod }),
+              }
             );
+            const settlementBody = await settlementRes.json().catch(() => null);
+            if (!settlementRes.ok || !settlementBody?.success) {
+              toast.error(
+                settlementBody?.error?.message ?? '정산 생성에 실패했습니다.'
+              );
+              return;
+            }
+            const parsed = SettlementCreateResponseSchema.safeParse(
+              settlementBody.data
+            );
+            if (!parsed.success) {
+              toast.error('정산 응답 형식 오류가 발생했습니다.');
+              return;
+            }
+            const sid = parsed.data.id;
+            if (splitMethod === 'EQUAL') {
+              router.push(`/meetings/${meetingId}/settlement/${sid}/result`);
+            } else {
+              router.push(`/meetings/${meetingId}/settlement/${sid}/assign`);
+            }
+          } finally {
+            setSubmitting(false);
           }
         }}
         title="정산 방식을 확정할까요?"
@@ -305,7 +334,7 @@ export default function SettlementManualPage({
               <IconButton
                 size={48}
                 shape="square"
-                style={{ background: 'transparent' }}
+                className="bg-transparent"
                 icon={<Trash size={18} color="var(--status-negative)" />}
                 onClick={() => handleItemDelete(sheet.editingItem!.id)}
               />
