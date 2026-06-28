@@ -27,6 +27,8 @@ export interface MeetingDetail {
   status: MeetingStatus;
   scheduledAt: string;
   votingClosesAt: string | null;
+  /** ② 출발역 입력 마감 시각 — null이면 호스트가 아직 대기시간 미설정 */
+  departureInputClosesAt: string | null;
   anonymousVoting: boolean;
   confirmedCandidateId: string | null;
   budgetPerPerson: number | null;
@@ -49,6 +51,7 @@ interface RawMeetingResponse {
   status: MeetingStatus;
   scheduledAt: string;
   votingClosesAt: string | null;
+  departureInputClosesAt: string | null;
   anonymousVoting: boolean;
   confirmedCandidateId: string | null;
   budgetPerPerson: number | null;
@@ -88,6 +91,7 @@ async function fetchMeetingDetail(meetingId: string): Promise<MeetingDetail> {
     status: raw.status,
     scheduledAt: raw.scheduledAt,
     votingClosesAt: raw.votingClosesAt,
+    departureInputClosesAt: raw.departureInputClosesAt ?? null,
     anonymousVoting: raw.anonymousVoting,
     confirmedCandidateId: raw.confirmedCandidateId,
     budgetPerPerson: raw.budgetPerPerson,

@@ -71,6 +71,10 @@ export function VotingView({
   );
   const isTied = topCandidateIds.size > 1;
 
+  // 0표 + 마감 = 전원 동률(0표). 동률 정책(호스트 수동 선택)으로 흡수.
+  const isNoVotesClosed = isClosed && votesData.votedMemberCount === 0;
+  const needsManualSelection = isTied || isNoVotesClosed;
+
   const hasMyVote = !!votesData.myCandidateId;
 
   const handleVote = (candidateId: string) => {
@@ -83,8 +87,8 @@ export function VotingView({
   const [forceTieBreak, setForceTieBreak] = React.useState(false);
 
   const handleConfirm = () => {
-    if (isTied) {
-      // 동률 → 호스트 수동 선택 화면으로 전환 (ConfirmPlaceSheet 안 띄움)
+    if (needsManualSelection) {
+      // 동률 또는 0표+마감 → 호스트 수동 선택 화면으로 전환 (ConfirmPlaceSheet 안 띄움)
       setForceTieBreak(true);
       return;
     }
@@ -92,8 +96,9 @@ export function VotingView({
     openConfirmPlace(topCandidate.id);
   };
 
-  // 동률 + 호스트가 마감했거나(isClosed) 직접 트리거(forceTieBreak)한 경우 TieBreak 화면
-  if (isTied && viewerRole === 'HOST' && (isClosed || forceTieBreak)) {
+  // 호스트가 하단 "확정" 버튼을 직접 눌러 트리거한 경우(forceTieBreak)에만 TieBreak 화면.
+  // 동률·0표 모두 마감 후 자동 전환하지 않고 호스트의 명시적 액션을 기다린다.
+  if (needsManualSelection && viewerRole === 'HOST' && forceTieBreak) {
     return (
       <>
         <TieBreakSelectPanel
@@ -133,6 +138,18 @@ export function VotingView({
             votedMemberCount={votesData.votedMemberCount}
             totalVoters={votesData.totalVoters}
           />
+        </div>
+      )}
+
+      {/* 마감 + 0표 케이스 — 동률 정책(호스트 수동 선택)으로 흡수. 안내만 부드럽게. */}
+      {isClosed && votesData.votedMemberCount === 0 && (
+        <div className="shrink-0 mx-5 mb-3 p-3 rounded-[var(--radius-8)] bg-[var(--fill-normal)]">
+          <p className="text-[13px] leading-[18px] font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0">
+            아직 투표가 없어요.{' '}
+            {viewerRole === 'HOST'
+              ? '직접 장소를 선택해주세요.'
+              : '호스트가 직접 선택할 거예요.'}
+          </p>
         </div>
       )}
 

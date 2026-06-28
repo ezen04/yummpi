@@ -3,6 +3,7 @@ import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { transitionMeetingStatus } from '@/lib/meeting-status';
 import { getSocketEmitter } from '@/lib/socket-emitter';
+import { notifyMeetingMembers } from '@/lib/notify-meeting-members';
 import type { MeetingStatus } from '@prisma/client';
 
 const ALLOWED_STATUSES: MeetingStatus[] = ['VOTING', 'PLACE_CONFIRMED'];
@@ -29,7 +30,7 @@ export const POST = handleRoute(
 
     const meeting = await prisma.meeting.findUnique({
       where: { id: meetingId },
-      select: { status: true },
+      select: { status: true, title: true },
     });
 
     if (!meeting) {
@@ -155,6 +156,19 @@ export const POST = handleRoute(
           meetingId,
           status: 'PLACE_CONFIRMED',
         });
+
+      // P-2: VOTING → PLACE_CONFIRMED 최초 전환 시점에만 푸시.
+      if (member.userId) {
+        await notifyMeetingMembers({
+          meetingId,
+          excludeUserId: member.userId,
+          category: 'MEETING',
+          title: '모임 장소가 확정됐어요',
+          body: `'${meeting.title}' 모임이 '${candidate.name}'(으)로 확정됐어요.`,
+          url: `/meetings/${meetingId}`,
+          dedupeKey: `place-confirmed.${meetingId}`,
+        });
+      }
     }
 
     return apiSuccess(

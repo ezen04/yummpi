@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getCurrentMember } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
 import { VotePage } from '@/features/vote/pages/VotePage';
@@ -20,6 +20,12 @@ export default async function Page({
     select: { status: true },
   });
   if (!meeting) notFound();
+
+  // vote 페이지는 RECRUITING/VOTING 전용. 이후 상태에서 진입하면 모임 상세로
+  // 서버 측 redirect — client effect 기반 redirect로는 스켈레톤이 짧게 노출됨.
+  if (meeting.status !== 'RECRUITING' && meeting.status !== 'VOTING') {
+    redirect(`/meetings/${meetingId}`);
+  }
 
   return (
     <VotePage

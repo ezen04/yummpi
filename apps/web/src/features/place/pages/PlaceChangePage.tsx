@@ -55,6 +55,15 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
     [votesData?.candidates, meeting?.confirmedCandidateId]
   );
 
+  // 변경 가능한 후보 목록 — 현재 확정된 후보는 상단에 강조 카드로 따로 노출되므로 제외.
+  const changeableCandidates = React.useMemo(
+    () =>
+      votesData?.candidates.filter(
+        (c) => c.id !== meeting?.confirmedCandidateId
+      ) ?? [],
+    [votesData?.candidates, meeting?.confirmedCandidateId]
+  );
+
   const confirmedSubline = React.useMemo(() => {
     if (!confirmedCandidate) return '';
     const short = shortenKakaoCategory(confirmedCandidate.categoryName);
@@ -85,114 +94,114 @@ export function PlaceChangePage({ meetingId }: PlaceChangePageProps) {
   }
 
   return (
-    <div className="h-screen w-full bg-[var(--bg-alternative)] flex justify-center">
-      <div className="w-full max-w-[480px] h-full bg-[var(--bg-normal)] flex flex-col overflow-hidden transform-gpu">
-        <Header title="장소 변경" onBack={() => router.back()} />
+    // 모바일 폭·배경은 루트 layout이 담당. transform-gpu는 fixed 자손 가두기용.
+    // h-screen: footer 고정 + inner overflow-y-auto만 스크롤되도록 viewport 높이로 가둠.
+    <div className="h-screen flex flex-col overflow-hidden transform-gpu">
+      <Header title="장소 변경" onBack={() => router.back()} />
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 flex flex-col gap-6">
-          {/* 1. 현재 확정된 장소 (기존 1위) */}
-          {confirmedCandidate && (
-            <ConfirmedPlaceCard
-              name={confirmedCandidate.name}
-              categoryName={confirmedCandidate.categoryName}
-              subline={confirmedSubline}
-              badgeLabel="현재 1위 장소"
-              badgeIcon={
-                <Flame
-                  size={16}
-                  strokeWidth={0}
-                  fill="var(--primary)"
-                  color="var(--primary)"
-                />
-              }
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 flex flex-col gap-6">
+        {/* 1. 현재 확정된 장소 (기존 1위) */}
+        {confirmedCandidate && (
+          <ConfirmedPlaceCard
+            name={confirmedCandidate.name}
+            categoryName={confirmedCandidate.categoryName}
+            subline={confirmedSubline}
+            badgeLabel="현재 1위 장소"
+            badgeIcon={
+              <Flame
+                size={16}
+                strokeWidth={0}
+                fill="var(--primary)"
+                color="var(--primary)"
+              />
+            }
+          />
+        )}
+
+        {/* 2. 검색 진입 + 검색해서 선택한 장소 */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0">
+            원하는 장소를 검색하세요
+          </h2>
+          <button
+            type="button"
+            onClick={handleSearchEntry}
+            className={cn(
+              'relative h-[50px] rounded-[var(--radius-12)]',
+              'border border-[var(--line-normal)] bg-[var(--bg-normal)]',
+              'flex items-center gap-2 pl-4 pr-4 cursor-pointer',
+              'hover:border-[var(--primary)] transition-colors duration-150',
+              'text-left'
+            )}
+          >
+            <Search
+              size={19}
+              strokeWidth={1.5}
+              color="var(--label-alternative)"
+              className="shrink-0"
+            />
+            <span className="text-[15px] leading-[22px] font-[var(--font-sans)] text-[var(--label-assistive)]">
+              장소를 검색해주세요
+            </span>
+          </button>
+
+          {pendingSearchPlace && (
+            <PlaceChangeCandidateCard
+              name={pendingSearchPlace.name}
+              categoryName={pendingSearchPlace.categoryName}
+              distanceM={pendingSearchPlace.distanceM}
+              isSelected={selection?.type === 'search'}
+              onClick={() => setExplicitChoice({ type: 'search' })}
             />
           )}
+        </section>
 
-          {/* 2. 검색 진입 + 검색해서 선택한 장소 */}
+        {/* 3. 기존 후보 카드 목록 — 현재 확정된 후보 제외 */}
+        {changeableCandidates.length > 0 && (
           <section className="flex flex-col gap-3">
             <h2 className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0">
-              원하는 장소를 검색하세요
+              후보 장소에서 선택할 수 있어요
             </h2>
-            <button
-              type="button"
-              onClick={handleSearchEntry}
-              className={cn(
-                'relative h-[50px] rounded-[var(--radius-12)]',
-                'border border-[var(--line-normal)] bg-[var(--bg-normal)]',
-                'flex items-center gap-2 pl-4 pr-4 cursor-pointer',
-                'hover:border-[var(--primary)] transition-colors duration-150',
-                'text-left'
-              )}
-            >
-              <Search
-                size={19}
-                strokeWidth={1.5}
-                color="var(--label-alternative)"
-                className="shrink-0"
-              />
-              <span className="text-[15px] leading-[22px] font-[var(--font-sans)] text-[var(--label-assistive)]">
-                장소를 검색해주세요
-              </span>
-            </button>
-
-            {pendingSearchPlace && (
-              <PlaceChangeCandidateCard
-                name={pendingSearchPlace.name}
-                categoryName={pendingSearchPlace.categoryName}
-                distanceM={pendingSearchPlace.distanceM}
-                isSelected={selection?.type === 'search'}
-                onClick={() => setExplicitChoice({ type: 'search' })}
-              />
-            )}
+            <div className="flex flex-col gap-[10px]">
+              {changeableCandidates.map((candidate) => (
+                <PlaceChangeCandidateCard
+                  key={candidate.id}
+                  name={candidate.name}
+                  categoryName={candidate.categoryName}
+                  distanceM={candidate.distanceM}
+                  voteCount={candidate.voteCount}
+                  isSelected={
+                    selection?.type === 'candidate' &&
+                    selection.id === candidate.id
+                  }
+                  onClick={() =>
+                    setExplicitChoice({ type: 'candidate', id: candidate.id })
+                  }
+                />
+              ))}
+            </div>
           </section>
-
-          {/* 3. 기존 후보 카드 목록 */}
-          {votesData.candidates.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <h2 className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0">
-                후보 장소에서 선택할 수 있어요
-              </h2>
-              <div className="flex flex-col gap-[10px]">
-                {votesData.candidates.map((candidate) => (
-                  <PlaceChangeCandidateCard
-                    key={candidate.id}
-                    name={candidate.name}
-                    categoryName={candidate.categoryName}
-                    distanceM={candidate.distanceM}
-                    voteCount={candidate.voteCount}
-                    isSelected={
-                      selection?.type === 'candidate' &&
-                      selection.id === candidate.id
-                    }
-                    onClick={() =>
-                      setExplicitChoice({ type: 'candidate', id: candidate.id })
-                    }
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        <div className="shrink-0 border-t border-[var(--line-normal)] bg-[var(--bg-normal)] px-5 py-4 flex flex-col gap-3">
-          <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 text-center">
-            확정하면 참여자에게 장소 확정 알림이 가요
-          </p>
-          <Button
-            variant="basic"
-            size="lg"
-            onClick={handleConfirm}
-            disabled={!hasSelection}
-            className="w-full"
-          >
-            이 장소로 확정하기
-          </Button>
-        </div>
-
-        {confirmPlaceSheetOpen && (
-          <ConfirmPlaceSheet meetingId={meeting.id} votesData={votesData} />
         )}
       </div>
+
+      <div className="shrink-0 border-t border-[var(--line-normal)] bg-[var(--bg-normal)] px-5 py-4 flex flex-col gap-3">
+        <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0 text-center">
+          확정하면 참여자에게 장소 확정 알림이 가요
+        </p>
+        <Button
+          variant="basic"
+          size="lg"
+          onClick={handleConfirm}
+          disabled={!hasSelection}
+          className="w-full"
+        >
+          이 장소로 확정하기
+        </Button>
+      </div>
+
+      {confirmPlaceSheetOpen && (
+        <ConfirmPlaceSheet meetingId={meeting.id} votesData={votesData} />
+      )}
     </div>
   );
 }
