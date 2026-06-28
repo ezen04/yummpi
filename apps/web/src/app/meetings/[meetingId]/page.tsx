@@ -24,12 +24,24 @@ export default async function MeetingHubPage({
     include: {
       members: { where: { leftAt: null } },
       confirmedCandidate: true,
+      settlement: { select: { status: true } },
     },
   });
   if (!meeting) notFound();
 
   const member = await getCurrentMember(meetingId);
   const isHost = member?.role === 'HOST';
+
+  // 정산 확정(CONFIRMED) 이후 허브 CTA를 "송금 시작" vs "송금 현황"으로 가르기 위해
+  // Payment 초기화 여부를 본다. 확정 단계에서만 조회(그 외 status는 불필요).
+  const settlementStatus = meeting.settlement?.status ?? null;
+  let paymentsInitialized = false;
+  if (settlementStatus === 'CONFIRMED' || settlementStatus === 'COMPLETED') {
+    const paymentCount = await prisma.payment.count({
+      where: { settlementMember: { settlement: { meetingId } } },
+    });
+    paymentsInitialized = paymentCount > 0;
+  }
 
   // 호스트 먼저 정렬한 참여자 목록(아바타용).
   const members: HubMember[] = meeting.members
@@ -62,6 +74,8 @@ export default async function MeetingHubPage({
         members={members}
         confirmedPlace={confirmedPlace}
         isHost={isHost}
+        settlementStatus={settlementStatus}
+        paymentsInitialized={paymentsInitialized}
       />
     </div>
   );
