@@ -46,8 +46,18 @@ export default function SettlementEqualPage({
         toast.error('정산 응답 형식 오류가 발생했습니다.');
         return;
       }
+      const sid = parsed.data.id;
+      const confirmRes = await fetch(
+        `/api/v1/meetings/${meetingId}/settlements/${sid}/confirm`,
+        { method: 'POST' }
+      );
+      if (!confirmRes.ok) {
+        const confirmBody = await confirmRes.json().catch(() => null);
+        toast.error(confirmBody?.error?.message ?? '정산 확정에 실패했습니다.');
+        return;
+      }
       setEqualAmount(amount);
-      router.push(`/meetings/${meetingId}/settlement/${parsed.data.id}/result`);
+      router.push(`/meetings/${meetingId}/settlement/${sid}/result`);
     } finally {
       setSubmitting(false);
     }

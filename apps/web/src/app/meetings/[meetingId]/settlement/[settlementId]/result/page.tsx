@@ -53,7 +53,10 @@ export default function SettlementResultPage({
       <main className="flex-1 overflow-y-auto">
         <div className="mx-5 mt-5 mb-6 p-4 rounded-[var(--radius-12)] bg-[var(--primary-tint)]">
           <p className="text-[15px] font-semibold m-0 text-[var(--primary)]">
-            정산이 확정됐어요
+            {settlement?.status === 'CONFIRMED' ||
+            settlement?.status === 'COMPLETED'
+              ? '정산이 확정됐어요'
+              : '아직 정산이 완료되지 않았어요'}
           </p>
           {!loading && !error && (
             <p className="text-[13px] mt-1 mb-0 text-[var(--label-assistive)]">

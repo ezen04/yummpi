@@ -266,6 +266,17 @@ export default function SettlementManualPage({
             }
             const sid = parsed.data.id;
             if (splitMethod === 'EQUAL') {
+              const confirmRes = await fetch(
+                `/api/v1/meetings/${meetingId}/settlements/${sid}/confirm`,
+                { method: 'POST' }
+              );
+              if (!confirmRes.ok) {
+                const confirmBody = await confirmRes.json().catch(() => null);
+                toast.error(
+                  confirmBody?.error?.message ?? '정산 확정에 실패했습니다.'
+                );
+                return;
+              }
               router.push(`/meetings/${meetingId}/settlement/${sid}/result`);
             } else {
               router.push(`/meetings/${meetingId}/settlement/${sid}/assign`);
