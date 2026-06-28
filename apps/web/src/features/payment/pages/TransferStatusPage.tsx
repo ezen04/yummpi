@@ -8,6 +8,7 @@ import { PaymentErrorState } from '../components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
 import { PaymentLoadingSkeleton } from '../components/shell/PaymentLoadingSkeleton';
 import { TransferActionPanel } from '../components/transfer/TransferActionPanel';
+import { toast } from '@yummpi/ui';
 
 type Props = {
   meetingId: string;
@@ -72,6 +73,7 @@ export function TransferStatusPage({ meetingId }: Props) {
         invalidate: false,
       });
       invalidatePayments();
+      toast.success('송금을 취소했어요');
     }
 
     return (
