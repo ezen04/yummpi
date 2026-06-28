@@ -29,12 +29,11 @@ export function TieBreakSelectPanel({
 
   const [localSelected, setLocalSelected] = React.useState<string | null>(null);
 
-  // 동률 후보(최다 득표 동률)만 추출
+  // 동률 후보(최다 득표 동률)만 추출.
+  // 0표 케이스(전원 0표 동률)는 topCount === 0이라 전체 후보가 voteCount === topCount로 자동 포함.
   const tiedCandidates = React.useMemo(() => {
     const topCount = votesData.candidates[0]?.voteCount ?? 0;
-    return votesData.candidates.filter(
-      (c) => c.voteCount === topCount && topCount > 0
-    );
+    return votesData.candidates.filter((c) => c.voteCount === topCount);
   }, [votesData.candidates]);
 
   const activeSelected = localSelected ?? selectedCandidateId;
@@ -49,7 +48,9 @@ export function TieBreakSelectPanel({
       <Header title="장소 확정" onBack={onBack} />
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 flex flex-col gap-6">
-        <TieBreakCompletedNotice />
+        <TieBreakCompletedNotice
+          variant={votesData.votedMemberCount === 0 ? 'noVotes' : 'tied'}
+        />
 
         <div className="flex flex-col gap-[10px]">
           <h2 className="text-[14px] leading-5 font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0">
