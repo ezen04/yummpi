@@ -561,6 +561,7 @@ io(SOCKET_URL, {
 | `PAYMENT_NOT_FOUND` ★ | 404 | 송금 정보 없음 |
 | `PUSH_SUBSCRIPTION_NOT_FOUND` ★ | 404 | 웹푸시 구독 없음 또는 본인 구독 아님 |
 | `RESERVATION_NOT_FOUND` ★ | 404 | 예약 없음 또는 해당 모임 예약 아님 (2026-06-24 추가) |
+| `NOTIFICATION_NOT_FOUND` ★ | 404 | 알림 없음 또는 본인 알림 아님 (2026-06-28 추가) |
 | `ALREADY_JOINED_MEETING` | 409 | 중복 참여 |
 | `INVALID_INVITE_CODE` | 400 | 잘못된 초대 코드 |
 | `MEETING_CAPACITY_EXCEEDED` | 409 | 인원 초과 |
