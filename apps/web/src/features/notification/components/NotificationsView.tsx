@@ -8,6 +8,7 @@ import { Header } from '@/components/common/Header';
 import { Notification } from '@/components/common/Notification';
 import { useNotifications } from '../hooks/useNotifications';
 import { useMarkNotificationRead } from '../hooks/useMarkNotificationRead';
+import { NotificationsLoadingSkeleton } from './NotificationsLoadingSkeleton';
 
 type TabKey = 'home' | 'meetings' | 'notifications' | 'mypage';
 
@@ -87,7 +88,7 @@ export function NotificationsView() {
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
         <div className="rounded-2xl overflow-hidden bg-[var(--bg-normal)]">
           {isLoading ? (
-            <p className={MESSAGE_CLASS}>불러오는 중…</p>
+            <NotificationsLoadingSkeleton />
           ) : items.length === 0 ? (
             // 초기 상태(로드된 항목 없음)에서만 전체 영역 메시지
             isError ? (
