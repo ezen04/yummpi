@@ -16,53 +16,57 @@ export const POST = handleRoute(
 
     await assertHost(meetingId);
 
-    const settlement = await prisma.settlement.findUnique({
-      where: { meetingId },
-      include: {
-        settlementMembers: {
-          include: { payment: true },
+    // 검증(전원 PAID|EXEMPT) → COMPLETED 전이를 단일 트랜잭션으로 묶는다.
+    // 검증 read와 전이 update가 같은 tx에 있어야 그 사이 동시 PATCH로 송금이
+    // 되돌려진 채 모임이 종료되는 부분 상태를 막는다(원자적 커밋).
+    const updatedMeeting = await prisma.$transaction(async (tx) => {
+      const settlement = await tx.settlement.findUnique({
+        where: { meetingId },
+        include: {
+          settlementMembers: {
+            include: { payment: true },
+          },
         },
-      },
-    });
+      });
 
-    if (!settlement) {
-      throw new ApiError(
-        'SETTLEMENT_NOT_FOUND',
-        '정산 정보를 찾을 수 없습니다.'
-      );
-    }
-
-    const payments = settlement.settlementMembers
-      .map((member) => member.payment)
-      .filter((payment) => payment !== null);
-    const missingPaymentCount =
-      settlement.settlementMembers.length - payments.length;
-    const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
-    const reportedCount = payments.filter(
-      (p) => p.status === 'TRANSFER_REPORTED'
-    ).length;
-
-    if (
-      settlement.settlementMembers.length === 0 ||
-      payments.length === 0 ||
-      missingPaymentCount > 0 ||
-      pendingCount > 0 ||
-      reportedCount > 0
-    ) {
-      throw new ApiError(
-        'PAYMENTS_NOT_COMPLETED',
-        '완료되지 않은 송금이 있습니다.',
-        { pendingCount, reportedCount, missingPaymentCount }
-      );
-    }
-
-    const updatedMeeting = await transitionMeetingStatus(
-      meetingId,
-      'COMPLETED',
-      {
-        reason: 'PAYMENTS_COMPLETED',
+      if (!settlement) {
+        throw new ApiError(
+          'SETTLEMENT_NOT_FOUND',
+          '정산 정보를 찾을 수 없습니다.'
+        );
       }
-    );
+
+      const payments = settlement.settlementMembers
+        .map((member) => member.payment)
+        .filter((payment) => payment !== null);
+      const missingPaymentCount =
+        settlement.settlementMembers.length - payments.length;
+      const pendingCount = payments.filter(
+        (p) => p.status === 'PENDING'
+      ).length;
+      const reportedCount = payments.filter(
+        (p) => p.status === 'TRANSFER_REPORTED'
+      ).length;
+
+      if (
+        settlement.settlementMembers.length === 0 ||
+        payments.length === 0 ||
+        missingPaymentCount > 0 ||
+        pendingCount > 0 ||
+        reportedCount > 0
+      ) {
+        throw new ApiError(
+          'PAYMENTS_NOT_COMPLETED',
+          '완료되지 않은 송금이 있습니다.',
+          { pendingCount, reportedCount, missingPaymentCount }
+        );
+      }
+
+      return transitionMeetingStatus(meetingId, 'COMPLETED', {
+        tx,
+        reason: 'PAYMENTS_COMPLETED',
+      });
+    });
 
     return apiSuccess(
       { meetingId, meetingStatus: updatedMeeting.status },

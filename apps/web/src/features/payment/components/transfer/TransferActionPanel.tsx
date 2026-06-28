@@ -12,7 +12,6 @@ import {
   buildTransferMockData,
   copyToClipboard,
 } from '../../utils/transferMock';
-import { TransferNoAccountState } from './TransferNoAccountState';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
 import '../payment-montage.css';
 import type { PaymentListItem, PaymentSummary } from '@yummpi/schemas';
@@ -24,9 +23,7 @@ type Props = {
   onReportTransfer: (paymentId: string) => Promise<void>;
   onCancelTransfer: (paymentId: string) => Promise<void>;
   onReportSuccess?: () => void;
-  onRegisterAccount?: () => void;
   summary?: PaymentSummary;
-  viewerRole?: 'HOST' | 'MEMBER';
 };
 
 export function TransferActionPanel({
@@ -36,13 +33,12 @@ export function TransferActionPanel({
   onReportTransfer,
   onCancelTransfer,
   onReportSuccess,
-  onRegisterAccount,
   summary,
-  viewerRole = 'MEMBER',
 }: Props) {
+  // 등록된 호스트 계좌가 있으면 그 값을, 없으면 buildTransferMockData가 더미로 폴백.
+  // 멤버는 계좌 등록 여부와 무관하게 항상 송금 화면을 본다(막다른 게이트 제거).
   const hostAccount = useHostAccountStore((s) => s.account);
   const mock = buildTransferMockData(item.amount, hostNickname, hostAccount);
-  const hasHostAccount = hostAccount !== null;
   const [isPending, setIsPending] = useState(false);
   const [copied, setCopied] = useState<'account' | 'amount' | null>(null);
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
@@ -105,15 +101,6 @@ export function TransferActionPanel({
     } finally {
       setIsPending(false);
     }
-  }
-
-  if (isActionable && !hasHostAccount) {
-    return (
-      <TransferNoAccountState
-        viewerRole={viewerRole}
-        onRegisterAccount={onRegisterAccount}
-      />
-    );
   }
 
   /* ── EXEMPT ────────────────────────────────────────────────────── */
