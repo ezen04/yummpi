@@ -99,12 +99,7 @@ export function MeetingsListView() {
       style={{ background: 'var(--bg-alternative)' }}
     >
       {/* 헤더 (나의 모임 + 알림 벨) */}
-      <Header
-        title="나의 모임"
-        hideBackSpacer
-        showBell
-        onBell={() => router.push('/notifications')}
-      />
+      <Header title="나의 모임" hideBackSpacer />
 
       <main className="flex-1 w-full max-w-[390px] mx-auto px-5 pt-3 pb-6">
         {/* 세그먼트 (만든/참여) */}
