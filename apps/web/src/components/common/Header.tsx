@@ -48,7 +48,7 @@ export function Header({
     return (
       <header
         className={cn(
-          'h-14 box-content pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0',
+          'h-14 box-content pt-[max(env(safe-area-inset-top),12px)] bg-[var(--bg-normal)] flex items-center justify-center px-3 relative shrink-0',
           className
         )}
       >
@@ -70,7 +70,7 @@ export function Header({
   return (
     <header
       className={cn(
-        'h-14 box-content pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] flex items-center justify-between shrink-0',
+        'h-14 box-content pt-[max(env(safe-area-inset-top),12px)] bg-[var(--bg-normal)] flex items-center justify-between shrink-0',
         isDashboard ? 'px-5' : 'pl-2 pr-3',
         className
       )}
