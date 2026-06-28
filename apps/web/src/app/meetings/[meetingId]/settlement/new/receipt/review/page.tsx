@@ -12,11 +12,10 @@ import { IconButton } from '@/components/common/IconButton';
 import { Tipbox } from '@/components/common/Tipbox';
 import { Button } from '@/components/common/Button';
 import { Confirmbox } from '@/components/common/Confirmbox';
+import { toast } from '@yummpi/ui';
+import { SettlementCreateResponseSchema } from '@yummpi/schemas';
 import { useSettlementStore, OcrItem } from '@/features/settlement/store';
-import {
-  FLOW_STEPS,
-  MOCK_SETTLEMENT_ID,
-} from '@/features/settlement/constants';
+import { FLOW_STEPS } from '@/features/settlement/constants';
 
 // promotingLineIndex: 미분류 줄 승격 모드. !== null이면 저장 시
 // promoteUnclassifiedLine(해당 index)으로 분기. editingItem과 동시 활성화되지 않음.
@@ -53,6 +52,7 @@ export default function ReceiptReviewPage({
 
   const [sheet, setSheet] = useState(SHEET_CLOSED);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const selectedReceipt = receipts.find(
     (r) => r.receiptId === selectedReceiptId
@@ -183,14 +183,11 @@ export default function ReceiptReviewPage({
             <button
               key={receipt.receiptId}
               onClick={() => setSelectedReceiptId(receipt.receiptId)}
-              className={`w-1/4 aspect-video rounded-md border-2 transition-all ${
+              className={`w-1/4 aspect-video rounded-md border-2 transition-all bg-[var(--bg-alternative)] ${
                 selectedReceiptId === receipt.receiptId
                   ? 'border-[var(--primary)]'
                   : 'border-[var(--line-normal)]'
               }`}
-              style={{
-                background: 'var(--bg-alternative)',
-              }}
             >
               <div className="w-full h-full flex items-center justify-center text-xs">
                 영수증 {i + 1}
@@ -211,20 +208,13 @@ export default function ReceiptReviewPage({
                     selectedReceipt.ocrItems.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between px-4 py-3 rounded-md border"
-                        style={{ borderColor: 'var(--line-normal)' }}
+                        className="flex items-center justify-between px-4 py-3 rounded-md border border-[var(--line-normal)]"
                       >
                         <div className="flex-1">
-                          <p
-                            className="text-sm font-medium"
-                            style={{ color: 'var(--label-normal)' }}
-                          >
+                          <p className="text-sm font-medium text-[var(--label-normal)]">
                             {item.name}
                           </p>
-                          <p
-                            className="text-xs"
-                            style={{ color: 'var(--label-assistive)' }}
-                          >
+                          <p className="text-xs text-[var(--label-assistive)]">
                             {item.quantity}개 ×{' '}
                             {item.unitPrice ??
                               (item.quantity > 0
@@ -237,7 +227,7 @@ export default function ReceiptReviewPage({
                           <IconButton
                             size={32}
                             shape="square"
-                            style={{ background: 'transparent' }}
+                            className="bg-transparent"
                             icon={<Pencil size={16} />}
                             onClick={() => handleOpenForm(item)}
                           />
@@ -245,22 +235,14 @@ export default function ReceiptReviewPage({
                       </div>
                     ))
                   ) : (
-                    <p
-                      className="text-sm text-center py-4"
-                      style={{ color: 'var(--label-assistive)' }}
-                    >
+                    <p className="text-sm text-center py-4 text-[var(--label-assistive)]">
                       항목이 없습니다
                     </p>
                   )}
 
                   <button
                     onClick={() => handleOpenForm()}
-                    className="w-full py-3 rounded-md text-sm font-medium"
-                    style={{
-                      border: '1.5px dashed var(--line-normal)',
-                      color: 'var(--label-alternative)',
-                      background: 'transparent',
-                    }}
+                    className="w-full py-3 rounded-md text-sm font-medium border border-dashed border-[var(--line-normal)] text-[var(--label-alternative)] bg-transparent"
                   >
                     + 항목 추가
                   </button>
@@ -271,28 +253,21 @@ export default function ReceiptReviewPage({
                       visibleUnclassifiedLines: 빈 줄 skip + 원본 idx 보존. */}
                   {visibleUnclassifiedLines.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      <p
-                        className="text-xs font-medium"
-                        style={{ color: 'var(--label-assistive)' }}
-                      >
+                      <p className="text-xs font-medium text-[var(--label-assistive)]">
                         인식 못 한 줄 ({visibleUnclassifiedLines.length}개)
                       </p>
                       {visibleUnclassifiedLines.map(({ line, idx }) => (
                         <div
                           key={`${idx}-${line}`}
-                          className="flex items-center justify-between gap-2 px-4 py-3 rounded-md border"
-                          style={{ borderColor: 'var(--line-normal)' }}
+                          className="flex items-center justify-between gap-2 px-4 py-3 rounded-md border border-[var(--line-normal)]"
                         >
-                          <p
-                            className="text-sm flex-1 min-w-0 break-words"
-                            style={{ color: 'var(--label-alternative)' }}
-                          >
+                          <p className="text-sm flex-1 min-w-0 break-words text-[var(--label-alternative)]">
                             {line}
                           </p>
                           <IconButton
                             size={32}
                             shape="square"
-                            style={{ background: 'transparent' }}
+                            className="bg-transparent"
                             icon={<Plus size={16} />}
                             onClick={() => handleOpenPromoteForm(idx, line)}
                           />
@@ -305,20 +280,11 @@ export default function ReceiptReviewPage({
 
             {/* 소계 */}
             {selectedReceipt.ocrItems.length > 0 && (
-              <div
-                className="p-4 rounded-md"
-                style={{ background: 'var(--bg-alternative)' }}
-              >
-                <p
-                  className="text-xs mb-1"
-                  style={{ color: 'var(--label-assistive)' }}
-                >
+              <div className="p-4 rounded-md bg-[var(--bg-alternative)]">
+                <p className="text-xs mb-1 text-[var(--label-assistive)]">
                   이 영수증 소계
                 </p>
-                <p
-                  className="text-xl font-bold"
-                  style={{ color: 'var(--label-normal)' }}
-                >
+                <p className="text-xl font-bold text-[var(--label-normal)]">
                   {totalAmount.toLocaleString()}원
                 </p>
               </div>
@@ -328,20 +294,11 @@ export default function ReceiptReviewPage({
 
         {/* 전체 영수증 합계 (EQUAL 시 이 금액을 균등 분배) */}
         {receipts.length > 0 && (
-          <div
-            className="flex items-center justify-between p-4 rounded-md"
-            style={{ background: 'var(--primary-tint)' }}
-          >
-            <p
-              className="text-sm font-medium"
-              style={{ color: 'var(--primary)' }}
-            >
+          <div className="flex items-center justify-between p-4 rounded-md bg-[var(--primary-tint)]">
+            <p className="text-sm font-medium text-[var(--primary)]">
               전체 영수증 합계 ({receipts.length}장)
             </p>
-            <p
-              className="text-lg font-bold"
-              style={{ color: 'var(--primary)' }}
-            >
+            <p className="text-lg font-bold text-[var(--primary)]">
               {grandTotal.toLocaleString()}원
             </p>
           </div>
@@ -352,12 +309,9 @@ export default function ReceiptReviewPage({
 
         {/* 정산 방식 선택 — 전역 */}
         <div className="space-y-3">
-          <p
-            className="text-sm font-medium"
-            style={{ color: 'var(--label-normal)' }}
-          >
+          <p className="text-sm font-medium text-[var(--label-normal)]">
             정산 방식 선택{' '}
-            <span style={{ color: 'var(--status-negative)' }}>*</span>
+            <span className="text-[var(--status-negative)]">*</span>
           </p>
           <div className="space-y-2">
             {(
@@ -385,24 +339,51 @@ export default function ReceiptReviewPage({
 
       <Footer
         variant="button"
-        label={splitMethod === 'EQUAL' ? '정산 결과로' : '항목 선택으로'}
-        disabled={!canProceed}
+        label={
+          submitting
+            ? '처리 중...'
+            : splitMethod === 'EQUAL'
+              ? '정산 결과로'
+              : '항목 선택으로'
+        }
+        disabled={!canProceed || submitting}
         onClick={() => setConfirmOpen(true)}
       />
 
       <Confirmbox
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setConfirmOpen(false);
-          if (splitMethod === 'EQUAL') {
-            router.push(
-              `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/result`
+          if (!splitMethod) return;
+          setSubmitting(true);
+          try {
+            const res = await fetch(
+              `/api/v1/meetings/${meetingId}/settlements`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ splitMethod }),
+              }
             );
-          } else {
-            router.push(
-              `/meetings/${meetingId}/settlement/${MOCK_SETTLEMENT_ID}/assign`
-            );
+            const body = await res.json().catch(() => null);
+            if (!res.ok || !body?.success) {
+              toast.error(body?.error?.message ?? '정산 생성에 실패했습니다.');
+              return;
+            }
+            const parsed = SettlementCreateResponseSchema.safeParse(body.data);
+            if (!parsed.success) {
+              toast.error('정산 응답 형식 오류가 발생했습니다.');
+              return;
+            }
+            const sid = parsed.data.id;
+            if (splitMethod === 'EQUAL') {
+              router.push(`/meetings/${meetingId}/settlement/${sid}/result`);
+            } else {
+              router.push(`/meetings/${meetingId}/settlement/${sid}/assign`);
+            }
+          } finally {
+            setSubmitting(false);
           }
         }}
         title="정산 방식을 확정할까요?"
@@ -472,7 +453,7 @@ export default function ReceiptReviewPage({
               <IconButton
                 size={48}
                 shape="square"
-                style={{ background: 'transparent' }}
+                className="bg-transparent"
                 icon={<Trash size={18} color="var(--status-negative)" />}
                 onClick={handleItemDelete}
               />

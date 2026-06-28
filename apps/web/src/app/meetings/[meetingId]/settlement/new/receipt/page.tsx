@@ -20,9 +20,7 @@ import {
 
 const MAX = 4;
 
-// TODO: 호스트 전용 — 실제 session/member API 연동 전까지는 클라이언트
-// 가드를 걸 수 없다(MOCK_MEMBERS 기반, constants.ts 참조). 비호스트가 들어와도
-// 업로드 시 서버(assertHost)가 403으로 막으므로 데이터는 안전하다.
+// TODO: 호스트 전용 — 비호스트가 들어와도 업로드 시 서버(assertHost)가 403으로 막아 데이터는 안전하다.
 export default function SettlementReceiptPage({
   params,
 }: {
@@ -160,10 +158,7 @@ export default function SettlementReceiptPage({
                   )}
 
                   {r.ocrStatus === 'PROCESSING' && (
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40"
-                      style={{ background: '' }}
-                    >
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40">
                       <Refresh
                         size={24}
                         strokeWidth={1.5}
@@ -191,7 +186,7 @@ export default function SettlementReceiptPage({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isProcessing}
-              className="aspect-square rounded-[var(--radius-10)] flex flex-col items-center justify-center gap-2 bg-transparent cursor-pointer disabled:cursor-default disabled:opacity-50 border-dashed border-1.5 border-[var(--line-normal)]"
+              className="aspect-square rounded-[var(--radius-10)] flex flex-col items-center justify-center gap-2 bg-transparent cursor-pointer disabled:cursor-default disabled:opacity-50 border-dashed border border-[var(--line-normal)]"
             >
               <Camera
                 size={24}

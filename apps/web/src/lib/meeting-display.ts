@@ -5,19 +5,63 @@
 
 import type { MeetingStatus } from '@prisma/client';
 
-/** 상태별 pill 라벨 + 톤(색 CSS 변수). dot·text 색으로 사용. */
+/**
+ * 상태별 pill 라벨 + 톤.
+ * - `tone`: 색 CSS 변수 문자열 (MeetingCard 등 기존 소비자 호환용)
+ * - `toneText` / `toneBg`: 동일 색의 Tailwind 클래스 (인라인 style 대체용)
+ */
 export const MEETING_STATUS_META: Record<
   MeetingStatus,
-  { label: string; tone: string }
+  { label: string; tone: string; toneText: string; toneBg: string }
 > = {
-  DRAFT: { label: '모임 준비 중', tone: 'var(--label-alternative)' },
-  RECRUITING: { label: '후보 모으는 중', tone: 'var(--primary)' },
-  VOTING: { label: '장소 투표 중', tone: 'var(--primary)' },
-  PLACE_CONFIRMED: { label: '장소 확정', tone: 'var(--status-positive)' },
-  IN_PROGRESS: { label: '모임 진행 중', tone: 'var(--status-positive)' },
-  SETTLING: { label: '정산 중', tone: 'var(--status-cautionary)' },
-  COMPLETED: { label: '종료된 모임', tone: 'var(--label-alternative)' },
-  CANCELLED: { label: '취소된 모임', tone: 'var(--label-alternative)' },
+  DRAFT: {
+    label: '모임 준비 중',
+    tone: 'var(--label-alternative)',
+    toneText: 'text-[var(--label-alternative)]',
+    toneBg: 'bg-[var(--label-alternative)]',
+  },
+  RECRUITING: {
+    label: '후보 모으는 중',
+    tone: 'var(--primary)',
+    toneText: 'text-[var(--primary)]',
+    toneBg: 'bg-[var(--primary)]',
+  },
+  VOTING: {
+    label: '장소 투표 중',
+    tone: 'var(--primary)',
+    toneText: 'text-[var(--primary)]',
+    toneBg: 'bg-[var(--primary)]',
+  },
+  PLACE_CONFIRMED: {
+    label: '장소 확정',
+    tone: 'var(--status-positive)',
+    toneText: 'text-[var(--status-positive)]',
+    toneBg: 'bg-[var(--status-positive)]',
+  },
+  IN_PROGRESS: {
+    label: '모임 진행 중',
+    tone: 'var(--status-positive)',
+    toneText: 'text-[var(--status-positive)]',
+    toneBg: 'bg-[var(--status-positive)]',
+  },
+  SETTLING: {
+    label: '정산 중',
+    tone: 'var(--status-cautionary)',
+    toneText: 'text-[var(--status-cautionary)]',
+    toneBg: 'bg-[var(--status-cautionary)]',
+  },
+  COMPLETED: {
+    label: '종료된 모임',
+    tone: 'var(--label-alternative)',
+    toneText: 'text-[var(--label-alternative)]',
+    toneBg: 'bg-[var(--label-alternative)]',
+  },
+  CANCELLED: {
+    label: '취소된 모임',
+    tone: 'var(--label-alternative)',
+    toneText: 'text-[var(--label-alternative)]',
+    toneBg: 'bg-[var(--label-alternative)]',
+  },
 };
 
 /** scheduledAt 기준 클라이언트 D-day 계산. 오늘=D-DAY, 미래=D-n, 과거=D+n. */

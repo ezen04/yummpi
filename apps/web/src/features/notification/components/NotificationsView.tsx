@@ -83,7 +83,7 @@ export function NotificationsView() {
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-alternative)]">
-      <Header title="알림" />
+      <Header title="알림" hideBackSpacer />
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
         <div className="rounded-2xl overflow-hidden bg-[var(--bg-normal)]">
           {isLoading ? (

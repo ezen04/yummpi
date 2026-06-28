@@ -79,6 +79,16 @@ test.describe('파라미터 검증 (auth·DB 불필요)', () => {
     expect(res.status()).toBe(400);
     expect((await res.json()).error.code).toBe('VALIDATION_ERROR');
   });
+
+  test('BE-4b GET /assignments/me — 비-UUID 경로 파라미터 → 400', async ({
+    request,
+  }) => {
+    const res = await request.get(
+      `${BASE}/meetings/not-a-uuid/settlements/not-a-uuid/assignments/me`
+    );
+    expect(res.status()).toBe(400);
+    expect((await res.json()).error.code).toBe('VALIDATION_ERROR');
+  });
 });
 
 // ── 존재하지 않는 모임 (DB 필요, auth 불필요) ────────────────────────────────
@@ -173,6 +183,15 @@ test.describe('무인증 접근 차단 — 403', () => {
     const res = await request.put(
       `${BASE}/meetings/${seed['SEEDPAY4']}/settlements/${seed['SEEDPAY4_SETTLEMENT']}/assignments/me`,
       { data: { receiptItemIds: [GHOST_UUID] } }
+    );
+    expect(res.status()).toBe(403);
+    expect((await res.json()).error.code).toBe('FORBIDDEN');
+  });
+
+  test('BE-4b GET /assignments/me → 403 FORBIDDEN', async ({ request }) => {
+    test.skip(!seed['SEEDPAY4'] || !seed['SEEDPAY4_SETTLEMENT'], 'seed 미적용');
+    const res = await request.get(
+      `${BASE}/meetings/${seed['SEEDPAY4']}/settlements/${seed['SEEDPAY4_SETTLEMENT']}/assignments/me`
     );
     expect(res.status()).toBe(403);
     expect((await res.json()).error.code).toBe('FORBIDDEN');
@@ -356,6 +375,43 @@ test.describe('BE-3 POST /settlements', () => {
       splitMethod: 'EQUAL',
       totalAmount: expect.any(Number),
     });
+  });
+});
+
+// ── BE-4b: GET /assignments/me ────────────────────────────────────────────────
+//
+// 인증된 멤버가 자신의 role·memberId·nickname 을 조회한다.
+// settlement 계산 완료 여부와 무관하게 응답해야 한다.
+
+test.describe('BE-4b GET /assignments/me', () => {
+  test.beforeAll(() => {
+    seed = loadSeed();
+  });
+
+  test('SEEDPAY4 + 인증 → 200 + role·memberId·nickname 반환', async ({
+    request,
+  }) => {
+    test.skip(!seed['SEEDPAY4'] || !seed['SEEDPAY4_SETTLEMENT'], 'seed 미적용');
+    const res = await request.get(
+      `${BASE}/meetings/${seed['SEEDPAY4']}/settlements/${seed['SEEDPAY4_SETTLEMENT']}/assignments/me`
+    );
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.data).toMatchObject({
+      role: expect.stringMatching(/^(HOST|MEMBER)$/),
+      memberId: expect.any(String),
+      nickname: expect.any(String),
+    });
+  });
+
+  test('없는 meetingId → 404 MEETING_NOT_FOUND', async ({ request }) => {
+    test.skip(!seed['__dbReady'], 'DB 없이 실행 — 404 검증 불가');
+    const res = await request.get(
+      `${BASE}/meetings/${GHOST_UUID}/settlements/${GHOST_UUID}/assignments/me`
+    );
+    expect(res.status()).toBe(404);
+    expect((await res.json()).error.code).toBe('MEETING_NOT_FOUND');
   });
 });
 

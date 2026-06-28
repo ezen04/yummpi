@@ -38,7 +38,9 @@ export default function RootLayout({
       <body className="bg-[var(--bg-alternative)]">
         <SessionProvider>
           <QueryProvider>
-            {children}
+            <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-[var(--bg-normal)] shadow-[var(--shadow-large)]">
+              {children}
+            </div>
             <PWAInstallBanner />
             <Toaster position="top-center" richColors />
           </QueryProvider>

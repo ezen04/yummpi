@@ -31,7 +31,7 @@ export function PaymentConfirmbox({
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center px-7 bg-[var(--overlay)]"
+      className="fixed inset-0 z-[300] mx-auto flex max-w-[480px] items-center justify-center px-7 bg-[var(--overlay)]"
       onClick={handleOverlayClick}
     >
       <div
