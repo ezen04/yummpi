@@ -1,8 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { Clock } from '@yummpi/ui';
+import { Clock, toast } from '@yummpi/ui';
 import { cn } from '@/lib/utils';
+
+const FIVE_MIN_MS = 5 * 60 * 1000;
 
 interface VotingCountdownProps {
   votingClosesAt: string;
@@ -47,6 +49,12 @@ export function VotingCountdown({
   className,
 }: VotingCountdownProps) {
   const [now, setNow] = React.useState(() => new Date());
+  // N-2: 마감 5분 전 1회 토스트 안내 가드. votingClosesAt이 변경되면 reset.
+  const fiveMinWarnedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    fiveMinWarnedRef.current = false;
+  }, [votingClosesAt]);
 
   React.useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60_000);
@@ -57,6 +65,16 @@ export function VotingCountdown({
     () => new Date(votingClosesAt),
     [votingClosesAt]
   );
+
+  // N-2: 매 분 갱신 시 남은 시간 비교. 5분 이하 + 0초 초과 + 미경고면 1회 토스트.
+  React.useEffect(() => {
+    const remainMs = closesAtDate.getTime() - now.getTime();
+    if (remainMs > 0 && remainMs <= FIVE_MIN_MS && !fiveMinWarnedRef.current) {
+      fiveMinWarnedRef.current = true;
+      toast.warning('투표 마감 5분 전이에요!');
+    }
+  }, [now, closesAtDate]);
+
   const label = formatClosesAt(closesAtDate, now);
 
   return (
