@@ -98,7 +98,7 @@ export function MeetingsListView() {
       style={{ background: 'var(--bg-alternative)' }}
     >
       {/* 헤더 (나의 모임 + 알림 벨) */}
-      <header className="h-14 box-content pt-[env(safe-area-inset-top)] bg-[var(--bg-normal)] flex items-center justify-between px-5 shrink-0">
+      <header className="h-14 box-content pt-[max(env(safe-area-inset-top),12px)] bg-[var(--bg-normal)] flex items-center justify-between px-5 shrink-0">
         <span
           className="text-[18px] leading-[26px] font-semibold"
           style={{ color: 'var(--label-normal)' }}
