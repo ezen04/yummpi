@@ -4,7 +4,8 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button, Bell } from '@yummpi/ui';
+import { Button } from '@yummpi/ui';
+import { Header } from '@/components/common/Header';
 import { Menubar } from '@/components/common/Menubar';
 import { MeetingCard } from '@/features/meeting/components/MeetingCard';
 import { useMe, useMyMeetings } from '@/features/dashboard/hooks';
@@ -98,21 +99,12 @@ export function MeetingsListView() {
       style={{ background: 'var(--bg-alternative)' }}
     >
       {/* 헤더 (나의 모임 + 알림 벨) */}
-      <header className="h-14 box-content pt-[max(env(safe-area-inset-top),12px)] bg-[var(--bg-normal)] flex items-center justify-between px-5 shrink-0">
-        <span
-          className="text-[18px] leading-[26px] font-semibold"
-          style={{ color: 'var(--label-normal)' }}
-        >
-          나의 모임
-        </span>
-        <button
-          onClick={() => router.push('/notifications')}
-          aria-label="알림"
-          className="flex items-center justify-center w-[42px] h-[42px] rounded-[var(--radius-full)] bg-[var(--bg-alternative)] border-none cursor-pointer text-[var(--label-neutral)] transition-colors hover:bg-[var(--fill-strong)]"
-        >
-          <Bell size={22} strokeWidth={1.5} />
-        </button>
-      </header>
+      <Header
+        title="나의 모임"
+        hideBackSpacer
+        showBell
+        onBell={() => router.push('/notifications')}
+      />
 
       <main className="flex-1 w-full max-w-[390px] mx-auto px-5 pt-3 pb-6">
         {/* 세그먼트 (만든/참여) */}

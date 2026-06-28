@@ -4,7 +4,6 @@ import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { MeetingStatus } from '@prisma/client';
 import {
-  ChevronLeft,
   Share,
   Pencil,
   MoreVertical,
@@ -22,6 +21,8 @@ import { YAvatar } from '@/components/common/YAvatar';
 import { TodoCard, WaitingCard } from '@/components/common/GroupDetailCard';
 import { BottomSheet } from '@/components/common/BottomSheet';
 import { Confirmbox } from '@/components/common/Confirmbox';
+import { Header } from '@/components/common/Header';
+import { cn } from '@/lib/utils';
 import { MEETING_STATUS_META, dday } from '@/lib/meeting-display';
 import { ReservationPanel } from '@/features/reservation/components/ReservationPanel';
 import { StartRecruitingButton } from './StartRecruitingButton';
@@ -198,50 +199,37 @@ export function MeetingHubView({
   return (
     <div className="flex h-full flex-col bg-[var(--bg-alternative)]">
       {/* 헤더 */}
-      <header className="flex items-center gap-1 bg-[var(--bg-normal)] px-2 pb-2.5 pt-[max(12px,env(safe-area-inset-top))] shrink-0">
-        <button
-          onClick={() => router.push('/dashboard')}
-          aria-label="뒤로"
-          className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
-        >
-          <ChevronLeft size={24} strokeWidth={1.5} />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[18px] font-semibold leading-[26px] text-[var(--label-normal)]">
-            {title}
-          </p>
-          <p className="text-[12px] leading-4" style={{ color: meta.tone }}>
-            {meta.label}
-          </p>
-        </div>
-        <button
-          onClick={() => setMenuOpen(true)}
-          aria-label="더보기"
-          className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
-        >
-          <MoreVertical size={20} strokeWidth={1.5} />
-        </button>
-      </header>
+      <Header
+        title={title}
+        subtitle={meta.label}
+        subtitleClassName={meta.toneText}
+        onBack={() => router.push('/dashboard')}
+        rightActions={
+          <button
+            onClick={() => setMenuOpen(true)}
+            aria-label="더보기"
+            className="flex h-10 w-10 -mr-2 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
+          >
+            <MoreVertical size={20} strokeWidth={1.5} />
+          </button>
+        }
+      />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
         {/* 모임 정보 카드 */}
         <section className="rounded-[14px] border border-[var(--line-alternative)] bg-[var(--bg-normal)] p-[19px] flex flex-col gap-3.5">
           <div className="flex items-center justify-between">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-[5px] text-[13px] font-medium"
-              style={{ background: 'var(--primary-tint)', color: meta.tone }}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-tint)] px-2.5 py-[5px] text-[13px] font-medium',
+                meta.toneText
+              )}
             >
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ background: meta.tone }}
-              />
+              <span className={cn('h-1.5 w-1.5 rounded-full', meta.toneBg)} />
               {meta.label}
             </span>
             {dd && (
-              <span
-                className="text-[12px] font-medium"
-                style={{ color: meta.tone }}
-              >
+              <span className={cn('text-[12px] font-medium', meta.toneText)}>
                 {dd}
               </span>
             )}
