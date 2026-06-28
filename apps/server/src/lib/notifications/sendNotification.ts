@@ -1,7 +1,22 @@
 import type { NotificationCategory } from '@prisma/client';
+import { WebPushError } from 'web-push';
 import { prisma } from '../prisma.js';
 import { sendWebPush } from './webPush.js';
 import { sendNotificationEmail } from './email.js';
+
+/**
+ * 구독 영구 폐기(410 Gone / 404 Not Found) → DB 정리 대상.
+ * 403(VAPID 불일치)·429(rate limit)·5xx 등은 일시 오류로 보존한다.
+ * (헬퍼를 webPush.ts가 아닌 여기 두는 이유: webPush.ts는 모듈 최상위에서
+ *  setVapidDetails를 실행 → 테스트가 실제 헬퍼 로드 시 VAPID 검증 크래시.
+ *  WebPushError 클래스 import는 부수효과가 없어 안전하다.)
+ */
+function isExpiredSubscriptionError(err: unknown): err is WebPushError {
+  return (
+    err instanceof WebPushError &&
+    (err.statusCode === 404 || err.statusCode === 410)
+  );
+}
 
 export type NotificationPayload = {
   title: string;
@@ -40,6 +55,7 @@ export async function sendNotificationToUser(
   if (!user.pushEnabled) return { ok: false, reason: 'opted_out' };
 
   let pushSucceeded = false;
+  const expiredSubIds: string[] = [];
   for (const sub of user.pushSubscriptions) {
     try {
       await sendWebPush(
@@ -52,7 +68,25 @@ export async function sendNotificationToUser(
       );
       pushSucceeded = true;
     } catch (err) {
-      console.error(`[notification] webpush failed sub=${sub.id}`, err);
+      if (isExpiredSubscriptionError(err)) {
+        expiredSubIds.push(sub.id);
+        console.warn(
+          `[notification] expired sub removed sub=${sub.id} status=${err.statusCode}`
+        );
+      } else {
+        console.error(`[notification] webpush failed sub=${sub.id}`, err);
+      }
+    }
+  }
+
+  // 만료 구독 정리 — best-effort. 정리 실패가 발송 결과·이메일 fallback을 막지 않는다.
+  if (expiredSubIds.length > 0) {
+    try {
+      await prisma.pushSubscription.deleteMany({
+        where: { id: { in: expiredSubIds } },
+      });
+    } catch (err) {
+      console.error('[notification] expired sub cleanup failed', err);
     }
   }
 
