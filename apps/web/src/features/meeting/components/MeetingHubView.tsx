@@ -52,6 +52,7 @@ interface Props {
   confirmedPlace: HubPlace | null;
   isHost: boolean;
   settlementStatus: SettlementStatus | null;
+  settlementId: string | null;
   paymentsInitialized: boolean;
 }
 
@@ -87,6 +88,7 @@ export function MeetingHubView({
   confirmedPlace,
   isHost,
   settlementStatus,
+  settlementId,
   paymentsInitialized,
 }: Props) {
   const router = useRouter();
@@ -180,10 +182,17 @@ export function MeetingHubView({
       key: 'settlement',
       label: '정산',
       icon: <CreditCard size={20} strokeWidth={1.5} />,
-      // 정산 완료(COMPLETED) 후엔 정산 생성 페이지로 가면 안 됨(이미 정산 끝).
-      // SETTLING(정산 진행 중)에만 활성. 완료 후 흐름은 "송금 현황 보기" CTA로.
+      // DRAFT → 호스트·비호스트 모두 /assign
+      // CONFIRMED/COMPLETED → 모두 /result
+      // 정산 미생성 + 호스트 → /settlement/new (SETTLING 상태에선 도달 불가)
       enabled: ['SETTLING'],
-      href: `${base}/settlement/new`,
+      href: settlementId
+        ? settlementStatus === 'CONFIRMED' || settlementStatus === 'COMPLETED'
+          ? `${base}/settlement/${settlementId}/result`
+          : `${base}/settlement/${settlementId}/assign`
+        : isHost
+          ? `${base}/settlement/new`
+          : undefined,
     },
     {
       key: 'payment',

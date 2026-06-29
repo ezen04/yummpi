@@ -24,7 +24,7 @@ export default async function MeetingHubPage({
     include: {
       members: { where: { leftAt: null } },
       confirmedCandidate: true,
-      settlement: { select: { status: true } },
+      settlement: { select: { id: true, status: true } },
     },
   });
   if (!meeting) notFound();
@@ -35,6 +35,7 @@ export default async function MeetingHubPage({
   // 정산 확정(CONFIRMED) 이후 허브 CTA를 "송금 시작" vs "송금 현황"으로 가르기 위해
   // Payment 초기화 여부를 본다. 확정 단계에서만 조회(그 외 status는 불필요).
   const settlementStatus = meeting.settlement?.status ?? null;
+  const settlementId = meeting.settlement?.id ?? null;
   let paymentsInitialized = false;
   if (settlementStatus === 'CONFIRMED' || settlementStatus === 'COMPLETED') {
     const paymentCount = await prisma.payment.count({
@@ -75,6 +76,7 @@ export default async function MeetingHubPage({
         confirmedPlace={confirmedPlace}
         isHost={isHost}
         settlementStatus={settlementStatus}
+        settlementId={settlementId}
         paymentsInitialized={paymentsInitialized}
       />
     </div>
