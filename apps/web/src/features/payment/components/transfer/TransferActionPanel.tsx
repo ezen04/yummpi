@@ -64,7 +64,14 @@ export function TransferActionPanel({
     }
   }
 
-  async function handlePaymentAppFallback(appName: '카카오페이' | '토스') {
+  // 비공식 커스텀 스킴 — 앱의 송금/홈 화면 진입 시도. 계좌·금액 prefill은 하지 않는다.
+  // 미설치·미지원이면 조용히 실패하므로 금액 복사·안내 문구를 항상 먼저 수행해 fallback으로 둔다.
+  const APP_SCHEME = {
+    카카오페이: 'kakaotalk://kakaopay/home',
+    토스: 'supertoss://send',
+  } as const;
+
+  async function handleOpenPaymentApp(appName: '카카오페이' | '토스') {
     setError(null);
     setCopied(null);
     const ok = await copyToClipboard(mock.formattedAmount);
@@ -73,9 +80,10 @@ export function TransferActionPanel({
       return;
     }
     setFallbackMessage(
-      `금액을 복사했어요. ${appName} 앱에서 직접 송금해 주세요.`
+      `금액을 복사했어요. ${appName}에서 붙여넣어 송금해 주세요.`
     );
     setTimeout(() => setFallbackMessage(null), 3000);
+    window.location.href = APP_SCHEME[appName];
   }
 
   async function handleReportTransfer() {
@@ -252,11 +260,11 @@ export function TransferActionPanel({
             <div className="flex gap-3">
               <KakaoPayButton
                 className="flex-1 h-[58px] rounded-[14px]"
-                onClick={() => void handlePaymentAppFallback('카카오페이')}
+                onClick={() => void handleOpenPaymentApp('카카오페이')}
               />
               <TossPayButton
                 className="flex-1 h-[58px] rounded-[14px]"
-                onClick={() => void handlePaymentAppFallback('토스')}
+                onClick={() => void handleOpenPaymentApp('토스')}
               />
             </div>
             <Button
