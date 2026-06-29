@@ -7,6 +7,8 @@ import { Button, Check } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Input } from '@/components/common/Input';
 import { ScheduleField } from './ScheduleField';
+import { BottomSheet } from '@/components/common/BottomSheet';
+import { StationSearchPicker } from '@/features/place/components/search/StationSearchPicker';
 import { useCreateMeeting, useUpdateMeeting } from '../hooks';
 import {
   isMeetingApiError,
@@ -30,6 +32,16 @@ function parsePositiveInt(value: string): number | undefined {
   if (!Number.isInteger(n) || n <= 0) return NaN; // 검증 실패 신호
   return n;
 }
+
+// 식당 종류 옵션 (카테고리 키 — categoryMap 6 대분류와 일치).
+const FOOD_TYPES: { key: string; label: string }[] = [
+  { key: 'korean', label: '한식' },
+  { key: 'japanese', label: '일식' },
+  { key: 'chinese', label: '중식' },
+  { key: 'meat', label: '고기' },
+  { key: 'cafe', label: '카페' },
+  { key: 'western', label: '양식' },
+];
 
 export interface MeetingFormInitial {
   title: string;
@@ -58,6 +70,15 @@ export function CreateMeetingForm({
     initial?.scheduledAt ? new Date(initial.scheduledAt) : null
   );
   const [maxMembers, setMaxMembers] = useState(initial?.maxMembers ?? '');
+
+  // 만남역(선택)·식당종류(선택) — 생성 모드 전용.
+  const [station, setStation] = useState<{
+    stationName: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [stationSheetOpen, setStationSheetOpen] = useState(false);
+  const [foodTypes, setFoodTypes] = useState<string[]>([]);
 
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<CreateMeetingResult | null>(null);
@@ -119,6 +140,15 @@ export function CreateMeetingForm({
       scheduledAt: scheduledAt.toISOString(),
       ...(description.trim() ? { description: description.trim() } : {}),
       ...(max ? { maxMembers: max } : {}),
+      ...(foodTypes.length ? { foodTypes } : {}),
+      // 만남역은 셋이 함께(이름·좌표). 미입력 시 중간지점 플로우.
+      ...(station
+        ? {
+            meetingStationName: station.stationName,
+            meetingLat: station.lat,
+            meetingLng: station.lng,
+          }
+        : {}),
     };
 
     create.mutate(input, {
@@ -248,9 +278,28 @@ export function CreateMeetingForm({
             )}
           </div>
 
-          <Link href={`/meetings/${created.id}`} className="w-full pt-4 pb-8">
-            <Button className="w-full">모임으로 이동</Button>
-          </Link>
+          {station ? (
+            <Link href={`/meetings/${created.id}`} className="w-full pt-4 pb-8">
+              <Button className="w-full">모임으로 이동</Button>
+            </Link>
+          ) : (
+            // 만남역 미입력 → 중간 장소 찾기(출발역 입력) 1차 노출.
+            <div className="w-full pt-4 pb-8 flex flex-col gap-2">
+              <Button
+                className="w-full"
+                onClick={() =>
+                  router.push(`/meetings/${created.id}/place/departure`)
+                }
+              >
+                중간 장소 찾기
+              </Button>
+              <Link href={`/meetings/${created.id}`} className="w-full">
+                <Button variant="outline" className="w-full">
+                  모임으로 이동
+                </Button>
+              </Link>
+            </div>
+          )}
         </main>
       </div>
     );
@@ -317,6 +366,97 @@ export function CreateMeetingForm({
             error={!!error && !scheduledAt}
           />
 
+          {!isEdit && (
+            <>
+              {/* 만남 장소(역) — 선택. 트리거 → BottomSheet 역 검색 */}
+              <div className="flex flex-col gap-[6px] w-full">
+                <label
+                  className="text-[14px] leading-5 font-medium"
+                  style={{ color: 'var(--label-normal)' }}
+                >
+                  만남 장소
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStationSheetOpen(true)}
+                    className="flex-1 px-4 py-3 text-[15px] text-left rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)]"
+                    style={{
+                      color: station
+                        ? 'var(--label-normal)'
+                        : 'var(--label-assistive)',
+                    }}
+                  >
+                    {station
+                      ? station.stationName
+                      : '만남 역을 검색해주세요 (선택)'}
+                  </button>
+                  {station && (
+                    <button
+                      type="button"
+                      onClick={() => setStation(null)}
+                      className="shrink-0 px-3 py-3 text-[14px]"
+                      style={{ color: 'var(--label-alternative)' }}
+                    >
+                      지우기
+                    </button>
+                  )}
+                </div>
+                <p
+                  className="text-[13px]"
+                  style={{ color: 'var(--label-alternative)' }}
+                >
+                  역을 정하면 근처 맛집을 추천해드려요. 비워두면 모두의 중간
+                  지점을 찾아드려요.
+                </p>
+              </div>
+
+              {/* 식당 종류 — 선택, 다중 */}
+              <div className="flex flex-col gap-[6px] w-full">
+                <label
+                  className="text-[14px] leading-5 font-medium"
+                  style={{ color: 'var(--label-normal)' }}
+                >
+                  식당 종류
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {FOOD_TYPES.map((ft) => {
+                    const active = foodTypes.includes(ft.key);
+                    return (
+                      <button
+                        key={ft.key}
+                        type="button"
+                        onClick={() =>
+                          setFoodTypes((prev) =>
+                            active
+                              ? prev.filter((k) => k !== ft.key)
+                              : [...prev, ft.key]
+                          )
+                        }
+                        className="px-3.5 py-1.5 rounded-full text-[14px] border transition-colors"
+                        style={
+                          active
+                            ? {
+                                background: 'var(--primary)',
+                                color: 'var(--static-white)',
+                                borderColor: 'var(--primary)',
+                              }
+                            : {
+                                background: 'transparent',
+                                color: 'var(--label-alternative)',
+                                borderColor: 'var(--line-normal)',
+                              }
+                        }
+                      >
+                        {ft.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+
           <Input
             label="정원"
             type="number"
@@ -350,6 +490,30 @@ export function CreateMeetingForm({
               ? '만드는 중…'
               : '모임 만들기'}
         </Button>
+
+        {!isEdit && stationSheetOpen && (
+          <BottomSheet
+            open
+            onClose={() => setStationSheetOpen(false)}
+            variant="background"
+          >
+            <div className="flex flex-col h-[70vh]">
+              <StationSearchPicker
+                onSelect={(s) => {
+                  setStation({
+                    stationName: s.stationName,
+                    lat: s.lat,
+                    lng: s.lng,
+                  });
+                  setStationSheetOpen(false);
+                  if (error) setError(null);
+                }}
+                placeholder="만남 역을 검색해주세요"
+                className="flex-1"
+              />
+            </div>
+          </BottomSheet>
+        )}
       </main>
     </div>
   );

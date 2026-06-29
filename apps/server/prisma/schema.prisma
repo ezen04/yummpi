@@ -231,6 +231,12 @@ model Meeting {
   anonymousVoting    Boolean   @default(false) @map("anonymous_voting")
   placeSearchRadiusM Int?      @map("place_search_radius_m")
 
+  // 만남역(선택) — 생성 시 호스트가 지정하면 음식점 추천 center로 사용(③).
+  // 미지정 시 중간지점(midpoint) 플로우. lat/lng는 역 근처 추천에 필요.
+  meetingStationName String?   @map("meeting_station_name")
+  meetingLat         Decimal?  @db.Decimal(10, 7) @map("meeting_lat")
+  meetingLng         Decimal?  @db.Decimal(10, 7) @map("meeting_lng")
+
   inviteCode  String    @unique @map("invite_code")
   expiresAt   DateTime? @map("expires_at")
   createdAt   DateTime  @default(now()) @map("created_at")

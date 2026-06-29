@@ -9,6 +9,8 @@ import {
   optBool,
   optDate,
   optInt,
+  optLatitude,
+  optLongitude,
   optString,
   optStringArray,
   reqString,
@@ -48,6 +50,15 @@ export const POST = handleRoute(async (req: Request) => {
     placeSearchRadiusM: optInt(body.placeSearchRadiusM, 'placeSearchRadiusM'),
     votingClosesAt: optDate(body.votingClosesAt, 'votingClosesAt'),
     expiresAt: optDate(body.expiresAt, 'expiresAt'),
+    // 만남역(선택) — 좌표는 음식점 추천 center용. 이름·lat·lng는 셋이 함께 들어옴.
+    meetingStationName: optString(
+      body.meetingStationName,
+      'meetingStationName',
+      1,
+      50
+    ),
+    meetingLat: optLatitude(body.meetingLat, 'meetingLat'),
+    meetingLng: optLongitude(body.meetingLng, 'meetingLng'),
   };
 
   const inviteCode = await uniqueInviteCode();
