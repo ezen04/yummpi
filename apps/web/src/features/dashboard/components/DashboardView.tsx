@@ -30,7 +30,7 @@ export function DashboardView() {
     >
       <Header greeting="안녕하세요" title={`${nickname}님 👋`} />
 
-      <main className="flex-1 w-full max-w-[390px] mx-auto px-5 pt-2 pb-6">
+      <main className="flex-1 w-full max-w-[390px] mx-auto px-5 pt-2 pb-28">
         <section className="flex flex-col gap-3">
           <div className="flex items-end justify-between">
             <h2
@@ -119,6 +119,7 @@ export function DashboardView() {
       </main>
 
       <Menubar
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-40"
         activeTab="home"
         onTabChange={handleTabChange}
         onCreateClick={() => router.push('/meetings/new')}

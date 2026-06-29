@@ -36,7 +36,7 @@ export function BottomSheet({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[200]">
+    <div className="fixed inset-0 z-[200] mx-auto max-w-[480px]">
       {/* 딤 배경 */}
       {hasDim && (
         <div

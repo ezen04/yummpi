@@ -1,20 +1,20 @@
 'use client';
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { MapPin, Flame, Plus, toast } from '@yummpi/ui';
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
 import { KakaoMap } from '@/components/common/KakaoMap';
-import { calcDistance } from '@/lib/haversine';
+import type { RecommendationItem } from '@/features/place/api/placeApi';
 import { PlaceFilterChips } from '@/features/place/components/recommendation/PlaceFilterChips';
 import { PlaceRecommendationList } from '@/features/place/components/recommendation/PlaceRecommendationList';
 import { useOptimalPoint } from '@/features/place/hooks/useOptimalPoint';
 import { usePlaceCandidates } from '@/features/place/hooks/usePlaceCandidates';
 import { usePlaceRecommendations } from '@/features/place/hooks/usePlaceRecommendations';
 import { usePlaceSuggestions } from '@/features/place/hooks/usePlaceSuggestions';
-import type { RecommendationItem } from '@/features/place/api/placeApi';
 import type { VotesData } from '@/hooks/useVote';
+import { calcDistance } from '@/lib/haversine';
+import { Flame, MapPin, Plus, toast } from '@yummpi/ui';
+import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import type { MeetingDetail } from '../../hooks/useMeetingDetail';
 import { useVoteUiStore } from '../../stores/useVoteUiStore';
 import { ConfirmPlaceSheet } from '../confirm/ConfirmPlaceSheet';
@@ -194,7 +194,7 @@ export function RecruitingView({
     // B-1: 5개 초과 사전 검증 — 낙관적 추가 막아 카드 깜빡임 제거.
     // BE도 400으로 막지만, 사전 검증으로 onMutate 자체 호출 안 함.
     if (votesData.candidates.length >= ACTIVE_LIMIT) {
-      toast.error('후보는 최대 5개까지 추가할 수 있어요.');
+      toast('후보는 최대 5개까지 추가할 수 있어요.');
       return;
     }
     addCandidate({
@@ -234,6 +234,33 @@ export function RecruitingView({
 
   const candidateCount = votesData.candidates.length;
 
+  // N-3: 다른 멤버가 후보 추가/제거 시 토스트 안내. 1초 debounce로 연속 변경
+  // (여러 클릭/다중 추가)을 1번으로 묶음. 본인 mutation 중(isAdding·isRejecting)은
+  // 가드해서 자기 행동에는 토스트 안 띄움.
+  const prevCandidateCountRef = React.useRef(candidateCount);
+  const candidateChangeToastRef = React.useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+  React.useEffect(() => {
+    const prev = prevCandidateCountRef.current;
+    prevCandidateCountRef.current = candidateCount;
+    if (prev === candidateCount) return;
+    if (isAdding || isRejecting) return;
+    if (candidateChangeToastRef.current) {
+      clearTimeout(candidateChangeToastRef.current);
+    }
+    candidateChangeToastRef.current = setTimeout(() => {
+      toast('후보가 업데이트됐어요.');
+    }, 1000);
+  }, [candidateCount, isAdding, isRejecting]);
+  React.useEffect(() => {
+    return () => {
+      if (candidateChangeToastRef.current) {
+        clearTimeout(candidateChangeToastRef.current);
+      }
+    };
+  }, []);
+
   // 자체 데이터 로딩 시 스켈레톤 — useOptimalPoint·usePlaceRecommendations·
   // usePlaceSuggestions 중 하나라도 isLoading이면 실제 화면 레이아웃과
   // 동일한 회색 박스 스켈레톤으로 표시 (옵션 c — 각 View가 자기 데이터 책임).
@@ -266,10 +293,20 @@ export function RecruitingView({
           <Button
             variant="basic"
             size="lg"
-            onClick={() => router.push(`/meetings/${meeting.id}`)}
+            onClick={() => {
+              // 호스트: 대기시간 미설정이면 wait-setup, 설정 완료면 본인 입력 위해 departure.
+              // 비호스트는 wait-setup 권한 없음 → 항상 departure.
+              const target =
+                isHost && meeting.departureInputClosesAt == null
+                  ? `/meetings/${meeting.id}/place/wait-setup`
+                  : `/meetings/${meeting.id}/place/departure`;
+              router.push(target);
+            }}
             className="w-full"
           >
-            모임 상세 페이지로 돌아가기
+            {isHost && meeting.departureInputClosesAt == null
+              ? '대기 시간 설정하러 가기'
+              : '출발역 입력하러 가기'}
           </Button>
         </div>
       </div>
@@ -314,7 +351,7 @@ export function RecruitingView({
           className="flex items-center gap-1 text-[13px] leading-[18px] font-medium font-[var(--font-sans)] text-[var(--primary)] bg-transparent border-none cursor-pointer"
         >
           <Plus size={14} strokeWidth={2} />
-          후보 추가
+          장소 추가
         </button>
       </div>
 

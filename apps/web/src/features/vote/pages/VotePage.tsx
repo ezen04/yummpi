@@ -1,20 +1,20 @@
 'use client';
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from '@yummpi/ui';
 import { useSocket, useSocketEvent } from '@/hooks/useSocket';
 import { useVote } from '@/hooks/useVote';
-import { useMeetingDetail } from '../hooks/useMeetingDetail';
-import { VoteLoadingSkeleton } from '../components/shell/VoteLoadingSkeleton';
-import { VoteErrorState } from '../components/shell/VoteErrorState';
-import { NotInVoteFlowView } from '../components/shell/NotInVoteFlowView';
-import { VoteScreenContainer } from '../components/shell/VoteScreenContainer';
+import { toast } from '@yummpi/ui';
+import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { RecruitingView } from '../components/recruiting/RecruitingView';
 import { RecruitingViewSkeleton } from '../components/recruiting/RecruitingViewSkeleton';
+import { NotInVoteFlowView } from '../components/shell/NotInVoteFlowView';
+import { VoteErrorState } from '../components/shell/VoteErrorState';
+import { VoteLoadingSkeleton } from '../components/shell/VoteLoadingSkeleton';
+import { VoteScreenContainer } from '../components/shell/VoteScreenContainer';
 import { VotingView } from '../components/voting/VotingView';
 import { VotingViewSkeleton } from '../components/voting/VotingViewSkeleton';
 import type { MeetingStatus } from '../hooks/useMeetingDetail';
+import { useMeetingDetail } from '../hooks/useMeetingDetail';
 
 export interface VotePageProps {
   meetingId: string;
@@ -52,6 +52,15 @@ export function VotePage({
   useSocketEvent('place:confirmed', () => {
     toast.success('장소가 확정되었어요!');
     router.replace(`/meetings/${meetingId}`);
+  });
+
+  // N-1: 호스트가 투표 시작 → meeting:status-changed echo로 모든 클라이언트에게
+  // 토스트 안내. 호스트 본인 탭도 echo 받지만 본인은 시작 액션을 인지하고 있으므로
+  // 부드러운 success 안내가 자연스러움. (게스트는 화면이 자동 전환되므로 안내 필수)
+  useSocketEvent('meeting:status-changed', (data) => {
+    if (data.status === 'VOTING') {
+      toast.success('투표가 시작되었어요!');
+    }
   });
 
   const handleBack = () => router.back();

@@ -8,6 +8,7 @@ import { PaymentErrorState } from '../components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
 import { PaymentLoadingSkeleton } from '../components/shell/PaymentLoadingSkeleton';
 import { TransferActionPanel } from '../components/transfer/TransferActionPanel';
+import { toast } from '@yummpi/ui';
 
 type Props = {
   meetingId: string;
@@ -20,9 +21,9 @@ export function TransferStatusPage({ meetingId }: Props) {
   const { updatePayment, invalidatePayments } = usePaymentActions(meetingId);
 
   /**
-   * 방어 redirect: 회원 멤버가 PAID/EXEMPT 상태로 /transfer URL에 직접 진입한 경우
-   * 송금 현황(/payments)으로 보낸다. 게스트는 /transfer/done(완료 화면)에 머무르는
-   * 정책이므로 redirect 대상에서 제외한다.
+   * 방어 redirect: 회원 멤버가 PAID/EXEMPT가 되면 송금 현황(/payments)으로 보낸다
+   * (호스트 입금 확인 완료 → 송금 화면 불필요). 게스트는 호스트 현황 미노출이라
+   * redirect 대상에서 제외하고 이 화면(신고 완료 상태)에 머무른다.
    */
   useEffect(() => {
     if (!data) return;
@@ -72,6 +73,7 @@ export function TransferStatusPage({ meetingId }: Props) {
         invalidate: false,
       });
       invalidatePayments();
+      toast.success('송금을 취소했어요');
     }
 
     return (
@@ -80,12 +82,11 @@ export function TransferStatusPage({ meetingId }: Props) {
         <TransferActionPanel
           item={myPayment}
           hostNickname={data.host.nickname}
-          viewerRole="MEMBER"
           onRefresh={invalidatePayments}
           onReportTransfer={handleReportTransfer}
           onCancelTransfer={handleCancelTransfer}
           onReportSuccess={() =>
-            router.push(`/meetings/${meetingId}/payments/transfer/done`)
+            toast.success('주최자에게 송금 완료를 알렸어요')
           }
         />
       </>

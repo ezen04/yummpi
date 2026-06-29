@@ -25,7 +25,7 @@ export async function sendNotificationEmail(opts: {
   body: string;
   url?: string;
 }): Promise<void> {
-  const base = process.env.NEXTAUTH_URL ?? 'https://yummpi.app';
+  const base = process.env.NEXTAUTH_URL ?? 'https://yummpi.com';
   const absoluteUrl = opts.url
     ? opts.url.startsWith('http')
       ? opts.url
@@ -37,7 +37,7 @@ export async function sendNotificationEmail(opts: {
     url: absoluteUrl,
   });
   const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM ?? '"얌피" <noreply@yummpi.app>',
+    from: process.env.MAIL_FROM ?? '"얌피" <noreply@yummpi.com>',
     to: opts.to,
     subject: `[얌피] ${opts.title}`,
     html,

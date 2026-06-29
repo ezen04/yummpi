@@ -12,7 +12,6 @@ import {
   buildTransferMockData,
   copyToClipboard,
 } from '../../utils/transferMock';
-import { TransferNoAccountState } from './TransferNoAccountState';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
 import '../payment-montage.css';
 import type { PaymentListItem, PaymentSummary } from '@yummpi/schemas';
@@ -24,9 +23,7 @@ type Props = {
   onReportTransfer: (paymentId: string) => Promise<void>;
   onCancelTransfer: (paymentId: string) => Promise<void>;
   onReportSuccess?: () => void;
-  onRegisterAccount?: () => void;
   summary?: PaymentSummary;
-  viewerRole?: 'HOST' | 'MEMBER';
 };
 
 export function TransferActionPanel({
@@ -36,13 +33,12 @@ export function TransferActionPanel({
   onReportTransfer,
   onCancelTransfer,
   onReportSuccess,
-  onRegisterAccount,
   summary,
-  viewerRole = 'MEMBER',
 }: Props) {
+  // 등록된 호스트 계좌가 있으면 그 값을, 없으면 buildTransferMockData가 더미로 폴백.
+  // 멤버는 계좌 등록 여부와 무관하게 항상 송금 화면을 본다(막다른 게이트 제거).
   const hostAccount = useHostAccountStore((s) => s.account);
   const mock = buildTransferMockData(item.amount, hostNickname, hostAccount);
-  const hasHostAccount = hostAccount !== null;
   const [isPending, setIsPending] = useState(false);
   const [copied, setCopied] = useState<'account' | 'amount' | null>(null);
   const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
@@ -51,6 +47,7 @@ export function TransferActionPanel({
   const isActionable = item.status === 'PENDING';
   const isTransferReported = item.status === 'TRANSFER_REPORTED';
   const isExempt = item.status === 'EXEMPT';
+  const isPaid = item.status === 'PAID';
 
   const avatarChar = hostNickname?.[0] ?? '모';
 
@@ -107,15 +104,6 @@ export function TransferActionPanel({
     }
   }
 
-  if (isActionable && !hasHostAccount) {
-    return (
-      <TransferNoAccountState
-        viewerRole={viewerRole}
-        onRegisterAccount={onRegisterAccount}
-      />
-    );
-  }
-
   /* ── EXEMPT ────────────────────────────────────────────────────── */
   if (isExempt) {
     return (
@@ -136,6 +124,36 @@ export function TransferActionPanel({
               </p>
               <p className="text-xs text-[var(--label-alternative)]">
                 {item.displayName}님은 이번 정산에서 제외됐어요
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── PAID (주최자 입금 확인 완료) ───────────────────────────────── */
+  // 멤버는 PAID가 되면 상위에서 /payments로 redirect되지만, 게스트는 이 화면에
+  // 머무르므로(호스트 현황 미노출) PAID 완료 상태를 여기서 명시한다.
+  if (isPaid) {
+    return (
+      <div className="flex flex-col flex-1">
+        {summary && (
+          <div className="pt-4 mb-2">
+            <PaymentSummaryPanel summary={summary} />
+          </div>
+        )}
+        <div className="flex flex-col px-5 pt-4 pb-4 gap-6 flex-1">
+          <div className="rounded-[var(--radius-12)] bg-[var(--status-positive)]/10 p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[var(--status-positive)]/15 flex items-center justify-center shrink-0">
+              <Icon name="check" size={20} color="var(--status-positive)" />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <p className="text-sm font-semibold text-[var(--label-strong)]">
+                송금이 완료됐어요
+              </p>
+              <p className="text-xs text-[var(--label-alternative)]">
+                주최자가 입금을 확인했어요
               </p>
             </div>
           </div>

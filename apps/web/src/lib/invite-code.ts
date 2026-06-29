@@ -20,7 +20,7 @@ export function generateInviteCode(): string {
 export function inviteUrl(inviteCode: string): string {
   // 배포 도메인 기준. NEXTAUTH_URL은 Vercel=배포 도메인, 로컬=http://localhost:3000으로 이미 세팅됨.
   // (커스텀 도메인 붙으면 NEXTAUTH_URL만 교체 → 코드 무변경)
-  const base = (process.env.NEXTAUTH_URL ?? 'https://yummpi.app').replace(
+  const base = (process.env.NEXTAUTH_URL ?? 'https://yummpi.com').replace(
     /\/+$/,
     ''
   );

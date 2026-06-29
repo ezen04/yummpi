@@ -14,6 +14,7 @@ export const MOCK_MEETING: MeetingDetail = {
   status: 'RECRUITING',
   scheduledAt: oneDayLater,
   votingClosesAt: oneHourLater,
+  departureInputClosesAt: null,
   anonymousVoting: true,
   confirmedCandidateId: null,
   budgetPerPerson: 25000,

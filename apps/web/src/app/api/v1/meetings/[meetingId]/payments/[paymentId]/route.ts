@@ -40,7 +40,7 @@ export const PATCH = handleRoute(
       include: {
         settlementMember: {
           include: {
-            settlement: true,
+            settlement: { include: { meeting: { select: { status: true } } } },
             member: true,
           },
         },
@@ -54,6 +54,14 @@ export const PATCH = handleRoute(
     // 해당 meeting에 속하는지 확인
     if (payment.settlementMember.settlement.meetingId !== meetingId) {
       throw new ApiError('PAYMENT_NOT_FOUND', '결제 정보를 찾을 수 없습니다.');
+    }
+
+    // 종료된 모임은 어떤 송금 변경도 불가(되돌리기·독촉 포함). 전이 끝난 상태이므로 일괄 차단.
+    if (payment.settlementMember.settlement.meeting.status === 'COMPLETED') {
+      throw new ApiError(
+        'INVALID_MEETING_STATUS_TRANSITION',
+        '종료된 모임의 송금 상태는 변경할 수 없습니다.'
+      );
     }
 
     const isHost = currentMember.role === 'HOST';

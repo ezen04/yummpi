@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@yummpi/ui';
 import { useSocketEvent } from '@/hooks/useSocket';
 import type { VoteUpdatedPayload } from '@/lib/socket';
 
@@ -183,10 +184,13 @@ export function useVote(meetingId: string) {
 
       return { snapshot };
     },
-    onError: (_err, _candidateId, context) => {
+    onError: (err, _candidateId, context) => {
       if (context?.snapshot !== undefined) {
         queryClient.setQueryData(voteKeys.detail(meetingId), context.snapshot);
       }
+      // BE 메시지 노출 — 마감 race(VOTING_CLOSED), 상태 머신 위반 등 사용자가
+      // 클릭과 마감 시점이 겹쳐서 거부되는 케이스를 인지 못하면 혼란.
+      toast.error(err instanceof Error ? err.message : '투표에 실패했어요.');
     },
     onSettled: () => {
       mutatingCountRef.current = Math.max(0, mutatingCountRef.current - 1);

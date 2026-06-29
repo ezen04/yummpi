@@ -13,10 +13,18 @@ import { usePaymentActions } from '../hooks/usePaymentActions';
 import { usePaymentStatus } from '../hooks/usePaymentStatus';
 import { isPaymentApiError } from '../api/paymentApi';
 import { formatCooldownUntil } from '../utils/transferMock';
+import { toast } from '@yummpi/ui';
 import type { PaymentAction } from '@yummpi/schemas';
 
 type Props = {
   meetingId: string;
+};
+
+const HOST_ACTION_SUCCESS_MESSAGE: Partial<Record<PaymentAction, string>> = {
+  REMIND: '독촉 알림을 보냈어요',
+  MARK_PAID: '입금을 확인했어요',
+  MARK_PENDING: '대기 상태로 되돌렸어요',
+  MARK_EXEMPT: '면제 처리했어요',
 };
 
 export function PaymentStatusPage({ meetingId }: Props) {
@@ -55,6 +63,8 @@ export function PaymentStatusPage({ meetingId }: Props) {
     setActionErrorMessage(null);
     try {
       await updatePayment({ paymentId, action });
+      const message = HOST_ACTION_SUCCESS_MESSAGE[action];
+      if (message) toast.success(message);
     } catch (error) {
       if (isPaymentApiError(error)) {
         if (error.code === 'REMIND_COOLDOWN') {
@@ -109,6 +119,7 @@ export function PaymentStatusPage({ meetingId }: Props) {
       return (
         <PaymentNotInitializedState
           viewerRole={data.viewerRole}
+          settlementStatus={data.settlementStatus}
           onInitialize={() => initializePayments.mutate()}
           isInitializing={initializePayments.isPending}
           errorMessage={initializeErrorMessage}

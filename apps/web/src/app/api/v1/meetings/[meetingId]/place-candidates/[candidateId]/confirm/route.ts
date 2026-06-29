@@ -6,6 +6,7 @@ import {
   transitionMeetingStatus,
 } from '@/lib/meeting-status';
 import { getSocketEmitter } from '@/lib/socket-emitter';
+import { notifyMeetingMembers } from '@/lib/notify-meeting-members';
 import type { MeetingStatus } from '@prisma/client';
 
 type Ctx = { params: Promise<{ meetingId: string; candidateId: string }> };
@@ -14,11 +15,11 @@ const ALLOWED_STATUSES: MeetingStatus[] = ['VOTING', 'PLACE_CONFIRMED'];
 
 export const POST = handleRoute(async (_req: Request, { params }: Ctx) => {
   const { meetingId, candidateId } = await params;
-  await assertHost(meetingId);
+  const host = await assertHost(meetingId);
 
   const meeting = await prisma.meeting.findUnique({
     where: { id: meetingId },
-    select: { status: true },
+    select: { status: true, title: true },
   });
 
   if (!meeting) {
@@ -107,6 +108,21 @@ export const POST = handleRoute(async (_req: Request, { params }: Ctx) => {
         meetingId,
         status: 'PLACE_CONFIRMED',
       });
+
+    // P-2: VOTING → PLACE_CONFIRMED 최초 전환 시점에만 푸시.
+    // 이후 장소 변경(PLACE_CONFIRMED → PLACE_CONFIRMED)은 dedupeKey가 동일해
+    // worker의 멱등 처리로도 막히지만, 의도를 명확히 하기 위해 이 블록 안에 둠.
+    if (host.userId) {
+      await notifyMeetingMembers({
+        meetingId,
+        excludeUserId: host.userId,
+        category: 'MEETING',
+        title: '모임 장소가 확정됐어요',
+        body: `'${meeting.title}' 모임이 '${candidate.name}'(으)로 확정됐어요.`,
+        url: `/meetings/${meetingId}`,
+        dedupeKey: `place-confirmed.${meetingId}`,
+      });
+    }
   }
 
   return apiSuccess(

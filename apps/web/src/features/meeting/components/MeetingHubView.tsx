@@ -2,9 +2,8 @@
 
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import type { MeetingStatus } from '@prisma/client';
+import type { MeetingStatus, SettlementStatus } from '@prisma/client';
 import {
-  ChevronLeft,
   Share,
   Pencil,
   MoreVertical,
@@ -22,6 +21,8 @@ import { YAvatar } from '@/components/common/YAvatar';
 import { TodoCard, WaitingCard } from '@/components/common/GroupDetailCard';
 import { BottomSheet } from '@/components/common/BottomSheet';
 import { Confirmbox } from '@/components/common/Confirmbox';
+import { Header } from '@/components/common/Header';
+import { cn } from '@/lib/utils';
 import { MEETING_STATUS_META, dday } from '@/lib/meeting-display';
 import { ReservationPanel } from '@/features/reservation/components/ReservationPanel';
 import { StartRecruitingButton } from './StartRecruitingButton';
@@ -50,6 +51,8 @@ interface Props {
   members: HubMember[];
   confirmedPlace: HubPlace | null;
   isHost: boolean;
+  settlementStatus: SettlementStatus | null;
+  paymentsInitialized: boolean;
 }
 
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
@@ -83,6 +86,8 @@ export function MeetingHubView({
   members,
   confirmedPlace,
   isHost,
+  settlementStatus,
+  paymentsInitialized,
 }: Props) {
   const router = useRouter();
   const meta = MEETING_STATUS_META[status];
@@ -198,50 +203,37 @@ export function MeetingHubView({
   return (
     <div className="flex h-full flex-col bg-[var(--bg-alternative)]">
       {/* 헤더 */}
-      <header className="flex items-center gap-1 bg-[var(--bg-normal)] px-2 pb-2.5 pt-[max(12px,env(safe-area-inset-top))] shrink-0">
-        <button
-          onClick={() => router.push('/dashboard')}
-          aria-label="뒤로"
-          className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
-        >
-          <ChevronLeft size={24} strokeWidth={1.5} />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[18px] font-semibold leading-[26px] text-[var(--label-normal)]">
-            {title}
-          </p>
-          <p className="text-[12px] leading-4" style={{ color: meta.tone }}>
-            {meta.label}
-          </p>
-        </div>
-        <button
-          onClick={() => setMenuOpen(true)}
-          aria-label="더보기"
-          className="flex h-10 w-10 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
-        >
-          <MoreVertical size={20} strokeWidth={1.5} />
-        </button>
-      </header>
+      <Header
+        title={title}
+        subtitle={meta.label}
+        subtitleClassName={meta.toneText}
+        onBack={() => router.push('/dashboard')}
+        rightActions={
+          <button
+            onClick={() => setMenuOpen(true)}
+            aria-label="더보기"
+            className="flex h-10 w-10 -mr-2 items-center justify-center rounded-full border-none bg-transparent text-[var(--label-normal)] cursor-pointer transition-colors hover:bg-[var(--fill-normal)]"
+          >
+            <MoreVertical size={20} strokeWidth={1.5} />
+          </button>
+        }
+      />
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
         {/* 모임 정보 카드 */}
         <section className="rounded-[14px] border border-[var(--line-alternative)] bg-[var(--bg-normal)] p-[19px] flex flex-col gap-3.5">
           <div className="flex items-center justify-between">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-[5px] text-[13px] font-medium"
-              style={{ background: 'var(--primary-tint)', color: meta.tone }}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full bg-[var(--primary-tint)] px-2.5 py-[5px] text-[13px] font-medium',
+                meta.toneText
+              )}
             >
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ background: meta.tone }}
-              />
+              <span className={cn('h-1.5 w-1.5 rounded-full', meta.toneBg)} />
               {meta.label}
             </span>
             {dd && (
-              <span
-                className="text-[12px] font-medium"
-                style={{ color: meta.tone }}
-              >
+              <span className={cn('text-[12px] font-medium', meta.toneText)}>
                 {dd}
               </span>
             )}
@@ -467,17 +459,54 @@ export function MeetingHubView({
         return (
           <NextCard
             title="즐거운 모임 되세요!"
-            desc="모임이 끝나면 정산을 시작할 수 있어요."
-          />
+            desc={
+              isHost
+                ? '모임이 끝났다면 정산을 시작해 보세요.'
+                : '모임이 끝나면 호스트가 정산을 시작해요.'
+            }
+          >
+            {isHost && (
+              <HubCta
+                label="정산 시작하기"
+                onClick={() => router.push(`${base}/settlement/new`)}
+              />
+            )}
+          </NextCard>
         );
       case 'SETTLING':
-        return isHost ? (
+        if (!isHost) return <WaitingCard type="adjustment" />;
+        // SETTLING은 정산 단계와 송금 단계를 모두 포함한다(COMPLETED는 전원 송금 후).
+        // 정산 확정(CONFIRMED·방어적으로 COMPLETED 포함) 후엔 다음 할 일이 송금.
+        // Payment 초기화 전이면 "송금 시작", 이미 초기화됐으면 "송금 현황"으로 분기.
+        if (
+          settlementStatus === 'CONFIRMED' ||
+          settlementStatus === 'COMPLETED'
+        ) {
+          return (
+            <NextCard
+              title={
+                paymentsInitialized
+                  ? '송금이 진행 중이에요'
+                  : '정산이 확정됐어요'
+              }
+              desc={
+                paymentsInitialized
+                  ? '송금 현황을 확인하고 관리해 보세요.'
+                  : '이제 멤버들에게 송금을 요청할 수 있어요.'
+              }
+            >
+              <HubCta
+                label={paymentsInitialized ? '송금 현황 보기' : '송금 시작하기'}
+                onClick={() => router.push(`${base}/payments`)}
+              />
+            </NextCard>
+          );
+        }
+        return (
           <TodoCard
             type="adjustment"
             onAction={() => router.push(`${base}/settlement/new`)}
           />
-        ) : (
-          <WaitingCard type="adjustment" />
         );
       case 'COMPLETED':
         return (

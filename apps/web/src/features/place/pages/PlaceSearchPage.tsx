@@ -166,66 +166,65 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   );
 
   return (
-    // 모바일 컨테이너 (VoteScreenContainer와 동일 폭) — vote 흐름과 일관성
-    <div className="h-screen w-full bg-[var(--bg-alternative)] flex justify-center">
-      <div className="w-full max-w-[480px] h-full bg-[var(--bg-normal)] relative overflow-hidden transform-gpu">
-        {/* 1) 지도 — 화면 전체 배경 */}
-        <div className="absolute inset-0">
-          {lat && lng ? (
-            <KakaoMap
-              center={{ lat: Number(lat), lng: Number(lng) }}
-              markers={markers}
-              height="100%"
-            />
-          ) : (
-            <div className="w-full h-full bg-[var(--bg-alternative)]" />
-          )}
-        </div>
-
-        {/* 2) 헤더 + 검색 input — 상단 floating (지도 위)
-            wrapper는 투명. 헤더는 자체 bg-[var(--bg-normal)]로 흰색 유지,
-            검색 input 영역은 투명이라 input 박스만 지도 위에 떠 있음. */}
-        <div className="absolute top-0 left-0 right-0 z-10">
-          <Header title="장소 검색" onBack={() => router.back()} />
-          <div className="px-5 pt-2 pb-3">
-            <PlaceSearchInput value={query} onChange={setQuery} />
-            {optimalError && (
-              <p className="mt-2 text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0 px-2 py-1 rounded bg-[var(--bg-normal)]/90 inline-block">
-                출발지 정보가 없어 거리 정렬 없이 키워드만으로 검색해요.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* 3) 검색 결과 BottomSheet — 화면 하단에서 슬라이드 업 (검색어 있을 때만) */}
-        {showResultSheet && (
-          <div
-            className={
-              'absolute bottom-0 left-0 right-0 z-20 h-1/2 ' +
-              'bg-[var(--bg-normal)] rounded-t-[20px] ' +
-              'shadow-[0_-4px_16px_rgba(0,0,0,0.08)] flex flex-col'
-            }
-            role="dialog"
-            aria-label="검색 결과"
-          >
-            {/* 회색 grab handle */}
-            <div className="shrink-0 flex justify-center pt-2 pb-1">
-              <div className="w-10 h-1 rounded-full bg-[var(--line-normal)]" />
-            </div>
-            <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-4">
-              <PlaceSearchResultList
-                items={sortedResults}
-                mode={mode}
-                activeExternalIds={activeExternalIds}
-                rejectedExternalIds={rejectedExternalIds}
-                onSelect={handleSelect}
-                isLoading={isLoading}
-                isEmptyQuery={isEmptyQuery}
-              />
-            </div>
-          </div>
+    // 모바일 폭·배경은 루트 layout이 담당. transform-gpu는 fixed 자손 가두기용.
+    // h-screen: layout `min-h-screen` 안에서 body 스크롤 방지 (inner overflow만 사용).
+    <div className="h-screen relative overflow-hidden transform-gpu">
+      {/* 1) 지도 — 화면 전체 배경 */}
+      <div className="absolute inset-0">
+        {lat && lng ? (
+          <KakaoMap
+            center={{ lat: Number(lat), lng: Number(lng) }}
+            markers={markers}
+            height="100%"
+          />
+        ) : (
+          <div className="w-full h-full bg-[var(--bg-alternative)]" />
         )}
       </div>
+
+      {/* 2) 헤더 + 검색 input — 상단 floating (지도 위)
+            wrapper는 투명. 헤더는 자체 bg-[var(--bg-normal)]로 흰색 유지,
+            검색 input 영역은 투명이라 input 박스만 지도 위에 떠 있음. */}
+      <div className="absolute top-0 left-0 right-0 z-10">
+        <Header title="장소 검색" onBack={() => router.back()} />
+        <div className="px-5 pt-2 pb-3">
+          <PlaceSearchInput value={query} onChange={setQuery} />
+          {optimalError && (
+            <p className="mt-2 text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-normal)] m-0 px-2 py-1 rounded bg-[var(--bg-normal)]/90 inline-block">
+              출발지 정보가 없어 거리 정렬 없이 키워드만으로 검색해요.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* 3) 검색 결과 BottomSheet — 화면 하단에서 슬라이드 업 (검색어 있을 때만) */}
+      {showResultSheet && (
+        <div
+          className={
+            'absolute bottom-0 left-0 right-0 z-20 h-1/2 ' +
+            'bg-[var(--bg-normal)] rounded-t-[20px] ' +
+            'shadow-[0_-4px_16px_rgba(0,0,0,0.08)] flex flex-col'
+          }
+          role="dialog"
+          aria-label="검색 결과"
+        >
+          {/* 회색 grab handle */}
+          <div className="shrink-0 flex justify-center pt-2 pb-1">
+            <div className="w-10 h-1 rounded-full bg-[var(--line-normal)]" />
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-4">
+            <PlaceSearchResultList
+              items={sortedResults}
+              mode={mode}
+              activeExternalIds={activeExternalIds}
+              rejectedExternalIds={rejectedExternalIds}
+              onSelect={handleSelect}
+              isLoading={isLoading}
+              isEmptyQuery={isEmptyQuery}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

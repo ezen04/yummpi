@@ -1,14 +1,12 @@
 import { Worker } from 'bullmq';
-import { Prisma } from '@prisma/client';
+import { Prisma, type NotificationCategory } from '@prisma/client';
 import { createBullmqConnection } from '../lib/bullmq.js';
 import { prisma } from '../lib/prisma.js';
-import {
-  sendNotificationToUser,
-  type NotificationCategory,
-} from '../lib/notifications/sendNotification.js';
+import { sendNotificationToUser } from '../lib/notifications/sendNotification.js';
 
 // web의 enqueueNotification(@yummpi/schemas EnqueueNotificationInput)과 동일 형태.
-// apps/server는 schemas 의존이 없어 payment 큐와 같은 방식으로 로컬 미러링한다.
+// apps/server는 schemas 의존이 없어 큐 페이로드를 로컬 선언한다.
+// category 타입은 수기 union 대신 Prisma 생성 NotificationCategory를 직접 참조한다(DB 진실원).
 interface NotificationJobData {
   userId: string;
   category: NotificationCategory;
@@ -92,7 +90,8 @@ if (process.env.NODE_ENV !== 'test') {
   const worker = new Worker<NotificationJobData>(
     'notification.send',
     processNotificationJob,
-    { connection }
+    // idle 시 Redis 폴링 빈도↓ (Upstash 명령 비용 절감). 새 job은 즉시 깨어남.
+    { connection, drainDelay: 60, stalledInterval: 60_000 }
   );
   worker.on('completed', (job) =>
     console.log(`[notification] done job=${job.id}`)

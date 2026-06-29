@@ -46,15 +46,22 @@ export function ConfirmPlaceSheet({
 
   const isSearchMode = !!selectedSearchPlace;
 
+  // 0표 케이스: 후보 카드에서 선택했지만 voteCount === 0 — 동률 정책(전원 0표)으로
+  // 호스트가 직접 선택한 흐름. "최다 득표 1위" 멘트는 사실과 안 맞아 분기.
+  const isNoVotesPick =
+    !isSearchMode && !flow3 && selectedCandidate?.voteCount === 0;
+
   // 라벨/아이콘 분기
   const badgeLabel = isSearchMode
     ? '선택한 장소'
     : flow3
       ? '유일한 후보'
-      : '최다 득표 1위';
+      : isNoVotesPick
+        ? '호스트가 선택한 장소'
+        : '최다 득표 1위';
 
   const badgeIcon =
-    isSearchMode || flow3 ? (
+    isSearchMode || flow3 || isNoVotesPick ? (
       <Sparkles
         size={16}
         strokeWidth={0}
@@ -90,7 +97,7 @@ export function ConfirmPlaceSheet({
       : '';
 
   const cardSubline =
-    isSearchMode || flow3
+    isSearchMode || flow3 || isNoVotesPick
       ? [shortCategory, distanceLabel].filter(Boolean).join(' · ')
       : selectedCandidate
         ? `${shortCategory} · ${votesData.totalVoters}표 중 ${selectedCandidate.voteCount}표`
@@ -100,7 +107,9 @@ export function ConfirmPlaceSheet({
 
   const subtitle = flow3
     ? '투표 없이 이 장소로 바로 확정돼요.'
-    : '1위 장소가 확정되며 예약 관리 단계로 넘어가요.';
+    : isNoVotesPick
+      ? '이 장소로 확정되며 예약 관리 단계로 넘어가요.'
+      : '1위 장소가 확정되며 예약 관리 단계로 넘어가요.';
 
   const handleSubmit = () => {
     if (!hasSelection) return;

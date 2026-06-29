@@ -48,6 +48,38 @@ lib/ocr/** , lib/s3/** , lib/settlement-engine/**
 - 정산 시작은 ①의 참석 체크 완료(attended=true 대상) 기준 — 참석 로직 수정 금지
 - 재오픈은 전원 Payment PENDING일 때만 (⑤와 계약)
 
+## AI 행동 지침
+
+### useEffect 내 상태 호출 규칙
+
+`useEffect` 안에서 `setState` · Zustand 액션 · `setXxx`류 호출은 **반드시 비동기 컨텍스트 안에서만** 해야 한다.
+
+```typescript
+// ❌ 금지 — 동기 호출 → cascading render 경고
+useEffect(() => {
+  if (condition) {
+    setSomeState(false); // 동기 호출 금지
+    return;
+  }
+  fetch(...).finally(() => setSomeState(false));
+}, []);
+
+// ✅ 필수 — 동기 early return은 setState 없이 return만
+useEffect(() => {
+  if (condition) return; // setState 없이 return
+
+  const run = async () => {
+    try { ... }
+    catch { ... }
+    finally { setSomeState(false); } // 비동기 컨텍스트 안에서만
+  };
+  run();
+}, []);
+```
+
+- `useState` 초기값으로 이미 올바른 값이 설정된 경우 early return에서 재설정 불필요
+- `useEffect` 콜백은 `async` 불가 → 내부 async 함수를 정의하고 호출
+
 ## 핵심 주의사항
 
 - **분배 엔진은 TDD 강제**: 구현 전 단위 테스트를 먼저 작성 → 사용자 검토·승인 → 구현 → 테스트 통과 확인. 순서 역행 금지.

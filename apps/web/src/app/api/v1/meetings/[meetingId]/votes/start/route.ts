@@ -3,6 +3,7 @@ import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { assertHost } from '@/lib/current-member';
 import { transitionMeetingStatus } from '@/lib/meeting-status';
 import { getSocketEmitter } from '@/lib/socket-emitter';
+import { notifyMeetingMembers } from '@/lib/notify-meeting-members';
 
 type Ctx = { params: Promise<{ meetingId: string }> };
 
@@ -20,7 +21,7 @@ interface PostBody {
  */
 export const POST = handleRoute(async (req: Request, { params }: Ctx) => {
   const { meetingId } = await params;
-  await assertHost(meetingId);
+  const host = await assertHost(meetingId);
 
   const body = (await req.json().catch(() => ({}))) as Partial<PostBody>;
   const votingClosesAtRaw = body.votingClosesAt;
@@ -37,16 +38,20 @@ export const POST = handleRoute(async (req: Request, { params }: Ctx) => {
     );
   }
 
+  let meetingTitle = '';
+
   // 트랜잭션 안에서 모임 상태·후보 수·약속시간 모두 재검증 (TOCTOU 방어)
   await prisma.$transaction(async (tx) => {
     const meeting = await tx.meeting.findUnique({
       where: { id: meetingId },
-      select: { status: true, scheduledAt: true },
+      select: { status: true, scheduledAt: true, title: true },
     });
 
     if (!meeting) {
       throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
     }
+
+    meetingTitle = meeting.title;
 
     if (meeting.status !== 'RECRUITING') {
       throw new ApiError(
@@ -93,6 +98,20 @@ export const POST = handleRoute(async (req: Request, { params }: Ctx) => {
   getSocketEmitter()
     .to(`meeting:${meetingId}`)
     .emit('meeting:status-changed', { meetingId, status: 'VOTING' });
+
+  // P-1: 회원 멤버에게 푸시 알림 적재 (호스트 본인 제외, 게스트 자동 제외).
+  // 트랜잭션 밖이라 적재 실패가 본 응답을 깨지 않음 (헬퍼 내부에서 catch).
+  if (host.userId) {
+    await notifyMeetingMembers({
+      meetingId,
+      excludeUserId: host.userId,
+      category: 'VOTE',
+      title: '투표가 시작됐어요',
+      body: `'${meetingTitle}' 모임에서 투표가 시작됐어요. 장소를 골라주세요.`,
+      url: `/meetings/${meetingId}/vote`,
+      dedupeKey: `vote-started.${meetingId}`,
+    });
+  }
 
   return apiSuccess({
     meetingId,

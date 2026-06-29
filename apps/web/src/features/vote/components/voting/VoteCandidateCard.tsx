@@ -34,7 +34,9 @@ export function VoteCandidateCard({
 
   const subline = [shortCategory, distanceLabel].filter(Boolean).join(' · ');
 
-  const isClickable = !disabled && !!onClick;
+  // 내가 이미 투표한 후보는 클릭 불가 (재투표 시 표수 깜빡임/롤백 방지).
+  // 투표 변경은 다른 후보 클릭으로만 가능.
+  const isClickable = !disabled && !!onClick && !isMyVote;
 
   // 투표율에 따른 progress bar — 카드 background를 linear-gradient로 채움.
   // 내 투표: 메인색 연하게(--primary-tint), 그 외: 연한 회색(--fill-normal)

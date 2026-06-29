@@ -1,11 +1,15 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 vi.mock('../../prisma.js', () => ({
-  prisma: { user: { findUnique: vi.fn() } },
+  prisma: {
+    user: { findUnique: vi.fn() },
+    pushSubscription: { deleteMany: vi.fn() },
+  },
 }));
 vi.mock('../webPush.js', () => ({ sendWebPush: vi.fn() }));
 vi.mock('../email.js', () => ({ sendNotificationEmail: vi.fn() }));
 
+import { WebPushError } from 'web-push';
 import { sendNotificationToUser } from '../sendNotification.js';
 import { prisma } from '../../prisma.js';
 import { sendWebPush } from '../webPush.js';
@@ -100,6 +104,37 @@ describe('sendNotificationToUser', () => {
     expect(res).toEqual({ ok: true, channel: 'email' });
     expect(sendWebPush).toHaveBeenCalledOnce();
     expect(sendNotificationEmail).toHaveBeenCalledOnce();
+  });
+
+  it('웹푸시 410(만료) → 해당 구독 삭제 + emailFallback로 메일', async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(
+      makeUser({ pushSubscriptions: [SUB] }) as never
+    );
+    vi.mocked(sendWebPush).mockRejectedValue(
+      new WebPushError('Gone', 410, {}, '', SUB.endpoint)
+    );
+
+    const res = await sendNotificationToUser('user-1', PAYLOAD);
+
+    expect(res).toEqual({ ok: true, channel: 'email' });
+    expect(prisma.pushSubscription.deleteMany).toHaveBeenCalledWith({
+      where: { id: { in: [SUB.id] } },
+    });
+    expect(sendNotificationEmail).toHaveBeenCalledOnce();
+  });
+
+  it('웹푸시 500(일시 오류) → 구독 보존(삭제 안 함)', async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(
+      makeUser({ pushSubscriptions: [SUB] }) as never
+    );
+    vi.mocked(sendWebPush).mockRejectedValue(
+      new WebPushError('Server Error', 500, {}, '', SUB.endpoint)
+    );
+
+    const res = await sendNotificationToUser('user-1', PAYLOAD);
+
+    expect(res).toEqual({ ok: true, channel: 'email' });
+    expect(prisma.pushSubscription.deleteMany).not.toHaveBeenCalled();
   });
 
   it('emailFallback=false면 푸시 실패해도 메일 없이 no_channel (독촉 외 카테고리)', async () => {

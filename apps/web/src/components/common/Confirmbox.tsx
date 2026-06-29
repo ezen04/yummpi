@@ -27,7 +27,7 @@ export function Confirmbox({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center">
+    <div className="fixed inset-0 z-[300] mx-auto flex max-w-[480px] items-center justify-center">
       <div onClick={onClose} className="absolute inset-0 bg-[var(--overlay)]" />
 
       <div
