@@ -124,3 +124,14 @@ export function transferHost(
     { method: 'POST' }
   );
 }
+
+// POST 출석 일괄 확정(호스트) — attending = 참석 멤버 id 목록.
+export function setAttendance(
+  meetingId: string,
+  attending: string[]
+): Promise<{ attending: number }> {
+  return apiFetch(`/api/v1/meetings/${meetingId}/attendance`, {
+    method: 'POST',
+    body: JSON.stringify({ attending }),
+  });
+}

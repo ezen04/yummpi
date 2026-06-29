@@ -490,7 +490,7 @@ export function MeetingHubView({
             {isHost && (
               <HubCta
                 label="정산 시작하기"
-                onClick={() => router.push(`${base}/settlement/new`)}
+                onClick={() => router.push(`${base}/attendance`)}
               />
             )}
           </NextCard>
