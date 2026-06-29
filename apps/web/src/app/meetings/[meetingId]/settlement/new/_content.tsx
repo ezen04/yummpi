@@ -40,7 +40,10 @@ export default function SettlementNewContent({
     <>
       <Header
         title="정산 방법 선택"
-        onBack={() => router.push(`/meetings/${meetingId}`)}
+        onBack={() => {
+          clearReceipts();
+          router.push(`/meetings/${meetingId}`);
+        }}
       />
       <main className="mx-2">
         <ul className="flex flex-col p-0 m-0 list-none gap-4">
