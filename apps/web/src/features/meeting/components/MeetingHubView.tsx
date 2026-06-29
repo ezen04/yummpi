@@ -459,8 +459,19 @@ export function MeetingHubView({
         return (
           <NextCard
             title="즐거운 모임 되세요!"
-            desc="모임이 끝나면 정산을 시작할 수 있어요."
-          />
+            desc={
+              isHost
+                ? '모임이 끝났다면 정산을 시작해 보세요.'
+                : '모임이 끝나면 호스트가 정산을 시작해요.'
+            }
+          >
+            {isHost && (
+              <HubCta
+                label="정산 시작하기"
+                onClick={() => router.push(`${base}/settlement/new`)}
+              />
+            )}
+          </NextCard>
         );
       case 'SETTLING':
         if (!isHost) return <WaitingCard type="adjustment" />;
