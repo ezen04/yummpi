@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -25,6 +26,10 @@ export async function getPresignedPutUrl(
     }),
     { expiresIn }
   );
+}
+
+export async function deleteS3Object(objectKey: string): Promise<void> {
+  await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: objectKey }));
 }
 
 // CLOVA OCR이 S3 오브젝트를 직접 fetch할 수 있도록 단기 presigned GET URL 발급.
