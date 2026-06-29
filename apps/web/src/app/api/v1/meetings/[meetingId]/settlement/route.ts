@@ -44,6 +44,13 @@ export const GET = handleRoute(
 
     const currentMember = await requireMember(meetingId);
 
+    if (currentMember.attendanceStatus === 'ABSENT') {
+      throw new ApiError(
+        'FORBIDDEN',
+        '불참 처리된 멤버는 정산 화면에 접근할 수 없습니다.'
+      );
+    }
+
     const settlement = await prisma.settlement.findUnique({
       where: { meetingId },
       include: {
@@ -81,11 +88,16 @@ export const GET = handleRoute(
       totalAmount: r.totalAmount as number,
     }));
 
-    const data = buildSettlementResponse(
-      settlement,
-      receipts,
-      currentMember.id
-    );
+    const raw = buildSettlementResponse(settlement, receipts, currentMember.id);
+
+    // host는 전원 금액 조회, 일반 멤버는 본인 행만.
+    const data =
+      currentMember.role === 'HOST'
+        ? raw
+        : {
+            ...raw,
+            settlementMembers: raw.settlementMembers.filter((m) => m.isMe),
+          };
 
     // 응답 직전 inner schema parse — Prisma 결과 ↔ 계약 drift 차단.
     const parsed = SettlementResponseSchema.parse(data);
