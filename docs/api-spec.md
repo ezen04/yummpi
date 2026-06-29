@@ -256,7 +256,9 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 
 > **권한: 업로드·OCR·검수·직접 입력·삭제는 전부 호스트 전용** (`assertHost`, 2026-06-12 결정). 게스트·일반 멤버는 403. 조회(`GET`)는 멤버 전원 가능.
 > **OCR 엔진: CLOVA General OCR** (영수증 특화 모델 아님 — 2026-06-12 전환 결정). 토큰 응답을 자체 파서로 구조화 — 상세는 `ocr-parser-work-doc.md` 참조.
-> **잠금 규칙**: 해당 모임에 `settlements` 레코드가 존재하면 영수증 추가/수정/삭제/수동 생성 → `409 RECEIPT_LOCKED`.
+> **잠금 규칙**: settlement 상태에 따라 다음과 같이 세분화.
+> - **추가·수동 생성(`POST`)**: settlement 레코드 존재 자체로 차단 → `409 RECEIPT_LOCKED` (상태 무관)
+> - **수정·삭제(`PATCH`·`DELETE`)**: `CONFIRMED`·`COMPLETED` → `403 FORBIDDEN` (영구 잠금) / `DRAFT` → `409 RECEIPT_LOCKED` (소비 선택 진행 중)
 > 정산 생성 이후에는 `EQUAL`은 금액이 확정되고, `ITEM_BASED`는 소비 선택 대상 품목이 확정되므로 영수증을 변경할 수 없다.
 > 잠금 해제/정산 재오픈은 MVP 제외.
 
@@ -302,6 +304,34 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 ```
 - `objectKey`: manual receipt는 `null`
 ### `PATCH .../receipts/:receiptId` — OCR 결과 검수·수정
+
+요청:
+```json
+{
+  "items": [
+    { "name": "치킨", "quantity": 1, "unitPrice": 18000, "totalPrice": 18000 }
+  ]
+}
+```
+
+응답 200:
+```json
+{
+  "receiptId": "r_xxx",
+  "objectKey": "meetings/m_xxx/receipts/r_xxx.jpg",
+  "ocrStatus": "SUCCEEDED",
+  "totalAmount": 18000,
+  "items": [
+    { "receiptItemId": "item_1", "name": "치킨", "quantity": 1, "unitPrice": 18000, "totalPrice": 18000 }
+  ]
+}
+```
+
+- `items` 전체 교체. `totalAmount`는 서버가 items `totalPrice` 합산으로 재계산한다
+- `items` 최소 1개, `quantity` 1 이상, `unitPrice`/`totalPrice` 0원 이상. 위반 시 `400 VALIDATION_ERROR`
+- settlement가 `CONFIRMED | COMPLETED`이면 → `403 FORBIDDEN`
+- 소비 선택 시작 후 (settlement DRAFT 존재) → `409 RECEIPT_LOCKED`
+
 ### `POST .../receipts/manual` — 직접 입력 (이미지 없이 receipt 생성, 호스트) ★ v2.2
 
 요청:
@@ -595,6 +625,7 @@ io(SOCKET_URL, {
 | `PAYMENTS_NOT_COMPLETED` | 422 | 미송금 존재 |
 | `OCR_REQUEST_FAILED` | 502 | OCR 실패 |
 | `OBJECT_UPLOAD_FAILED` | 502 | 업로드 실패 |
+| `OBJECT_DELETE_FAILED` | 502 | S3 오브젝트 삭제 실패 |
 | `KAKAO_API_FAILED` | 502 | 카카오 외부 API 호출 실패 |
 | `INTERNAL_ERROR` ★ | 500 | 처리되지 않은 서버 오류(공용 fallback) |
 
