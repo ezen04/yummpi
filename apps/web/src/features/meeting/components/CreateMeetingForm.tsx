@@ -298,11 +298,9 @@ export function CreateMeetingForm({
               maxLength={1000}
               rows={3}
               placeholder="모임 소개를 적어주세요 (선택)"
-              className="w-full px-4 py-3 text-[15px] resize-none outline-none"
+              className="w-full px-4 py-3 text-[15px] resize-none outline-none border border-[var(--line-normal)] rounded-[var(--radius-12)] focus:border-[var(--primary)]"
               style={{
                 background: 'var(--bg-normal)',
-                border: '1px solid var(--line-normal)',
-                borderRadius: 'var(--radius-12)',
                 color: 'var(--label-normal)',
               }}
             />
