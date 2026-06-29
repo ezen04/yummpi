@@ -110,7 +110,9 @@ if (process.env.NODE_ENV !== 'test') {
   const worker = new Worker<ReminderJobData>(
     'payment.reminder',
     processReminderJob,
-    { connection }
+    // idle 시 Redis 폴링 빈도↓ (Upstash 명령 비용 절감). 새 job은 즉시 깨어나고,
+    // 지연 job은 예정 시각에 깨므로 독촉 지연 영향 없음(idle일 때만 덜 두드림).
+    { connection, drainDelay: 60, stalledInterval: 60_000 }
   );
   worker.on('completed', (job) => console.log(`[reminder] done job=${job.id}`));
   worker.on('failed', (job, err) =>

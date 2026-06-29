@@ -90,7 +90,8 @@ if (process.env.NODE_ENV !== 'test') {
   const worker = new Worker<NotificationJobData>(
     'notification.send',
     processNotificationJob,
-    { connection }
+    // idle 시 Redis 폴링 빈도↓ (Upstash 명령 비용 절감). 새 job은 즉시 깨어남.
+    { connection, drainDelay: 60, stalledInterval: 60_000 }
   );
   worker.on('completed', (job) =>
     console.log(`[notification] done job=${job.id}`)
