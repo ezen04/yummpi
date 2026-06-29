@@ -13,10 +13,18 @@ export function JoinPage({ inviteCode }: { inviteCode: string }) {
   if (isLoading || status === 'loading') {
     return (
       <main
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-screen flex flex-col items-center justify-center px-5"
         style={{ background: 'var(--bg-alternative)' }}
       >
-        <p style={{ color: 'var(--label-assistive)' }}>불러오는 중…</p>
+        <div
+          className="w-full max-w-[390px] flex flex-col gap-4 p-6 rounded-[var(--radius-12)]"
+          style={{ background: 'var(--bg-normal)' }}
+        >
+          <div className="h-6 w-2/3 mx-auto rounded-[var(--radius-8)] bg-[var(--fill-normal)] animate-pulse" />
+          <div className="h-[72px] w-full rounded-[var(--radius-12)] bg-[var(--fill-normal)] animate-pulse" />
+          <div className="h-12 w-full rounded-[var(--radius-12)] bg-[var(--fill-normal)] animate-pulse" />
+          <div className="h-12 w-full rounded-[var(--radius-12)] bg-[var(--fill-normal)] animate-pulse" />
+        </div>
       </main>
     );
   }
