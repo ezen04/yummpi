@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   createMeeting,
   updateMeeting,
@@ -27,7 +27,13 @@ export function useUpdateMeeting(meetingId: string) {
 
 // 모임 삭제(호스트, 소프트 삭제). 성공 시 대시보드로.
 export function useDeleteMeeting(meetingId: string) {
+  const queryClient = useQueryClient();
   return useMutation<void, unknown, void>({
     mutationFn: () => deleteMeeting(meetingId),
+    onSuccess: () => {
+      // 삭제(취소) 직후 대시보드 모임 목록 즉시 갱신.
+      // (호출측 onSuccess의 router.push와 함께 실행됨)
+      queryClient.invalidateQueries({ queryKey: ['my-meetings'] });
+    },
   });
 }
