@@ -4,8 +4,9 @@ import { expireMeetings } from '../lib/meeting-expiry.js';
 
 // Queue 네임스페이스 — ⑤ docs/payment-notification-worker 계약상 ① 몫.
 const QUEUE_NAME = 'meeting.expire';
-// 만료 스캔 주기 (60초). 만료 반영 지연은 최대 이 값.
-const SCAN_INTERVAL_MS = 60_000;
+// 만료 스캔 주기 (5분). 만료 반영 지연은 최대 이 값.
+// 60초→5분: 상시 스캔이 Upstash 명령 비용의 큰 축이라 완화(만료 몇 분 지연은 무해).
+const SCAN_INTERVAL_MS = 300_000;
 // repeatable 스케줄러 id (멱등 — 같은 id면 갱신, 재기동 시 중복 안 쌓임).
 const SCHEDULER_ID = 'meeting-expire-scan';
 
@@ -25,6 +26,9 @@ if (process.env.NODE_ENV !== 'test') {
 
   const worker = new Worker(QUEUE_NAME, processExpireJob, {
     connection: workerConnection,
+    // idle 폴링·stalled 체크 빈도↓ (Upstash 명령 비용 절감).
+    drainDelay: 60,
+    stalledInterval: 60_000,
   });
   const queue = new Queue(QUEUE_NAME, { connection: queueConnection });
 
