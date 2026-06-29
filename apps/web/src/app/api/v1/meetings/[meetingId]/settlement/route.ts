@@ -90,13 +90,15 @@ export const GET = handleRoute(
 
     const raw = buildSettlementResponse(settlement, receipts, currentMember.id);
 
-    // host는 전원 금액 조회, 일반 멤버는 본인 행만.
+    // host는 전원 items 포함 조회, 일반 멤버는 전원 금액 보이되 items는 본인 행만.
     const data =
       currentMember.role === 'HOST'
         ? raw
         : {
             ...raw,
-            settlementMembers: raw.settlementMembers.filter((m) => m.isMe),
+            settlementMembers: raw.settlementMembers.map((m) =>
+              m.isMe ? m : { ...m, items: null }
+            ),
           };
 
     // 응답 직전 inner schema parse — Prisma 결과 ↔ 계약 drift 차단.
