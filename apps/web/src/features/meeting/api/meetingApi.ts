@@ -103,14 +103,10 @@ export function deleteMeeting(meetingId: string): Promise<void> {
 }
 
 // DELETE 참석자 내보내기(호스트) — leftAt 소프트 삭제.
-export function kickMember(
-  meetingId: string,
-  memberId: string
-): Promise<void> {
-  return apiFetch<void>(
-    `/api/v1/meetings/${meetingId}/members/${memberId}`,
-    { method: 'DELETE' }
-  );
+export function kickMember(meetingId: string, memberId: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/meetings/${meetingId}/members/${memberId}`, {
+    method: 'DELETE',
+  });
 }
 
 // POST 방장 권한 위임(호스트) — 대상은 회원만(게스트 불가).
