@@ -6,6 +6,7 @@ import { PaymentErrorState } from '../components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
 import { PaymentLoadingSkeleton } from '../components/shell/PaymentLoadingSkeleton';
 import { PaymentNotInitializedState } from '../components/shell/PaymentNotInitializedState';
+import { ExemptCelebrationCard } from '../components/shell/ExemptCelebrationCard';
 import { PaymentHostView } from '../components/host/PaymentHostView';
 import { useCompletePayments } from '../hooks/useCompletePayments';
 import { useInitializePayments } from '../hooks/useInitializePayments';
@@ -35,6 +36,8 @@ export function PaymentStatusPage({ meetingId }: Props) {
   const [actionErrorMessage, setActionErrorMessage] = useState<string | null>(
     null
   );
+  // 회원 면제 시 축하 카드 → "송금 현황 보러가기" 탭하면 리스트로 펼친다(이동 없음).
+  const [showStatus, setShowStatus] = useState(false);
 
   const { data, isLoading, isError, apiError, isSettlementNotReady, refetch } =
     usePaymentStatus(meetingId);
@@ -135,6 +138,20 @@ export function PaymentStatusPage({ meetingId }: Props) {
         !myPayment.isGuest &&
         (myPayment.status === 'PAID' || myPayment.status === 'EXEMPT');
       if (!stayHere) return <PaymentLoadingSkeleton />;
+
+      /* 회원 면제: 송금 현황을 펼치기 전에 축하 카드를 먼저 보여준다(이동 없이 토글) */
+      if (myPayment && myPayment.status === 'EXEMPT' && !showStatus) {
+        return (
+          <>
+            <PaymentHeaderWrapper />
+            <ExemptCelebrationCard
+              displayName={myPayment.displayName}
+              amount={myPayment.amount}
+              onViewStatus={() => setShowStatus(true)}
+            />
+          </>
+        );
+      }
     }
 
     return (
