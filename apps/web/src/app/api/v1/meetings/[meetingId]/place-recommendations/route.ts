@@ -10,6 +10,8 @@ interface KakaoDocument {
   id: string;
   place_name: string;
   category_name: string;
+  /** 카카오 카테고리 그룹 코드 — 'FD6'(음식점) · 'CE7'(카페) 등. 식당 필터 핵심 키. */
+  category_group_code: string;
   address_name: string;
   road_address_name: string;
   phone: string;
@@ -22,6 +24,18 @@ interface KakaoDocument {
 interface KakaoResponse {
   documents: KakaoDocument[];
 }
+
+/**
+ * 모임 식당 종류(영문 key 또는 한글) → 카카오 카테고리 그룹 코드.
+ * 카페는 별도 그룹(CE7), 나머지 식당류는 음식점(FD6).
+ * "고기" 같은 키워드를 그냥 검색하면 한의원·마사지가 섞여 나오므로 group code로 강제 필터.
+ */
+function toKakaoGroupCode(foodType: string): 'FD6' | 'CE7' {
+  if (foodType === 'cafe' || foodType === '카페') return 'CE7';
+  return 'FD6';
+}
+
+const ALLOWED_GROUP_CODES = new Set(['FD6', 'CE7']);
 
 async function searchKakaoByCategory(
   query: string,
@@ -37,6 +51,8 @@ async function searchKakaoByCategory(
     radius: String(radius),
     size: '15',
     sort: 'distance',
+    // 1차 필터: 카카오 측에서 카테고리 그룹으로 제한 (한의원·약국 등 자연스럽게 제외)
+    category_group_code: toKakaoGroupCode(query),
   });
 
   const res = await fetch(`${KAKAO_KEYWORD_URL}?${params}`, {
@@ -47,7 +63,10 @@ async function searchKakaoByCategory(
   if (!res.ok) return [];
 
   const data = (await res.json()) as KakaoResponse;
-  return data.documents ?? [];
+  // 2차 안전망: 카카오 응답에 일관성 없는 케이스 차단
+  return (data.documents ?? []).filter((d) =>
+    ALLOWED_GROUP_CODES.has(d.category_group_code)
+  );
 }
 
 export const GET = handleRoute(

@@ -7,6 +7,8 @@ interface KakaoDocument {
   id: string;
   place_name: string;
   category_name: string;
+  /** 'FD6'(음식점) · 'CE7'(카페) 등 — 식당 필터 핵심 키. */
+  category_group_code: string;
   address_name: string;
   road_address_name: string;
   phone: string;
@@ -19,6 +21,8 @@ interface KakaoResponse {
   documents: KakaoDocument[];
   meta: { is_end: boolean };
 }
+
+const ALLOWED_GROUP_CODES = new Set(['FD6', 'CE7']);
 
 export const GET = handleRoute(async (req: Request) => {
   const { searchParams } = new URL(req.url);
@@ -73,17 +77,21 @@ export const GET = handleRoute(async (req: Request) => {
 
   const kakao = (await res.json()) as KakaoResponse;
 
-  const items = kakao.documents.map((d) => ({
-    externalPlaceId: d.id,
-    name: d.place_name,
-    categoryName: d.category_name || null,
-    address: d.address_name || null,
-    roadAddress: d.road_address_name || null,
-    phone: d.phone || null,
-    lat: d.y,
-    lng: d.x,
-    placeUrl: d.place_url || null,
-  }));
+  // 식당·카페만 노출. 자유 검색이라 사용자가 "한의원" 같은 키워드 직접 입력해도
+  // FD6/CE7 외 결과는 차단.
+  const items = kakao.documents
+    .filter((d) => ALLOWED_GROUP_CODES.has(d.category_group_code))
+    .map((d) => ({
+      externalPlaceId: d.id,
+      name: d.place_name,
+      categoryName: d.category_name || null,
+      address: d.address_name || null,
+      roadAddress: d.road_address_name || null,
+      phone: d.phone || null,
+      lat: d.y,
+      lng: d.x,
+      placeUrl: d.place_url || null,
+    }));
 
   return apiSuccess({ items, page, hasNext: !kakao.meta.is_end });
 });
