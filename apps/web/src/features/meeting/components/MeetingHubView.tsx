@@ -292,6 +292,13 @@ export function MeetingHubView({
                 </div>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => router.push(`${base}/members`)}
+              className="shrink-0 border-none bg-transparent text-[13px] text-[var(--label-alternative)] cursor-pointer"
+            >
+              전체보기
+            </button>
           </div>
         </section>
 
