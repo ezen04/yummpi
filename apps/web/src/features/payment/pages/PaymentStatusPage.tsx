@@ -150,7 +150,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
             await completePayments.mutateAsync();
           }}
           onCompleted={() =>
-            router.push(`/meetings/${meetingId}/payments/complete`)
+            // 종료 후 /payments는 서버에서 /complete로 redirect → push면 뒤로가기 백-트랩.
+            // replace로 히스토리를 정리해 완료 화면을 종착으로 만든다.
+            router.replace(`/meetings/${meetingId}/payments/complete`)
           }
           isCompleting={completePayments.isPending}
           completeErrorMessage={completeErrorMessage}
