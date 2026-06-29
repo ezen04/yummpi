@@ -40,6 +40,8 @@ export {
   Trash2 as Trash,
   RefreshCw as Refresh,
   FileText,
+  Crown,
+  Locate,
 } from 'lucide-react';
 
 export function YIcon({

@@ -71,7 +71,14 @@
   --radius-10: 10px;
   --radius-12: 12px;
   --radius-16: 16px;
+  --radius-20: 20px;
+  --radius-28: 28px;
   --radius-full: 999px;
+
+  /* ---- Map (지도 전용 토큰) ---- */
+  --map-surface: #faf4ee;
+  --map-warm-tint: rgba(255, 244, 234, 0.25);
+  --line-warm: #ded6ce;
 
   /* ---- Shadcn compatibility ---- */
   --muted: var(--fill-strong);
@@ -84,6 +91,12 @@
   --shadow-medium: 0 4px 24px rgba(0, 0, 0, 0.1);
   --shadow-large:
     0 6px 3px rgba(23, 23, 23, 0.04), 0 16px 9px rgba(23, 23, 23, 0.04);
+  /* warm tone — 지도 위에 떠 있는 카드/시트/floating 버튼용 */
+  --shadow-warm: 0 10px 28px rgba(203, 184, 164, 0.18);
+  /* 핀 자체 그림자 — primary 기반, 부드럽게 떠 있는 느낌 */
+  --shadow-pin: 0 14px 28px rgba(233, 75, 53, 0.18);
+  /* 핀 아래 ground 타원 — selected/topVote에서만 보이는 따뜻한 바닥 그림자 */
+  --shadow-pin-ground: 0 6px 14px rgba(246, 178, 171, 0.55);
 
   /* ---- Font ---- */
   --font-sans:
