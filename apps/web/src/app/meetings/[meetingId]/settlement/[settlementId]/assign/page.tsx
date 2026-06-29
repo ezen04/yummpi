@@ -18,10 +18,7 @@ export default async function SettlementAssignPage({
   const items = await prisma.receiptItem.findMany({
     where: { receipt: { meetingId } },
     select: { id: true, name: true, totalPrice: true },
-    orderBy: [
-      { receipt: { createdAt: 'asc' } },
-      { sortOrder: 'asc' },
-    ],
+    orderBy: [{ receipt: { createdAt: 'asc' } }, { sortOrder: 'asc' }],
   });
 
   return (
