@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
+import { assertMembersUnlocked } from '@/lib/member-lock';
 
 /**
  * POST /api/v1/meetings/:meetingId/attendance
@@ -21,6 +22,8 @@ export const POST = handleRoute(async (req: Request, ctx: Ctx) => {
   if (me.role !== 'HOST') {
     throw new ApiError('FORBIDDEN', '주최자만 참석자를 확정할 수 있습니다.');
   }
+  // 정산 시작 후 출석 일괄 변경 차단(④ — 참여자 집합 고정).
+  await assertMembersUnlocked(meetingId);
 
   const body = (await req.json().catch(() => ({}))) as { attending?: unknown };
   if (

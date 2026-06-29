@@ -615,6 +615,7 @@ io(SOCKET_URL, {
 | `NICKNAME_DUPLICATED` | 409 | 닉네임 중복 |
 | `SETTLEMENT_ALREADY_EXISTS` ★ | 409 | 모임에 정산이 이미 존재 |
 | `VOTING_SETTING_LOCKED` ★ | 409 | 투표 시작 후 익명 설정 변경 |
+| `MEMBER_LOCKED` ★ | 409 | 정산 시작 후 멤버 변경(탈퇴·방장위임·출석) 시도 (2026-06-29 추가) |
 | `RECEIPT_LOCKED` ★ | 409 | 소비 선택 시작 후 영수증 추가/삭제 시도 |
 | `RECEIPT_ALREADY_EXISTS` ★ | 409 | 동일 receiptId 재요청·더블서밋 (PK 충돌, 2026-06-26 추가) |
 | `SETTLEMENT_CALCULATION_PENDING` ★ | 409 | 계산 미완료 상태에서 확정 시도 |
