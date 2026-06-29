@@ -6,6 +6,7 @@ import { toast } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { KakaoMap } from '@/components/common/KakaoMap';
 import { useVote } from '@/hooks/useVote';
+import { useMeetingDetail } from '@/features/vote/hooks/useMeetingDetail';
 import { calcDistance } from '@/lib/haversine';
 import type { RecommendationItem } from '../api/placeApi';
 import { useOptimalPoint } from '../hooks/useOptimalPoint';
@@ -45,12 +46,17 @@ export function PlaceSearchPage({ meetingId }: PlaceSearchPageProps) {
   const debouncedQuery = useDebouncedValue(query, 300);
 
   const { votesData } = useVote(meetingId);
+  const { data: meeting } = useMeetingDetail(meetingId);
 
-  // 중간지점 좌표 — 멤버 출발지 0명이면 훅이 error 상태가 되어 lat/lng = null
-  // → 검색은 전국 단위로 fallback (UX (b)), 사용자에게는 input 아래 안내로 사유 노출
-  const { data: optimal, isError: optimalError } = useOptimalPoint(meetingId);
-  const lat = optimal?.lat ?? null;
-  const lng = optimal?.lng ?? null;
+  // 검색 center 결정 — 호스트가 만남역을 정한 모임은 그 좌표 우선, 아니면 출발지 평균 중간지점.
+  // 만남역이 있으면 optimalError(출발지 0명) 안내도 숨긴다.
+  const hasVenue = meeting?.meetingLat != null && meeting?.meetingLng != null;
+
+  const { data: optimal, isError: optimalErrorRaw } =
+    useOptimalPoint(meetingId);
+  const lat = hasVenue ? meeting.meetingLat : (optimal?.lat ?? null);
+  const lng = hasVenue ? meeting.meetingLng : (optimal?.lng ?? null);
+  const optimalError = hasVenue ? false : optimalErrorRaw;
 
   const { data: results, isLoading } = usePlaceSearch(
     meetingId,
