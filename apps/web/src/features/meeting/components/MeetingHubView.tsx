@@ -149,7 +149,11 @@ export function MeetingHubView({
       key: 'place',
       label: '장소',
       icon: <MapPin size={20} strokeWidth={1.5} />,
-      enabled: ['RECRUITING', 'VOTING', 'PLACE_CONFIRMED', 'IN_PROGRESS'],
+      // 확정 후 장소 버튼은 재확정(/place/change) = 호스트 전용.
+      // 비호스트는 추천·투표 단계(RECRUITING·VOTING)까지만 진입 가능.
+      enabled: isHost
+        ? ['RECRUITING', 'VOTING', 'PLACE_CONFIRMED', 'IN_PROGRESS']
+        : ['RECRUITING', 'VOTING'],
       href: placeHref,
     },
     {
@@ -425,7 +429,10 @@ export function MeetingHubView({
             <StartRecruitingButton meetingId={meetingId} />
           </NextCard>
         ) : (
-          <WaitingCard type="location-vote" />
+          <NextCard
+            title="호스트가 모임을 준비하고 있어요"
+            desc="모집이 시작되면 장소 추천에 참여할 수 있어요."
+          />
         );
       case 'RECRUITING':
         return (
@@ -446,7 +453,15 @@ export function MeetingHubView({
             onAction={() => router.push(`${base}/vote`)}
           />
         ) : (
-          <WaitingCard type="location-vote" />
+          <NextCard
+            title="장소 투표가 진행 중이에요"
+            desc="가고 싶은 장소에 투표해 주세요."
+          >
+            <HubCta
+              label="투표하러 가기"
+              onClick={() => router.push(`${base}/vote`)}
+            />
+          </NextCard>
         );
       case 'PLACE_CONFIRMED':
         return (
