@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useRef, useState } from 'react';
+import { use, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, Close, Refresh, toast } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
@@ -28,40 +28,27 @@ export default function SettlementReceiptPage({
 }) {
   const { meetingId } = use(params);
   const router = useRouter();
-  const { receipts, addReceipt, clearReceipts, deleteReceipt } =
-    useSettlementStore();
+  const {
+    receipts,
+    addReceipt,
+    clearReceipts,
+    deleteReceipt,
+    previewUrls,
+    pendingFiles,
+    setPreviewUrl,
+    setPendingFile,
+    removePendingFile,
+  } = useSettlementStore();
   const { processReceipts } = useOcrProcessor(meetingId);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  // OCR 호출은 "다음" 클릭 시 일괄 처리 — 추가 시점엔 PENDING 카드만 띄우고
-  // File은 여기 보관(Zustand store엔 영속하지 않음, OCR 끝나면 더 필요 없음).
-  const [pendingEntries, setPendingEntries] = useState<ReceiptUploadEntry[]>(
-    []
-  );
-  // 업로드한 원본 사진 미리보기 — OCR(마스킹은 서버 파서 단계에서만 적용)과
-  // 무관하게 항상 원본 그대로 보여준다. "다음" 누르기 전엔 이게 카드의 전부.
-  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 화면 이탈(언마운트) 시점에만 남은 미리보기 URL을 일괄 해제 — state 변경마다
-  // 도는 effect로 만들면 새 사진 추가 시 직전 사진의 URL까지 같이 revoke된다.
-  const previewUrlsRef = useRef(previewUrls);
-  previewUrlsRef.current = previewUrls;
-  useEffect(() => {
-    return () => {
-      Object.values(previewUrlsRef.current).forEach((url) =>
-        URL.revokeObjectURL(url)
-      );
-    };
-  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     e.target.value = '';
     const remaining = MAX - receipts.length;
 
-    // base64로 인코딩(fileToBase64)한 뒤 서버에서 거부당하면 사용자가 변환·업로드
-    // 대기를 다 거치고서야 실패를 알게 된다 — 선택 시점에 미리 걸러낸다.
     const oversized = files.filter((f) => f.size > MAX_RECEIPT_IMAGE_BYTES);
     if (oversized.length > 0) {
       toast.error('10MB 이하 사진만 업로드할 수 있어요.');
@@ -70,41 +57,37 @@ export default function SettlementReceiptPage({
       .filter((f) => f.size <= MAX_RECEIPT_IMAGE_BYTES)
       .slice(0, remaining);
 
-    const newEntries: ReceiptUploadEntry[] = picked.map((file) => ({
-      receiptId: crypto.randomUUID(),
-      file,
-    }));
-    newEntries.forEach((entry) => addReceipt(entry.receiptId));
-    setPendingEntries((prev) => [...prev, ...newEntries]);
-    setPreviewUrls((prev) => {
-      const next = { ...prev };
-      newEntries.forEach((entry) => {
-        next[entry.receiptId] = URL.createObjectURL(entry.file);
-      });
-      return next;
+    picked.forEach((file) => {
+      const receiptId = crypto.randomUUID();
+      addReceipt(receiptId);
+      setPreviewUrl(receiptId, URL.createObjectURL(file));
+      setPendingFile(receiptId, file);
     });
   };
 
-  const handleDelete = (receiptId: string) => {
-    deleteReceipt(receiptId);
-    setPendingEntries((prev) => prev.filter((e) => e.receiptId !== receiptId));
-    setPreviewUrls((prev) => {
-      const { [receiptId]: removed, ...rest } = prev;
-      if (removed) URL.revokeObjectURL(removed);
-      return rest;
-    });
-  };
+  // deleteReceipt가 blob URL 해제 + pendingFiles 제거까지 처리
+  const handleDelete = (receiptId: string) => deleteReceipt(receiptId);
 
   const handleNext = async () => {
+    const pendingEntries: ReceiptUploadEntry[] = receipts
+      .filter((r) => r.receiptId in pendingFiles)
+      .map((r) => ({
+        receiptId: r.receiptId,
+        file: pendingFiles[r.receiptId],
+      }));
+
     if (pendingEntries.length === 0) {
       router.push(`/meetings/${meetingId}/settlement/new/receipt/review`);
       return;
     }
     setIsProcessing(true);
-    await processReceipts(pendingEntries);
-    setPendingEntries([]);
-    setIsProcessing(false);
-    router.push(`/meetings/${meetingId}/settlement/new/receipt/review`);
+    try {
+      await processReceipts(pendingEntries);
+      pendingEntries.forEach((e) => removePendingFile(e.receiptId));
+      router.push(`/meetings/${meetingId}/settlement/new/receipt/review`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleBack = () => {
@@ -222,8 +205,22 @@ export default function SettlementReceiptPage({
         open={leaveOpen}
         onClose={() => setLeaveOpen(false)}
         onConfirm={() => {
-          clearReceipts();
-          router.push(`/meetings/${meetingId}/settlement/new`);
+          setLeaveOpen(false);
+          void (async () => {
+            // DB/S3에 올라간 영수증 정리 (PENDING은 아직 서버에 없으므로 제외)
+            await Promise.allSettled(
+              receipts
+                .filter((r) => r.ocrStatus !== 'PENDING')
+                .map((r) =>
+                  fetch(
+                    `/api/v1/meetings/${meetingId}/receipts/${r.receiptId}`,
+                    { method: 'DELETE' }
+                  )
+                )
+            );
+            clearReceipts();
+            router.push(`/meetings/${meetingId}/settlement/new`);
+          })();
         }}
         title="영수증 업로드를 취소할까요?"
         body="추가한 영수증이 모두 삭제됩니다."

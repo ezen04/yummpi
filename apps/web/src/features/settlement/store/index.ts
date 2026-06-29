@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 
 export interface OcrItem {
@@ -24,6 +26,8 @@ interface SettlementStore {
   equalAmount: number | null; // EQUAL(영수증 없는 /equal)만 사용. 그 외 null
   mySelectedItemIds: string[]; // ITEM_BASED /assign에서만 채움. 그 외 []
   myRole: 'HOST' | 'MEMBER' | null; // 정산 플로우 진입 시 GET /members에서 채움
+  previewUrls: Record<string, string>; // receiptId → blob: URL (re-mount 후에도 유지)
+  pendingFiles: Record<string, File>; // receiptId → File (아직 S3 미업로드)
 
   addReceipt: (receiptId: string) => void;
   setOcrProcessing: (receiptId: string) => void;
@@ -49,6 +53,9 @@ interface SettlementStore {
     lineIndex: number,
     item: OcrItem
   ) => void;
+  setPreviewUrl: (receiptId: string, url: string) => void;
+  setPendingFile: (receiptId: string, file: File) => void;
+  removePendingFile: (receiptId: string) => void;
 }
 
 export const useSettlementStore = create<SettlementStore>((set) => ({
@@ -59,6 +66,8 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
   equalAmount: null,
   mySelectedItemIds: [],
   myRole: null,
+  previewUrls: {},
+  pendingFiles: {},
 
   addReceipt: (receiptId) =>
     set((state) => {
@@ -94,27 +103,40 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
     })),
 
   clearReceipts: () =>
-    set({
-      receipts: [],
-      selectedReceiptId: null,
-      splitMethod: null,
-      flowType: null,
-      equalAmount: null,
-      mySelectedItemIds: [],
-      myRole: null,
+    set((state) => {
+      Object.values(state.previewUrls).forEach((url) =>
+        URL.revokeObjectURL(url)
+      );
+      return {
+        receipts: [],
+        selectedReceiptId: null,
+        splitMethod: null,
+        flowType: null,
+        equalAmount: null,
+        mySelectedItemIds: [],
+        myRole: null,
+        previewUrls: {},
+        pendingFiles: {},
+      };
     }),
 
   deleteReceipt: (receiptId) =>
     set((state) => {
+      const url = state.previewUrls[receiptId];
+      if (url) URL.revokeObjectURL(url);
       const newReceipts = state.receipts.filter(
         (r) => r.receiptId !== receiptId
       );
+      const { [receiptId]: _url, ...restUrls } = state.previewUrls;
+      const { [receiptId]: _file, ...restFiles } = state.pendingFiles;
       return {
         receipts: newReceipts,
         selectedReceiptId:
           state.selectedReceiptId === receiptId
             ? (newReceipts[0]?.receiptId ?? null)
             : state.selectedReceiptId,
+        previewUrls: restUrls,
+        pendingFiles: restFiles,
       };
     }),
 
@@ -161,6 +183,22 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
           : r
       ),
     })),
+
+  setPreviewUrl: (receiptId, url) =>
+    set((state) => ({
+      previewUrls: { ...state.previewUrls, [receiptId]: url },
+    })),
+
+  setPendingFile: (receiptId, file) =>
+    set((state) => ({
+      pendingFiles: { ...state.pendingFiles, [receiptId]: file },
+    })),
+
+  removePendingFile: (receiptId) =>
+    set((state) => {
+      const { [receiptId]: _, ...rest } = state.pendingFiles;
+      return { pendingFiles: rest };
+    }),
 
   // 미분류 줄 → 품목 승격. ocrItems push + unclassifiedLines splice를 한 액션으로
   // 묶어 중복 노출/race를 차단한다.

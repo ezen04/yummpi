@@ -25,7 +25,7 @@ export type CallClovaResult =
   | { status: 'ERROR'; message?: string };
 
 export async function callClovaGeneralOcr(
-  imageBase64: string,
+  imageUrl: string,
   format: 'jpg' | 'png' | 'jpeg'
 ): Promise<CallClovaResult> {
   const url = process.env.CLOVA_OCR_INVOKE_URL;
@@ -45,7 +45,7 @@ export async function callClovaGeneralOcr(
       // 바꿀지 결정한다.
       requestId: crypto.randomUUID(),
       timestamp: Date.now(),
-      images: [{ format, name: 'receipt', data: imageBase64 }],
+      images: [{ format, name: 'receipt', url: imageUrl }],
     },
     {
       headers: { 'X-OCR-SECRET': secret },

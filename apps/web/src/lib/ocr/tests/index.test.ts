@@ -1,17 +1,64 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 
+vi.mock('../clova', () => ({
+  callClovaGeneralOcr: vi.fn(),
+}));
+
+import { callClovaGeneralOcr } from '../clova';
 import { callGeneralOcr } from '../index';
 
-describe('callGeneralOcr — input guards', () => {
-  it('imageBase64 6MB 초과 시 CONFIG throw (limiter·네트워크 진입 전 fail-fast)', async () => {
-    const oversized = 'a'.repeat(6 * 1024 * 1024 + 1);
+const IMAGE_URL = 'https://s3.example.com/meetings/abc/receipts/xyz.jpg';
+const TOKEN = {
+  text: '치킨',
+  confidence: 0.99,
+  cx: 0,
+  cy: 0,
+  width: 10,
+  height: 10,
+  lineBreak: false,
+};
 
-    await expect(callGeneralOcr(oversized, 'jpg')).rejects.toMatchObject({
-      name: 'OcrFailedError',
-      kind: 'CONFIG',
+describe('callGeneralOcr', () => {
+  const mockedClova = callClovaGeneralOcr as unknown as Mock;
+
+  beforeEach(() => {
+    mockedClova.mockReset();
+  });
+
+  it('imageUrl·format을 callClovaGeneralOcr에 그대로 전달한다', async () => {
+    mockedClova.mockResolvedValueOnce({ status: 'SUCCESS', tokens: [TOKEN] });
+
+    await callGeneralOcr(IMAGE_URL, 'jpg');
+
+    expect(mockedClova).toHaveBeenCalledWith(IMAGE_URL, 'jpg');
+  });
+
+  it('SUCCESS → tokens 배열 반환', async () => {
+    mockedClova.mockResolvedValueOnce({ status: 'SUCCESS', tokens: [TOKEN] });
+
+    const result = await callGeneralOcr(IMAGE_URL, 'jpg');
+
+    expect(result).toEqual([TOKEN]);
+  });
+
+  it('FAILURE → OcrFailedError(INFER_FAILURE) throw', async () => {
+    mockedClova.mockResolvedValueOnce({
+      status: 'FAILURE',
+      message: '이미지 흐림',
     });
-    await expect(callGeneralOcr(oversized, 'jpg')).rejects.toThrow(
-      /exceeds CLOVA OCR limit/
-    );
+
+    await expect(callGeneralOcr(IMAGE_URL, 'jpg')).rejects.toMatchObject({
+      name: 'OcrFailedError',
+      kind: 'INFER_FAILURE',
+    });
+  });
+
+  it('ERROR → OcrFailedError(INFER_ERROR) throw', async () => {
+    mockedClova.mockResolvedValueOnce({ status: 'ERROR', message: 'internal' });
+
+    await expect(callGeneralOcr(IMAGE_URL, 'jpg')).rejects.toMatchObject({
+      name: 'OcrFailedError',
+      kind: 'INFER_ERROR',
+    });
   });
 });

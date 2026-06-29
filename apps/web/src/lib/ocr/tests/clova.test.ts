@@ -130,14 +130,14 @@ describe('callClovaGeneralOcr', () => {
   it('axios 호출 시 timeout 3000ms·X-OCR-SECRET 헤더·V2 body 전달', async () => {
     mockedPost.mockResolvedValueOnce({ data: SAMPLE_SUCCESS_BODY });
 
-    await callClovaGeneralOcr('base64-data', 'png');
+    await callClovaGeneralOcr('https://s3.example.com/img.png', 'png');
 
     expect(mockedPost).toHaveBeenCalledTimes(1);
     const [url, body, config] = mockedPost.mock.calls[0];
     expect(url).toBe('https://example.invalid/ocr');
     expect(body).toMatchObject({
       version: 'V2',
-      images: [{ format: 'png', data: 'base64-data' }],
+      images: [{ format: 'png', url: 'https://s3.example.com/img.png' }],
     });
     expect(config).toMatchObject({
       headers: { 'X-OCR-SECRET': 'secret-x' },
