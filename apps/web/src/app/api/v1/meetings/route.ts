@@ -105,6 +105,8 @@ export const GET = handleRoute(async (req: Request) => {
   );
 
   const where: Prisma.MeetingWhereInput = {
+    // 소프트 삭제(취소)된 모임은 목록에서 제외 (DELETE = cancelledAt 기록).
+    cancelledAt: null,
     OR: [
       { hostUserId: user.id },
       { members: { some: { userId: user.id, leftAt: null } } },
