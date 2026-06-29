@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentErrorState } from '../components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
@@ -37,7 +37,20 @@ export function PaymentStatusPage({ meetingId }: Props) {
     null
   );
   // 회원 면제 시 축하 카드 → "송금 현황 보러가기" 탭하면 리스트로 펼친다(이동 없음).
-  const [showStatus, setShowStatus] = useState(false);
+  // 한 번 본 모임은 같은 세션에서 카드를 건너뛰고 바로 리스트로 간다(sessionStorage).
+  const exemptSeenKey = `payment-exempt-seen:${meetingId}`;
+  const [showStatus, setShowStatus] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(exemptSeenKey) === '1';
+  });
+  const handleViewStatus = useCallback(() => {
+    setShowStatus(true);
+    try {
+      sessionStorage.setItem(exemptSeenKey, '1');
+    } catch {
+      // sessionStorage 접근 불가(프라이빗 모드 등)면 무시 — 이번 방문만 펼침.
+    }
+  }, [exemptSeenKey]);
 
   const { data, isLoading, isError, apiError, isSettlementNotReady, refetch } =
     usePaymentStatus(meetingId);
@@ -147,7 +160,7 @@ export function PaymentStatusPage({ meetingId }: Props) {
             <ExemptCelebrationCard
               displayName={myPayment.displayName}
               amount={myPayment.amount}
-              onViewStatus={() => setShowStatus(true)}
+              onViewStatus={handleViewStatus}
             />
           </>
         );
