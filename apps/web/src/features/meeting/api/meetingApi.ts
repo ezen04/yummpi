@@ -107,6 +107,24 @@ export function deleteMeeting(meetingId: string): Promise<void> {
   return apiFetch<void>(`/api/v1/meetings/${meetingId}`, { method: 'DELETE' });
 }
 
+// DELETE 참석자 내보내기(호스트) — leftAt 소프트 삭제.
+export function kickMember(meetingId: string, memberId: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/meetings/${meetingId}/members/${memberId}`, {
+    method: 'DELETE',
+  });
+}
+
+// POST 방장 권한 위임(호스트) — 대상은 회원만(게스트 불가).
+export function transferHost(
+  meetingId: string,
+  memberId: string
+): Promise<{ meetingId: string; hostMemberId: string }> {
+  return apiFetch(
+    `/api/v1/meetings/${meetingId}/members/${memberId}/transfer-host`,
+    { method: 'POST' }
+  );
+}
+
 // POST 출석 일괄 확정(호스트) — attending = 참석 멤버 id 목록.
 export function setAttendance(
   meetingId: string,

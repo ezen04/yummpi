@@ -21,6 +21,15 @@ export interface MeetingHostInfo {
   startLongitude: string | null;
 }
 
+export interface MeetingMemberInfo {
+  id: string;
+  nickname: string;
+  role: 'HOST' | 'MEMBER';
+  startStation: string | null;
+  startLatitude: string | null;
+  startLongitude: string | null;
+}
+
 export interface MeetingDetail {
   id: string;
   title: string;
@@ -29,11 +38,17 @@ export interface MeetingDetail {
   votingClosesAt: string | null;
   /** ② 출발역 입력 마감 시각 — null이면 호스트가 아직 대기시간 미설정 */
   departureInputClosesAt: string | null;
+  /** ① 호스트가 직접 정한 만남역 — 셋이 함께 들어옴 (null이면 출발지 평균 중간지점 흐름) */
+  meetingStationName: string | null;
+  meetingLat: string | null;
+  meetingLng: string | null;
   anonymousVoting: boolean;
   confirmedCandidateId: string | null;
   budgetPerPerson: number | null;
   foodTypes: string[];
   host: MeetingHostInfo | null;
+  /** viewer 본인 출발역 표시·중간지점 근접역 등에 사용 */
+  members: MeetingMemberInfo[];
 }
 
 interface RawMeetingMember {
@@ -52,6 +67,9 @@ interface RawMeetingResponse {
   scheduledAt: string;
   votingClosesAt: string | null;
   departureInputClosesAt: string | null;
+  meetingStationName: string | null;
+  meetingLat: string | null;
+  meetingLng: string | null;
   anonymousVoting: boolean;
   confirmedCandidateId: string | null;
   budgetPerPerson: number | null;
@@ -92,11 +110,22 @@ async function fetchMeetingDetail(meetingId: string): Promise<MeetingDetail> {
     scheduledAt: raw.scheduledAt,
     votingClosesAt: raw.votingClosesAt,
     departureInputClosesAt: raw.departureInputClosesAt ?? null,
+    meetingStationName: raw.meetingStationName ?? null,
+    meetingLat: raw.meetingLat ?? null,
+    meetingLng: raw.meetingLng ?? null,
     anonymousVoting: raw.anonymousVoting,
     confirmedCandidateId: raw.confirmedCandidateId,
     budgetPerPerson: raw.budgetPerPerson,
     foodTypes: raw.foodTypes ?? [],
     host,
+    members: raw.members.map((m) => ({
+      id: m.id,
+      nickname: m.nickname,
+      role: m.role,
+      startStation: m.startStation,
+      startLatitude: m.startLatitude,
+      startLongitude: m.startLongitude,
+    })),
   };
 }
 
