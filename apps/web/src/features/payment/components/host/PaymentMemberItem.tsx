@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/common/Button';
+import { Icon } from '@/components/common/Icon';
+import { IconButton } from '@/components/common/IconButton';
 import { formatAmount } from '../../utils/transferMock';
 import { PaymentConfirmbox } from '../shell/PaymentConfirmbox';
+import {
+  PaymentMemberActionSheet,
+  getSecondaryActions,
+} from './PaymentMemberActionSheet';
 import '../payment-montage.css';
 import { REMIND_DAILY_LIMIT } from '@yummpi/schemas';
 import type { PaymentListItem, PaymentAction } from '@yummpi/schemas';
@@ -45,7 +51,9 @@ const STATUS_BADGE: Record<
 
 export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const badge = STATUS_BADGE[item.status] ?? null;
+  const secondaryActions = onAction ? getSecondaryActions(item) : [];
   const isHost = viewerRole === 'HOST';
   const isHostSelf = item.isMine && isHost;
   // 쿨다운: 마운트 후에만 시각 비교(SSR 불일치 방지). 1초마다 갱신해
@@ -122,18 +130,7 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
             </span>
           )}
 
-          {/* EXEMPT → 면제 취소 (배지와 함께 노출) */}
-          {item.status === 'EXEMPT' && item.canMarkPending && onAction && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
-              className="rounded-full h-10 px-[18px] text-[15px] font-medium text-[var(--label-alternative)] whitespace-nowrap"
-            >
-              면제 취소
-            </Button>
-          )}
-
+          {/* 주 액션 (인라인) — badge 없는 상태에서만 노출 */}
           {!badge && onAction && (
             <>
               {/* TRANSFER_REPORTED → 완료 확인 */}
@@ -145,18 +142,6 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                   className="rounded-full h-10 px-[18px] text-[15px] whitespace-nowrap"
                 >
                   완료 확인
-                </Button>
-              )}
-
-              {/* PAID → 되돌리기 */}
-              {item.canMarkPending && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onAction(item.paymentId, 'MARK_PENDING')}
-                  className="rounded-full h-10 px-[18px] text-[15px] font-medium text-[var(--label-alternative)] whitespace-nowrap"
-                >
-                  되돌리기
                 </Button>
               )}
 
@@ -184,19 +169,23 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
                     </Button>
                   </div>
                 )}
-
-              {/* PENDING → 면제 */}
-              {item.canMarkExempt && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onAction(item.paymentId, 'MARK_EXEMPT')}
-                  className="rounded-full h-10 px-[18px] text-[15px] font-medium text-[var(--label-alternative)] whitespace-nowrap"
-                >
-                  면제
-                </Button>
-              )}
             </>
+          )}
+
+          {/* 보조 액션 (더보기) — 되돌리기·면제취소·면제 */}
+          {onAction && secondaryActions.length > 0 && (
+            <IconButton
+              onClick={() => setSheetOpen(true)}
+              size={40}
+              aria-label={`${item.displayName} 더보기`}
+              icon={
+                <Icon
+                  name="more-vertical"
+                  size={20}
+                  color="var(--label-alternative)"
+                />
+              }
+            />
           )}
         </div>
       </div>
@@ -221,6 +210,15 @@ export function PaymentMemberItem({ item, viewerRole, onAction }: Props) {
           입금이 확인되었나요?
         </p>
       </PaymentConfirmbox>
+
+      {onAction && (
+        <PaymentMemberActionSheet
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          item={item}
+          onAction={onAction}
+        />
+      )}
     </>
   );
 }
