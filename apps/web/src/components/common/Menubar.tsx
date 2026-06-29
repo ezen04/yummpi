@@ -17,6 +17,7 @@ interface MenubarProps {
   activeTab: TabKey;
   onTabChange: (tab: TabKey) => void;
   onCreateClick: () => void;
+  notificationsBadge?: boolean;
   className?: string;
 }
 
@@ -54,6 +55,7 @@ export function Menubar({
   activeTab,
   onTabChange,
   onCreateClick,
+  notificationsBadge,
   className,
 }: MenubarProps) {
   const TAB_BTN =
@@ -69,12 +71,17 @@ export function Menubar({
         onClick={() => onTabChange(tab.key)}
         className={TAB_BTN}
       >
-        <Image
-          src={isActive ? tab.activeIcon : tab.mutedIcon}
-          alt=""
-          width={20}
-          height={20}
-        />
+        <span className="relative">
+          <Image
+            src={isActive ? tab.activeIcon : tab.mutedIcon}
+            alt=""
+            width={20}
+            height={20}
+          />
+          {tab.key === 'notifications' && notificationsBadge && (
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--primary)] border border-[var(--bg-normal)]" />
+          )}
+        </span>
         <span
           className={cn(
             TAB_LABEL,

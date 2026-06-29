@@ -6,12 +6,14 @@ import { Button } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Menubar } from '@/components/common/Menubar';
 import { MeetingCard } from '@/features/meeting/components/MeetingCard';
+import { useUnreadNotificationCount } from '@/features/notification/hooks/useUnreadNotificationCount';
 import { useMe, useMyMeetings } from '../hooks';
 
 export function DashboardView() {
   const router = useRouter();
   const me = useMe();
   const meetings = useMyMeetings();
+  const unreadCount = useUnreadNotificationCount();
 
   const nickname = me.data?.nickname ?? '회원';
   const items = meetings.data?.items ?? [];
@@ -122,6 +124,7 @@ export function DashboardView() {
         activeTab="home"
         onTabChange={handleTabChange}
         onCreateClick={() => router.push('/meetings/new')}
+        notificationsBadge={unreadCount > 0}
       />
     </div>
   );

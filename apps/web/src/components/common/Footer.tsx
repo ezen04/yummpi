@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Menubar } from './Menubar';
+import { useUnreadNotificationCount } from '@/features/notification/hooks/useUnreadNotificationCount';
 
 type TabKey = 'home' | 'meetings' | 'notifications' | 'mypage';
 
@@ -23,10 +24,19 @@ type FooterProps =
       className?: string;
     };
 
+function MenubarWithBadge(props: {
+  activeTab: TabKey;
+  onTabChange: (tab: TabKey) => void;
+  onCreateClick: () => void;
+}) {
+  const unread = useUnreadNotificationCount();
+  return <Menubar {...props} notificationsBadge={unread > 0} />;
+}
+
 export function Footer(props: FooterProps) {
   if (props.variant === 'menubar') {
     return (
-      <Menubar
+      <MenubarWithBadge
         activeTab={props.activeTab}
         onTabChange={props.onTabChange}
         onCreateClick={props.onCreateClick}
