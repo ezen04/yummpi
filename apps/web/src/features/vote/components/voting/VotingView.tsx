@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Header } from '@/components/common/Header';
-import { useVote, type VotesData } from '@/hooks/useVote';
+import { useVote, type VoteCandidate, type VotesData } from '@/hooks/useVote';
 import type { MeetingDetail } from '../../hooks/useMeetingDetail';
 import { useVoteUiStore } from '../../stores/useVoteUiStore';
 import { ConfirmPlaceSheet } from '../confirm/ConfirmPlaceSheet';
@@ -53,6 +53,26 @@ export function VotingView({
   const confirmPlaceSheetOpen = useVoteUiStore((s) => s.confirmPlaceSheetOpen);
 
   const isClosed = useIsVotingClosed(votesData.votingClosesAt);
+
+  // 카드 순서 고정 — useVote는 voteCount desc로 재정렬해서 주지만,
+  // 화면에선 진입 시점 순서를 유지(투표 시 카드가 점프하면 클릭 정확도·시각 안정성 ↓).
+  //
+  // useState lazy init으로 첫 render의 id 순서를 mount 동안 freeze.
+  // 이후 voteCount 변경 → useMemo가 candidatesById로 다시 매핑.
+  // 새로 추가된 후보는 끝에 append, 사라진 후보(REJECTED·삭제)는 자동으로 빠짐.
+  const [initialOrder] = React.useState<string[]>(() =>
+    votesData.candidates.map((c) => c.id)
+  );
+
+  const orderedCandidates = React.useMemo<VoteCandidate[]>(() => {
+    const byId = new Map(votesData.candidates.map((c) => [c.id, c]));
+    const initialSet = new Set(initialOrder);
+    const frozen = initialOrder
+      .map((id) => byId.get(id))
+      .filter((c): c is VoteCandidate => c !== undefined);
+    const appended = votesData.candidates.filter((c) => !initialSet.has(c.id));
+    return [...frozen, ...appended];
+  }, [initialOrder, votesData.candidates]);
 
   // 1위 동률 감지 + 동률 1위 ID 집합 — 모든 동률 1위 카드에 배지 표시.
   // candidates는 useVote가 voteCount desc + id asc로 정렬해두므로 [0]이 최상위.
@@ -155,7 +175,7 @@ export function VotingView({
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
         <VoteCandidateList
-          candidates={votesData.candidates}
+          candidates={orderedCandidates}
           myCandidateId={votesData.myCandidateId}
           topCandidateIds={topCandidateIds}
           onVote={handleVote}

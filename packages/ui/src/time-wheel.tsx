@@ -60,24 +60,36 @@ export function WheelTimePicker({
 
   // 트랙패드/마우스 wheel 속도 throttle.
   // wheelMode="natural"이 작은 deltaY에도 반응이 빨라 트랙패드에서 1번에 여러 행 넘어감.
-  // wheel 이벤트를 200ms throttle로 캡처해 라이브러리 도달 빈도를 낮춤.
+  // wheel 이벤트를 100ms throttle로 캡처해 라이브러리 도달 빈도를 낮춤.
   // 모바일 touch 이벤트는 wheel과 무관 → 영향 없음.
+  //
+  // React onWheelCapture는 root에서 passive listener로 등록되어 preventDefault가
+  // 무시되고 콘솔 경고가 뜸. native addEventListener + { passive: false }로 직접 등록.
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const lastWheelRef = React.useRef(0);
-  const handleWheelCapture = (e: React.WheelEvent<HTMLDivElement>) => {
-    const now = Date.now();
-    if (now - lastWheelRef.current < 100) {
-      e.stopPropagation();
-      e.preventDefault();
-      return;
-    }
-    lastWheelRef.current = now;
-  };
+
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handler = (e: WheelEvent) => {
+      const now = Date.now();
+      if (now - lastWheelRef.current < 100) {
+        e.stopPropagation();
+        e.preventDefault();
+        return;
+      }
+      lastWheelRef.current = now;
+    };
+
+    el.addEventListener('wheel', handler, { passive: false, capture: true });
+    return () => {
+      el.removeEventListener('wheel', handler, { capture: true });
+    };
+  }, []);
 
   return (
-    <div
-      className={cn('relative w-full', className)}
-      onWheelCapture={handleWheelCapture}
-    >
+    <div ref={containerRef} className={cn('relative w-full', className)}>
       <Picker
         value={pickerValue}
         onChange={handleChange}
