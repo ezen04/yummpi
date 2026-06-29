@@ -48,6 +48,7 @@ export default function ReceiptReviewPage({
     deleteOcrItem,
     addOcrItem,
     promoteUnclassifiedLine,
+    resetOcrResults,
   } = useSettlementStore();
 
   const [sheet, setSheet] = useState(SHEET_CLOSED);
@@ -80,6 +81,7 @@ export default function ReceiptReviewPage({
     splitMethod !== null && receipts.some((r) => r.ocrItems.length > 0);
 
   const handleBack = () => {
+    resetOcrResults();
     router.push(`/meetings/${meetingId}/settlement/new/receipt`);
   };
 
