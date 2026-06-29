@@ -11,6 +11,21 @@ import { usePlaceCandidates } from '@/features/place/hooks/usePlaceCandidates';
 import { usePlaceRecommendations } from '@/features/place/hooks/usePlaceRecommendations';
 import { usePlaceSuggestions } from '@/features/place/hooks/usePlaceSuggestions';
 import { findNearestStation } from '@/features/place/utils/stationSearch';
+
+// ① 모임 생성 시 식당 종류는 영문 key(`korean`·`japanese`·…)로 저장된다.
+// chip에는 한글 라벨로 표시 — 매핑되지 않은 값(이미 한글이거나 raw 카카오 카테고리)은 그대로 통과.
+const FOOD_TYPE_LABEL: Record<string, string> = {
+  korean: '한식',
+  japanese: '일식',
+  chinese: '중식',
+  meat: '고기',
+  cafe: '카페',
+  western: '양식',
+};
+
+function toFoodTypeLabel(type: string): string {
+  return FOOD_TYPE_LABEL[type] ?? type;
+}
 import type { VotesData } from '@/hooks/useVote';
 import { calcDistance } from '@/lib/haversine';
 import { Flame, MapPin, Plus, toast } from '@yummpi/ui';
@@ -197,7 +212,7 @@ export function RecruitingView({
     }
     meeting.foodTypes.forEach((type) => {
       items.push({
-        label: type,
+        label: toFoodTypeLabel(type),
         icon: <Flame size={14} strokeWidth={1.5} />,
         active: true,
       });
