@@ -49,6 +49,11 @@ export interface CreateMeetingInput {
   maxMembers?: number;
   budgetPerPerson?: number;
   anonymousVoting?: boolean;
+  foodTypes?: string[]; // 식당 종류 (카테고리 키 배열)
+  // 만남역(선택) — 셋이 함께. 미입력 시 중간지점 플로우.
+  meetingStationName?: string;
+  meetingLat?: number;
+  meetingLng?: number;
 }
 
 // POST /api/v1/meetings 응답 (생성 결과)
