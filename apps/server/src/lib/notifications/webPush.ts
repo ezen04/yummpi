@@ -1,7 +1,7 @@
 import webPush from 'web-push';
 
 webPush.setVapidDetails(
-  'mailto:hello@yummpi.app',
+  'mailto:hello@yummpi.com',
   process.env.VAPID_PUBLIC_KEY ?? '',
   process.env.VAPID_PRIVATE_KEY ?? ''
 );
