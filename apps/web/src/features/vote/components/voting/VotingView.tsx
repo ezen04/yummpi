@@ -54,6 +54,33 @@ export function VotingView({
 
   const isClosed = useIsVotingClosed(votesData.votingClosesAt);
 
+  // 카드 순서 고정 — useVote는 voteCount desc로 재정렬해서 주지만,
+  // 화면에선 진입 시점 순서를 유지(투표 시 카드가 점프하면 클릭 정확도·시각 안정성 ↓).
+  // 새로운 후보가 들어오면 끝에 append, 사라진 후보는 자동으로 빠짐.
+  const [candidateOrder, setCandidateOrder] = React.useState<string[]>(() =>
+    votesData.candidates.map((c) => c.id)
+  );
+
+  React.useEffect(() => {
+    setCandidateOrder((prev) => {
+      const seen = new Set(prev);
+      const newIds = votesData.candidates
+        .map((c) => c.id)
+        .filter((id) => !seen.has(id));
+      if (newIds.length === 0) return prev;
+      return [...prev, ...newIds];
+    });
+  }, [votesData.candidates]);
+
+  const orderedCandidates = React.useMemo(() => {
+    const map = new Map(votesData.candidates.map((c) => [c.id, c]));
+    return candidateOrder
+      .map((id) => map.get(id))
+      .filter(
+        (c): c is (typeof votesData.candidates)[number] => c !== undefined
+      );
+  }, [candidateOrder, votesData.candidates]);
+
   // 1위 동률 감지 + 동률 1위 ID 집합 — 모든 동률 1위 카드에 배지 표시.
   // candidates는 useVote가 voteCount desc + id asc로 정렬해두므로 [0]이 최상위.
   const topCandidate = votesData.candidates[0];
@@ -155,7 +182,7 @@ export function VotingView({
 
       <div className="flex-1 min-h-0 overflow-y-auto px-5 pb-4">
         <VoteCandidateList
-          candidates={votesData.candidates}
+          candidates={orderedCandidates}
           myCandidateId={votesData.myCandidateId}
           topCandidateIds={topCandidateIds}
           onVote={handleVote}
