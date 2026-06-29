@@ -66,7 +66,9 @@ export function DepartureInputView({
             size={18}
             strokeWidth={1.5}
             className={`shrink-0 ${
-              station ? 'text-[var(--primary)]' : 'text-[var(--label-assistive)]'
+              station
+                ? 'text-[var(--primary)]'
+                : 'text-[var(--label-assistive)]'
             }`}
           />
           <span

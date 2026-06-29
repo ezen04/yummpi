@@ -102,11 +102,7 @@ export function StationSearchSheet({
       {query.trim() !== '' && (
         <div className="px-5 pb-3 shrink-0">
           <div className="rounded-[var(--radius-12)] overflow-hidden border border-[var(--line-normal)]">
-            <KakaoMap
-              center={center}
-              customPins={customPins}
-              height="200px"
-            />
+            <KakaoMap center={center} customPins={customPins} height="200px" />
           </div>
         </div>
       )}
