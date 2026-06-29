@@ -15,6 +15,9 @@ export const MOCK_MEETING: MeetingDetail = {
   scheduledAt: oneDayLater,
   votingClosesAt: oneHourLater,
   departureInputClosesAt: null,
+  meetingStationName: null,
+  meetingLat: null,
+  meetingLng: null,
   anonymousVoting: true,
   confirmedCandidateId: null,
   budgetPerPerson: 25000,
@@ -26,6 +29,16 @@ export const MOCK_MEETING: MeetingDetail = {
     startLatitude: '37.498',
     startLongitude: '127.028',
   },
+  members: [
+    {
+      id: 'm-1',
+      nickname: '지훈',
+      role: 'HOST',
+      startStation: '강남역',
+      startLatitude: '37.498',
+      startLongitude: '127.028',
+    },
+  ],
 };
 
 const MOCK_CANDIDATES: VoteCandidate[] = [

@@ -10,6 +10,7 @@ import { useOptimalPoint } from '@/features/place/hooks/useOptimalPoint';
 import { usePlaceCandidates } from '@/features/place/hooks/usePlaceCandidates';
 import { usePlaceRecommendations } from '@/features/place/hooks/usePlaceRecommendations';
 import { usePlaceSuggestions } from '@/features/place/hooks/usePlaceSuggestions';
+import { findNearestStation } from '@/features/place/utils/stationSearch';
 import type { VotesData } from '@/hooks/useVote';
 import { calcDistance } from '@/lib/haversine';
 import { Flame, MapPin, Plus, toast } from '@yummpi/ui';
@@ -34,18 +35,26 @@ export function RecruitingView({
   meeting,
   votesData,
   viewerRole,
+  viewerMemberId,
   onBack,
 }: RecruitingViewProps) {
   const router = useRouter();
   const isHost = viewerRole === 'HOST';
 
+  // 호스트가 만남역을 직접 정한 모임은 그 좌표를 center로 사용 — 출발지 평균
+  // 중간지점 계산이 불필요하다(useOptimalPoint 결과·에러 모두 무시).
+  const hasVenue = meeting.meetingLat != null && meeting.meetingLng != null;
+
   const {
     data: optimal,
-    isLoading: optimalLoading,
-    isError: optimalError,
+    isLoading: optimalLoadingRaw,
+    isError: optimalErrorRaw,
   } = useOptimalPoint(meeting.id);
-  const lat = optimal?.lat ?? null;
-  const lng = optimal?.lng ?? null;
+
+  const lat = hasVenue ? meeting.meetingLat : (optimal?.lat ?? null);
+  const lng = hasVenue ? meeting.meetingLng : (optimal?.lng ?? null);
+  const optimalLoading = hasVenue ? false : optimalLoadingRaw;
+  const optimalError = hasVenue ? false : optimalErrorRaw;
 
   const { data: recommendations, isLoading: recLoading } =
     usePlaceRecommendations(meeting.id, lat, lng);
@@ -160,11 +169,28 @@ export function RecruitingView({
     lng,
   ]);
 
+  // 상단 chip에 표시할 "기준이 되는 역" 결정.
+  // 우선순위: 호스트가 정한 만남역 → 중간지점 결과 좌표에 가장 가까운 역 → viewer 본인 출발역.
+  // 셋 다 없으면 null → 역 chip 자체를 숨긴다.
+  const centerStationLabel = React.useMemo<string | null>(() => {
+    if (meeting.meetingStationName) return meeting.meetingStationName;
+    if (lat && lng) {
+      const nearest = findNearestStation({
+        lat: Number(lat),
+        lng: Number(lng),
+      });
+      if (nearest) return `${nearest.name}역`;
+    }
+    const viewer = meeting.members.find((m) => m.id === viewerMemberId);
+    if (viewer?.startStation) return viewer.startStation;
+    return null;
+  }, [meeting.meetingStationName, meeting.members, viewerMemberId, lat, lng]);
+
   const chips = React.useMemo(() => {
     const items = [];
-    if (meeting.host?.startStation) {
+    if (centerStationLabel) {
       items.push({
-        label: meeting.host.startStation,
+        label: centerStationLabel,
         icon: <MapPin size={14} strokeWidth={1.5} />,
         active: true,
       });
@@ -177,7 +203,7 @@ export function RecruitingView({
       });
     });
     return items;
-  }, [meeting]);
+  }, [centerStationLabel, meeting.foodTypes]);
 
   // 호스트 카드 클릭 토글:
   //  - ACTIVE 카드(이미 후보) → reject (강등, ACTIVE → REJECTED 풀)
