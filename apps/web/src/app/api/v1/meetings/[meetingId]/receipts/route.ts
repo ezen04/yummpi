@@ -4,14 +4,61 @@ import { z } from 'zod';
 import {
   ReceiptUploadRequestSchema,
   ReceiptUploadResponseSchema,
+  ReceiptListResponseSchema,
 } from '@yummpi/schemas';
 import { handleRoute, apiSuccess, ApiError } from '@/lib/api-response';
-import { assertHost } from '@/lib/current-member';
+import { assertHost, requireMember } from '@/lib/current-member';
 import { prisma } from '@/lib/prisma';
 import { getPresignedPutUrl } from '@/lib/s3';
 import { assertReceiptAddable } from './_receipt-guards';
 
 const paramsSchema = z.object({ meetingId: z.string().uuid() });
+
+// `GET /api/v1/meetings/:meetingId/receipts` — 영수증 목록 (멤버 전원, api-spec §9)
+export const GET = handleRoute(
+  async (
+    _req: NextRequest,
+    { params }: { params: Promise<{ meetingId: string }> }
+  ) => {
+    const paramsParsed = paramsSchema.safeParse(await params);
+    if (!paramsParsed.success) {
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        '잘못된 모임 식별자 형식입니다.',
+        paramsParsed.error.flatten()
+      );
+    }
+    const { meetingId } = paramsParsed.data;
+
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId, cancelledAt: null },
+      select: { id: true },
+    });
+    if (!meeting) {
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    }
+
+    await requireMember(meetingId);
+
+    const receipts = await prisma.receipt.findMany({
+      where: { meetingId },
+      include: { _count: { select: { items: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const response = ReceiptListResponseSchema.parse({
+      receipts: receipts.map((r) => ({
+        receiptId: r.id,
+        objectKey: r.objectKey,
+        ocrStatus: r.ocrStatus,
+        totalAmount: r.totalAmount,
+        itemCount: r._count.items,
+        createdAt: r.createdAt.toISOString(),
+      })),
+    });
+    return apiSuccess(response);
+  }
+);
 
 // `POST /api/v1/meetings/:meetingId/receipts` — presigned PUT URL 발급 + Receipt stub(PENDING) 생성
 // api-spec §9 ★ v2.2. FE가 파일마다 독립 호출 → S3 PUT → POST .../ocr 순으로 진행.
@@ -31,7 +78,7 @@ export const POST = handleRoute(
     const { meetingId } = paramsParsed.data;
 
     const meeting = await prisma.meeting.findUnique({
-      where: { id: meetingId },
+      where: { id: meetingId, cancelledAt: null },
       select: { id: true },
     });
     if (!meeting) {

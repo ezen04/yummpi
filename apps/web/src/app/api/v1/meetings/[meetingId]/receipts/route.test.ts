@@ -5,12 +5,14 @@ import { Prisma } from '@prisma/client';
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     meeting: { findUnique: vi.fn() },
+    receipt: { findMany: vi.fn() },
     $transaction: vi.fn(),
   },
 }));
 
 vi.mock('@/lib/current-member', () => ({
   assertHost: vi.fn(),
+  requireMember: vi.fn(),
 }));
 
 vi.mock('@/lib/s3', () => ({
@@ -22,16 +24,23 @@ vi.mock('./_receipt-guards', () => ({
 }));
 
 import { prisma } from '@/lib/prisma';
-import { assertHost } from '@/lib/current-member';
+import { assertHost, requireMember } from '@/lib/current-member';
 import { getPresignedPutUrl } from '@/lib/s3';
 import { assertReceiptAddable } from './_receipt-guards';
-import { POST } from './route';
+import { GET, POST } from './route';
 
 const MEETING_ID = '11111111-1111-1111-8111-111111111111';
 const MEMBER_ID = '22222222-2222-2222-8222-222222222222';
 const RECEIPT_ID = '33333333-3333-3333-8333-333333333333';
 
 const params = { params: Promise.resolve({ meetingId: MEETING_ID }) };
+
+function makeGetReq(): NextRequest {
+  return new Request(
+    `http://localhost/api/v1/meetings/${MEETING_ID}/receipts`,
+    { method: 'GET' }
+  ) as unknown as NextRequest;
+}
 
 function makeReq(body: unknown): NextRequest {
   return new Request(
@@ -50,6 +59,56 @@ function withTxCreate(mockCreate: Mock) {
       fn({ receipt: { create: mockCreate } })
   );
 }
+
+describe('GET /api/v1/meetings/:meetingId/receipts', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    (prisma.meeting.findUnique as unknown as Mock).mockResolvedValue({
+      id: MEETING_ID,
+    });
+    (requireMember as unknown as Mock).mockResolvedValue({ id: MEMBER_ID });
+  });
+
+  it('영수증 목록 반환 — 200', async () => {
+    const now = new Date().toISOString();
+    (prisma.receipt.findMany as unknown as Mock).mockResolvedValue([
+      {
+        id: RECEIPT_ID,
+        objectKey: `meetings/${MEETING_ID}/receipts/${RECEIPT_ID}.jpg`,
+        ocrStatus: 'SUCCEEDED',
+        totalAmount: 18000,
+        createdAt: new Date(now),
+        _count: { items: 2 },
+      },
+    ]);
+
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { data: { receipts: unknown[] } };
+    expect(body.data.receipts).toHaveLength(1);
+  });
+
+  it('취소된 모임(cancelledAt) → 404 MEETING_NOT_FOUND', async () => {
+    (prisma.meeting.findUnique as unknown as Mock).mockResolvedValue(null);
+
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('MEETING_NOT_FOUND');
+  });
+
+  it('영수증 없는 모임 → receipts 빈 배열', async () => {
+    (prisma.receipt.findMany as unknown as Mock).mockResolvedValue([]);
+
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { data: { receipts: unknown[] } };
+    expect(body.data.receipts).toHaveLength(0);
+  });
+});
 
 describe('POST /api/v1/meetings/:meetingId/receipts', () => {
   beforeEach(() => {
