@@ -8,6 +8,7 @@ import {
   optEnum,
 } from '@/lib/meeting-input';
 import { selfMember, suggestNickname } from '@/lib/member';
+import { assertMembersUnlocked } from '@/lib/member-lock';
 
 /**
  * 참석자 API §5 — PATCH(본인 정보 수정) · DELETE(나가기/내보내기).
@@ -47,6 +48,11 @@ export const PATCH = handleRoute(async (req: Request, ctx: Ctx) => {
     'ABSENT',
   ] as const);
 
+  // 정산 시작 후 출석 변경 차단(④). 닉네임 등 다른 필드 수정은 허용.
+  if (attendanceStatus !== undefined) {
+    await assertMembersUnlocked(meetingId);
+  }
+
   // 닉네임 변경 시 중복 검사(자신 제외)
   if (nickname !== undefined && nickname !== me.nickname) {
     const dup = await prisma.meetingMember.findFirst({
@@ -85,6 +91,9 @@ export const PATCH = handleRoute(async (req: Request, ctx: Ctx) => {
 export const DELETE = handleRoute(async (_req: Request, ctx: Ctx) => {
   const { meetingId, memberId } = await ctx.params;
   const me = await requireMember(meetingId);
+
+  // 정산 시작 후 멤버 이탈(나가기·강제탈퇴) 차단(④).
+  await assertMembersUnlocked(meetingId);
 
   const isSelf = me.id === memberId;
   const isHost = me.role === 'HOST';

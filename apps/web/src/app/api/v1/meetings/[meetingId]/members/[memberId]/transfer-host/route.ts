@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ApiError, apiSuccess, handleRoute } from '@/lib/api-response';
 import { requireMember } from '@/lib/current-member';
+import { assertMembersUnlocked } from '@/lib/member-lock';
 
 /**
  * POST /api/v1/meetings/:meetingId/members/:memberId/transfer-host
@@ -20,6 +21,8 @@ export const POST = handleRoute(async (_req: Request, ctx: Ctx) => {
   if (me.role !== 'HOST') {
     throw new ApiError('FORBIDDEN', '주최자만 권한을 위임할 수 있습니다.');
   }
+  // 정산 시작 후 방장 변경 차단(④ — ITEM_BASED 흡수자 호스트가 바뀌면 계산 깨짐).
+  await assertMembersUnlocked(meetingId);
   if (me.id === memberId) {
     throw new ApiError('FORBIDDEN', '본인에게는 위임할 수 없습니다.');
   }
