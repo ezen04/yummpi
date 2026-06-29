@@ -7,9 +7,17 @@ import { MeetingCompletedView } from '../components/completion/MeetingCompletedV
 
 type Props = {
   meetingId: string;
+  meetingName?: string;
+  placeName?: string;
+  placeDateTime?: string;
 };
 
-export function MeetingCompletePage({ meetingId }: Props) {
+export function MeetingCompletePage({
+  meetingId,
+  meetingName,
+  placeName,
+  placeDateTime,
+}: Props) {
   const { data, isLoading, isError, apiError, refetch } =
     usePaymentStatus(meetingId);
 
@@ -23,7 +31,14 @@ export function MeetingCompletePage({ meetingId }: Props) {
         />
       );
     if (!data) return <PaymentLoadingSkeleton />;
-    return <MeetingCompletedView summary={data.summary} />;
+    return (
+      <MeetingCompletedView
+        summary={data.summary}
+        meetingName={meetingName}
+        placeName={placeName}
+        placeDateTime={placeDateTime}
+      />
+    );
   })();
 
   return <div className="h-dvh flex flex-col overflow-hidden">{screen}</div>;

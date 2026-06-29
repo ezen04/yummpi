@@ -19,6 +19,9 @@ export const viewport: Viewport = {
   themeColor: '#ffffff',
   width: 'device-width',
   initialScale: 1,
+  // 모바일 핀치 줌/더블탭 확대 차단 (앱형 UX)
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

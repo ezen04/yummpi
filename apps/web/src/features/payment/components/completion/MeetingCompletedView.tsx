@@ -23,7 +23,7 @@ export function MeetingCompletedView({
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[var(--bg-alternative)]">
-      <PaymentHeaderWrapper />
+      <PaymentHeaderWrapper showBack={false} />
 
       {/* 본문 */}
       <div className="flex flex-col items-center px-5 pt-8 pb-6 gap-6 flex-1">

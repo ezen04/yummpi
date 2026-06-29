@@ -9,6 +9,7 @@ import { Header } from '@/components/common/Header';
 import { Menubar } from '@/components/common/Menubar';
 import { MeetingCard } from '@/features/meeting/components/MeetingCard';
 import { useMe, useMyMeetings } from '@/features/dashboard/hooks';
+import { useUnreadNotificationCount } from '@/features/notification/hooks/useUnreadNotificationCount';
 import type { MyMeeting } from '@/features/dashboard/api/dashboardApi';
 
 // 나의 모임 목록(Figma 699:918). API 변경 0 — GET /meetings + users/me 파생.
@@ -69,6 +70,7 @@ export function MeetingsListView() {
   const router = useRouter();
   const me = useMe();
   const meetings = useMyMeetings();
+  const unreadCount = useUnreadNotificationCount();
 
   const [segment, setSegment] = useState<Segment>('hosted');
   const [filter, setFilter] = useState<Filter>('all');
@@ -253,6 +255,7 @@ export function MeetingsListView() {
         activeTab="meetings"
         onTabChange={handleTabChange}
         onCreateClick={() => router.push('/meetings/new')}
+        notificationsBadge={unreadCount > 0}
       />
     </div>
   );

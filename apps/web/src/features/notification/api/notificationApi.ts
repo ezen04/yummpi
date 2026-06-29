@@ -55,3 +55,14 @@ export async function getNotifications(
 export async function markNotificationRead(id: string): Promise<void> {
   await apiFetch(`/api/v1/notifications/${id}/read`, { method: 'PATCH' });
 }
+
+/**
+ * 하단바 배지용 안 읽음 개수만 가볍게 조회. 목록 응답에 이미 unreadCount가
+ * 포함되므로 limit=1로 최소 페이로드만 받아 그 값을 읽는다.
+ */
+export async function getUnreadCount(): Promise<number> {
+  const data = await apiFetch<{ unreadCount?: number }>(
+    `/api/v1/notifications?page=1&limit=1`
+  );
+  return typeof data.unreadCount === 'number' ? data.unreadCount : 0;
+}

@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PaymentErrorState } from '../components/shell/PaymentErrorState';
 import { PaymentHeaderWrapper } from '../components/shell/PaymentHeaderWrapper';
 import { PaymentLoadingSkeleton } from '../components/shell/PaymentLoadingSkeleton';
 import { PaymentNotInitializedState } from '../components/shell/PaymentNotInitializedState';
+import { ExemptCelebrationCard } from '../components/shell/ExemptCelebrationCard';
 import { PaymentHostView } from '../components/host/PaymentHostView';
 import { useCompletePayments } from '../hooks/useCompletePayments';
 import { useInitializePayments } from '../hooks/useInitializePayments';
@@ -35,6 +36,21 @@ export function PaymentStatusPage({ meetingId }: Props) {
   const [actionErrorMessage, setActionErrorMessage] = useState<string | null>(
     null
   );
+  // 회원 면제 시 축하 카드 → "송금 현황 보러가기" 탭하면 리스트로 펼친다(이동 없음).
+  // 한 번 본 모임은 같은 세션에서 카드를 건너뛰고 바로 리스트로 간다(sessionStorage).
+  const exemptSeenKey = `payment-exempt-seen:${meetingId}`;
+  const [showStatus, setShowStatus] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(exemptSeenKey) === '1';
+  });
+  const handleViewStatus = useCallback(() => {
+    setShowStatus(true);
+    try {
+      sessionStorage.setItem(exemptSeenKey, '1');
+    } catch {
+      // sessionStorage 접근 불가(프라이빗 모드 등)면 무시 — 이번 방문만 펼침.
+    }
+  }, [exemptSeenKey]);
 
   const { data, isLoading, isError, apiError, isSettlementNotReady, refetch } =
     usePaymentStatus(meetingId);
@@ -135,6 +151,20 @@ export function PaymentStatusPage({ meetingId }: Props) {
         !myPayment.isGuest &&
         (myPayment.status === 'PAID' || myPayment.status === 'EXEMPT');
       if (!stayHere) return <PaymentLoadingSkeleton />;
+
+      /* 회원 면제: 송금 현황을 펼치기 전에 축하 카드를 먼저 보여준다(이동 없이 토글) */
+      if (myPayment && myPayment.status === 'EXEMPT' && !showStatus) {
+        return (
+          <>
+            <PaymentHeaderWrapper />
+            <ExemptCelebrationCard
+              displayName={myPayment.displayName}
+              amount={myPayment.amount}
+              onViewStatus={handleViewStatus}
+            />
+          </>
+        );
+      }
     }
 
     return (
@@ -150,7 +180,9 @@ export function PaymentStatusPage({ meetingId }: Props) {
             await completePayments.mutateAsync();
           }}
           onCompleted={() =>
-            router.push(`/meetings/${meetingId}/payments/complete`)
+            // 종료 후 /payments는 서버에서 /complete로 redirect → push면 뒤로가기 백-트랩.
+            // replace로 히스토리를 정리해 완료 화면을 종착으로 만든다.
+            router.replace(`/meetings/${meetingId}/payments/complete`)
           }
           isCompleting={completePayments.isPending}
           completeErrorMessage={completeErrorMessage}
