@@ -95,13 +95,13 @@ export function MeetingsListView() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-full flex flex-col"
       style={{ background: 'var(--bg-alternative)' }}
     >
       {/* 헤더 (나의 모임 + 알림 벨) */}
       <Header title="나의 모임" hideBackSpacer />
 
-      <main className="flex-1 w-full max-w-[390px] mx-auto px-5 pt-3 pb-6">
+      <main className="flex-1 min-h-0 overflow-y-auto w-full max-w-[390px] mx-auto px-5 pt-3 pb-6">
         {/* 세그먼트 (만든/참여) */}
         <div
           className="flex gap-1.5 p-1 rounded-[var(--radius-12)]"
