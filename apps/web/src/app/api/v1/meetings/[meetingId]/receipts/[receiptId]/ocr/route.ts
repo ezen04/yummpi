@@ -12,6 +12,7 @@ import {
   sumItemTotals,
   toReceiptItemInputs,
 } from '../../_ocr-utils';
+import { assertReceiptEditable } from '../../_receipt-guards';
 
 const paramsSchema = z.object({
   meetingId: z.string().uuid(),
@@ -36,9 +37,9 @@ export const POST = handleRoute(
     }
     const { meetingId, receiptId } = paramsParsed.data;
 
-    // meeting 존재 확인 먼저 — assertHost가 member 못 찾아 403 대신 404를 반환
+    // meeting 존재 확인 먼저 — assertHost가 member 못 찾아 403 대신 404를 반환. 취소 모임 차단.
     const meeting = await prisma.meeting.findUnique({
-      where: { id: meetingId },
+      where: { id: meetingId, cancelledAt: null },
       select: { id: true },
     });
     if (!meeting) {
@@ -64,7 +65,9 @@ export const POST = handleRoute(
         '이미 OCR 처리된 영수증입니다.'
       );
     }
-    // FAILED는 재시도 허용 — items 없으므로 update 충돌 없음
+    // FAILED는 재시도 허용 — items 없으므로 update 충돌 없음.
+    // settlement가 이미 시작됐으면 OCR 재시도도 잠금.
+    await assertReceiptEditable(meetingId);
 
     const format: 'jpg' | 'png' =
       receipt.objectKey.split('.').pop()?.toLowerCase() === 'png'
@@ -99,14 +102,19 @@ export const POST = handleRoute(
           : 'OCR 처리 중 오류가 발생했습니다.';
     }
 
-    const updated = await prisma.receipt.update({
-      where: { id: receiptId },
-      data: {
-        ocrStatus,
-        totalAmount: ocrStatus === 'SUCCEEDED' ? sumItemTotals(items) : null,
-        ...(rawOcrJson !== null ? { rawOcrJson } : {}),
-        ...(ocrStatus === 'SUCCEEDED'
-          ? {
+    // SUCCEEDED: assertReceiptEditable + items 생성을 같은 tx로 묶어 TOCTOU 방어.
+    //            CLOVA 호출 중 settlement가 생성돼도 write 시점에 재확인.
+    // FAILED: items 생성 없으므로 guard 불필요 — 직접 update로 ocrStatus만 기록.
+    const updated = await (async () => {
+      if (ocrStatus === 'SUCCEEDED') {
+        return prisma.$transaction(async (tx) => {
+          await assertReceiptEditable(meetingId, tx);
+          return tx.receipt.update({
+            where: { id: receiptId },
+            data: {
+              ocrStatus: 'SUCCEEDED',
+              totalAmount: sumItemTotals(items),
+              ...(rawOcrJson !== null ? { rawOcrJson } : {}),
               items: {
                 create: items.map((item, idx) => ({
                   name: item.name,
@@ -117,11 +125,21 @@ export const POST = handleRoute(
                   sortOrder: idx,
                 })),
               },
-            }
-          : {}),
-      },
-      include: { items: { orderBy: { sortOrder: 'asc' } } },
-    });
+            },
+            include: { items: { orderBy: { sortOrder: 'asc' } } },
+          });
+        });
+      }
+      return prisma.receipt.update({
+        where: { id: receiptId },
+        data: {
+          ocrStatus: 'FAILED',
+          totalAmount: null,
+          ...(rawOcrJson !== null ? { rawOcrJson } : {}),
+        },
+        include: { items: { orderBy: { sortOrder: 'asc' } } },
+      });
+    })();
 
     if (ocrStatus === 'FAILED') {
       throw new ApiError(
@@ -145,6 +163,6 @@ export const POST = handleRoute(
       })),
       unclassifiedLines,
     });
-    return apiSuccess(response, undefined, 200);
+    return apiSuccess(response);
   }
 );

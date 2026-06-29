@@ -5,6 +5,7 @@ vi.mock('@/lib/prisma', () => ({
   prisma: {
     meeting: { findUnique: vi.fn() },
     receipt: { findUnique: vi.fn(), update: vi.fn() },
+    $transaction: vi.fn(),
   },
 }));
 
@@ -26,11 +27,16 @@ vi.mock('@/lib/ocr/parser', async (importOriginal) => {
   return { ...actual, parseReceipt: vi.fn() };
 });
 
+vi.mock('../../_receipt-guards', () => ({
+  assertReceiptEditable: vi.fn(),
+}));
+
 import { prisma } from '@/lib/prisma';
 import { assertHost } from '@/lib/current-member';
 import { getPresignedGetUrl } from '@/lib/s3';
 import { callGeneralOcr, OcrFailedError } from '@/lib/ocr';
 import { parseReceipt } from '@/lib/ocr/parser';
+import { assertReceiptEditable } from '../../_receipt-guards';
 import { POST } from './route';
 
 const MEETING_ID = '11111111-1111-1111-8111-111111111111';
@@ -73,6 +79,42 @@ describe('POST /api/v1/meetings/:meetingId/receipts/:receiptId/ocr', () => {
       id: MEETING_ID,
     });
     (assertHost as unknown as Mock).mockResolvedValue({ id: MEMBER_ID });
+    (assertReceiptEditable as unknown as Mock).mockResolvedValue(undefined);
+  });
+
+  it('취소된 모임(cancelledAt) → 404 MEETING_NOT_FOUND', async () => {
+    (prisma.meeting.findUnique as unknown as Mock).mockResolvedValue(null);
+
+    const res = await POST(makeReq(), params);
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('MEETING_NOT_FOUND');
+  });
+
+  it('receipt를 찾을 수 없음 → 404 RECEIPT_NOT_FOUND', async () => {
+    (prisma.receipt.findUnique as unknown as Mock).mockResolvedValue(null);
+
+    const res = await POST(makeReq(), params);
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('RECEIPT_NOT_FOUND');
+  });
+
+  it('objectKey가 null인 영수증 → 400 VALIDATION_ERROR', async () => {
+    (prisma.receipt.findUnique as unknown as Mock).mockResolvedValue({
+      id: RECEIPT_ID,
+      meetingId: MEETING_ID,
+      objectKey: null,
+      ocrStatus: 'PENDING',
+    });
+
+    const res = await POST(makeReq(), params);
+
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
   it('ocrStatus가 SUCCEEDED인 영수증 → 409 RECEIPT_ALREADY_OCR_SUCCEEDED', async () => {
@@ -90,7 +132,7 @@ describe('POST /api/v1/meetings/:meetingId/receipts/:receiptId/ocr', () => {
     expect(body.error.code).toBe('RECEIPT_ALREADY_OCR_SUCCEEDED');
   });
 
-  it('ocrStatus가 FAILED인 영수증 → 재시도 허용, getPresignedGetUrl URL을 callGeneralOcr에 전달', async () => {
+  it('ocrStatus가 FAILED인 영수증 → 재시도 허용, SUCCEEDED 경로는 $transaction 안에서 assertReceiptEditable 재확인 후 items 생성', async () => {
     (prisma.receipt.findUnique as unknown as Mock).mockResolvedValue({
       id: RECEIPT_ID,
       meetingId: MEETING_ID,
@@ -105,6 +147,10 @@ describe('POST /api/v1/meetings/:meetingId/receipts/:receiptId/ocr', () => {
       items: [PARSED_ITEM],
       unclassifiedLines: [],
     });
+    // SUCCEEDED 경로: $transaction 콜백에 prisma 목 자체를 tx로 주입해 tx.receipt.update를 그대로 통과.
+    (prisma.$transaction as unknown as Mock).mockImplementation(
+      (fn: (tx: unknown) => Promise<unknown>) => fn(prisma)
+    );
     (prisma.receipt.update as unknown as Mock).mockResolvedValue({
       id: RECEIPT_ID,
       objectKey: OBJECT_KEY,
@@ -125,6 +171,9 @@ describe('POST /api/v1/meetings/:meetingId/receipts/:receiptId/ocr', () => {
     const res = await POST(makeReq(), params);
 
     expect(callGeneralOcr).toHaveBeenCalledWith(PRESIGNED_GET_URL, 'jpg');
+    expect(prisma.$transaction).toHaveBeenCalledOnce();
+    // early check(tx 없음) + tx 내 재확인 = 총 2회
+    expect(assertReceiptEditable).toHaveBeenCalledTimes(2);
     expect(res.status).toBe(200);
     const body = (await res.json()) as { data: { ocrStatus: string } };
     expect(body.data.ocrStatus).toBe('SUCCEEDED');

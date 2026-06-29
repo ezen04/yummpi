@@ -1,4 +1,5 @@
 import { idSchema } from './common';
+import { ReceiptItemResponseSchema } from './receipt-common';
 import { z } from 'zod';
 
 // `POST /api/v1/meetings/:meetingId/receipts` — presigned PUT URL 발급 요청/응답
@@ -27,13 +28,8 @@ export const ReceiptUploadResponseSchema = z.object({
 export type ReceiptUploadResponse = z.infer<typeof ReceiptUploadResponseSchema>;
 
 // `POST /api/v1/meetings/:meetingId/receipts/:receiptId/ocr` 응답
-export const OcrReceiptItemResponseSchema = z.object({
-  receiptItemId: idSchema,
-  name: z.string().min(1),
-  quantity: z.number().int().positive(),
-  unitPrice: z.number().int().nonnegative(),
-  totalPrice: z.number().int().nonnegative(),
-});
+// 하위 호환 alias — 실체는 공용 ReceiptItemResponseSchema (receipt-manual.ts)
+export const OcrReceiptItemResponseSchema = ReceiptItemResponseSchema;
 export type OcrReceiptItemResponse = z.infer<
   typeof OcrReceiptItemResponseSchema
 >;
