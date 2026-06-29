@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
+import { Button } from '@/components/common/Button';
 import { StationSearchSheet } from '../components/search/StationSearchSheet';
 import { type StationLineRow } from '../utils/stationSearch';
 import { useSetDeparture } from '../hooks/useSetDeparture';
@@ -12,7 +13,7 @@ import { useSetDeparture } from '../hooks/useSetDeparture';
  * 실제 라우트용 — 출발역 입력 메인 화면.
  * 입력 필드를 누르면 StationSearchSheet가 열려 검색·선택 → 본 화면에 역이름 표시.
  * "다음" 클릭 시 저장(① members PATCH) → 대기 화면 이동.
- * CTA는 이 화면 전용 pill 버튼(공용 Footer 미사용 — 모양이 다름).
+ * 디자인은 preview/screens/DepartureInputScreen.tsx와 동일 (공용 컴포넌트만 사용).
  */
 export function DepartureInputView({
   meetingId,
@@ -44,24 +45,22 @@ export function DepartureInputView({
     );
   };
 
-  const canConfirm = !!station && !isPending;
-
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-normal)]">
+    <div className="h-full flex flex-col bg-[var(--bg-normal)]">
       <Header
         onBack={() => router.back()}
         onClose={() => router.push(`/meetings/${meetingId}`)}
       />
 
-      <div className="flex-1 min-h-0 px-5 pt-6">
-        <h1 className="text-center text-[22px] leading-[30px] font-bold text-[var(--label-normal)] mb-8">
+      <div className="flex-1 min-h-0 flex flex-col px-5 pt-2">
+        <h1 className="text-center text-[20px] font-bold text-[var(--label-normal)] mb-7">
           내 출발역을 입력해주세요
         </h1>
 
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="flex w-full items-center gap-2 h-[52px] px-4 rounded-[var(--radius-16)] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-left transition-colors hover:bg-[var(--fill-alternative)]"
+          className="flex items-center gap-2 h-12 px-4 rounded-[var(--radius-12)] border border-[var(--line-normal)] bg-[var(--bg-normal)] text-left"
         >
           <MapPin
             size={18}
@@ -88,23 +87,16 @@ export function DepartureInputView({
         )}
       </div>
 
-      {/* CTA — pill 형태, full-width */}
-      <div
-        className="px-5 pt-3 bg-[var(--bg-normal)]"
-        style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}
-      >
-        <button
-          type="button"
+      <div className="px-5 pt-3 pb-5">
+        <Button
+          variant="basic"
+          size="lg"
+          className="w-full"
           onClick={handleConfirm}
-          disabled={!canConfirm}
-          className={`flex w-full items-center justify-center h-14 rounded-[var(--radius-full)] text-[16px] font-semibold transition-colors ${
-            canConfirm
-              ? 'bg-[var(--primary)] text-[var(--static-white)] hover:bg-[var(--primary-strong)] active:bg-[var(--primary-heavy)] cursor-pointer'
-              : 'bg-[var(--fill-disable)] text-[var(--label-disable)] cursor-default'
-          }`}
+          disabled={!station || isPending}
         >
           {isPending ? '저장 중...' : '다음'}
-        </button>
+        </Button>
       </div>
 
       <StationSearchSheet

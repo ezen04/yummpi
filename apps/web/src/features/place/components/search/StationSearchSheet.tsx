@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft } from '@yummpi/ui';
 import { KakaoMap, type KakaoCustomPin } from '@/components/common/KakaoMap';
+import { Header } from '@/components/common/Header';
 import { PlaceSearchInput } from './PlaceSearchInput';
 import {
   searchStationLineRows,
@@ -86,27 +86,14 @@ export function StationSearchSheet({
 
   return (
     <div className="fixed inset-0 z-[300] mx-auto max-w-[480px] bg-[var(--bg-normal)] flex flex-col">
-      {/* 헤더 */}
-      <div className="flex items-center h-14 px-3 shrink-0">
-        <button
-          type="button"
-          onClick={handleClose}
-          className="p-2 -ml-2"
-          aria-label="닫기"
-        >
-          <ChevronLeft size={24} strokeWidth={1.8} />
-        </button>
-        <h2 className="ml-1 text-[17px] font-semibold text-[var(--label-normal)]">
-          장소 검색
-        </h2>
-      </div>
+      <Header title="장소 검색" onBack={handleClose} />
 
       {/* 검색 input */}
       <div className="px-5 pb-3 shrink-0">
         <PlaceSearchInput
           value={query}
           onChange={setQuery}
-          placeholder="역 이름으로 검색 (예: 강남)"
+          placeholder="역 이름으로 검색"
           autoFocus
         />
       </div>
@@ -133,7 +120,7 @@ export function StationSearchSheet({
       <div className="flex-1 min-h-0 overflow-y-auto">
         {query.trim() === '' ? (
           <p className="px-5 pt-6 text-center text-[14px] text-[var(--label-assistive)]">
-            역 이름을 입력하면 검색돼요 (예: 강남)
+            역 이름을 입력해주세요
           </p>
         ) : results.length === 0 ? (
           <p className="px-5 pt-6 text-center text-[14px] text-[var(--label-assistive)]">
