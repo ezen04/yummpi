@@ -9,6 +9,7 @@ export * from './pushSubscription';
 export * from './receipt-list';
 export * from './receipt-manual';
 export * from './receipt-patch';
+export * from './receipt-get';
 export * from './receipt-ocr';
 export * from './settlement-assignments';
 export * from './settlement-create';

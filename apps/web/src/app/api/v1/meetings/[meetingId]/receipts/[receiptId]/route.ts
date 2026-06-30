@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import {
+  ReceiptGetResponseSchema,
   ReceiptPatchRequestSchema,
   ReceiptPatchResponseSchema,
 } from '@yummpi/schemas';
@@ -18,6 +19,59 @@ const paramsSchema = z.object({
   meetingId: z.string().uuid(),
   receiptId: z.string().uuid(),
 });
+
+// `GET /api/v1/meetings/:meetingId/receipts/:receiptId` — 영수증 상세 + 항목 목록 (호스트, api-spec §9)
+// unclassifiedLines는 DB에 별도 저장 안 됨 → []. (work.md P2: unclassified_lines 컬럼 추가로 해결 예정)
+export const GET = handleRoute(
+  async (
+    _req: NextRequest,
+    { params }: { params: Promise<{ meetingId: string; receiptId: string }> }
+  ) => {
+    const paramsParsed = paramsSchema.safeParse(await params);
+    if (!paramsParsed.success) {
+      throw new ApiError(
+        'VALIDATION_ERROR',
+        '잘못된 식별자 형식입니다.',
+        paramsParsed.error.flatten()
+      );
+    }
+    const { meetingId, receiptId } = paramsParsed.data;
+
+    const meeting = await prisma.meeting.findUnique({
+      where: { id: meetingId, cancelledAt: null },
+      select: { id: true },
+    });
+    if (!meeting) {
+      throw new ApiError('MEETING_NOT_FOUND', '모임을 찾을 수 없습니다.');
+    }
+
+    await assertHost(meetingId);
+
+    const receipt = await prisma.receipt.findUnique({
+      where: { id: receiptId },
+      include: { items: { orderBy: { sortOrder: 'asc' } } },
+    });
+    if (!receipt || receipt.meetingId !== meetingId) {
+      throw new ApiError('RECEIPT_NOT_FOUND', '영수증을 찾을 수 없습니다.');
+    }
+
+    const response = ReceiptGetResponseSchema.parse({
+      receiptId: receipt.id,
+      objectKey: receipt.objectKey,
+      ocrStatus: receipt.ocrStatus,
+      totalAmount: receipt.totalAmount,
+      items: receipt.items.map((item) => ({
+        receiptItemId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+      })),
+      unclassifiedLines: [],
+    });
+    return apiSuccess(response);
+  }
+);
 
 // `PATCH /api/v1/meetings/:meetingId/receipts/:receiptId` — OCR 결과 검수·수정 (호스트, api-spec §9)
 // items 전체 교체: 기존 items deleteMany → 새 items createMany.
