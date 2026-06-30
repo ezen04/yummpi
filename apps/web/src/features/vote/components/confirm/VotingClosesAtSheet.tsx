@@ -48,6 +48,19 @@ function formatTimeChip(hour: number, minute: number): string {
   return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
+/** 모임 약속 시간을 안내용으로 표시 — "7월 1일 (수) 오후 6시 30분" */
+function formatMeetingScheduledAt(date: Date): string {
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const w = WEEKDAY_KO[date.getDay()];
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const period = hours < 12 ? '오전' : '오후';
+  const h12 = hours % 12 === 0 ? 12 : hours % 12;
+  const minStr = minutes === 0 ? '' : ` ${minutes}분`;
+  return `${m}월 ${d}일 (${w}) ${period} ${h12}시${minStr}`;
+}
+
 type ExpandedField = 'date' | 'time';
 
 export function VotingClosesAtSheet({
@@ -116,6 +129,14 @@ export function VotingClosesAtSheet({
           <p className="text-[13px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-alternative)] m-0">
             투표가 끝나는 시간을 정해주세요
           </p>
+          {meetingScheduledAt && (
+            // 모임 약속 시간 안내 — 호스트가 마감 시각 상한을 사전에 알 수 있게.
+            // BE 검증("모임 약속 시간 이전으로 설정해주세요") 실패 전에 가이드 노출.
+            <p className="text-[12px] leading-4 font-normal font-[var(--font-sans)] text-[var(--label-assistive)] m-0 mt-1">
+              모임 시간:{' '}
+              {formatMeetingScheduledAt(new Date(meetingScheduledAt))} 이전
+            </p>
+          )}
         </div>
 
         {/* 날짜·시간 chip 행 — 클릭한 쪽이 활성화되며 아래에 해당 picker 표시 */}

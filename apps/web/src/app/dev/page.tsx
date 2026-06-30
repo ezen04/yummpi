@@ -25,6 +25,7 @@ import { Selectbox } from '../../components/common/Selectbox';
 import { YAvatar } from '../../components/common/YAvatar';
 import { Thumbnail } from '../../components/common/Thumbnail';
 import { Confirmbox } from '../../components/common/Confirmbox';
+import { MapPin as MapPinDS } from '../../components/common/MapPin';
 import {
   PersonItem,
   MenuItem,
@@ -120,6 +121,65 @@ export default function DevPage() {
             <p className="text-caption1 text-[var(--label-assistive)]">
               Caption1 · 12px
             </p>
+          </div>
+        </section>
+
+        {/* ── MapPin (지도 핀) ── */}
+        <section className="space-y-3">
+          <h2 className="text-label1 font-semibold text-[var(--label-alternative)] uppercase tracking-wide">
+            MapPin
+          </h2>
+          <p className="text-caption1 text-[var(--label-assistive)]">
+            4가지 상태 (지도 배경 톤 위에서)
+          </p>
+          <div
+            className="flex items-end justify-around gap-2 p-6 [border-radius:var(--radius-20)]"
+            style={{ background: 'var(--map-surface)' }}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <MapPinDS variant="default" />
+              <span className="text-caption2 text-[var(--label-assistive)]">
+                default
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <MapPinDS variant="selected" />
+              <span className="text-caption2 text-[var(--label-assistive)]">
+                selected
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <MapPinDS variant="topVote" />
+              <span className="text-caption2 text-[var(--label-assistive)]">
+                topVote
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <MapPinDS variant="mine" />
+              <span className="text-caption2 text-[var(--label-assistive)]">
+                mine
+              </span>
+            </div>
+          </div>
+
+          <p className="text-caption1 text-[var(--label-assistive)] mt-3">
+            라벨 + 아이콘 조합
+          </p>
+          <div
+            className="flex items-end justify-around gap-2 p-6 [border-radius:var(--radius-20)]"
+            style={{ background: 'var(--map-surface)' }}
+          >
+            <MapPinDS
+              variant="selected"
+              icon={<MapPin size={16} strokeWidth={2} />}
+              label="홍대 삼겹살"
+            />
+            <MapPinDS
+              variant="topVote"
+              icon={<Flame size={16} strokeWidth={2} />}
+              label="3표"
+            />
+            <MapPinDS variant="default" label="2표" />
           </div>
         </section>
 
