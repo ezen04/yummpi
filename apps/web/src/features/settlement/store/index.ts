@@ -45,7 +45,6 @@ interface SettlementStore {
   setEqualAmount: (amount: number | null) => void;
   setMySelectedItemIds: (ids: string[]) => void;
   setMyRole: (role: 'HOST' | 'MEMBER') => void;
-  resetOcrResults: () => void;
   updateOcrItem: (receiptId: string, itemId: string, item: OcrItem) => void;
   deleteOcrItem: (receiptId: string, itemId: string) => void;
   addOcrItem: (receiptId: string, item: OcrItem) => void;
@@ -148,17 +147,6 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
   setEqualAmount: (amount) => set({ equalAmount: amount }),
   setMySelectedItemIds: (ids) => set({ mySelectedItemIds: ids }),
   setMyRole: (role) => set({ myRole: role }),
-
-  resetOcrResults: () =>
-    set((state) => ({
-      receipts: state.receipts.map((r) => ({
-        ...r,
-        ocrStatus: 'PENDING' as const,
-        ocrItems: [],
-        unclassifiedLines: [],
-      })),
-      splitMethod: null,
-    })),
 
   updateOcrItem: (receiptId, itemId, item) =>
     set((state) => ({

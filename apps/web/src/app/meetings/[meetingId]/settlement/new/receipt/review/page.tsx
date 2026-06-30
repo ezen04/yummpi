@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash, Pencil, Plus } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
@@ -13,7 +13,11 @@ import { Tipbox } from '@/components/common/Tipbox';
 import { Button } from '@/components/common/Button';
 import { Confirmbox } from '@/components/common/Confirmbox';
 import { toast } from '@yummpi/ui';
-import { SettlementCreateResponseSchema } from '@yummpi/schemas';
+import {
+  ReceiptGetResponseSchema,
+  ReceiptListResponseSchema,
+  SettlementCreateResponseSchema,
+} from '@yummpi/schemas';
 import { useSettlementStore, OcrItem } from '@/features/settlement/store';
 import { FLOW_STEPS } from '@/features/settlement/constants';
 
@@ -42,13 +46,15 @@ export default function ReceiptReviewPage({
     receipts,
     selectedReceiptId,
     splitMethod,
+    previewUrls,
+    addReceipt,
     setSelectedReceiptId,
     setSplitMethod,
+    updateOcrResult,
     updateOcrItem,
     deleteOcrItem,
     addOcrItem,
     promoteUnclassifiedLine,
-    resetOcrResults,
   } = useSettlementStore();
 
   const [sheet, setSheet] = useState(SHEET_CLOSED);
@@ -80,8 +86,52 @@ export default function ReceiptReviewPage({
   const canProceed =
     splitMethod !== null && receipts.some((r) => r.ocrItems.length > 0);
 
+  useEffect(() => {
+    if (useSettlementStore.getState().receipts.length > 0) return;
+    const sync = async () => {
+      const listRes = await fetch(`/api/v1/meetings/${meetingId}/receipts`);
+      if (!listRes.ok) {
+        router.replace(`/meetings/${meetingId}/settlement/new`);
+        return;
+      }
+      const listBody = await listRes.json().catch(() => null);
+      const listParsed = ReceiptListResponseSchema.safeParse(listBody?.data);
+      if (!listParsed.success || listParsed.data.receipts.length === 0) {
+        router.replace(`/meetings/${meetingId}/settlement/new`);
+        return;
+      }
+      await Promise.all(
+        listParsed.data.receipts.map(async ({ receiptId }) => {
+          const res = await fetch(
+            `/api/v1/meetings/${meetingId}/receipts/${receiptId}`
+          );
+          if (!res.ok) return;
+          const body = await res.json().catch(() => null);
+          const parsed = ReceiptGetResponseSchema.safeParse(body?.data);
+          if (!parsed.success) return;
+          const { ocrStatus, items, unclassifiedLines } = parsed.data;
+          addReceipt(receiptId);
+          if (ocrStatus === 'SUCCEEDED' || ocrStatus === 'FAILED') {
+            updateOcrResult(
+              receiptId,
+              items.map((item) => ({
+                id: item.receiptItemId,
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.totalPrice,
+              })),
+              ocrStatus,
+              unclassifiedLines
+            );
+          }
+        })
+      );
+    };
+    void sync();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleBack = () => {
-    resetOcrResults();
     router.push(`/meetings/${meetingId}/settlement/new/receipt`);
   };
 
@@ -185,15 +235,24 @@ export default function ReceiptReviewPage({
             <button
               key={receipt.receiptId}
               onClick={() => setSelectedReceiptId(receipt.receiptId)}
-              className={`w-1/4 aspect-video rounded-md border-2 transition-all bg-[var(--bg-alternative)] ${
+              className={`w-1/4 aspect-video rounded-md border-2 transition-all overflow-hidden bg-[var(--bg-alternative)] ${
                 selectedReceiptId === receipt.receiptId
                   ? 'border-[var(--primary)]'
                   : 'border-[var(--line-normal)]'
               }`}
             >
-              <div className="w-full h-full flex items-center justify-center text-xs">
-                영수증 {i + 1}
-              </div>
+              {previewUrls[receipt.receiptId] ? (
+                // eslint-disable-next-line @next/next/no-img-element -- blob: URL
+                <img
+                  src={previewUrls[receipt.receiptId]}
+                  alt={`영수증 ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs">
+                  영수증 {i + 1}
+                </div>
+              )}
             </button>
           ))}
         </div>
@@ -360,6 +419,44 @@ export default function ReceiptReviewPage({
           if (!splitMethod) return;
           setSubmitting(true);
           try {
+            const patchTargets = receipts
+              .map((r, idx) => ({ receipt: r, label: `영수증 ${idx + 1}번` }))
+              .filter(({ receipt }) => receipt.ocrItems.length > 0);
+            const patchResults = await Promise.allSettled(
+              patchTargets.map(async ({ receipt }) => {
+                const res = await fetch(
+                  `/api/v1/meetings/${meetingId}/receipts/${receipt.receiptId}`,
+                  {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      items: receipt.ocrItems.map((item) => ({
+                        name: item.name,
+                        quantity: item.quantity,
+                        unitPrice:
+                          item.unitPrice ??
+                          Math.floor(item.totalPrice / item.quantity),
+                        totalPrice: item.totalPrice,
+                      })),
+                    }),
+                  }
+                );
+                if (!res.ok) {
+                  const errBody = await res.json().catch(() => null);
+                  throw new Error(
+                    errBody?.error?.message ?? '수정에 실패했습니다.'
+                  );
+                }
+              })
+            );
+            const failedLabels = patchTargets
+              .filter((_, i) => patchResults[i].status === 'rejected')
+              .map(({ label }) => label);
+            if (failedLabels.length > 0) {
+              toast.error(`${failedLabels.join(', ')} 수정에 실패했습니다.`);
+              return;
+            }
+
             const res = await fetch(
               `/api/v1/meetings/${meetingId}/settlements`,
               {
