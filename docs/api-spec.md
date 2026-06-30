@@ -303,6 +303,26 @@ DRAFT → RECRUITING → VOTING → PLACE_CONFIRMED → IN_PROGRESS → SETTLING
 }
 ```
 - `objectKey`: manual receipt는 `null`
+### `GET .../receipts/:receiptId` — 영수증 상세 + 항목 목록 (호스트) ★ v2.2
+
+응답 200:
+```json
+{
+  "receiptId": "r_xxx",
+  "objectKey": "meetings/m_xxx/receipts/r_xxx.jpg",
+  "ocrStatus": "SUCCEEDED",
+  "totalAmount": 50000,
+  "items": [
+    { "receiptItemId": "item_1", "name": "치킨", "quantity": 1, "unitPrice": 18000, "totalPrice": 18000 }
+  ],
+  "unclassifiedLines": []
+}
+```
+
+- 권한: 호스트 전용 (`assertHost`)
+- `unclassifiedLines`: DB에 별도 저장 안 됨 → 항상 `[]` (P2: `unclassified_lines` 컬럼 추가로 해결 예정)
+- 주 사용처: `/review` 마운트 시 새로고침 복원 (store 비어있을 때 서버 재조회)
+
 ### `PATCH .../receipts/:receiptId` — OCR 결과 검수·수정
 
 요청:

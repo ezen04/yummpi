@@ -210,7 +210,7 @@ export default function SettlementReceiptPage({
             // DB/S3에 올라간 영수증 정리 (PENDING은 아직 서버에 없으므로 제외)
             await Promise.allSettled(
               receipts
-                .filter((r) => r.ocrStatus !== 'PENDING')
+                .filter((r) => !(r.receiptId in pendingFiles))
                 .map((r) =>
                   fetch(
                     `/api/v1/meetings/${meetingId}/receipts/${r.receiptId}`,

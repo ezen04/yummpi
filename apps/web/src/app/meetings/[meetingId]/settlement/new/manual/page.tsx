@@ -41,6 +41,7 @@ export default function SettlementManualPage({
     receipts,
     splitMethod,
     setSplitMethod,
+    clearReceipts,
     updateOcrItem,
     deleteOcrItem,
     addOcrItem,
@@ -109,7 +110,10 @@ export default function SettlementManualPage({
     <>
       <Header
         title="직접 입력"
-        onBack={() => router.push(`/meetings/${meetingId}/settlement/new`)}
+        onBack={() => {
+          clearReceipts();
+          router.push(`/meetings/${meetingId}/settlement/new`);
+        }}
       />
       <div className="px-5 pt-4 pb-2">
         <Step steps={FLOW_STEPS.manual} current={0} />

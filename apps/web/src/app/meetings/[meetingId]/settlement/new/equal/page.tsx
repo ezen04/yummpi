@@ -20,6 +20,7 @@ export default function SettlementEqualPage({
   const [totalAmount, setTotalAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { setSplitMethod, setEqualAmount } = useSettlementStore();
+  const parsedAmount = parseInt(totalAmount, 10);
 
   // setSplitMethod는 Zustand stable ref — 의존성 배열 불필요
   useEffect(() => {
@@ -73,20 +74,26 @@ export default function SettlementEqualPage({
         <Input
           label="총 금액"
           required
-          type="number"
-          inputMode="numeric"
+          type="text" // number 대신 text로 변경하여 휠 버그, 알파벳 'e' 버그 차단
+          inputMode="numeric" // 모바일에서는 깔끔하게 숫자 키패드만 노출
           placeholder="예: 170000"
           rightIcon={
             <span className="text-sm text-[var(--label-normal)]">원</span>
           }
           value={totalAmount}
-          onChange={(e) => setTotalAmount(e.target.value)}
+          onChange={(e) => {
+            // 숫자가 아닌 문자(공백, 한글, 영어, 기호 등)는 타이핑이나 복사 붙여넣기 시 즉시 제거
+            const onlyNumber = e.target.value.replace(/[^0-9]/g, '');
+            setTotalAmount(onlyNumber);
+          }}
         />
       </main>
       <Footer
         variant="button"
         label={submitting ? '처리 중...' : '정산 결과로'}
-        disabled={!totalAmount || parseInt(totalAmount) <= 0 || submitting}
+        disabled={
+          !totalAmount || isNaN(parsedAmount) || parsedAmount <= 0 || submitting
+        }
         onClick={handleSubmit}
       />
     </>

@@ -22,7 +22,7 @@ export default function SettlementResultPage({
   const [settlement, setSettlement] = useState<SettlementResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [myOpen, setMyOpen] = useState(false);
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch(`/api/v1/meetings/${meetingId}/settlement`)
@@ -40,8 +40,16 @@ export default function SettlementResultPage({
   }, [meetingId]);
 
   const myMember = settlement?.settlementMembers.find((m) => m.isMe);
-  const myItems = myMember?.items ?? [];
   const myAmount = myMember?.finalAmount ?? 0;
+
+  const toggleMember = (memberId: string) => {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(memberId)) next.delete(memberId);
+      else next.add(memberId);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -82,13 +90,15 @@ export default function SettlementResultPage({
             <div className="px-5 divide-y">
               {settlement.settlementMembers.map((mem) => {
                 const isMe = mem.isMe;
-                const canToggle = isMe && myItems.length > 0;
+                const memberItems = mem.items ?? [];
+                const canToggle = memberItems.length > 0;
+                const isOpen = openIds.has(mem.memberId);
                 return (
                   <div key={mem.memberId}>
                     {canToggle ? (
                       <button
                         type="button"
-                        onClick={() => setMyOpen((v) => !v)}
+                        onClick={() => toggleMember(mem.memberId)}
                         className="w-full flex items-center text-left"
                       >
                         <PersonResultItem
@@ -97,13 +107,13 @@ export default function SettlementResultPage({
                           isMe={isMe}
                           isHost={mem.role === 'HOST'}
                           resultLabel={`${mem.finalAmount.toLocaleString()}원`}
-                          resultVariant="primary"
+                          resultVariant={isMe ? 'primary' : 'default'}
                         />
                         <ChevronRight
                           size={16}
                           color="var(--label-assistive)"
                           className={`shrink-0 transition-transform ${
-                            myOpen ? 'rotate-90' : ''
+                            isOpen ? 'rotate-90' : ''
                           }`}
                         />
                       </button>
@@ -116,11 +126,11 @@ export default function SettlementResultPage({
                         resultVariant={isMe ? 'primary' : 'default'}
                       />
                     )}
-                    {canToggle && myOpen && (
+                    {canToggle && isOpen && (
                       <div className="pl-[52px] pb-2">
-                        {myItems.map((it, i) => (
+                        {memberItems.map((it) => (
                           <div
-                            key={i}
+                            key={it.receiptItemId}
                             className="flex items-center justify-between py-1"
                           >
                             <span className="text-[13px] text-[var(--label-alternative)]">
