@@ -100,3 +100,42 @@ describe('useSettlementStore.promoteUnclassifiedLine', () => {
     expect(r1.ocrItems).toHaveLength(1);
   });
 });
+
+describe('useSettlementStore.removeUnclassifiedLine', () => {
+  beforeEach(reset);
+
+  it('P1: 인덱스 0 폐기 → 해당 줄만 제거, ocrItems 불변', () => {
+    seed(
+      'r1',
+      [{ id: 'r1-1', name: 'keep', quantity: 1, totalPrice: 1000 }],
+      ['판매일시: 2026-06-30', '오뎅탕']
+    );
+
+    useSettlementStore.getState().removeUnclassifiedLine('r1', 0);
+
+    const r1 = findReceipt('r1')!;
+    expect(r1.unclassifiedLines).toEqual(['오뎅탕']);
+    expect(r1.ocrItems).toEqual([
+      { id: 'r1-1', name: 'keep', quantity: 1, totalPrice: 1000 },
+    ]);
+  });
+
+  it('P2: 중간 인덱스 폐기 → 앞뒤 줄은 보존', () => {
+    seed('r1', [], ['a', 'b', 'c']);
+
+    useSettlementStore.getState().removeUnclassifiedLine('r1', 1);
+
+    const r1 = findReceipt('r1')!;
+    expect(r1.unclassifiedLines).toEqual(['a', 'c']);
+  });
+
+  it('P3: 다른 receiptId 영향 없음', () => {
+    seed('r1', [], ['x', 'y']);
+    seed('r2', [], ['z']);
+
+    useSettlementStore.getState().removeUnclassifiedLine('r1', 0);
+
+    const r2 = findReceipt('r2')!;
+    expect(r2.unclassifiedLines).toEqual(['z']);
+  });
+});
