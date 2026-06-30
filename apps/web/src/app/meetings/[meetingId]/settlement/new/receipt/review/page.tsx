@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash, Pencil, Plus } from '@yummpi/ui';
+import { Trash, Pencil, Plus, ChevronRight } from '@yummpi/ui';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { Step } from '@/components/common/Step';
@@ -55,11 +55,13 @@ export default function ReceiptReviewPage({
     deleteOcrItem,
     addOcrItem,
     promoteUnclassifiedLine,
+    removeUnclassifiedLine,
   } = useSettlementStore();
 
   const [sheet, setSheet] = useState(SHEET_CLOSED);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [unclassifiedExpanded, setUnclassifiedExpanded] = useState(false);
 
   const selectedReceipt = receipts.find(
     (r) => r.receiptId === selectedReceiptId
@@ -309,31 +311,62 @@ export default function ReceiptReviewPage({
                   </button>
 
                   {/* 미분류 줄 — 파서가 품목/요약/헤더 어디에도 분류 못 한 줄.
-                      사용자가 직접 [+]로 품목 승격. HEADER/SUMMARY 매칭 줄은
-                      파서 단에서 이미 제외됨(노이즈 차단).
+                      사용자가 직접 [+]로 품목 승격하거나 [Trash]로 폐기. 기본은
+                      접혀 있고(메타데이터 등으로 화면이 지저분해지는 것 방지),
+                      펼치면 전부 노출 — 키워드로 일부만 거르지 않음(오탐 시 복구 불가
+                      위험 + UI 이원화 방지).
                       visibleUnclassifiedLines: 빈 줄 skip + 원본 idx 보존. */}
                   {visibleUnclassifiedLines.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      <p className="text-xs font-medium text-[var(--label-assistive)]">
-                        인식 못 한 줄 ({visibleUnclassifiedLines.length}개)
-                      </p>
-                      {visibleUnclassifiedLines.map(({ line, idx }) => (
-                        <div
-                          key={`${idx}-${line}`}
-                          className="flex items-center justify-between gap-2 px-4 py-3 rounded-md border border-[var(--line-normal)]"
-                        >
-                          <p className="text-sm flex-1 min-w-0 break-words text-[var(--label-alternative)]">
-                            {line}
-                          </p>
-                          <IconButton
-                            size={32}
-                            shape="square"
-                            className="bg-transparent"
-                            icon={<Plus size={16} />}
-                            onClick={() => handleOpenPromoteForm(idx, line)}
-                          />
-                        </div>
-                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setUnclassifiedExpanded((v) => !v)}
+                        className="w-full flex items-center justify-between text-left"
+                      >
+                        <p className="text-xs font-medium text-[var(--label-assistive)]">
+                          인식 못 한 줄 ({visibleUnclassifiedLines.length}개)
+                        </p>
+                        <ChevronRight
+                          size={16}
+                          color="var(--label-assistive)"
+                          className={`shrink-0 transition-transform ${unclassifiedExpanded ? 'rotate-90' : ''}`}
+                        />
+                      </button>
+                      {unclassifiedExpanded &&
+                        visibleUnclassifiedLines.map(({ line, idx }) => (
+                          <div
+                            key={`${idx}-${line}`}
+                            className="flex items-center justify-between gap-2 px-4 py-3 rounded-md border border-[var(--line-normal)]"
+                          >
+                            <p className="text-sm flex-1 min-w-0 break-words text-[var(--label-alternative)]">
+                              {line}
+                            </p>
+                            <div className="flex gap-1">
+                              <IconButton
+                                size={32}
+                                shape="square"
+                                className="bg-transparent"
+                                icon={<Plus size={16} />}
+                                onClick={() => handleOpenPromoteForm(idx, line)}
+                              />
+                              <IconButton
+                                size={32}
+                                shape="square"
+                                className="bg-transparent"
+                                icon={
+                                  <Trash
+                                    size={16}
+                                    color="var(--status-negative)"
+                                  />
+                                }
+                                onClick={() =>
+                                  selectedReceiptId &&
+                                  removeUnclassifiedLine(selectedReceiptId, idx)
+                                }
+                              />
+                            </div>
+                          </div>
+                        ))}
                     </div>
                   )}
                 </div>

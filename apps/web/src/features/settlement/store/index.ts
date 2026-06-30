@@ -53,6 +53,7 @@ interface SettlementStore {
     lineIndex: number,
     item: OcrItem
   ) => void;
+  removeUnclassifiedLine: (receiptId: string, lineIndex: number) => void;
   setPreviewUrl: (receiptId: string, url: string) => void;
   setPendingFile: (receiptId: string, file: File) => void;
   removePendingFile: (receiptId: string) => void;
@@ -209,6 +210,21 @@ export const useSettlementStore = create<SettlementStore>((set) => ({
           ? {
               ...r,
               ocrItems: [...r.ocrItems, item],
+              unclassifiedLines: r.unclassifiedLines.filter(
+                (_, i) => i !== lineIndex
+              ),
+            }
+          : r
+      ),
+    })),
+
+  // 미분류 줄 폐기. 품목으로 안 보낼 노이즈(메타데이터 등)를 검수자가 직접 제거.
+  removeUnclassifiedLine: (receiptId, lineIndex) =>
+    set((state) => ({
+      receipts: state.receipts.map((r) =>
+        r.receiptId === receiptId
+          ? {
+              ...r,
               unclassifiedLines: r.unclassifiedLines.filter(
                 (_, i) => i !== lineIndex
               ),
