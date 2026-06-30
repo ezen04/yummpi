@@ -31,7 +31,7 @@ import {
   assertReceiptDeletable,
 } from '../_receipt-guards';
 import { ApiError } from '@/lib/api-response';
-import { PATCH, DELETE } from './route';
+import { GET, PATCH, DELETE } from './route';
 
 const MEETING_ID = '11111111-1111-1111-8111-111111111111';
 const MEMBER_ID = '22222222-2222-2222-8222-222222222222';
@@ -85,6 +85,85 @@ function withTxDelete(mockDelete: Mock) {
       fn({ receipt: { delete: mockDelete } })
   );
 }
+
+function makeGetReq(): NextRequest {
+  return new Request(
+    `http://localhost/api/v1/meetings/${MEETING_ID}/receipts/${RECEIPT_ID}`,
+    { method: 'GET' }
+  ) as unknown as NextRequest;
+}
+
+describe('GET /api/v1/meetings/:meetingId/receipts/:receiptId', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    (prisma.meeting.findUnique as unknown as Mock).mockResolvedValue({
+      id: MEETING_ID,
+    });
+    (assertHost as unknown as Mock).mockResolvedValue({ id: MEMBER_ID });
+    (prisma.receipt.findUnique as unknown as Mock).mockResolvedValue({
+      id: RECEIPT_ID,
+      meetingId: MEETING_ID,
+      objectKey: OBJECT_KEY,
+      ocrStatus: 'SUCCEEDED',
+      totalAmount: 18000,
+      items: [
+        {
+          id: '44444444-4444-4444-8444-444444444444',
+          name: '치킨',
+          quantity: 2,
+          unitPrice: 9000,
+          totalPrice: 18000,
+          sortOrder: 0,
+        },
+      ],
+    });
+  });
+
+  it('정상 조회 — items 포함 200 반환', async () => {
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { data: { items: unknown[] } };
+    expect(body.data.items).toHaveLength(1);
+  });
+
+  it('URL 조작으로 타 모임 영수증 접근 시 → 404 RECEIPT_NOT_FOUND', async () => {
+    (prisma.receipt.findUnique as unknown as Mock).mockResolvedValue({
+      id: RECEIPT_ID,
+      meetingId: 'other-meeting-id',
+      objectKey: OBJECT_KEY,
+      ocrStatus: 'SUCCEEDED',
+      totalAmount: 0,
+      items: [],
+    });
+
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('RECEIPT_NOT_FOUND');
+  });
+
+  it('비호스트 멤버 요청 → assertHost throw → 403', async () => {
+    (assertHost as unknown as Mock).mockRejectedValueOnce(
+      new ApiError('FORBIDDEN', '호스트만 접근할 수 있습니다.')
+    );
+
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('취소된 모임(cancelledAt) → 404 MEETING_NOT_FOUND', async () => {
+    (prisma.meeting.findUnique as unknown as Mock).mockResolvedValue(null);
+
+    const res = await GET(makeGetReq(), params);
+
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('MEETING_NOT_FOUND');
+  });
+});
 
 describe('PATCH /api/v1/meetings/:meetingId/receipts/:receiptId', () => {
   beforeEach(() => {
