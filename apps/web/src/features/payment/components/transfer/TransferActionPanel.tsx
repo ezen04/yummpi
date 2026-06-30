@@ -13,6 +13,7 @@ import {
   copyToClipboard,
 } from '../../utils/transferMock';
 import { PaymentSummaryPanel } from '../summary/PaymentSummaryPanel';
+import { ExemptCelebrationCard } from '../shell/ExemptCelebrationCard';
 import '../payment-montage.css';
 import type { PaymentListItem, PaymentSummary } from '@yummpi/schemas';
 
@@ -113,30 +114,13 @@ export function TransferActionPanel({
   }
 
   /* ── EXEMPT ────────────────────────────────────────────────────── */
+  // 게스트는 호스트 현황 미노출이라 버튼(onViewStatus) 없이 카드만 본다.
   if (isExempt) {
     return (
-      <div className="flex flex-col flex-1">
-        {summary && (
-          <div className="pt-4 mb-2">
-            <PaymentSummaryPanel summary={summary} />
-          </div>
-        )}
-        <div className="flex flex-col px-5 pt-4 pb-4 gap-6 flex-1">
-          <div className="rounded-[var(--radius-12)] bg-[var(--bg-alternative)] p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--fill-normal)] flex items-center justify-center text-xl shrink-0">
-              🎁
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-sm font-semibold text-[var(--label-strong)]">
-                면제 처리됐어요
-              </p>
-              <p className="text-xs text-[var(--label-alternative)]">
-                {item.displayName}님은 이번 정산에서 제외됐어요
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ExemptCelebrationCard
+        displayName={item.displayName}
+        amount={item.amount}
+      />
     );
   }
 

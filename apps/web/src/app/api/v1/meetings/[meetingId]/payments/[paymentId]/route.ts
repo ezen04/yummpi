@@ -153,11 +153,12 @@ export const PATCH = handleRoute(
       if (isHost) {
         if (
           payment.status !== 'PAID' &&
-          payment.status !== 'TRANSFER_REPORTED'
+          payment.status !== 'TRANSFER_REPORTED' &&
+          payment.status !== 'EXEMPT'
         ) {
           throw new ApiError(
             'INVALID_PAYMENT_STATUS',
-            'PAID 또는 송금 신고 상태에서만 되돌릴 수 있습니다.'
+            'PAID·송금 신고·면제 상태에서만 되돌릴 수 있습니다.'
           );
         }
       } else if (isOwner) {

@@ -75,7 +75,9 @@ export function buildPaymentListItem(
     canMarkPending:
       !isHostSelf &&
       isHost &&
-      (p.status === 'PAID' || p.status === 'TRANSFER_REPORTED'),
+      (p.status === 'PAID' ||
+        p.status === 'TRANSFER_REPORTED' ||
+        p.status === 'EXEMPT'), // 면제 취소(EXEMPT→PENDING) 지원
     canMarkExempt: !isHostSelf && isHost && p.status !== 'EXEMPT',
     transferMock: null,
   };
