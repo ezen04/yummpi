@@ -5,7 +5,7 @@ import { idSchema } from './common';
 export const ReceiptListItemSchema = z.object({
   receiptId: idSchema,
   objectKey: z.string().nullable(),
-  ocrStatus: z.enum(['PENDING', 'SUCCEEDED', 'FAILED']),
+  ocrStatus: z.enum(['PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED']),
   totalAmount: z.number().int().nonnegative().nullable(),
   itemCount: z.number().int().nonnegative(),
   createdAt: z.string().datetime(),
