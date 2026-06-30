@@ -91,9 +91,11 @@ export function VotingView({
   );
   const isTied = topCandidateIds.size > 1;
 
-  // 0표 + 마감 = 전원 동률(0표). 동률 정책(호스트 수동 선택)으로 흡수.
-  const isNoVotesClosed = isClosed && votesData.votedMemberCount === 0;
-  const needsManualSelection = isTied || isNoVotesClosed;
+  // 0표 = 전원 동률(0표)로 간주 → 동률 정책(호스트 수동 선택)으로 흡수.
+  // 마감 전·후 무관하게 적용: 마감 전에도 호스트가 0표 상태에서 "확정"을 누르면
+  // 첫 후보가 자동 확정되던 버그를 막고, TieBreak 화면으로 명시적 선택을 요구한다.
+  const isNoVotes = votesData.votedMemberCount === 0;
+  const needsManualSelection = isTied || isNoVotes;
 
   const hasMyVote = !!votesData.myCandidateId;
 
