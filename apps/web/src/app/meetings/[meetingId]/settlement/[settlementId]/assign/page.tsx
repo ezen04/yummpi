@@ -11,8 +11,22 @@ export default async function SettlementAssignPage({
   const { meetingId, settlementId } = await params;
 
   const member = await getCurrentMember(meetingId);
-  if (!member) {
-    redirect(`/meetings/${meetingId}`);
+  if (!member) return null;
+
+  if (member.role !== 'HOST') {
+    const settlement = await prisma.settlement.findUnique({
+      where: { id: settlementId },
+      select: { status: true },
+    });
+    if (settlement?.status !== 'DRAFT') {
+      redirect(`/meetings/${meetingId}`);
+    }
+    const assignmentCount = await prisma.itemAssignment.count({
+      where: { settlementId, memberId: member.id },
+    });
+    if (assignmentCount > 0) {
+      redirect(`/meetings/${meetingId}`);
+    }
   }
 
   const items = await prisma.receiptItem.findMany({

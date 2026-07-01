@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { getCurrentMember } from '@/lib/current-member';
 import SettlementNewContent from './_content';
 
 export default async function SettlementNewPage({
@@ -9,11 +8,6 @@ export default async function SettlementNewPage({
   params: Promise<{ meetingId: string }>;
 }) {
   const { meetingId } = await params;
-
-  const member = await getCurrentMember(meetingId);
-  if (!member || member.role !== 'HOST') {
-    redirect(`/meetings/${meetingId}`);
-  }
 
   const settlement = await prisma.settlement.findUnique({
     where: { meetingId },

@@ -54,6 +54,7 @@ interface Props {
   settlementStatus: SettlementStatus | null;
   settlementId: string | null;
   paymentsInitialized: boolean;
+  myAssignmentSubmitted: boolean;
 }
 
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
@@ -90,6 +91,7 @@ export function MeetingHubView({
   settlementStatus,
   settlementId,
   paymentsInitialized,
+  myAssignmentSubmitted,
 }: Props) {
   const router = useRouter();
   const meta = MEETING_STATUS_META[status];
@@ -333,7 +335,14 @@ export function MeetingHubView({
           </h2>
           <div className="grid grid-cols-3 gap-2.5">
             {MENU.map((m) => {
-              const on = m.enabled.includes(status);
+              const on =
+                m.enabled.includes(status) &&
+                !(
+                  m.key === 'settlement' &&
+                  !isHost &&
+                  myAssignmentSubmitted &&
+                  settlementStatus === 'DRAFT'
+                );
               return (
                 <button
                   key={m.key}
@@ -504,41 +513,60 @@ export function MeetingHubView({
             )}
           </NextCard>
         );
-      case 'SETTLING':
-        if (!isHost) return <WaitingCard type="adjustment" />;
-        // SETTLING은 정산 단계와 송금 단계를 모두 포함한다(COMPLETED는 전원 송금 후).
-        // 정산 확정(CONFIRMED·방어적으로 COMPLETED 포함) 후엔 다음 할 일이 송금.
-        // Payment 초기화 전이면 "송금 시작", 이미 초기화됐으면 "송금 현황"으로 분기.
-        if (
-          settlementStatus === 'CONFIRMED' ||
-          settlementStatus === 'COMPLETED'
-        ) {
-          return (
-            <NextCard
-              title={
-                paymentsInitialized
-                  ? '송금이 진행 중이에요'
-                  : '정산이 확정됐어요'
-              }
-              desc={
-                paymentsInitialized
-                  ? '송금 현황을 확인하고 관리해 보세요.'
-                  : '이제 멤버들에게 송금을 요청할 수 있어요.'
-              }
-            >
-              <HubCta
-                label={paymentsInitialized ? '송금 현황 보기' : '송금 시작하기'}
-                onClick={() => router.push(`${base}/payments`)}
+      case 'SETTLING': {
+        if (isHost) {
+          if (!settlementId) {
+            return (
+              <TodoCard
+                type="adjustment"
+                onAction={() => router.push(`${base}/settlement/new`)}
               />
-            </NextCard>
-          );
+            );
+          }
+          if (settlementStatus === 'DRAFT') {
+            return (
+              <TodoCard
+                type="adjustment"
+                onAction={() =>
+                  router.push(`${base}/settlement/${settlementId}/confirm`)
+                }
+              />
+            );
+          }
+          if (settlementStatus === 'CONFIRMED' && !paymentsInitialized) {
+            return (
+              <NextCard
+                title="정산이 확정됐어요"
+                desc="이제 멤버들에게 송금을 요청할 수 있어요."
+              >
+                <HubCta
+                  label="송금 시작하기"
+                  onClick={() => router.push(`${base}/payments`)}
+                />
+              </NextCard>
+            );
+          }
+          return null;
         }
+
+        // 비호스트
+        if (settlementStatus === 'CONFIRMED') return null;
+        if (!settlementId) return <WaitingCard type="adjustment" />;
+        if (myAssignmentSubmitted) return <SubmittedWaitingCard />;
         return (
-          <TodoCard
-            type="adjustment"
-            onAction={() => router.push(`${base}/settlement/new`)}
-          />
+          <NextCard
+            title="정산이 진행 중이에요"
+            desc="영수증을 확인하고 항목별 정산을 완료해주세요."
+          >
+            <HubCta
+              label="정산 확인하기"
+              onClick={() =>
+                router.push(`${base}/settlement/${settlementId}/assign`)
+              }
+            />
+          </NextCard>
         );
+      }
       case 'COMPLETED':
         return (
           <NextCard
@@ -558,6 +586,24 @@ export function MeetingHubView({
 }
 
 // ── 보조 컴포넌트 ──────────────────────────────────────────
+
+function SubmittedWaitingCard() {
+  return (
+    <div className="flex items-start gap-3 bg-[var(--fill-normal)] rounded-[var(--radius-12)] px-5 py-4">
+      <span className="shrink-0 mt-[1px]">
+        <Clock size={24} strokeWidth={1.5} color="var(--label-assistive)" />
+      </span>
+      <div>
+        <p className="text-[15px] leading-[22px] font-semibold text-[var(--label-alternative)] m-0">
+          제출했어요, 다른 참여자를 기다리는 중이에요
+        </p>
+        <p className="text-[13px] leading-[18px] text-[var(--label-assistive)] mt-1 mb-0">
+          모든 참여자가 제출하면 호스트가 정산을 확정해요.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function NextCard({
   title,
