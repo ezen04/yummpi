@@ -49,13 +49,11 @@ function makeTx({
   const tx = {
     $executeRaw: vi.fn().mockResolvedValue(1),
     settlement: {
-      findUnique: vi
-        .fn()
-        .mockResolvedValue({
-          id: SETTLEMENT_ID,
-          status: lockedStatus,
-          confirmedAt: null,
-        }),
+      findUnique: vi.fn().mockResolvedValue({
+        id: SETTLEMENT_ID,
+        status: lockedStatus,
+        confirmedAt: null,
+      }),
       update: vi.fn().mockResolvedValue(updated),
     },
     meetingMember: { count: vi.fn().mockResolvedValue(attendingCount) },
