@@ -22,7 +22,12 @@ const COMPLETED_AT = new Date('2026-07-02T00:00:00.000Z');
 function call() {
   return POST(
     new Request('http://test/', { method: 'POST' }) as unknown as NextRequest,
-    { params: Promise.resolve({ meetingId: MEETING_ID, settlementId: SETTLEMENT_ID }) }
+    {
+      params: Promise.resolve({
+        meetingId: MEETING_ID,
+        settlementId: SETTLEMENT_ID,
+      }),
+    }
   );
 }
 
@@ -38,10 +43,13 @@ describe('POST /settlements/:settlementId/complete', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(assertHost).mockResolvedValue({} as never);
-    vi.mocked(prisma.settlement.findUnique).mockResolvedValue(makeSettlement() as never);
-    vi.mocked(prisma.settlement.update).mockResolvedValue(
-      { id: SETTLEMENT_ID, completedAt: COMPLETED_AT } as never
+    vi.mocked(prisma.settlement.findUnique).mockResolvedValue(
+      makeSettlement() as never
     );
+    vi.mocked(prisma.settlement.update).mockResolvedValue({
+      id: SETTLEMENT_ID,
+      completedAt: COMPLETED_AT,
+    } as never);
   });
 
   it('CONFIRMED + completedAt 없음 → 200, completedAt 신규 기록', async () => {
@@ -52,7 +60,9 @@ describe('POST /settlements/:settlementId/complete', () => {
     expect(body.success).toBe(true);
     expect(body.data.settlementId).toBe(SETTLEMENT_ID);
     expect(prisma.settlement.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ completedAt: expect.any(Date) }) })
+      expect.objectContaining({
+        data: expect.objectContaining({ completedAt: expect.any(Date) }),
+      })
     );
   });
 

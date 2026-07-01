@@ -22,7 +22,12 @@ const SETTLEMENT_ID = 'a1b2c3d4-e5f6-4a7b-8c9d-000000000031';
 function call() {
   return POST(
     new Request('http://test/', { method: 'POST' }) as unknown as NextRequest,
-    { params: Promise.resolve({ meetingId: MEETING_ID, settlementId: SETTLEMENT_ID }) }
+    {
+      params: Promise.resolve({
+        meetingId: MEETING_ID,
+        settlementId: SETTLEMENT_ID,
+      }),
+    }
   );
 }
 
@@ -31,12 +36,26 @@ function makeTx({
   lockedStatus = 'DRAFT',
   attendingCount = 2,
   memberCount = 2,
-}: { lockedStatus?: string; attendingCount?: number; memberCount?: number } = {}) {
-  const updated = { id: SETTLEMENT_ID, status: 'CONFIRMED', confirmedAt: new Date() };
+}: {
+  lockedStatus?: string;
+  attendingCount?: number;
+  memberCount?: number;
+} = {}) {
+  const updated = {
+    id: SETTLEMENT_ID,
+    status: 'CONFIRMED',
+    confirmedAt: new Date(),
+  };
   const tx = {
     $executeRaw: vi.fn().mockResolvedValue(1),
     settlement: {
-      findUnique: vi.fn().mockResolvedValue({ id: SETTLEMENT_ID, status: lockedStatus, confirmedAt: null }),
+      findUnique: vi
+        .fn()
+        .mockResolvedValue({
+          id: SETTLEMENT_ID,
+          status: lockedStatus,
+          confirmedAt: null,
+        }),
       update: vi.fn().mockResolvedValue(updated),
     },
     meetingMember: { count: vi.fn().mockResolvedValue(attendingCount) },
@@ -53,12 +72,16 @@ describe('POST /settlements/:settlementId/confirm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(assertHost).mockResolvedValue({} as never);
-    vi.mocked(prisma.meeting.findUnique).mockResolvedValue(
-      { id: MEETING_ID, status: 'SETTLING' } as never
-    );
-    vi.mocked(prisma.settlement.findUnique).mockResolvedValue(
-      { id: SETTLEMENT_ID, meetingId: MEETING_ID, status: 'DRAFT', confirmedAt: null } as never
-    );
+    vi.mocked(prisma.meeting.findUnique).mockResolvedValue({
+      id: MEETING_ID,
+      status: 'SETTLING',
+    } as never);
+    vi.mocked(prisma.settlement.findUnique).mockResolvedValue({
+      id: SETTLEMENT_ID,
+      meetingId: MEETING_ID,
+      status: 'DRAFT',
+      confirmedAt: null,
+    } as never);
   });
 
   it('DRAFT → 200, settlement CONFIRMED로 업데이트', async () => {
@@ -71,14 +94,19 @@ describe('POST /settlements/:settlementId/confirm', () => {
     expect(body.success).toBe(true);
     expect(body.data.status).toBe('CONFIRMED');
     expect(tx.settlement.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ status: 'CONFIRMED' }) })
+      expect.objectContaining({
+        data: expect.objectContaining({ status: 'CONFIRMED' }),
+      })
     );
   });
 
   it('이미 CONFIRMED → 200 idempotent, 트랜잭션 미진입', async () => {
-    vi.mocked(prisma.settlement.findUnique).mockResolvedValue(
-      { id: SETTLEMENT_ID, meetingId: MEETING_ID, status: 'CONFIRMED', confirmedAt: new Date() } as never
-    );
+    vi.mocked(prisma.settlement.findUnique).mockResolvedValue({
+      id: SETTLEMENT_ID,
+      meetingId: MEETING_ID,
+      status: 'CONFIRMED',
+      confirmedAt: new Date(),
+    } as never);
 
     const res = await call();
     const body = await res.json();
@@ -89,9 +117,12 @@ describe('POST /settlements/:settlementId/confirm', () => {
   });
 
   it('이미 COMPLETED → 200 idempotent, 트랜잭션 미진입', async () => {
-    vi.mocked(prisma.settlement.findUnique).mockResolvedValue(
-      { id: SETTLEMENT_ID, meetingId: MEETING_ID, status: 'COMPLETED', confirmedAt: new Date() } as never
-    );
+    vi.mocked(prisma.settlement.findUnique).mockResolvedValue({
+      id: SETTLEMENT_ID,
+      meetingId: MEETING_ID,
+      status: 'COMPLETED',
+      confirmedAt: new Date(),
+    } as never);
 
     const res = await call();
     const body = await res.json();
@@ -112,9 +143,10 @@ describe('POST /settlements/:settlementId/confirm', () => {
   });
 
   it('모임이 SETTLING 아님 → 409 INVALID_MEETING_STATUS_TRANSITION', async () => {
-    vi.mocked(prisma.meeting.findUnique).mockResolvedValue(
-      { id: MEETING_ID, status: 'IN_PROGRESS' } as never
-    );
+    vi.mocked(prisma.meeting.findUnique).mockResolvedValue({
+      id: MEETING_ID,
+      status: 'IN_PROGRESS',
+    } as never);
 
     const res = await call();
     const body = await res.json();
@@ -134,9 +166,12 @@ describe('POST /settlements/:settlementId/confirm', () => {
   });
 
   it('정산이 다른 모임 소속 → 404 SETTLEMENT_NOT_FOUND', async () => {
-    vi.mocked(prisma.settlement.findUnique).mockResolvedValue(
-      { id: SETTLEMENT_ID, meetingId: 'other-meeting-id', status: 'DRAFT', confirmedAt: null } as never
-    );
+    vi.mocked(prisma.settlement.findUnique).mockResolvedValue({
+      id: SETTLEMENT_ID,
+      meetingId: 'other-meeting-id',
+      status: 'DRAFT',
+      confirmedAt: null,
+    } as never);
 
     const res = await call();
     const body = await res.json();
