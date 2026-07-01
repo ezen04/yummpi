@@ -25,22 +25,37 @@ export default function SettlementResultPage({
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetch(`/api/v1/meetings/${meetingId}/settlement`)
-      .then((r) => r.json())
-      .then((body) => {
-        const parsed = SettlementResponseEnvelopeSchema.safeParse(body);
-        if (parsed.success) {
-          setSettlement(parsed.data.data);
-        } else {
-          setError(body?.error?.message ?? '정산 정보를 불러올 수 없습니다.');
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/v1/meetings/${meetingId}/settlement`);
+        const body = await res.json();
+        if (!res.ok) {
+          router.replace(`/meetings/${meetingId}`);
+          return;
         }
-      })
-      .catch(() => setError('네트워크 오류가 발생했습니다.'))
-      .finally(() => setLoading(false));
-  }, [meetingId]);
+        const parsed = SettlementResponseEnvelopeSchema.safeParse(body);
+        if (!parsed.success) {
+          setError(body?.error?.message ?? '정산 정보를 불러올 수 없습니다.');
+          return;
+        }
+        const data = parsed.data.data;
+        if (data.status === 'DRAFT') {
+          router.replace(`/meetings/${meetingId}`);
+          return;
+        }
+        setSettlement(data);
+      } catch {
+        setError('네트워크 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [meetingId, router]);
 
   const myMember = settlement?.settlementMembers.find((m) => m.isMe);
   const myAmount = myMember?.finalAmount ?? 0;
+  const isHost = myMember?.role === 'HOST';
 
   const toggleMember = (memberId: string) => {
     setOpenIds((prev) => {
@@ -164,7 +179,15 @@ export default function SettlementResultPage({
         variant="button"
         label="송금하기"
         disabled={loading || !!error}
-        onClick={() => router.push(`/meetings/${meetingId}/payments`)}
+        onClick={() => {
+          if (isHost && settlement) {
+            fetch(
+              `/api/v1/meetings/${meetingId}/settlements/${settlement.id}/complete`,
+              { method: 'POST' }
+            ).catch(() => {});
+          }
+          router.push(`/meetings/${meetingId}/payments`);
+        }}
       />
     </>
   );

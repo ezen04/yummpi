@@ -44,6 +44,20 @@ export default async function MeetingHubPage({
     paymentsInitialized = paymentCount > 0;
   }
 
+  // 비호스트 SETTLING + DRAFT: 내 ItemAssignment 존재 여부 → 탭 비활성·상태 카드 분기용
+  let myAssignmentSubmitted = false;
+  if (
+    meeting.status === 'SETTLING' &&
+    settlementId &&
+    settlementStatus === 'DRAFT' &&
+    member
+  ) {
+    const assignmentCount = await prisma.itemAssignment.count({
+      where: { settlementId, memberId: member.id },
+    });
+    myAssignmentSubmitted = assignmentCount > 0;
+  }
+
   // 호스트 먼저 정렬한 참여자 목록(아바타용).
   const members: HubMember[] = meeting.members
     .map((m) => ({ nickname: m.nickname, isHost: m.role === 'HOST' }))
@@ -78,6 +92,7 @@ export default async function MeetingHubPage({
         settlementStatus={settlementStatus}
         settlementId={settlementId}
         paymentsInitialized={paymentsInitialized}
+        myAssignmentSubmitted={myAssignmentSubmitted}
       />
     </div>
   );
