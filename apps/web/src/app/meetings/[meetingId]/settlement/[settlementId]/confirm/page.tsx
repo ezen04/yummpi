@@ -84,7 +84,7 @@ export default function SettlementConfirmPage({
     };
     fetchRef.current = doFetch;
     doFetch();
-  }, [meetingId, settlementId]);
+  }, [meetingId, settlementId, router]);
 
   // 대기 중일 때 5초 폴링 — fetchRef.current 호출이라 use* 의존성 없음
   useEffect(() => {
